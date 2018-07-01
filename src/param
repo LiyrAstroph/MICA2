@@ -1,0 +1,9 @@
+#
+
+FileDir                   ./
+DataFile                  data/lcdata.txt
+ 
+FlagUniformVarParams      0                # whether each dataset has the same variabiliyt parameters
+
+FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
+                                           # note that different lines have different parameters.

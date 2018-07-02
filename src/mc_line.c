@@ -12,6 +12,7 @@
 #include <math.h>
 #include <float.h>
 #include <gsl/gsl_cblas.h>
+#include <gsl/gsl_sf_erf.h>
 
 #include "dnest_line.h"
 #include "allvars.h"
@@ -919,7 +920,7 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
 
 double Sll(double t1, double t2, const void *model, int nds, int nls)
 {
-  double Dt, DT, St, lnSt, x1=0.0, x2=0.0;
+  double Dt, DT, St, lnSt;
   double sigma, taud, fg, tau0, wg;
   double *pm = (double *)model;
   int idx;
@@ -998,7 +999,7 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
 double Slc(double tcon, double tline, const void *model, int nds, int nls)
 {
   double *pm = (double *)model;
-  double Dt, DT, sigma, taud, fg, wg, tau0, St, lnSt, x1, x2;
+  double Dt, DT, sigma, taud, fg, wg, tau0, St, lnSt;
   int idx;
   
   idx = idx_con_pm[nds];

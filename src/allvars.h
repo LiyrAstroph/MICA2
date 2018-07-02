@@ -35,11 +35,12 @@ extern double **par_range_model;
 extern int *par_fix;
 extern double *par_fix_val;
 extern double var_range_model[7][2], line_range_model[4][2];
-extern double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *ASmat, *Tmat1, *Tmat2;
+extern double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *USmatT, *ASmat, *Tmat1, *Tmat2;
 extern double *workspace;
 extern int ncon_max, nall_max, nlset_max;
 extern int nq; /* order of long-term trend */
 extern double *var_param, *var_param_std;
+extern double tspan_max;
 
 
 /* line */

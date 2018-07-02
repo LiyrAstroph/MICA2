@@ -45,9 +45,9 @@ void init()
   line_range_model[1][1] = log(1.0e1);
 
   line_range_model[2][0] = 0.0; // center of Gaussian
-  line_range_model[2][1] = 100.0;
+  line_range_model[2][1] = tspan_max;
 
-  line_range_model[3][0] = log(10.0); // sigma of Gaussian
+  line_range_model[3][0] = log(1.0); // sigma of Gaussian
   line_range_model[3][1] = log(100.0);
 
   allocate_memory();
@@ -63,6 +63,7 @@ void allocate_memory()
   IPCmat = malloc(nall_max*nall_max*sizeof(double));
 
   USmat = malloc(nall_max*nall_max*5*sizeof(double));
+  USmatT = malloc(nall_max*nall_max*5*sizeof(double));
 
   ASmat = malloc(nall_max*nall_max*25*sizeof(double));
 
@@ -132,6 +133,7 @@ void free_memory()
   free(IPCmat);
 
   free(USmat);
+  free(USmatT);
   free(ASmat);
   
   free(Tmat1);

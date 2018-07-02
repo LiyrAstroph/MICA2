@@ -37,11 +37,12 @@ double **par_range_model;
 int *par_fix;
 double *par_fix_val;
 double var_range_model[7][2], line_range_model[4][2];;
-double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *ASmat, *Tmat1, *Tmat2;
+double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *USmatT, *ASmat, *Tmat1, *Tmat2;
 double *workspace;
 int ncon_max, nall_max, nlset_max;
 int nq; /* order of long-term trend */
 double *var_param, *var_param_std;
+double tspan_max;
 
 /* line */
 int **idx_line_pm, *idx_con_pm; 

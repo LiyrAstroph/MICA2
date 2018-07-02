@@ -286,6 +286,13 @@ int read_data()
       nlset_max = dataset[i].nlset;
   }
 
+  tspan_max = 0.0;
+  for(i=0; i<nset; i++)
+  {
+    if(tspan_max < dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])
+      tspan_max = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
+  }
+
   /* test */
   if(thistask == roottask)
   {

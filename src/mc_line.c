@@ -43,7 +43,7 @@ void mc_line()
     strcpy(argv[argc++], "-l");
   }
 
-  //strcpy(argv[argc++], "-p");
+  strcpy(argv[argc++], "-p");
 
   mc_line_init();
 
@@ -103,6 +103,11 @@ void mc_line()
       /* reconstuct all the light curves */
       recostruct_line_from_varmodel(best_model_line, i, nall, tall, fall, feall);
 
+      fprintf(fp, "# %d",nall[0]);
+      for(j=0;  j < dataset[i].nlset; j++)
+        fprintf(fp, ":%d", nall[1+j]);
+      fprintf(fp, "\n");
+      
       /* output reconstructed continuum */
       for(k=0; k<nall[0]; k++)
         fprintf(fp, "%f %f %f\n", tall[k], fall[k] * dataset[i].con.scale, feall[k] * dataset[i].con.scale);
@@ -237,8 +242,7 @@ void postprocess_line()
   }
   return;
 }
-
-void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
+void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
   int i, j, k, m, info, idx;
@@ -374,12 +378,155 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   free(PEmat3);
   free(PEmat4);
   return;
+
+}
+
+void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
+{
+  double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
+  int i, j, k, m, info, idx;
+  double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
+  int nall_data, nqall, ntall, np;
+  double *tall_data, *fall_data, *feall_data;
+  double sigma, tau, *pm=(double *)model;
+
+  idx = idx_con_pm[nds];
+  tau = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(tau);
+
+  ntall = nall[0];
+  for(i=0; i<dataset[nds].nlset; i++)
+    ntall += nall[i+1];
+
+  nqall = nq * (1  + dataset[nds].nlset);
+  nall_data = alldata[nds].n;
+  tall_data = alldata[nds].t;
+  fall_data = alldata[nds].f;
+  feall_data = alldata[nds].fe;
+
+  Larr = workspace;
+  ybuf = Larr + nall_data * nqall;
+  y = ybuf + nall_data;
+  Cq = y + nall_data;
+  yq = Cq + nqall*nqall;
+  yave = yq + nqall;
+  yuq = yave + nall_data; 
+  Larr_rec = yuq + ntall;
+
+  PEmat1 = malloc(ntall * ntall * sizeof(double));
+  PEmat2 = malloc(ntall * ntall * sizeof(double));
+  PEmat3 = malloc(ntall * ntall * sizeof(double));
+  PEmat4 = malloc(ntall * ntall * sizeof(double));
+
+  set_covar_Pmat_data_line(model, nds);
+  
+  set_covar_Umat_line(model, nds, nall, tall);
+  
+  set_covar_Amat_line(model, nds, nall, tall);
+
+  for(i=0;i<dataset[nds].con.n;i++)
+  {
+    Larr[i*nqall] = 1.0; 
+    for(j=0; j<dataset[nds].nlset; j++)
+      Larr[i*nqall + 1 + j] = 0.0;
+  }
+  np = dataset[nds].con.n;
+  for(j=0; j<dataset[nds].nlset; j++)
+  {
+    for(m=0; m<dataset[nds].line[j].n; m++)
+    {
+      for(i=0; i<nqall; i++)
+        Larr[(np+m)*nqall + i ]  = 0.0;
+        
+      Larr[(np + m) * nqall + 1 + j] = 1.0;
+    }
+    np += dataset[nds].line[j].n;
+  }
+
+  memcpy(PEmat1, PCmat, nall_data*nall_data*sizeof(double));
+  memcpy(PEmat2, Larr, nall_data*nqall*sizeof(double));
+
+  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, nqall); // Tmat2 = C^-1 * L;  NxNq
+
+  multiply_mat_MN_transposeA(Larr, PEmat2, Cq, nqall, nqall, nall_data); // ICq = L^T*C^-1*L; NqxNq
+  multiply_mat_MN_transposeA(PEmat2, fall_data, yq, nqall, 1, nall_data); // yq = L^T*C^-1*y;  Nqx1
+  memcpy(PEmat1, Cq, nqall*nqall*sizeof(double));
+  multiply_mat_MN_inverseA(PEmat1, yq, nqall, 1); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
+
+  multiply_mat_MN(Larr, yq, yave, nall_data, 1, nqall); // yave = L * q; Nx1
+  for(i=0; i<nall_data; i++)
+    y[i] = fall_data[i] - yave[i];
+
+  memcpy(PEmat1, PCmat, nall_data*nall_data*sizeof(double));
+  memcpy(PEmat2, y, nall_data*sizeof(double));
+  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, 1);  // C^-1 * (y - Lq)
+
+  multiply_matvec_MN(USmat, ntall, nall_data, PEmat2, fall); // S * C^-1 * (y - Lq)
+
+  for(i=0;i<nall[0];i++)
+  {
+    Larr_rec[i*nqall + 0]=1.0;
+    for(j=1; j<nqall; j++)
+      Larr_rec[i*nqall + j] = 0.0;
+  }
+
+  np = nall[0];
+  for(k=0; k<dataset[nds].nlset; k++)
+  {
+    for(i=0; i<nall[1+k]; i++)
+    {
+      for(j=0; j<nqall; j++)
+      {
+        Larr_rec[(np+i)*nqall + j] = 0.0;
+      }
+      Larr_rec[(np+i)*nqall + 1+k ] = 1.0;
+    }
+    np += nall[1+k];
+  }
+
+  multiply_matvec_MN(Larr_rec, ntall, nqall, yq, yuq);
+
+  for(i=0; i<ntall; i++)
+    fall[i] += yuq[i];
+
+  /* Transpose of USmat */
+  for(i=0; i<ntall; i++)
+    for(j=0; j<nall_data; j++)
+      USmatT[j*ntall + i] = USmat[i*nall_data + j];
+
+  memcpy(PEmat1, PCmat, nall_data*nall_data*sizeof(double));
+  memcpy(PEmat2, USmatT, ntall*nall_data*sizeof(double));
+
+  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, ntall); // C^-1 x S; NdxN
+  multiply_mat_MN(USmat, PEmat2, PEmat1, ntall, ntall, nall_data); // S x C^-1 x S; NxN
+
+  /* S x C^-1 x L */
+  multiply_mat_MN_transposeA(PEmat2, Larr, PEmat3, ntall, nqall, nall_data);
+  /* S x C^-1 x L - L */
+  for(i=0; i<ntall*nqall; i++)PEmat3[i] -= Larr_rec[i];
+  
+  inverse_mat(Cq, nqall, &info);
+
+  multiply_mat_MN(PEmat3, Cq, PEmat2, ntall, nqall, nqall);
+  /* (S x C^-1 x L - L) x Cq x (S x C^-1 x L - L)^T */
+  multiply_mat_MN_transposeB(PEmat2, PEmat3, PEmat4, ntall, ntall, nqall);
+  
+  for(i=0; i<ntall; i++)
+  {
+    feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat1[i*ntall+i] + PEmat4[i*ntall + i]);
+  }
+
+  free(PEmat1);
+  free(PEmat2);
+  free(PEmat3);
+  free(PEmat4);
+  return;
 }
 
 double prob_line_variability(const void *model)
 {
   double prob = 0.0, prob1;
-  int i, j, k, m, np, info, info_C, info_ICq, sign_C, sign_ICq;
+  int i, j, k, m, np, info, sign;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq, *yave;
   double *tall, *fall, *feall;
@@ -446,18 +593,24 @@ double prob_line_variability(const void *model)
 
     prob1 = -0.5*cblas_ddot(nall, y, 1, ybuf, 1)/(sigma*sigma); // y^T * C^-1 * y
 
-    //if(prob1 > 0.0 )  // check if prob is positive
-    //{ 
-      //prob = -DBL_MAX;
-      //printf("prob >0!\n");
-      //return prob;
-    //}
-    lndet = lndet_mat3(PCmat, nall, &info_C, &sign_C) + 2.0*nall*log(sigma);
-    lndet_ICq = lndet_mat3(ICq, nqall, &info_ICq, &sign_ICq) - 2.0*nqall*log(sigma);
-    if(info_C!=0 || info_ICq!=0 || sign_C * sign_ICq ==-1 )
+    if(prob1 > 0.0 )  // check if prob is positive
+    { 
+      prob = -DBL_MAX;
+      printf("prob >0!\n");
+      return prob;
+    }
+    lndet = lndet_mat3(PCmat, nall, &info, &sign) + 2.0*nall*log(sigma);
+    if(info!=0|| sign==-1)
     {
       prob = -DBL_MAX;
-      printf("lndet %f %f %d %d!\n", lndet,  lndet_ICq, sign_C, sign_ICq);
+      printf("lndet_C %f %d!\n", lndet, sign);
+      return prob;
+    }
+    lndet_ICq = lndet_mat3(ICq, nqall, &info, &sign) - 2.0*nqall*log(sigma);
+    if(info!=0 || sign==-1 )
+    {
+      prob = -DBL_MAX;
+      printf("lndet_ICq %f %d!\n", lndet_ICq, sign);
       return prob;
     }
     prob += prob1 -0.5*lndet - 0.5*lndet_ICq;

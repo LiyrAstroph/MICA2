@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <gsl/gsl_integration.h>
 
 #define PI            (M_PI)
 #define MICA_MAX_STR_LENGTH  (100)
@@ -35,7 +36,7 @@ extern double **par_range_model;
 extern int *par_fix;
 extern double *par_fix_val;
 extern double var_range_model[7][2], line_range_model[4][2];
-extern double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *ASmat;
+extern double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *ASmat, *Tmat1, *Tmat2;
 extern double *workspace;
 extern int ncon_max, nall_max, nlset_max;
 extern int nq; /* order of long-term trend */
@@ -43,7 +44,7 @@ extern double *var_param, *var_param_std;
 
 
 /* line */
-extern int **idx_line_pm;
+extern int **idx_line_pm, *idx_con_pm;
 
 // error exit
 extern char str_error_exit[200];
@@ -83,4 +84,8 @@ extern int nset;
 
 extern LC *alldata;
 
+
+/* GSL */
+extern gsl_integration_fixed_workspace * gsl_w;
+extern gsl_integration_fixed_type * gsl_T;
 #endif

@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <mpi.h>
+#include <gsl/gsl_integration.h>
 
 #include "allvars.h"
 
@@ -37,17 +38,21 @@ double **par_range_model;
 int *par_fix;
 double *par_fix_val;
 double var_range_model[7][2], line_range_model[4][2];;
-double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *ASmat;
+double *PNmat, *PSmat, *PCmat, *IPCmat, *USmat, *ASmat, *Tmat1, *Tmat2;
 double *workspace;
 int ncon_max, nall_max, nlset_max;
 int nq; /* order of long-term trend */
 double *var_param, *var_param_std;
 
 /* line */
-int **idx_line_pm; 
+int **idx_line_pm, *idx_con_pm; 
 
 // mathematic functions
 int *workspace_ipiv;
 
 // error exit
 char str_error_exit[200];
+
+/* GSL */
+gsl_integration_fixed_workspace * gsl_w;
+gsl_integration_fixed_type * gsl_T;

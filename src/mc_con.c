@@ -54,7 +54,7 @@ void mc_con()
   {
     FILE *fp;
     char fname[200];
-    int i, j;
+    int j, idx;
     double sigma, tau, alpha, syserr;
     double *pm = best_model_con;
     double *tcon_data, *fcon_data, *fecon_data, *tcon, *fcon, *fecon;
@@ -75,21 +75,11 @@ void mc_con()
     for(i=0; i<nset; i++)
     {
 
-      if(parset.flag_uniform_var_params == 1)
-      {
-        syserr = (exp(pm[0])-1.0)*dataset[i].con.error_mean;
-        tau = exp(pm[2]);
-        sigma = exp(pm[1]) * sqrt(tau);
-        alpha = 1.0;
-
-      } 
-      else
-      {
-        syserr = (exp(pm[3*i])-1.0)*dataset[i].con.error_mean;
-        tau = exp(pm[3*i+2]);
-        sigma = exp(pm[3*i+1]) * sqrt(tau);
-        alpha = 1.0;
-      }
+      idx = idx_con_pm[i];
+      syserr = (exp(pm[idx])-1.0)*dataset[i].con.error_mean;
+      tau = exp(pm[idx+2]);
+      sigma = exp(pm[idx+1]) * sqrt(tau);
+      alpha = 1.0;
       
       ncon_data = dataset[i].con.n;
       tcon_data = dataset[i].con.t;
@@ -211,7 +201,7 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
 
   for(i=0; i<ncon; i++)
   {
-    fecon[i] = sqrt(sigma*sigma - PEmat2[i*ncon+i] + PEmat4[i*ncon + i]);
+    fecon[i] = sigma * sqrt(1.0 - PEmat2[i*ncon+i] + PEmat4[i*ncon + i]);
   }
 
   free(PEmat1);
@@ -334,7 +324,7 @@ double prob_con_variability(const void *model)
   double tau, sigma, alpha, lndet, lndet_ICq, syserr;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq;
   double *tcon, *fcon, *fecon;
-  int ncon;
+  int ncon, idx;
 
   Larr = workspace;
   ybuf = Larr + ncon_max;
@@ -356,21 +346,12 @@ double prob_con_variability(const void *model)
     fcon = dataset[k].con.f;
     fecon = dataset[k].con.fe;
 
-    if(parset.flag_uniform_var_params == 1)
-    {
-      syserr = (exp(pm[0])-1.0)*dataset[k].con.error_mean;
-      tau = exp(pm[2]);
-      sigma = exp(pm[1]) * sqrt(tau);
-      alpha = 1.0;
-    }
-    else
-    {
-      syserr = (exp(pm[3*k])-1.0)*dataset[k].con.error_mean;
-      tau = exp(pm[3*k+2]);
-      sigma = exp(pm[3*k+1]) * sqrt(tau);
-      alpha = 1.0;
-    }
-
+    idx = idx_con_pm[k];
+    syserr = (exp(pm[idx])-1.0)*dataset[k].con.error_mean;
+    tau = exp(pm[idx+2]);
+    sigma = exp(pm[idx+1]) * sqrt(tau);
+    alpha = 1.0;
+    
     set_covar_Pmat_data(sigma, tau, alpha, syserr, ncon, tcon, fcon, fecon);
     memcpy(IPCmat, PCmat, ncon*ncon*sizeof(double));
 
@@ -398,16 +379,16 @@ double prob_con_variability(const void *model)
   
     /* y^T x C^-1 y */
     multiply_matvec(IPCmat, y, ncon, ybuf);
-    prob += -0.5 * cblas_ddot(ncon, y, 1, ybuf, 1);
+    prob += -0.5 * cblas_ddot(ncon, y, 1, ybuf, 1)/(sigma * sigma);
 
-    lndet = lndet_mat3(PCmat, ncon, &info, &sign);
+    lndet = lndet_mat3(PCmat, ncon, &info, &sign) + 2.0*ncon*log(sigma);
     if(info!=0|| sign==-1)
     {
       prob = -DBL_MAX;
       printf("lndet_C %f %d!\n", lndet, sign);
       return prob;
     }
-    lndet_ICq = lndet_mat3(ICq, nq, &info, &sign);
+    lndet_ICq = lndet_mat3(ICq, nq, &info, &sign) - 2.0*nq*log(sigma);
     if(info!=0 || sign==-1 )
     {
       prob = -DBL_MAX;
@@ -457,6 +438,9 @@ int mc_con_end()
 
   free(perturb_accept);
 
+  free(best_model_con);
+  free(best_model_std_con);
+
   return 0;
 }
 
@@ -475,7 +459,7 @@ void set_covar_Pmat_data(double sigma, double tau, double alpha, double syserr, 
     for(j=0; j<i; j++)
     {
       t2 = t[j];
-      PSmat[i*n+j] = sigma*sigma* exp (- pow (fabs(t1-t2) / tau, alpha));
+      PSmat[i*n+j] = exp (- pow (fabs(t1-t2) / tau, alpha));
       PSmat[j*n+i] = PSmat[i*n+j];
 
       PNmat[i*n+j] = PNmat[j*n+i] = 0.0;
@@ -483,8 +467,8 @@ void set_covar_Pmat_data(double sigma, double tau, double alpha, double syserr, 
       PCmat[i*n+j] = PCmat[j*n+i] = PSmat[i*n+j];
     }
 
-    PSmat[i*n+i] = sigma * sigma;
-    PNmat[i*n+i] = fe[i]*fe[i] + syserr*syserr;
+    PSmat[i*n+i] = 1.0;
+    PNmat[i*n+i] = (fe[i]*fe[i] + syserr*syserr)/(sigma * sigma);
     PCmat[i*n+i] = PSmat[i*n+i] + PNmat[i*n+i];
   }
   return;
@@ -504,7 +488,7 @@ void set_covar_Umat(double sigma, double tau, double alpha, int ncon_data, doubl
     for(j=0; j<ncon_data; j++)
     {
       t2 = tcon_data[j];
-      USmat[i*ncon_data+j] = sigma*sigma * exp (- pow (fabs(t1-t2) / tau, alpha) );
+      USmat[i*ncon_data+j] =  exp (- pow (fabs(t1-t2) / tau, alpha) );
     }
   }
   return;

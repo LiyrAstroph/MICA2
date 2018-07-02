@@ -30,24 +30,24 @@ void init()
   var_range_model[0][0] = log(1.0); // systematic error in continuum
   var_range_model[0][1] = log(1.0+10.0);
 
-  var_range_model[1][0] = -15.0; // log(sigma)
-  var_range_model[1][1] = -1.0; 
+  var_range_model[1][0] = log(1.0e-4); // log(sigma)
+  var_range_model[1][1] = log(1.0e-1); 
 
   var_range_model[2][0] = log(1.0); // log(tau)
-  var_range_model[2][1] = log(1.0e4); 
+  var_range_model[2][1] = log(1.0e5); 
 
 
   /* set parameter range of line */
   line_range_model[0][0] = log(1.0); // systematic error in line
   line_range_model[0][1] = log(1.0+10.0);
 
-  line_range_model[1][0] = log(1.0e-5); // amplitude of Gaussian
-  line_range_model[1][1] = log(1.0e5);
+  line_range_model[1][0] = log(1.0e-1); // amplitude of Gaussian
+  line_range_model[1][1] = log(1.0e1);
 
   line_range_model[2][0] = 0.0; // center of Gaussian
   line_range_model[2][1] = 100.0;
 
-  line_range_model[3][0] = log(1.0); // sigma of Gaussian
+  line_range_model[3][0] = log(10.0); // sigma of Gaussian
   line_range_model[3][1] = log(100.0);
 
   allocate_memory();
@@ -66,6 +66,9 @@ void allocate_memory()
 
   ASmat = malloc(nall_max*nall_max*25*sizeof(double));
 
+  Tmat1 = malloc(nall_max*nall_max*sizeof(double));
+  Tmat2 = malloc(nall_max*nall_max*sizeof(double));
+
   workspace = malloc((50*nall_max)*sizeof(double));
   workspace_ipiv = malloc(nall_max*sizeof(double));
 
@@ -76,12 +79,27 @@ void allocate_memory()
   {
     var_param[i] = var_param_std[i] = 0.0;
   }
+
+  idx_con_pm = malloc(nset*sizeof(int));
+  if(parset.flag_uniform_var_params == 1)
+  {
+    for(i=0; i<nset; i++)
+      idx_con_pm[i] = 0;
+  }
+  else
+  {
+    for(i=0; i<nset; i++)
+      idx_con_pm[i] = 3*i;
+  }
+
+  return;
 }
 
 void free_memory()
 {
   int i, j;
 
+  
   /* free dataset */
   for(i=0; i<nset; i++)
   {
@@ -94,9 +112,8 @@ void free_memory()
       free(dataset[i].line[j].t);
       free(dataset[i].line[j].f);
       free(dataset[i].line[j].fe);
-
-      free(dataset[i].line);
     }
+    free(dataset[i].line);
   }
   free(dataset);
 
@@ -115,6 +132,13 @@ void free_memory()
   free(IPCmat);
 
   free(USmat);
+  free(ASmat);
+  
+  free(Tmat1);
+  free(Tmat2);
+
   free(workspace);
   free(workspace_ipiv);
+
+  return;
 }

@@ -13,6 +13,7 @@
 #include <float.h>
 #include <gsl/gsl_cblas.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_sf_erf.h>
 
 #include "dnest_line.h"
 #include "allvars.h"
@@ -43,7 +44,7 @@ void mc_line()
     strcpy(argv[argc++], "-l");
   }
 
-  strcpy(argv[argc++], "-p");
+  //strcpy(argv[argc++], "-p");
 
   mc_line_init();
 
@@ -99,6 +100,7 @@ void mc_line()
       for(j=0; j<dataset[i].nlset; j++)
         ntall += nall[j];
 
+      
       /* reconstuct all the light curves */
       recostruct_line_from_varmodel(best_model_line, i, nall, tall, fall, feall);
 
@@ -117,7 +119,7 @@ void mc_line()
         np += nall[1+j];
       }
     }
-    
+
     fclose(fp);
 
     free(tall);
@@ -125,6 +127,7 @@ void mc_line()
     free(feall);
     free(nall);
   }
+  
 
   mc_line_end();
 
@@ -239,10 +242,15 @@ void postprocess_line()
 void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
-  int i, j, k, m, info;
+  int i, j, k, m, info, idx;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
   int nall_data, nqall, ntall, np;
   double *tall_data, *fall_data, *feall_data;
+  double sigma, tau, *pm=(double *)model;
+
+  idx = idx_con_pm[nds];
+  tau = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(tau);
 
   ntall = nall[0];
   for(i=0; i<dataset[nds].nlset; i++)
@@ -268,9 +276,9 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   PEmat4 = malloc(ntall * ntall * sizeof(double));
 
   set_covar_Pmat_data_line(model, nds);
-
+  
   set_covar_Umat_line(model, nds, nall, tall);
-
+  
   set_covar_Amat_line(model, nds, nall, tall);
 
   inverse_mat(PCmat, nall_data, &info);
@@ -358,7 +366,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
 
   for(i=0; i<ntall; i++)
   {
-    feall[i] = sqrt(ASmat[i*ntall + i] - PEmat2[i*ntall+i] + PEmat4[i*ntall + i]);
+    feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat2[i*ntall+i] + PEmat4[i*ntall + i]);
     //printf("%d %f %f %f\n", i, ASmat[i*ntall + i],  PEmat2[i*ntall+i], PEmat4[i*ntall + i]);
   }
 
@@ -371,12 +379,103 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
 
 double prob_line_variability(const void *model)
 {
-  double prob = 0.0;
+  double prob = 0.0, prob1;
+  int i, j, k, m, np, info, info_C, info_ICq, sign_C, sign_ICq;
+  double lndet, lndet_ICq;
+  double *Larr, *ybuf, *y, *yq, *Cq, *ICq, *yave;
+  double *tall, *fall, *feall;
+  int nall, nqall, idx;
+  double sigma, tau, *pm = (double *)model;
+
+  Larr = workspace;
+  ybuf = Larr + nall_max * ((1+nlset_max)*nq);
+  y = ybuf + nall_max;
+  yq = y + nall_max;
+  yave = yq + (1+nlset_max)*nq;
+  Cq = yave + nall_max;
+  ICq = Cq + (1+nlset_max)*nq * (1+nlset_max)*nq;
+
+  /* iterate over all datasets */
+  for(k=0; k<nset; k++)
+  {
+    idx = idx_con_pm[k];
+    tau = exp(pm[idx+2]);
+    sigma = exp(pm[idx+1]) * sqrt(tau);
+
+    nall = alldata[k].n;
+    tall = alldata[k].t;
+    fall = alldata[k].f;
+    feall = alldata[k].fe;
+    nqall = nq * (1+dataset[k].nlset);
+
+    for(i=0;i<dataset[k].con.n;i++)
+    {
+      Larr[i*nqall] = 1.0; 
+      for(j=0; j<dataset[k].nlset; j++)
+        Larr[i*nqall + 1 + j] = 0.0;
+    }
+    np = dataset[k].con.n;
+    for(j=0; j<dataset[k].nlset; j++)
+    {
+      for(m=0; m<dataset[k].line[j].n; m++)
+      {
+        for(i=0; i<nqall; i++)
+          Larr[(np+m)*nqall + i ]  = 0.0;
+        
+        Larr[(np + m) * nqall + 1 + j] = 1.0;
+      }
+      np += dataset[k].line[j].n;
+    }
+     
+    set_covar_Pmat_data_line(model, k);
+    
+    memcpy(Tmat1, PCmat, nall*nall*sizeof(double));
+    memcpy(Tmat2, Larr, nall*nqall*sizeof(double));
+
+    multiply_mat_MN_inverseA(Tmat1, Tmat2, nall, nqall); // Tmat2 = C^-1 * L;  NxNq
+
+    multiply_mat_MN_transposeA(Larr, Tmat2, ICq, nqall, nqall, nall); // ICq = L^T*C^-1*L; NqxNq
+    multiply_mat_MN_transposeA(Tmat2, fall, yq, nqall, 1, nall); // yq = L^T*C^-1*y;  Nqx1
+    memcpy(Tmat1, ICq, nqall*nqall*sizeof(double));
+    multiply_mat_MN_inverseA(Tmat1, yq, nqall, 1); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
+
+    multiply_mat_MN(Larr, yq, yave, nall, 1, nqall); // yave = L * q; Nx1
+    for(i=0; i<nall; i++)y[i] = fall[i] - yave[i];
+    memcpy(Tmat1, PCmat, nall*nall*sizeof(double));
+    memcpy(ybuf, y, nall*sizeof(double));
+    multiply_mat_MN_inverseA(Tmat1, ybuf, nall, 1); // ybuf = C^-1 * y; Nx1
+
+    prob1 = -0.5*cblas_ddot(nall, y, 1, ybuf, 1)/(sigma*sigma); // y^T * C^-1 * y
+
+    //if(prob1 > 0.0 )  // check if prob is positive
+    //{ 
+      //prob = -DBL_MAX;
+      //printf("prob >0!\n");
+      //return prob;
+    //}
+    lndet = lndet_mat3(PCmat, nall, &info_C, &sign_C) + 2.0*nall*log(sigma);
+    lndet_ICq = lndet_mat3(ICq, nqall, &info_ICq, &sign_ICq) - 2.0*nqall*log(sigma);
+    if(info_C!=0 || info_ICq!=0 || sign_C * sign_ICq ==-1 )
+    {
+      prob = -DBL_MAX;
+      printf("lndet %f %f %d %d!\n", lndet,  lndet_ICq, sign_C, sign_ICq);
+      return prob;
+    }
+    prob += prob1 -0.5*lndet - 0.5*lndet_ICq;
+  }
+
+  return prob;
+}
+
+double prob_line_variability2(const void *model)
+{
+  double prob = 0.0, prob1, sigma, tau;
   int i, j, k, m, np, info, sign;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq;
   double *tall, *fall, *feall;
-  int nall, nqall;
+  int nall, nqall, idx;
+  double *pm = (double *)model;
 
   Larr = workspace;
   ybuf = Larr + nall_max * ((1+nlset_max)*nq);
@@ -386,8 +485,12 @@ double prob_line_variability(const void *model)
   ICq = Cq + (1+nlset_max)*nq * (1+nlset_max)*nq;
 
   /* iterate over all datasets */
-  for(k=0; k<2; k++)
+  for(k=0; k<nset; k++)
   {
+    idx = idx_con_pm[k];
+    tau = exp(pm[idx+2]);
+    sigma = exp(pm[idx+1]) * sqrt(tau);
+
     nall = alldata[k].n;
     tall = alldata[k].t;
     fall = alldata[k].f;
@@ -436,30 +539,37 @@ double prob_line_variability(const void *model)
     {
       y[i] = fall[i] - y[i];
     }
-  
+
     /* y^T x C^-1 x y */
     multiply_matvec(IPCmat, y, nall, ybuf);
-    prob += -0.5 * cblas_ddot(nall, y, 1, ybuf, 1);
+    prob1 = -0.5 * cblas_ddot(nall, y, 1, ybuf, 1)/(sigma*sigma);
     
-    lndet = lndet_mat3(PCmat, nall, &info, &sign);
+    if(prob1 > 0.0 )  // check if prob is positive
+    { 
+      prob = -DBL_MAX;
+      printf("prob >0!\n");
+      return prob;
+    }
+    lndet = lndet_mat3(PCmat, nall, &info, &sign) + 2.0*nall*log(sigma);
     if(info!=0|| sign==-1)
     {
       prob = -DBL_MAX;
       printf("lndet_C %f %d!\n", lndet, sign);
       return prob;
     }
-    lndet_ICq = lndet_mat3(ICq, nqall, &info, &sign);
+    lndet_ICq = lndet_mat3(ICq, nqall, &info, &sign) - 2.0*nqall*log(sigma);
     if(info!=0 || sign==-1 )
     {
       prob = -DBL_MAX;
       printf("lndet_ICq %f %d!\n", lndet_ICq, sign);
       return prob;
     }
-    prob += -0.5*lndet - 0.5*lndet_ICq;
-  }
+    prob += prob1 -0.5*lndet - 0.5*lndet_ICq;
 
+  }
   return prob;
 }
+
 
 int mc_line_init()
 {
@@ -503,12 +613,14 @@ int mc_line_init()
       for(j=0; j<dataset[i].nlset; j++)
       {
         idx_line_pm[i][j] = 4*np + num_params_var;
-        //printf("%d %d %d\n", i, j, idx_line_pm[i][j]);
         np++;
       }
     }
-    //exit(0);
   }
+
+  gsl_T = gsl_integration_fixed_hermite;
+  gsl_w = gsl_integration_fixed_alloc(gsl_T, 32, 0.0, 1.0, 0.0, 0.0);
+
   return 0;
 }
 
@@ -533,6 +645,11 @@ int mc_line_end()
   }
   free(idx_line_pm);
 
+  free(best_model_line);
+  free(best_model_std_line);
+
+  gsl_integration_fixed_free(gsl_w);
+
   return 0;
 }
 
@@ -545,25 +662,18 @@ void set_covar_Pmat_data_line(const void *model, int k)
 {
   double t1, t2;
   double sigma, tau, syserr, syserr_line, error;
-  int i, j, m, l, nall, np, npline;
+  int i, j, m, l, nall, np, npline, idx;
   double *pm = (double *)model;
   
   /* total number of point of this dataset */
   nall = alldata[k].n;
 
   /* set variability parameters */
-  if(parset.flag_uniform_var_params == 1)
-  {
-    syserr = (exp(pm[0])-1.0)*dataset[k].con.error_mean;
-    tau = exp(pm[2]);
-    sigma = exp(pm[1]) * sqrt(tau);
-  }
-  else
-  {
-    syserr = (exp(pm[3*k])-1.0)*dataset[k].con.error_mean;
-    tau = exp(pm[3*k+2]);
-    sigma = exp(pm[3*k+1]) * sqrt(tau);
-  }
+  idx = idx_con_pm[k];
+  tau = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(tau);
+  syserr = (exp(pm[idx+0])-1.0)*dataset[k].con.error_mean;
+  
 
   /* continuum - continuum  */
   for(i=0; i<dataset[k].con.n; i++)
@@ -574,12 +684,11 @@ void set_covar_Pmat_data_line(const void *model, int k)
     {
       t2 = dataset[k].con.t[j];
       PCmat[i*nall+j] = PCmat[j*nall+i] = 
-      PSmat[i*nall+j] = PSmat[j*nall+i] = sigma*sigma* exp (- fabs(t1-t2) / tau );
+      PSmat[i*nall+j] = PSmat[j*nall+i] = exp (- fabs(t1-t2) / tau );
     }
-
-    PSmat[i*nall+i] = sigma * sigma;
+    PSmat[i*nall+i] = 1.0;
     error = dataset[k].con.fe[i]*dataset[k].con.fe[i] + syserr*syserr;
-    PCmat[i*nall+i] = PSmat[i*nall+i] + error;
+    PCmat[i*nall+i] = PSmat[i*nall+i] + error/sigma/sigma;
   }
 
   /* continuum - line */
@@ -604,14 +713,8 @@ void set_covar_Pmat_data_line(const void *model, int k)
   for(j=0; j<dataset[k].nlset; j++)
   {
 
-    if(parset.flag_uniform_tranfuns == 1)
-    {
-      syserr_line = (exp(pm[num_params_var + j * 4]) - 1.0) * dataset[k].line[j].error_mean;
-    }
-    else
-    {
-      syserr_line = (exp(pm[num_params_var + (k*nlset_max + j) *4 ]) - 1.0) * dataset[k].line[j].error_mean;
-    }
+    idx = idx_line_pm[k][j];
+    syserr_line = (exp(pm[idx]) - 1.0) * dataset[k].line[j].error_mean;
 
     for(i=0; i<dataset[k].line[j].n; i++)
     {
@@ -624,10 +727,9 @@ void set_covar_Pmat_data_line(const void *model, int k)
         PCmat[(np + i)*nall+ (np + m) ] = PCmat[(np+m)*nall+(np+i)] =
         PSmat[(np + i)*nall+ (np + m) ] = PSmat[(np+m)*nall+(np+i)] = Sll(t1, t2, model, k, j);
       }
-
       PSmat[(np + i)*nall+(np +i)] = Sll(t1, t1, model, k, j);
       error = dataset[k].line[j].fe[i] * dataset[k].line[j].fe[i] + syserr_line*syserr_line;
-      PCmat[(np + i)*nall+(np +i)] = PSmat[(np + i)*nall+(np +i)] + error;
+      PCmat[(np + i)*nall+(np +i)] = PSmat[(np + i)*nall+(np +i)] + error/sigma/sigma;
 
       /* between lines */
       npline = np + dataset[k].line[j].n;
@@ -656,7 +758,7 @@ void set_covar_Pmat_data_line(const void *model, int k)
 void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
 {
   double sigma, taud, t1, t2;
-  int i, j, k, m, ntall, nall_data, np, npline;
+  int i, j, k, m, ntall, nall_data, np, npline, idx;
   double *pm = (double *)model;
 
   nall_data = alldata[nds].n;
@@ -664,16 +766,9 @@ void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
   for(i=0; i<dataset[nds].nlset; i++)
     ntall += nall[i+1];
 
-  if(parset.flag_uniform_var_params == 1)
-  {
-    taud = exp(pm[2]);
-    sigma = exp(pm[1]) * sqrt(taud);
-  }
-  else
-  {
-    taud = exp(pm[3*nds+2]);
-    sigma = exp(pm[3*nds+1]) * sqrt(taud);
-  }
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   /* continuum - continuum/line */
   for(i=0; i<nall[0]; i++)
@@ -684,7 +779,7 @@ void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
     for(j=0; j<dataset[nds].con.n; j++)
     {
       t2 = dataset[nds].con.t[j];
-      USmat[i * nall_data + j] = sigma*sigma * exp( - fabs(t1-t2)/taud);
+      USmat[i * nall_data + j] =  exp( - fabs(t1-t2)/taud);
     }
 
     /* lines */
@@ -699,12 +794,12 @@ void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
       np += dataset[nds].line[k].n;
     }
   }
-
+  
   /* line - continuum/line */
-
   npline = nall[0];
   for(k = 0; k<dataset[nds].nlset; k++)
   {
+    
     for(i=0; i<nall[1+k]; i++)
     {
       t1 = tall[npline + i];
@@ -727,7 +822,7 @@ void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
         }
         np += dataset[nds].line[m].n;
       }
-
+      
       /* line self */
       for(j=0; j<dataset[nds].line[k].n; j++)
       {
@@ -758,24 +853,16 @@ void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
 void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
 {
   double t1, t2, sigma, taud;
-  int i, j, k, m, ntall, np, npline;
+  int i, j, k, m, ntall, np, npline, idx;
   double *pm=(double *)model;
   
   ntall = nall[0];
   for(i=0; i<dataset[nds].nlset; i++)
     ntall += nall[i+1];
 
-  if(parset.flag_uniform_var_params == 1)
-  {
-    taud = exp(pm[2]);
-    sigma = exp(pm[1]) * sqrt(taud);
-  }
-  else
-  {
-    taud = exp(pm[3*nds+2]);
-    sigma = exp(pm[3*nds+1]) * sqrt(taud);
-  }
-  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   /* continuum - continuum/lines*/
   for(i=0; i<nall[0]; i++)
@@ -786,9 +873,9 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
     for(j=0; j<i; j++)
     {
       t2 = tall[j];
-      ASmat[i * ntall + j] = ASmat[j * ntall + i] = sigma*sigma * exp( - fabs(t1-t2)/taud);
+      ASmat[i * ntall + j] = ASmat[j * ntall + i] =  exp( - fabs(t1-t2)/taud);
     }
-    ASmat[i * ntall + i] = sigma * sigma;
+    ASmat[i * ntall + i] = 1.0;
     
     /* lines */
     np = nall[0];
@@ -844,17 +931,9 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
   double *pm = (double *)model;
   int idx;
 
-
-  if(parset.flag_uniform_var_params == 1)
-  {
-    taud = exp(pm[2]);
-    sigma = exp(pm[1]) * sqrt(taud);
-  }
-  else
-  {
-    taud = exp(pm[3*nds+2]);
-    sigma = exp(pm[3*nds+1]) * sqrt(taud);
-  }
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   idx = idx_line_pm[nds][nls];
   fg = exp(pm[idx + 1]);
@@ -871,7 +950,7 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
    *
    * with this equation, the factor exp(wg*wg/taud/taud) will be canceled out.
    */
-  if( wg/taud >= 20.0 )
+  /*if( wg/taud >= 20.0 )
   {
     x1 = -DT/2.0/wg + wg/taud;
     x2 =  DT/2.0/wg + wg/taud;
@@ -883,9 +962,12 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
   {
     St = exp(wg*wg/taud/taud) * ( exp(-DT/taud) * erfc( -DT/2.0/wg + wg/taud )
                                  +exp( DT/taud) * erfc(  DT/2.0/wg + wg/taud ) );
-  }
+  }*/
+
+  St =  exp(-DT/taud + gsl_sf_log_erfc( -DT/2.0/wg + wg/taud ) + wg*wg/taud/taud)
+      + exp( DT/taud + gsl_sf_log_erfc(  DT/2.0/wg + wg/taud ) + wg*wg/taud/taud);
   
-  St *= 1.0/2.0 * fg*fg * sigma*sigma;
+  St *= 1.0/2.0 * fg*fg;
   
   /*if(isnan(St))
   {
@@ -897,9 +979,72 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
 
 double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2)
 {
-  printf("FFFFF\n");
-  exit(0);
-  return 0.0;
+  double *pm=(double *)model;
+  int i, idx1, idx2, idx;
+  double fg1, fg2, tau1, tau2, wg1, wg2, sigma, taud;
+  double Dt, DT, St, x, w, xp, x1, x2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
+
+  idx1 = idx_line_pm[nds][nls1];
+  fg1 = exp(pm[idx1 + 1]);
+  tau1 =    pm[idx1 + 2] ;
+  wg1 = exp(pm[idx1 + 3]);
+
+  idx2 = idx_line_pm[nds][nls2];
+  fg2 = exp(pm[idx2 + 1]);
+  tau2 =    pm[idx2 + 2] ;
+  wg2 = exp(pm[idx2 + 3]);
+
+  Dt = t1-t2;
+  DT = Dt - (tau1-tau2);
+
+  /*if( wg2/taud >= 20.0 )
+  {
+    St = 0.0;
+    for(i=0; i<gsl_w->n; i++)
+    {
+      x = gsl_w->x[i];
+      w = gsl_w->weights[i];
+      xp = sqrt(2.0) * wg1 * x - DT; 
+      x1 = -1.0/sqrt(2.0) * ( xp/wg2 - wg2/taud );
+      x2 =  1.0/sqrt(2.0) * ( xp/wg2 + wg2/taud );
+
+      St += w * exp( - xp*xp/2.0/wg2/wg2 ) *   ( 1.0/x1 * ( 1.0 - 1.0/(2*x1*x1) +  3.0/pow(2*x1*x1, 2) - 15.0/pow(2*x1*x1, 3) ) 
+                                                +1.0/x2 * ( 1.0 - 1.0/(2*x2*x2) +  3.0/pow(2*x2*x2, 2) - 15.0/pow(2*x2*x2, 3)) ) ;
+    }
+
+    St *= 1.0/2.0/PI;
+  }
+  else
+  {
+    St = 0.0;
+    for(i=0; i<gsl_w->n; i++)
+    {
+      x = gsl_w->x[i];
+      w = gsl_w->weights[i];
+      xp = sqrt(2.0) * wg1 * x - DT; 
+      St += w * ( exp( - xp/taud) * erfc(-1.0/sqrt(2.0) * ( xp/wg2 - wg2/taud ))  
+                + exp(   xp/taud) * erfc( 1.0/sqrt(2.0) * ( xp/wg2 + wg2/taud )) );
+    }
+    St *= exp(wg2*wg2/taud/taud/2.0) * 1.0/2.0/sqrt(PI);
+  }*/
+  
+  St = 0.0;
+  for(i=0; i<gsl_w->n; i++)
+  {
+    x = gsl_w->x[i];
+    w = gsl_w->weights[i];
+    xp = sqrt(2.0) * wg1 * x - DT; 
+    St += w * ( exp( - xp/taud + gsl_sf_log_erfc(-1.0/sqrt(2.0) * ( xp/wg2 - wg2/taud )) + wg2*wg2/taud/taud/2.0)  
+              + exp(   xp/taud + gsl_sf_log_erfc( 1.0/sqrt(2.0) * ( xp/wg2 + wg2/taud )) + wg2*wg2/taud/taud/2.0) );
+  }
+
+  St *= 1.0/2.0/sqrt(PI) * fg1*fg2;
+
+  return St;
 }
 /*
  * nds: dataset index
@@ -911,16 +1056,9 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
   double Dt, DT, sigma, taud, fg, wg, tau0, St, lnSt, x1, x2;
   int idx;
   
-  if(parset.flag_uniform_var_params == 1)
-  {
-    taud = exp(pm[2]);
-    sigma = exp(pm[1]) * sqrt(taud);
-  }
-  else
-  {
-    taud = exp(pm[3*nds+2]);
-    sigma = exp(pm[3*nds+1]) * sqrt(taud);
-  }
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   idx = idx_line_pm[nds][nls];
   fg = exp(pm[idx + 1]);
@@ -938,7 +1076,7 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
    *
    * with this equation, the factor exp(wg*wg/taud/taud/2) will be canceled out.
    */
-  if( wg/taud >= 20.0)
+  /*if( wg/taud >= 20.0)
   {
     x1 = -(DT/wg - wg/taud)/sqrt(2.0);
     x2 =  (DT/wg + wg/taud)/sqrt(2.0);
@@ -950,9 +1088,12 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
   {
     St = exp(wg*wg/2.0/taud/taud) * ( exp(-DT/taud) * erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) 
                                      +exp( DT/taud) * erfc(  (DT/wg + wg/taud)/sqrt(2.0) ));
-  }
+  }*/
 
-  St *= 1.0/2.0 * fg * sigma*sigma;
+  St = exp(-DT/taud + gsl_sf_log_erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud )
+      +exp( DT/taud + gsl_sf_log_erfc(  (DT/wg + wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud );
+
+  St *= 1.0/2.0 * fg;
   return St;
 }
 

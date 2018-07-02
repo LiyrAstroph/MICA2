@@ -12,8 +12,6 @@
 #include <math.h>
 #include <float.h>
 #include <gsl/gsl_cblas.h>
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_sf_erf.h>
 
 #include "dnest_line.h"
 #include "allvars.h"
@@ -618,9 +616,6 @@ int mc_line_init()
     }
   }
 
-  gsl_T = gsl_integration_fixed_hermite;
-  gsl_w = gsl_integration_fixed_alloc(gsl_T, 32, 0.0, 1.0, 0.0, 0.0);
-
   return 0;
 }
 
@@ -647,8 +642,6 @@ int mc_line_end()
 
   free(best_model_line);
   free(best_model_std_line);
-
-  gsl_integration_fixed_free(gsl_w);
 
   return 0;
 }
@@ -950,30 +943,18 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
    *
    * with this equation, the factor exp(wg*wg/taud/taud) will be canceled out.
    */
-  /*if( wg/taud >= 20.0 )
-  {
-    x1 = -DT/2.0/wg + wg/taud;
-    x2 =  DT/2.0/wg + wg/taud;
-
-    St = exp( - DT*DT/wg/wg/4.0 ) / sqrt(PI) * (1.0/x1 * ( 1.0 - 1.0/(2*x1*x1) +  3.0/pow(2*x1*x1, 2) - 15.0/pow(2*x1*x1, 3)) 
-                                               +1.0/x2 * ( 1.0 - 1.0/(2*x2*x2) +  3.0/pow(2*x2*x2, 2) - 15.0/pow(2*x2*x2, 3)));
-  }
-  else
+  /*
   {
     St = exp(wg*wg/taud/taud) * ( exp(-DT/taud) * erfc( -DT/2.0/wg + wg/taud )
                                  +exp( DT/taud) * erfc(  DT/2.0/wg + wg/taud ) );
-  }*/
+  }
+  */
 
   St =  exp(-DT/taud + gsl_sf_log_erfc( -DT/2.0/wg + wg/taud ) + wg*wg/taud/taud)
       + exp( DT/taud + gsl_sf_log_erfc(  DT/2.0/wg + wg/taud ) + wg*wg/taud/taud);
   
   St *= 1.0/2.0 * fg*fg;
   
-  /*if(isnan(St))
-  {
-    printf("Sll: %f %f %f %f %f %e %f\n", St, sigma, fg, x1, x2, exp(30*30), wg/taud);
-    exit(0);
-  }*/
   return St;
 }
 
@@ -982,7 +963,7 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
   double *pm=(double *)model;
   int i, idx1, idx2, idx;
   double fg1, fg2, tau1, tau2, wg1, wg2, sigma, taud;
-  double Dt, DT, St, x, w, xp, x1, x2;
+  double Dt, DT, St, A;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
@@ -1000,49 +981,13 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
 
   Dt = t1-t2;
   DT = Dt - (tau1-tau2);
-
-  /*if( wg2/taud >= 20.0 )
-  {
-    St = 0.0;
-    for(i=0; i<gsl_w->n; i++)
-    {
-      x = gsl_w->x[i];
-      w = gsl_w->weights[i];
-      xp = sqrt(2.0) * wg1 * x - DT; 
-      x1 = -1.0/sqrt(2.0) * ( xp/wg2 - wg2/taud );
-      x2 =  1.0/sqrt(2.0) * ( xp/wg2 + wg2/taud );
-
-      St += w * exp( - xp*xp/2.0/wg2/wg2 ) *   ( 1.0/x1 * ( 1.0 - 1.0/(2*x1*x1) +  3.0/pow(2*x1*x1, 2) - 15.0/pow(2*x1*x1, 3) ) 
-                                                +1.0/x2 * ( 1.0 - 1.0/(2*x2*x2) +  3.0/pow(2*x2*x2, 2) - 15.0/pow(2*x2*x2, 3)) ) ;
-    }
-
-    St *= 1.0/2.0/PI;
-  }
-  else
-  {
-    St = 0.0;
-    for(i=0; i<gsl_w->n; i++)
-    {
-      x = gsl_w->x[i];
-      w = gsl_w->weights[i];
-      xp = sqrt(2.0) * wg1 * x - DT; 
-      St += w * ( exp( - xp/taud) * erfc(-1.0/sqrt(2.0) * ( xp/wg2 - wg2/taud ))  
-                + exp(   xp/taud) * erfc( 1.0/sqrt(2.0) * ( xp/wg2 + wg2/taud )) );
-    }
-    St *= exp(wg2*wg2/taud/taud/2.0) * 1.0/2.0/sqrt(PI);
-  }*/
   
-  St = 0.0;
-  for(i=0; i<gsl_w->n; i++)
-  {
-    x = gsl_w->x[i];
-    w = gsl_w->weights[i];
-    xp = sqrt(2.0) * wg1 * x - DT; 
-    St += w * ( exp( - xp/taud + gsl_sf_log_erfc(-1.0/sqrt(2.0) * ( xp/wg2 - wg2/taud )) + wg2*wg2/taud/taud/2.0)  
-              + exp(   xp/taud + gsl_sf_log_erfc( 1.0/sqrt(2.0) * ( xp/wg2 + wg2/taud )) + wg2*wg2/taud/taud/2.0) );
-  }
+  A = sqrt(wg1*wg1 + wg2*wg2);
 
-  St *= 1.0/2.0/sqrt(PI) * fg1*fg2;
+  St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud )
+      +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud ) ;
+
+  St *= 1.0/2.0 * fg1*fg2;
 
   return St;
 }
@@ -1076,19 +1021,12 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
    *
    * with this equation, the factor exp(wg*wg/taud/taud/2) will be canceled out.
    */
-  /*if( wg/taud >= 20.0)
-  {
-    x1 = -(DT/wg - wg/taud)/sqrt(2.0);
-    x2 =  (DT/wg + wg/taud)/sqrt(2.0);
-
-    St = exp( - DT*DT/wg/wg/2.0 ) / sqrt(PI) * ( 1.0/x1 * ( 1.0 - 1.0/(2*x1*x1) +  3.0/pow(2*x1*x1, 2) - 15.0/pow(2*x1*x1, 3) ) 
-                                                +1.0/x2 * ( 1.0 - 1.0/(2*x2*x2) +  3.0/pow(2*x2*x2, 2) - 15.0/pow(2*x2*x2, 3)) ) ;
-  }
-  else
+  /*
   {
     St = exp(wg*wg/2.0/taud/taud) * ( exp(-DT/taud) * erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) 
                                      +exp( DT/taud) * erfc(  (DT/wg + wg/taud)/sqrt(2.0) ));
-  }*/
+  }
+  */
 
   St = exp(-DT/taud + gsl_sf_log_erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud )
       +exp( DT/taud + gsl_sf_log_erfc(  (DT/wg + wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud );

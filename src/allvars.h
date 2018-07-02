@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
-#include <gsl/gsl_integration.h>
 
 #define PI            (M_PI)
 #define MICA_MAX_STR_LENGTH  (100)
@@ -84,8 +83,4 @@ extern int nset;
 
 extern LC *alldata;
 
-
-/* GSL */
-extern gsl_integration_fixed_workspace * gsl_w;
-extern gsl_integration_fixed_type * gsl_T;
 #endif

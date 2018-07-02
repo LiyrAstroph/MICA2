@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <mpi.h>
-#include <gsl/gsl_integration.h>
 
 #include "allvars.h"
 
@@ -52,7 +51,3 @@ int *workspace_ipiv;
 
 // error exit
 char str_error_exit[200];
-
-/* GSL */
-gsl_integration_fixed_workspace * gsl_w;
-gsl_integration_fixed_type * gsl_T;

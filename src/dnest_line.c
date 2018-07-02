@@ -146,6 +146,7 @@ void from_prior_line(void *model)
     pm[i] = dnest_randn()*var_param_std[i] + var_param[i];
     wrap(&pm[i], par_range_model[i][0], par_range_model[i][1]);
   }
+  
   for(i=num_params_var; i<num_params; i++)
   {
     pm[i] = par_range_model[i][0] + dnest_rand()*(par_range_model[i][1] - par_range_model[i][0]);

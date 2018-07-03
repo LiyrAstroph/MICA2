@@ -42,7 +42,7 @@ void mc_con()
     strcpy(argv[argc++], "-l");
   }
 
-  strcpy(argv[argc++], "-p");
+  //strcpy(argv[argc++], "-p");
 
   mc_con_init();
 

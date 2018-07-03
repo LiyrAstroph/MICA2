@@ -40,7 +40,7 @@ extern double *workspace;
 extern int ncon_max, nall_max, nlset_max;
 extern int nq; /* order of long-term trend */
 extern double *var_param, *var_param_std;
-extern double tspan_max;
+extern double tspan_max, tcadence_min;
 
 
 /* line */

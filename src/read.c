@@ -109,6 +109,7 @@ int read_data()
   FILE *fp;
   char buf[256], str[256], str2[256], *pstr;
   int i, j, k, np;
+  double tcad;
 
   /* read number of data sets. */
   if(thistask == roottask)
@@ -291,6 +292,15 @@ int read_data()
   {
     if(tspan_max < dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])
       tspan_max = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
+  }
+
+  tcadence_min = tspan_max;
+  for(i=0; i<nset; i++)
+  {
+
+    tcad = (dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])/(dataset[i].con.n-1);
+    if(tcadence_min > tcad)
+      tcadence_min = tcad;
   }
 
   /* test */

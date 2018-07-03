@@ -45,9 +45,9 @@ void init()
   line_range_model[1][1] = log(1.0e1);
 
   line_range_model[2][0] = 0.0; // center of Gaussian
-  line_range_model[2][1] = tspan_max;
+  line_range_model[2][1] = tspan_max/2.0;
 
-  line_range_model[3][0] = log(1.0); // sigma of Gaussian
+  line_range_model[3][0] = log(tcadence_min); // sigma of Gaussian
   line_range_model[3][1] = log(100.0);
 
   allocate_memory();

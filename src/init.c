@@ -31,10 +31,10 @@ void init()
   var_range_model[0][1] = log(1.0+10.0);
 
   var_range_model[1][0] = log(1.0e-4); // log(sigma)
-  var_range_model[1][1] = log(1.0e-1); 
+  var_range_model[1][1] = log(1.0e1); 
 
   var_range_model[2][0] = log(1.0); // log(tau)
-  var_range_model[2][1] = log(1.0e5); 
+  var_range_model[2][1] = log(tspan_max*2.0*PI); 
 
 
   /* set parameter range of line */
@@ -48,7 +48,7 @@ void init()
   line_range_model[2][1] = tspan_max/2.0;
 
   line_range_model[3][0] = log(tcadence_min); // sigma of Gaussian
-  line_range_model[3][1] = log(100.0);
+  line_range_model[3][1] = log(tspan_max);
 
   allocate_memory();
 }

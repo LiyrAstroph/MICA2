@@ -294,13 +294,21 @@ int read_data()
       tspan_max = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
   }
 
-  tcadence_min = tspan_max;
+  tcadence_con_min = tspan_max;
+  tcadence_line_min = tspan_max;
   for(i=0; i<nset; i++)
   {
 
     tcad = (dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])/(dataset[i].con.n-1);
-    if(tcadence_min > tcad)
-      tcadence_min = tcad;
+    if(tcadence_con_min > tcad)
+      tcadence_con_min = tcad;
+
+    for(j=0; j<dataset[i].nlset; j++)
+    {
+      tcad = (dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0])/(dataset[i].line[j].n-1);
+      if(tcadence_line_min  > tcad)
+        tcadence_line_min = tcad;
+    }
   }
 
   /* test */

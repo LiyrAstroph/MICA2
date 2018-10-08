@@ -93,6 +93,8 @@ void allocate_memory()
       idx_con_pm[i] = 3*i;
   }
 
+  logz = malloc(parset.num_gaussian_diff * sizeof(double));
+
   return;
 }
 
@@ -142,5 +144,6 @@ void free_memory()
   free(workspace);
   free(workspace_ipiv);
 
+  free(logz);
   return;
 }

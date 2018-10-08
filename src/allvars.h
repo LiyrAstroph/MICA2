@@ -46,6 +46,8 @@ extern double tspan_max, tcadence_con_min, tcadence_line_min;
 /* line */
 extern int **idx_line_pm, *idx_con_pm;
 
+extern double *logz; /* evidence */
+
 // error exit
 extern char str_error_exit[200];
 // mathematic functions
@@ -61,6 +63,8 @@ typedef struct
 
   int flag_uniform_var_params;
   int flag_uniform_tranfuns;
+
+  int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 
 }PARSET;
 extern PARSET parset;

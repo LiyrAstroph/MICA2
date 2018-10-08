@@ -47,6 +47,8 @@ double tspan_max, tcadence_con_min, tcadence_line_min;
 /* line */
 int **idx_line_pm, *idx_con_pm; 
 
+double *logz; /* evidence */
+
 // mathematic functions
 int *workspace_ipiv;
 

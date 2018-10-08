@@ -46,11 +46,11 @@ int dnest_con(int argc, char **argv)
     par_fix[i] = 0;
 
   /* fix systematic error of continuum */
-  for(i=0; i<num_params_var; i+=3)
+  /*for(i=0; i<num_params_var; i+=3)
   {
     par_fix[i] = 1;
     par_fix_val[i] = log(1.0);
-  }
+  }*/
   
 
   strcpy(options_file, dnest_options_file);

@@ -46,6 +46,14 @@ int read_parset()
     addr[nt] = &parset.flag_uniform_tranfuns;
     id[nt++] = INT;
 
+    strcpy(tag[nt], "NumGaussianLow");
+    addr[nt] = &parset.num_gaussian_low;
+    id[nt++] = INT;
+
+    strcpy(tag[nt], "NumGaussianUpp");
+    addr[nt] = &parset.num_gaussian_upper;
+    id[nt++] = INT;
+
     char fname[200];
     sprintf(fname, "%s", parset.param_file);
     
@@ -55,6 +63,10 @@ int read_parset()
       fprintf(stderr, "# Error: Cannot open file %s\n", fname);
       exit(-1);
     }
+
+    /* default parset */
+    parset.num_gaussian_low = parset.num_gaussian_upper = 1;
+    parset.flag_uniform_tranfuns = parset.flag_uniform_var_params = 0;
 
     while(!feof(fparam))
     {
@@ -96,6 +108,26 @@ int read_parset()
       }
     }
     fclose(fparam);
+
+    if(parset.num_gaussian_low <= 0)
+    {
+      printf("NumGaussianLow should be larger than 0.\n");
+      exit(0);
+    }
+
+    if(parset.num_gaussian_upper <= 0)
+    {
+      printf("NumGaussianUpp should be larger than 0.\n");
+      exit(0);
+    }
+
+    if(parset.num_gaussian_low > parset.num_gaussian_upper)
+    {
+      printf("NumGaussianLow should be smaller than or equal to NumGaussianUpp.\n");
+      exit(0);
+    }
+
+    parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low;
   }
 
   MPI_Bcast(&parset, sizeof(parset), MPI_BYTE, roottask, MPI_COMM_WORLD);

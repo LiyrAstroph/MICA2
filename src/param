@@ -1,9 +1,14 @@
 #
+# lines starting with "#" are regarded as comments and are neglected
+#
 
 FileDir                   ./
-DataFile                  data/lcdata.txt
+DataFile                  data/PG1440_data.txt
  
-FlagUniformVarParams      0                # whether each dataset has the same variabiliyt parameters
+FlagUniformVarParams      0                # whether each dataset has the same variability parameters
 
 FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
                                            # note that different lines have different parameters.
+
+NumGaussianLow            1                # Lower limit for the number of Gaussian
+NumGaussianUpp            2                # Upper limit for the number of Gaussian

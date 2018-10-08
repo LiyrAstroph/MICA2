@@ -63,18 +63,18 @@ int dnest_line(int argc, char **argv)
     par_fix[i] = 0;
 
   /* fix systematic error of continuum */
-  for(i=0; i<num_params_var; i+=3)
+  /*for(i=0; i<num_params_var; i+=3)
   {
     par_fix[i] = 1;
     par_fix_val[i] = log(1.0);
-  }
+  }*/
 
   /* fix systematic error of line */
-  for(i=0; i<num_params_line; i+=4)
+  /*for(i=0; i<num_params_line; i+=4)
   {
     par_fix[i+num_params_var] = 1;
     par_fix_val[i+num_params_var] = log(1.0);
-  }
+  }*/
 
   strcpy(options_file, dnest_options_file);
 
@@ -92,8 +92,14 @@ void set_par_range_line()
   for(j = 0; j<num_params_var; j+=3)
   {
     /* systematic error of continuum */
-    par_range_model[i][0] = var_range_model[0][0];
-    par_range_model[i++][1] = var_range_model[0][1];
+    par_range_model[i][0] = var_param[j] - 5.0 * var_param_std[j];
+    par_range_model[i][1] = var_param[j] + 5.0 * var_param_std[j];
+
+    /* systematic error */
+    par_range_model[i][0] = fmax(par_range_model[i][0], var_range_model[0][0]);
+    par_range_model[i][1] = fmin(par_range_model[i][1], var_range_model[0][1]);
+    i++;
+
 
     /* sigma */
     par_range_model[i][0] = var_param[j+1] - 5.0 * var_param_std[j+1];
@@ -110,7 +116,6 @@ void set_par_range_line()
     par_range_model[i][0] = fmax(par_range_model[i][0], var_range_model[2][0]);
     par_range_model[i][1] = fmin(par_range_model[i][1], var_range_model[2][1]);
     i++;
-
   }
 
   for(j = 0; j < num_params_line; j+= 4)

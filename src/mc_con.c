@@ -414,12 +414,6 @@ int mc_con_init()
   }
   MPI_Bcast(&parset.num_particles, 1, MPI_INT, roottask, MPI_COMM_WORLD);
 
-  perturb_accept = malloc(parset.num_particles * sizeof(int));
-  for(i=0; i<parset.num_particles; i++)
-  {
-    perturb_accept[i] = 0;
-  }
-
   return 0;
 }
 
@@ -435,8 +429,6 @@ int mc_con_end()
 
   free(par_fix);
   free(par_fix_val);
-
-  free(perturb_accept);
 
   free(best_model_con);
   free(best_model_std_con);

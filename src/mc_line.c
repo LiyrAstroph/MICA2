@@ -737,12 +737,6 @@ int mc_line_init()
   }
   MPI_Bcast(&parset.num_particles, 1, MPI_INT, roottask, MPI_COMM_WORLD);
 
-  perturb_accept = malloc(parset.num_particles * sizeof(int));
-  for(i=0; i<parset.num_particles; i++)
-  {
-    perturb_accept[i] = 0;
-  }
-
   idx_line_pm = malloc(nset * sizeof(double *));
   for(i=0; i<nset; i++)
   {
@@ -787,8 +781,6 @@ int mc_line_end()
 
   free(par_fix);
   free(par_fix_val);
-  
-  free(perturb_accept);
 
   for(i=0; i<nset; i++)
   {

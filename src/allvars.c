@@ -19,7 +19,6 @@ char proc_name[MPI_MAX_PROCESSOR_NAME];
 
 /* dnest */
 int which_level_update;
-int *perturb_accept;
 char dnest_options_file[MICA_MAX_STR_LENGTH];
 
 PARSET parset;

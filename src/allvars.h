@@ -22,9 +22,7 @@ extern char proc_name[MPI_MAX_PROCESSOR_NAME];
 
 
 /* for dnest */
-extern int which_particle_update;
 extern int which_level_update;
-extern unsigned long long int which_mcmc_steps;//mcmc steps 
 extern int *perturb_accept;
 extern double *limits;  // external from dnest
 extern char dnest_options_file[MICA_MAX_STR_LENGTH];

@@ -18,9 +18,7 @@ int roottask = 0;
 char proc_name[MPI_MAX_PROCESSOR_NAME];
 
 /* dnest */
-int which_particle_update;
 int which_level_update;
-unsigned long long int which_mcmc_steps;/* mcmc steps */ 
 int *perturb_accept;
 char dnest_options_file[MICA_MAX_STR_LENGTH];
 

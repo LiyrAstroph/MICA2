@@ -16,6 +16,7 @@
 
 #include "proto.h"
 
+DNestFptrSet *fptrset_line;
 
 int dnest_line(int argc, char **argv)
 {
@@ -36,7 +37,6 @@ int dnest_line(int argc, char **argv)
   }
 
   num_params = num_params_var + num_params_line;
-  size_of_modeltype = num_params * sizeof(double);
 
   par_range_model = malloc( num_params * sizeof(double *));
   for(i=0; i<num_params; i++)
@@ -45,16 +45,16 @@ int dnest_line(int argc, char **argv)
   par_fix = (int *) malloc(num_params * sizeof(int));
   par_fix_val = (double *) malloc(num_params * sizeof(double));
   
+  fptrset_line = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
-  from_prior = from_prior_line;
-  perturb = perturb_line;
-  print_particle = print_particle_line;
-  get_num_params = get_num_params_line;
-  restart_action = restart_action_line;
+  fptrset_line->from_prior = from_prior_line;
+  fptrset_line->perturb = perturb_line;
+  fptrset_line->print_particle = print_particle_line;
+  fptrset_line->restart_action = restart_action_line;
 
-  log_likelihoods_cal = log_likelihoods_cal_line;
-  log_likelihoods_cal_initial = log_likelihoods_cal_initial_line;
-  log_likelihoods_cal_restart = log_likelihoods_cal_restart_line;
+  fptrset_line->log_likelihoods_cal = log_likelihoods_cal_line;
+  fptrset_line->log_likelihoods_cal_initial = log_likelihoods_cal_initial_line;
+  fptrset_line->log_likelihoods_cal_restart = log_likelihoods_cal_restart_line;
   
   set_par_range_line();
 
@@ -78,8 +78,9 @@ int dnest_line(int argc, char **argv)
 
   strcpy(options_file, dnest_options_file);
 
-  dnest(argc, argv);
+  dnest(argc, argv, fptrset_line, num_params);
 
+  dnest_free_fptrset(fptrset_line);
   return 0;
 }
 

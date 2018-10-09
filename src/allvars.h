@@ -26,6 +26,7 @@ extern int which_level_update;
 extern double *limits;  // external from dnest
 extern char dnest_options_file[MICA_MAX_STR_LENGTH];
 
+
 /* con */
 extern int num_params, num_params_var, num_params_line;
 extern double **par_range_model;

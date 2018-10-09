@@ -155,6 +155,7 @@ void postprocess_line()
   double *pm, *pmstd;
   int num_ps, i, j;
   void *posterior_sample, *post_model;
+  int size_of_modeltype = num_params * sizeof(double);
   
   best_model_line = malloc(size_of_modeltype);
   best_model_std_line = malloc(size_of_modeltype);

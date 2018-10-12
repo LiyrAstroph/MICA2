@@ -147,7 +147,7 @@ void mc_line()
 
 
 /*!
- *  this function does postprocess for continuum. 
+ *  this function does postprocess. 
  */
 void postprocess_line()
 {
@@ -244,7 +244,11 @@ void postprocess_line()
   return;
 }
 
-
+/*!
+ * matrix operation A^-1 x B is implemented by calling functions
+ *    inverse_mat()
+ *    multiply_mat_MN()
+ */
 void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
@@ -384,6 +388,11 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
 
 }
 
+/*!
+ * matrix operation A^-1 x B is implemented by calling function 
+ *    multiply_mat_MN_inverseA()
+ * 
+ */
 void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
@@ -526,6 +535,11 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   return;
 }
 
+/*!
+ * matrix operation A^-1 x B is implemented by calling function 
+ *    multiply_mat_MN_inverseA()
+ * 
+ */
 double prob_line_variability(const void *model)
 {
   double prob = 0.0, prob1;
@@ -622,6 +636,11 @@ double prob_line_variability(const void *model)
   return prob;
 }
 
+/*!
+ * matrix operation A^-1 x B is implemented by calling functions
+ *    inverse_mat()
+ *    multiply_mat_MN()
+ */
 double prob_line_variability2(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau;

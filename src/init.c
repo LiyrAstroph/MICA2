@@ -14,7 +14,7 @@
 
 void init()
 {
-
+  // order of long-term trend in light curve
   nq = 1;
 
   if(parset.flag_uniform_var_params == 1)
@@ -81,6 +81,7 @@ void allocate_memory()
     var_param[i] = var_param_std[i] = 0.0;
   }
 
+  /* index for continuum parameters of each dataset */
   idx_con_pm = malloc(nset*sizeof(int));
   if(parset.flag_uniform_var_params == 1)
   {
@@ -93,6 +94,7 @@ void allocate_memory()
       idx_con_pm[i] = 3*i;
   }
 
+  /* evidence */
   logz = malloc(parset.num_gaussian_diff * sizeof(double));
 
   return;
@@ -102,7 +104,6 @@ void free_memory()
 {
   int i, j;
 
-  
   /* free dataset */
   for(i=0; i<nset; i++)
   {

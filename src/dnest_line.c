@@ -16,6 +16,7 @@
 
 #include "proto.h"
 
+/* function set for DNest */
 DNestFptrSet *fptrset_line;
 
 int dnest_line(int argc, char **argv)

@@ -5,8 +5,8 @@
  * Jun 22, 2018
  */
 
-#ifndef _ALLVARS_H
-#define _ALLVARS_H
+#ifndef MICA_ALLVARS_H
+#define MICA_ALLVARS_H
 
 #include <stdio.h>
 #include <stdlib.h>

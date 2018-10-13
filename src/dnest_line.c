@@ -77,9 +77,7 @@ int dnest_line(int argc, char **argv)
     par_fix_val[i+num_params_var] = log(1.0);
   }*/
 
-  strcpy(options_file, dnest_options_file);
-
-  dnest(argc, argv, fptrset_line, num_params);
+  dnest(argc, argv, fptrset_line, num_params, dnest_options_file);
 
   dnest_free_fptrset(fptrset_line);
   return 0;

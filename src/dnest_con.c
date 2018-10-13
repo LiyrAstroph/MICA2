@@ -52,11 +52,8 @@ int dnest_con(int argc, char **argv)
     par_fix[i] = 1;
     par_fix_val[i] = log(1.0);
   }*/
-  
 
-  strcpy(options_file, dnest_options_file);
-
-  dnest(argc, argv, fptrset_con, num_params);
+  dnest(argc, argv, fptrset_con, num_params, dnest_options_file);
 
   dnest_free_fptrset(fptrset_con);
   return 0;

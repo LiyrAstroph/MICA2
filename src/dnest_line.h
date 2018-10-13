@@ -7,6 +7,8 @@
 
 #ifndef _DNEST_LINE_H
 
+#define _DNEST_LINE_H
+
 #include <stdbool.h>
 
 /* functions */

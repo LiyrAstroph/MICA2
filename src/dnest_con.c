@@ -163,7 +163,7 @@ double perturb_con(void *model)
   }
 
   pm[which] += dnest_randh() * width;
-  wrap(&(pm[which]), par_range_model[which][0], par_range_model[which][1]);
+  dnest_wrap(&(pm[which]), par_range_model[which][0], par_range_model[which][1]);
   
   return logH;
 }

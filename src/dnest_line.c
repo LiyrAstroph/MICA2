@@ -149,7 +149,7 @@ void from_prior_line(void *model)
   for(i=0; i<num_params_var; i++)
   {
     pm[i] = dnest_randn()*var_param_std[i] + var_param[i];
-    wrap(&pm[i], par_range_model[i][0], par_range_model[i][1]);
+    dnest_wrap(&pm[i], par_range_model[i][0], par_range_model[i][1]);
   }
   
   for(i=num_params_var; i<num_params; i++)
@@ -231,13 +231,13 @@ double perturb_line(void *model)
   {
     logH -= (-0.5*pow((pm[which]-var_param[which])/var_param_std[which], 2.0) );
     pm[which] += dnest_randh() * width;
-    wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
+    dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
     logH += (-0.5*pow((pm[which]-var_param[which])/var_param_std[which], 2.0) );
   }
   else
   {
     pm[which] += dnest_randh() * width;
-    wrap(&(pm[which]), par_range_model[which][0], par_range_model[which][1]);
+    dnest_wrap(&(pm[which]), par_range_model[which][0], par_range_model[which][1]);
   }
   
   return logH;

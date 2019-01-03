@@ -61,6 +61,7 @@ typedef struct
 
   int flag_uniform_var_params;
   int flag_uniform_tranfuns;
+  int flag_con_sys_err, flag_line_sys_err;
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 

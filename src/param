@@ -3,7 +3,7 @@
 #
 
 FileDir                   ./
-DataFile                  data/PG1440_data.txt
+DataFile                  data/lcdata.txt
  
 FlagUniformVarParams      0                # whether each dataset has the same variability parameters
 
@@ -12,3 +12,6 @@ FlagUniformTranFuns       0                # whether each dataset has the same l
 
 NumGaussianLow            1                # Lower limit for the number of Gaussian
 NumGaussianUpp            2                # Upper limit for the number of Gaussian
+
+FlagConSysErr             1                # 0, not include systematic error of contininuum; 1, include
+FlagLineSysErr            1                # 0, not include systematic error of line; 1, include

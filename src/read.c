@@ -54,6 +54,14 @@ int read_parset()
     addr[nt] = &parset.num_gaussian_upper;
     id[nt++] = INT;
 
+    strcpy(tag[nt], "FlagConSysErr");
+    addr[nt] = &parset.flag_con_sys_err;
+    id[nt++] = INT;
+
+    strcpy(tag[nt], "FlagLineSysErr");
+    addr[nt] = &parset.flag_line_sys_err;
+    id[nt++] = INT;
+
     char fname[200];
     sprintf(fname, "%s", parset.param_file);
     

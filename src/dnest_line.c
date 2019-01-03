@@ -64,18 +64,24 @@ int dnest_line(int argc, char **argv)
     par_fix[i] = 0;
 
   /* fix systematic error of continuum */
-  /*for(i=0; i<num_params_var; i+=3)
+  if(parset.flag_line_sys_err != 0)
   {
-    par_fix[i] = 1;
-    par_fix_val[i] = log(1.0);
-  }*/
+    for(i=0; i<num_params_var; i+=3)
+    {
+      par_fix[i] = 1;
+      par_fix_val[i] = log(1.0);
+    }
+  }
 
   /* fix systematic error of line */
-  /*for(i=0; i<num_params_line; i+=4)
+  if(parset.flag_line_sys_err != 0)
   {
-    par_fix[i+num_params_var] = 1;
-    par_fix_val[i+num_params_var] = log(1.0);
-  }*/
+    for(i=0; i<num_params_line; i+=4)
+    {
+      par_fix[i+num_params_var] = 1;
+      par_fix_val[i+num_params_var] = log(1.0);
+    }
+  }
 
   dnest(argc, argv, fptrset_line, num_params, dnest_options_file);
 

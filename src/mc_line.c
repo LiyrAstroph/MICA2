@@ -793,15 +793,6 @@ int mc_line_end()
 {
   int i;
 
-  for(i=0; i<num_params; i++)
-  {
-    free(par_range_model[i]);
-  }
-  free(par_range_model);
-
-  free(par_fix);
-  free(par_fix_val);
-
   for(i=0; i<nset; i++)
   {
     free(idx_line_pm[i]);

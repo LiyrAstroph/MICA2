@@ -79,7 +79,17 @@ int dnest_line(int argc, char **argv)
 
   dnest(argc, argv, fptrset_line, num_params, dnest_options_file);
 
+  //free memory
   dnest_free_fptrset(fptrset_line);
+  for(i=0; i<num_params; i++)
+  {
+    free(par_range_model[i]);
+  }
+  free(par_range_model);
+
+  free(par_fix);
+  free(par_fix_val);
+
   return 0;
 }
 

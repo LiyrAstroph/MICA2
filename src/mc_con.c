@@ -422,15 +422,6 @@ int mc_con_end()
 {
   int i;
 
-  for(i=0; i<num_params; i++)
-  {
-    free(par_range_model[i]);
-  }
-  free(par_range_model);
-
-  free(par_fix);
-  free(par_fix_val);
-
   free(best_model_con);
   free(best_model_std_con);
 

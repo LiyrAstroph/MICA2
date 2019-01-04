@@ -3,15 +3,18 @@
 #
 
 FileDir                   ./
-DataFile                  data/lcdata.txt
+DataFile                  data/ngc5548_data.txt
  
 FlagUniformVarParams      0                # whether each dataset has the same variability parameters
 
 FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
                                            # note that different lines have different parameters.
 
-NumGaussianLow            1                # Lower limit for the number of Gaussian
-NumGaussianUpp            2                # Upper limit for the number of Gaussian
+LagLimitLow               0.0              # lower limit of the range of time lag to be explored
+LagLimitUpp               10.0             # upper limit of the range of time lag to be explored
 
-FlagConSysErr             1                # 0, not include systematic error of contininuum; 1, include
-FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
+NumGaussianLow            2                # lower limit of number of Gaussians
+NumGaussianUpp            2                # upper limit of number of Gaussians
+
+FlagConSysErr             0                # 0, not include systematic error of contininuum; 1, include
+FlagLineSysErr            0                # 0, not include systematic error of line; 1, include

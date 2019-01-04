@@ -43,6 +43,7 @@ double tspan_max, tcadence_con_min, tcadence_line_min;
 
 /* line */
 int **idx_line_pm, *idx_con_pm; 
+int num_gaussian;
 
 double *logz; /* evidence */
 

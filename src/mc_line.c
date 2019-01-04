@@ -747,7 +747,7 @@ double prob_line_variability2(const void *model)
 
 int mc_line_init()
 {
-  int i, j, np;
+  int i;
 
   sprintf(dnest_options_file, "%s/src/OPTIONS1D", parset.file_dir);
 
@@ -761,29 +761,6 @@ int mc_line_init()
   for(i=0; i<nset; i++)
   {
     idx_line_pm[i] = malloc(nlset_max * sizeof(int));
-  }
-
-  if(parset.flag_uniform_tranfuns == 1)
-  {
-    for(i=0; i<nset; i++)
-    {
-      for(j=0; j<dataset[i].nlset; j++)
-      {
-        idx_line_pm[i][j] = 4*j + num_params_var ;
-      }
-    }
-  }
-  else
-  {
-    np = 0;
-    for(i=0; i<nset; i++)
-    {
-      for(j=0; j<dataset[i].nlset; j++)
-      {
-        idx_line_pm[i][j] = 4*np + num_params_var;
-        np++;
-      }
-    }
   }
 
   return 0;
@@ -1078,77 +1055,105 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
 
 double Sll(double t1, double t2, const void *model, int nds, int nls)
 {
-  double Dt, DT, St, lnSt;
-  double sigma, taud, fg, tau0, wg;
+  double Dt, DT, St, Sttot, lnSt, A;
+  double sigma, taud, fg1, tau1, wg1, fg2, tau2, wg2;
   double *pm = (double *)model;
-  int idx;
+  int idx, k1, k2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
   sigma = exp(pm[idx+1]) * sqrt(taud);
+  Dt = t1 - t2;
 
   idx = idx_line_pm[nds][nls];
-  fg = exp(pm[idx + 1]);
-  tau0 =   pm[idx + 2] ;
-  wg = exp(pm[idx + 3]);
 
-  Dt = t1 - t2;
-  DT = Dt;
-  /* 
-   * for very large x 
-   * erfc(x) = exp(-x^2)/(x * pi^1/2) * ( 1 - 1/(2*x*x) + 3/(2*x*x)^2 ... )
-   * 
-   * (see https://en.wikipedia.org/wiki/Error_function)
-   *
-   * with this equation, the factor exp(wg*wg/taud/taud) will be canceled out.
-   */
-  /*
+  Sttot = 0.0;
+  for(k1=0; k1<num_gaussian; k1++)
   {
-    St = exp(wg*wg/taud/taud) * ( exp(-DT/taud) * erfc( -DT/2.0/wg + wg/taud )
-                                 +exp( DT/taud) * erfc(  DT/2.0/wg + wg/taud ) );
-  }
-  */
+    fg1 = exp(pm[idx + 1 + k1*3 + 0]);
+    tau1 =    pm[idx + 1 + k1*3 + 1] ;
+    wg1 = exp(pm[idx + 1 + k1*3 + 2]);
 
-  St =  exp(-DT/taud + gsl_sf_log_erfc( -DT/2.0/wg + wg/taud ) + wg*wg/taud/taud)
-      + exp( DT/taud + gsl_sf_log_erfc(  DT/2.0/wg + wg/taud ) + wg*wg/taud/taud);
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      fg2 = exp(pm[idx + 1 + k2*3 + 0]);
+      tau2 =    pm[idx + 1 + k2*3 + 1] ;
+      wg2 = exp(pm[idx + 1 + k2*3 + 2]);
+      
+      DT = Dt - (tau1 - tau2);
+    
+     /* 
+      * for very large x 
+      * erfc(x) = exp(-x^2)/(x * pi^1/2) * ( 1 - 1/(2*x*x) + 3/(2*x*x)^2 ... )
+      * 
+      * (see https://en.wikipedia.org/wiki/Error_function)
+      *
+      * with this equation, the factor exp(wg*wg/taud/taud) will be canceled out.
+      */
+     /*
+      {
+        St = exp(wg*wg/taud/taud) * ( exp(-DT/taud) * erfc( -DT/2.0/wg + wg/taud )
+                                 +exp( DT/taud) * erfc(  DT/2.0/wg + wg/taud ) );
+      }
+     */
+
+      A = sqrt(wg1*wg1 + wg2*wg2);
+
+      St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud )
+          +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud ) ;
+
+      St *= 1.0/2.0 * fg1*fg2;
+
+      Sttot += St;
+    }
+  }
   
-  St *= 1.0/2.0 * fg*fg;
-  
-  return St;
+  return Sttot;
 }
 
 double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2)
 {
   double *pm=(double *)model;
-  int i, idx1, idx2, idx;
+  int idx1, idx2, idx, k1, k2;
   double fg1, fg2, tau1, tau2, wg1, wg2, sigma, taud;
-  double Dt, DT, St, A;
+  double Dt, DT, St, Sttot, A;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
   sigma = exp(pm[idx+1]) * sqrt(taud);
+  Dt = t1 - t2;
 
   idx1 = idx_line_pm[nds][nls1];
-  fg1 = exp(pm[idx1 + 1]);
-  tau1 =    pm[idx1 + 2] ;
-  wg1 = exp(pm[idx1 + 3]);
-
   idx2 = idx_line_pm[nds][nls2];
-  fg2 = exp(pm[idx2 + 1]);
-  tau2 =    pm[idx2 + 2] ;
-  wg2 = exp(pm[idx2 + 3]);
 
-  Dt = t1-t2;
-  DT = Dt - (tau1-tau2);
+  Sttot = 0.0;
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    fg1 = exp(pm[idx1 + 1 + k1*3 + 0]);
+    tau1 =    pm[idx1 + 1 + k1*3 + 1] ;
+    wg1 = exp(pm[idx1 + 1 + k1*3 + 2]);
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      fg2 = exp(pm[idx2 + 1 + k2*3 + 0]);
+      tau2 =    pm[idx2 + 1 + k2*3 + 1] ;
+      wg2 = exp(pm[idx2 + 1 + k2*3 + 2]);
+
   
-  A = sqrt(wg1*wg1 + wg2*wg2);
+      DT = Dt - (tau1-tau2);
+  
+      A = sqrt(wg1*wg1 + wg2*wg2);
 
-  St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud )
-      +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud ) ;
+      St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud )
+          +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud ) ;
 
-  St *= 1.0/2.0 * fg1*fg2;
+      St *= 1.0/2.0 * fg1*fg2;
 
-  return St;
+      Sttot += St;
+    }
+  }
+
+  return Sttot;
 }
 /*
  * nds: dataset index
@@ -1157,20 +1162,25 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
 double Slc(double tcon, double tline, const void *model, int nds, int nls)
 {
   double *pm = (double *)model;
-  double Dt, DT, sigma, taud, fg, wg, tau0, St, lnSt;
-  int idx;
+  double Dt, DT, sigma, taud, fg, wg, tau0, St, Sttot, lnSt;
+  int idx, k;
   
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
   sigma = exp(pm[idx+1]) * sqrt(taud);
 
-  idx = idx_line_pm[nds][nls];
-  fg = exp(pm[idx + 1]);
-  tau0 =   pm[idx + 2] ;
-  wg = exp(pm[idx + 3]);
-
   Dt = tline - tcon;
-  DT = Dt - tau0;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k=0; k<num_gaussian; k++)
+  {
+    fg = exp(pm[idx + 1 + 3*k + 0]);
+    tau0 =   pm[idx + 1 + 3*k + 1] ;
+    wg = exp(pm[idx + 1 + 3*k + 2]);
+
+    DT = Dt - tau0;
 
   /* 
    * for very large x 
@@ -1187,10 +1197,14 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
   }
   */
 
-  St = exp(-DT/taud + gsl_sf_log_erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud )
-      +exp( DT/taud + gsl_sf_log_erfc(  (DT/wg + wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud );
+    St = exp(-DT/taud + gsl_sf_log_erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud )
+        +exp( DT/taud + gsl_sf_log_erfc(  (DT/wg + wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud );
 
-  St *= 1.0/2.0 * fg;
-  return St;
+    St *= 1.0/2.0 * fg;
+
+    Sttot += St;
+  }
+
+  return Sttot;
 }
 

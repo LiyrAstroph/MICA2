@@ -43,6 +43,7 @@ extern double tspan_max, tcadence_con_min, tcadence_line_min;
 
 /* line */
 extern int **idx_line_pm, *idx_con_pm;
+extern int num_gaussian;
 
 extern double *logz; /* evidence */
 
@@ -64,6 +65,8 @@ typedef struct
   int flag_con_sys_err, flag_line_sys_err;
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
+
+  double lag_limit_low, lag_limit_upper;
 
 }PARSET;
 extern PARSET parset;

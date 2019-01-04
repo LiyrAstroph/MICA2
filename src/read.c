@@ -46,6 +46,14 @@ int read_parset()
     addr[nt] = &parset.flag_uniform_tranfuns;
     id[nt++] = INT;
 
+    strcpy(tag[nt], "LagLimitLow");
+    addr[nt] = &parset.lag_limit_low;
+    id[nt++] = DOUBLE;
+
+    strcpy(tag[nt], "LagLimitUpp");
+    addr[nt] = &parset.lag_limit_upper;
+    id[nt++] = DOUBLE;
+
     strcpy(tag[nt], "NumGaussianLow");
     addr[nt] = &parset.num_gaussian_low;
     id[nt++] = INT;

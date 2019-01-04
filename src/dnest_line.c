@@ -23,17 +23,29 @@ int dnest_line(int argc, char **argv)
 {
   int i;
 
+  fptrset_line = dnest_malloc_fptrset();
+  /* setup functions used for dnest*/
+  fptrset_line->from_prior = from_prior_line;
+  fptrset_line->perturb = perturb_line;
+  fptrset_line->print_particle = print_particle_line;
+  fptrset_line->restart_action = restart_action_line;
+
+  fptrset_line->log_likelihoods_cal = log_likelihoods_cal_line;
+  fptrset_line->log_likelihoods_cal_initial = log_likelihoods_cal_initial_line;
+  fptrset_line->log_likelihoods_cal_restart = log_likelihoods_cal_restart_line;
+  
+  num_gaussian = parset.num_gaussian_low;
   /* number of parameters for line */
   if(parset.flag_uniform_tranfuns == 1)
   {
-    num_params_line = 4 * nlset_max;   /* each line has a Gussian */
+    num_params_line = (1+3*num_gaussian) * nlset_max;   /* each line has Gussians */
   }
   else
   {
     num_params_line = 0;
     for(i=0; i<nset; i++)
     {
-      num_params_line += 4 * dataset[i].nlset; 
+      num_params_line += (1+3*num_gaussian) * dataset[i].nlset; 
     }
   }
 
@@ -46,18 +58,8 @@ int dnest_line(int argc, char **argv)
   par_fix = (int *) malloc(num_params * sizeof(int));
   par_fix_val = (double *) malloc(num_params * sizeof(double));
   
-  fptrset_line = dnest_malloc_fptrset();
-  /* setup functions used for dnest*/
-  fptrset_line->from_prior = from_prior_line;
-  fptrset_line->perturb = perturb_line;
-  fptrset_line->print_particle = print_particle_line;
-  fptrset_line->restart_action = restart_action_line;
-
-  fptrset_line->log_likelihoods_cal = log_likelihoods_cal_line;
-  fptrset_line->log_likelihoods_cal_initial = log_likelihoods_cal_initial_line;
-  fptrset_line->log_likelihoods_cal_restart = log_likelihoods_cal_restart_line;
-  
   set_par_range_line();
+  set_idx_line_pm();
 
   /* setup fixed parameters */
   for(i=0; i<num_params; i++)
@@ -76,7 +78,7 @@ int dnest_line(int argc, char **argv)
   /* fix systematic error of line */
   if(parset.flag_line_sys_err != 0)
   {
-    for(i=0; i<num_params_line; i+=4)
+    for(i=0; i<num_params_line; i+=(1+3*num_gaussian))
     {
       par_fix[i+num_params_var] = 1;
       par_fix_val[i+num_params_var] = log(1.0);
@@ -99,9 +101,39 @@ int dnest_line(int argc, char **argv)
   return 0;
 }
 
+void set_idx_line_pm() 
+{
+  int i, j, np;
+
+  if(parset.flag_uniform_tranfuns == 1)
+  {
+    for(i=0; i<nset; i++)
+    {
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        idx_line_pm[i][j] = (1+num_gaussian*3)*j + num_params_var ;
+      }
+    }
+  }
+  else
+  {
+    np = 0;
+    for(i=0; i<nset; i++)
+    {
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        idx_line_pm[i][j] = (1+num_gaussian*3)*np + num_params_var;
+        np++;
+      }
+    }
+  }
+
+  return;
+}
+
 void set_par_range_line()
 {
-  int i, j;
+  int i, j, k;
 
   i = 0;
   
@@ -134,23 +166,26 @@ void set_par_range_line()
     i++;
   }
 
-  for(j = 0; j < num_params_line; j+= 4)
+  for(j = 0; j < num_params_line; j+= (1+3*num_gaussian))
   {
     /* systematic error of line */
     par_range_model[i][0] = line_range_model[0][0];
     par_range_model[i++][1] = line_range_model[0][1];
 
-    /* amplitude of gaussian */
-    par_range_model[i][0] = line_range_model[1][0];
-    par_range_model[i++][1] = line_range_model[1][1];
+    for(k=0; k<num_gaussian; k++)
+    {
+      /* amplitude of gaussian */
+      par_range_model[i][0] = line_range_model[1][0];
+      par_range_model[i++][1] = line_range_model[1][1];
 
-    /* center of gaussian */
-    par_range_model[i][0] = line_range_model[2][0];
-    par_range_model[i++][1] = line_range_model[2][1];
+      /* center of gaussian */
+      par_range_model[i][0] = line_range_model[2][0] + k*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
+      par_range_model[i++][1] = line_range_model[2][0] + (k+1)*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
 
-    /* sigma of gaussian */
-    par_range_model[i][0] = line_range_model[3][0];
-    par_range_model[i++][1] = line_range_model[3][1];
+      /* sigma of gaussian */
+      par_range_model[i][0] = line_range_model[3][0];
+      par_range_model[i++][1] = line_range_model[3][1];
+    }
   }
   
   return;

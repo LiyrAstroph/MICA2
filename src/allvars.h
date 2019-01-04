@@ -44,7 +44,7 @@ extern double tspan_max, tcadence_con_min, tcadence_line_min;
 /* line */
 extern int **idx_line_pm, *idx_con_pm;
 extern int num_gaussian;
-
+extern int nline_max;
 extern double *logz; /* evidence */
 
 // error exit

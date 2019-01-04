@@ -83,7 +83,8 @@ int read_parset()
     /* default parset */
     parset.num_gaussian_low = parset.num_gaussian_upper = 1;
     parset.flag_uniform_tranfuns = parset.flag_uniform_var_params = 0;
-
+    parset.lag_limit_low = 0.0;
+    parset.lag_limit_upper = -1.0;
     while(!feof(fparam))
     {
       sprintf(str,"empty");
@@ -321,6 +322,7 @@ int read_data()
   }
 
   ncon_max = 0;
+  nline_max = 0;
   nall_max = 0;
   nlset_max = 0;
   for(i=0; i<nset; i++)
@@ -333,6 +335,12 @@ int read_data()
 
     if(nlset_max < dataset[i].nlset)
       nlset_max = dataset[i].nlset;
+
+    for(j=0; j<dataset[i].nlset; j++)
+    {
+      if(nline_max < dataset[i].line[j].n)
+        nline_max = dataset[i].line[j].n;
+    }
   }
 
   tspan_max = 0.0;
@@ -340,6 +348,10 @@ int read_data()
   {
     if(tspan_max < dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])
       tspan_max = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
+  }
+  if(parset.lag_limit_upper < 0.0)
+  {
+    parset.lag_limit_upper = tspan_max/2.0;
   }
 
   tcadence_con_min = tspan_max;

@@ -1052,7 +1052,13 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
   return;
 }
 
-
+/*
+ * auto-covariance of line
+ *
+ * nds: index of dataset
+ * nls: index of line
+ *
+ */
 double Sll(double t1, double t2, const void *model, int nds, int nls)
 {
   double Dt, DT, St, Sttot, lnSt, A;
@@ -1111,6 +1117,13 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
   return Sttot;
 }
 
+/*
+ * covariance between different line
+ *
+ * nds: index of dataset
+ * nls1, nls2: indexes of line1 and line2
+ *
+ */
 double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2)
 {
   double *pm=(double *)model;
@@ -1156,6 +1169,8 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
   return Sttot;
 }
 /*
+ * covariance between continuum and line 
+ *
  * nds: dataset index
  * nls: line set index
  */

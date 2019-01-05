@@ -45,7 +45,7 @@ double tspan_max, tcadence_con_min, tcadence_line_min;
 int **idx_line_pm, *idx_con_pm; 
 int num_gaussian;
 int nline_max;
-
+double *Smat_lc, *Smat_ll;
 double *logz; /* evidence */
 
 // mathematic functions

@@ -590,7 +590,7 @@ double prob_line_variability(const void *model)
       np += dataset[k].line[j].n;
     }
      
-    set_covar_Pmat_data_line(model, k);
+    set_covar_Pmat_data_line_array(model, k);
     
     memcpy(Tmat1, PCmat, nall*nall*sizeof(double));
     memcpy(Tmat2, Larr, nall*nqall*sizeof(double));
@@ -690,7 +690,7 @@ double prob_line_variability2(const void *model)
       np += dataset[k].line[j].n;
     }
      
-    set_covar_Pmat_data_line(model, k);
+    set_covar_Pmat_data_line_array(model, k);
     memcpy(IPCmat, PCmat, nall*nall*sizeof(double));
 
     inverse_mat(IPCmat, nall, &info); /* calculate C^-1 */
@@ -763,6 +763,8 @@ int mc_line_init()
     idx_line_pm[i] = malloc(nlset_max * sizeof(int));
   }
 
+  Smat_lc = malloc(ncon_max * nline_max * sizeof(double));
+  Smat_ll = malloc(nline_max * nline_max * sizeof(double));
   return 0;
 }
 
@@ -778,7 +780,8 @@ int mc_line_end()
 
   free(best_model_line);
   free(best_model_std_line);
-
+  free(Smat_lc);
+  free(Smat_ll);
   return 0;
 }
 
@@ -876,6 +879,112 @@ void set_covar_Pmat_data_line(const void *model, int k)
       }
     }
     np += dataset[k].line[j].n;
+  }
+
+  return;
+}
+
+/*!
+ * this function sets the covariance matrix at data time points for an array of times 
+ *
+ * k is the index of dataset
+ */
+void set_covar_Pmat_data_line_array(const void *model, int k)
+{
+  double t1, t2;
+  double sigma, tau, syserr, syserr_line, error;
+  int i, j, m, l, nall, np, npline, idx, ncon, nline, nline2;
+  double *pm = (double *)model, *tcon, *tline, *tline2;
+  
+  /* total number of point of this dataset */
+  nall = alldata[k].n;
+
+  /* set variability parameters */
+  idx = idx_con_pm[k];
+  tau = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(tau);
+  syserr = (exp(pm[idx+0])-1.0)*dataset[k].con.error_mean;
+  
+
+  /* continuum - continuum  */
+  for(i=0; i<dataset[k].con.n; i++)
+  { 
+    t1 = dataset[k].con.t[i];
+
+    for(j=0; j<i; j++)
+    {
+      t2 = dataset[k].con.t[j];
+      PCmat[i*nall+j] = PCmat[j*nall+i] = 
+      PSmat[i*nall+j] = PSmat[j*nall+i] = exp (- fabs(t1-t2) / tau );
+    }
+    PSmat[i*nall+i] = 1.0;
+    error = dataset[k].con.fe[i]*dataset[k].con.fe[i] + syserr*syserr;
+    PCmat[i*nall+i] = PSmat[i*nall+i] + error/sigma/sigma;
+  }
+
+  /* continuum - line */
+  tcon = dataset[k].con.t;
+  ncon = dataset[k].con.n;
+  np = ncon;
+  for(j=0; j<dataset[k].nlset; j++)
+  {
+    tline = dataset[k].line[j].t;
+    nline = dataset[k].line[j].n;
+    Slc_array(tcon, ncon, tline, nline, model, k, j, Smat_lc);
+    for(i=0; i<ncon; i++)
+    {
+      for(m=0; m < nline; m++)
+      {
+        PCmat[i*nall + np + m] = PCmat[(np+m)*nall + i] =
+        PSmat[i*nall + np + m] = PSmat[(np+m)*nall + i] = Smat_lc[i*nline + m];
+      }
+    }
+    np += nline;
+  }
+
+  /* line - line */
+  np = ncon;
+  for(j=0; j<dataset[k].nlset; j++)
+  {
+
+    idx = idx_line_pm[k][j];
+    syserr_line = (exp(pm[idx]) - 1.0) * dataset[k].line[j].error_mean;
+    
+    tline = dataset[k].line[j].t;
+    nline = dataset[k].line[j].n;
+    Sll_array(tline, nline, model, k, j, Smat_ll);
+    /* line self */
+    for(i=0; i<nline; i++)
+    {
+      for(m=0; m<i; m++)
+      {
+        PCmat[(np + i)*nall+ (np + m) ] = PCmat[(np+m)*nall+(np+i)] =
+        PSmat[(np + i)*nall+ (np + m) ] = PSmat[(np+m)*nall+(np+i)] = Smat_ll[i*nline + m];
+      }
+      PSmat[(np + i)*nall+(np +i)] = Smat_ll[i*nline+i];
+      error = dataset[k].line[j].fe[i] * dataset[k].line[j].fe[i] + syserr_line*syserr_line;
+      PCmat[(np + i)*nall+(np +i)] = PSmat[(np + i)*nall+(np +i)] + error/sigma/sigma;
+    }
+
+    /* between lines */
+    npline = np + nline;
+    for(l=j+1; l<dataset[k].nlset; l++)
+    {
+      tline2 = dataset[k].line[l].t;
+      nline2 = dataset[k].line[l].n;
+      Sll2_array(tline, nline, tline2, nline2, model, k, j, l, Smat_ll);
+
+      for(i=0; i<nline; i++)
+      {
+        for(m=0; m<nline2; m++)
+        {
+          PCmat[(np+i)*nall + npline + m ] = PCmat[ (npline + m) * nall + np + i ] =
+          PSmat[(np+i)*nall + npline + m ] = PSmat[ (npline + m) * nall + np + i ] = Smat_ll[i*nline2 + m];
+        }
+      }
+      npline += nline2;
+    }
+    np += nline;
   }
 
   return;
@@ -1117,6 +1226,74 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
   return Sttot;
 }
 
+
+/*
+ * auto-covariance of line for an array of times
+ *
+ * nds: index of dataset
+ * nls: index of line
+ *
+ */
+
+void Sll_array(double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double Dt, DT, St, A, At, At2;
+  double sigma, taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12;
+  double *pm = (double *)model;
+  int idx, k1, k2, i, j;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<nline; i++)
+  {
+    for(j=0; j<=i; j++)
+    {
+      Smat[i*nline + j] = 0.0;
+    }
+  }
+
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    fg1 = exp(pm[idx + 1 + k1*3 + 0]);
+    tau1 =    pm[idx + 1 + k1*3 + 1] ;
+    wg1 = exp(pm[idx + 1 + k1*3 + 2]);
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      fg2 = exp(pm[idx + 1 + k2*3 + 0]);
+      tau2 =    pm[idx + 1 + k2*3 + 1] ;
+      wg2 = exp(pm[idx + 1 + k2*3 + 2]);
+      
+      A = sqrt(wg1*wg1 + wg2*wg2);
+      At = A/taud;
+      At2 = At*At/2.0;
+      fg12 = fg1*fg2/2.0;
+
+      for(i=0; i<nline; i++)
+      {
+        for(j=0; j<=i; j++)
+        {
+          Dt = tline[i] - tline[j];
+          DT = Dt - (tau1 - tau2);
+
+          St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - At) / sqrt(2.0) ) + At2 )
+              +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + At) / sqrt(2.0) ) + At2 ) ;
+
+          St *= fg12;
+
+          Smat[i*nline + j] += St;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
 /*
  * covariance between different line
  *
@@ -1168,6 +1345,75 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
 
   return Sttot;
 }
+
+/*
+ * covariance between different line for an array of times
+ *
+ * nds: index of dataset
+ * nls1, nls2: indexes of line1 and line2
+ *
+ */
+
+void Sll2_array(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, i, j;
+  double fg1, fg2, fg12, tau1, tau2, wg1, wg2, sigma, taud;
+  double Dt, DT, St, A, At, At2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  for(i=0; i<nline1; i++)
+  {
+    for(j=0; j<nline2; j++)
+    {
+      Smat[i*nline2 + j] = 0.0;
+    }
+  }
+
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    fg1 = exp(pm[idx1 + 1 + k1*3 + 0]);
+    tau1 =    pm[idx1 + 1 + k1*3 + 1] ;
+    wg1 = exp(pm[idx1 + 1 + k1*3 + 2]);
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      fg2 = exp(pm[idx2 + 1 + k2*3 + 0]);
+      tau2 =    pm[idx2 + 1 + k2*3 + 1] ;
+      wg2 = exp(pm[idx2 + 1 + k2*3 + 2]);
+      
+      A = sqrt(wg1*wg1 + wg2*wg2);
+      At = A/taud;
+      At2 = At*At/2.0;
+      fg12 = fg1*fg2/2.0;
+
+      for(i=0; i<nline1; i++)
+      {
+        for(j=0; j<nline2; j++)
+        {
+          Dt = tline1[i] - tline2[j];
+          DT = Dt - (tau1-tau2);
+
+          St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - At) / sqrt(2.0) ) + At2 )
+              +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + At) / sqrt(2.0) ) + At2 ) ;
+
+          St *= fg12;
+
+          Smat[i*nline2 + j] += St;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
 /*
  * covariance between continuum and line 
  *
@@ -1221,5 +1467,60 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
   }
 
   return Sttot;
+}
+
+/*
+ * covariance between continuum and line for an array of times
+ *
+ * nds: dataset index
+ * nls: line set index
+ */
+void Slc_array(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double *pm = (double *)model;
+  double Dt, DT, sigma, taud, fg, wg, tau0, St, wt, wt2;
+  int idx, i, j, k;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(taud);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<ncon; i++)
+  {
+    for(j=0; j<nline; j++)
+    {
+      Smat[i*nline+j] = 0.0;
+    }
+  }
+
+  for(k=0; k<num_gaussian; k++)
+  {
+    fg = exp(pm[idx + 1 + 3*k + 0]);
+    tau0 =   pm[idx + 1 + 3*k + 1] ;
+    wg = exp(pm[idx + 1 + 3*k + 2]);
+    
+    wt = wg/taud;
+    wt2 = wt*wt/2.0;
+    for(i=0; i<ncon; i++)
+    {
+      for(j=0; j<nline; j++)
+      {
+        Dt = tline[j] - tcon[i];
+
+        DT = Dt - tau0;
+
+        St = exp(-DT/taud + gsl_sf_log_erfc( -(DT/wg - wt)/sqrt(2.0) ) +  wt2 )
+            +exp( DT/taud + gsl_sf_log_erfc(  (DT/wg + wt)/sqrt(2.0) ) +  wt2 );
+
+        St *= 1.0/2.0 * fg;
+
+        Smat[i*nline + j] += St;
+      }
+    }
+  }
+
+  return;
 }
 

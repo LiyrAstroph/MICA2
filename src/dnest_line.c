@@ -66,7 +66,7 @@ int dnest_line(int argc, char **argv)
     par_fix[i] = 0;
 
   /* fix systematic error of continuum */
-  if(parset.flag_line_sys_err != 0)
+  if(parset.flag_line_sys_err == 0)
   {
     for(i=0; i<num_params_var; i+=3)
     {
@@ -76,7 +76,7 @@ int dnest_line(int argc, char **argv)
   }
 
   /* fix systematic error of line */
-  if(parset.flag_line_sys_err != 0)
+  if(parset.flag_line_sys_err == 0)
   {
     for(i=0; i<num_params_line; i+=(1+3*num_gaussian))
     {

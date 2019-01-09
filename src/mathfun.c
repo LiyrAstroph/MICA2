@@ -79,13 +79,13 @@ int multiply_mat_MN_inverseA(double * a, double *b, int m, int n)
   info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR, m, m, a, m, ipiv);
   if(info!=0)
   {
-    strcpy(str_error_exit, "multiply_mat_MN_inverseA 1.\n this usually caused by improper nc.\n increase the low limit of nc");
+    strcpy(str_error_exit, "error in multiply_mat_MN_inverseA.");
     error_exit(9);
   }
   info = LAPACKE_dgetrs(LAPACK_ROW_MAJOR, 'N', m, n, a, m, ipiv, b, n);
   if(info!=0)
   {
-    strcpy(str_error_exit, "multiply_mat_MN_inverseA 2\n this usually caused by improper nc.\n increase the low limit of nc");
+    strcpy(str_error_exit, "error in multiply_mat_MN_inverseA.");
     error_exit(9);
   }
 

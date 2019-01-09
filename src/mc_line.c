@@ -1173,7 +1173,7 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
   double Dt, DT, St, Sttot, lnSt, A;
   double sigma, taud, fg1, tau1, wg1, fg2, tau2, wg2;
   double *pm = (double *)model;
-  int idx, k1, k2;
+  int idx, k1, k2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
@@ -1185,15 +1185,17 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
   Sttot = 0.0;
   for(k1=0; k1<num_gaussian; k1++)
   {
-    fg1 = exp(pm[idx + 1 + k1*3 + 0]);
-    tau1 =    pm[idx + 1 + k1*3 + 1] ;
-    wg1 = exp(pm[idx + 1 + k1*3 + 2]);
+    idxk1 = idx + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
 
     for(k2=0; k2<num_gaussian; k2++)
     {
-      fg2 = exp(pm[idx + 1 + k2*3 + 0]);
-      tau2 =    pm[idx + 1 + k2*3 + 1] ;
-      wg2 = exp(pm[idx + 1 + k2*3 + 2]);
+      idxk2 = idx + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
       
       DT = Dt - (tau1 - tau2);
     
@@ -1240,7 +1242,7 @@ void Sll_array(double *tline, int nline, const void *model, int nds, int nls, do
   double Dt, DT, St, A, At, At2;
   double sigma, taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12;
   double *pm = (double *)model;
-  int idx, k1, k2, i, j;
+  int idx, k1, k2, i, j, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
@@ -1258,15 +1260,17 @@ void Sll_array(double *tline, int nline, const void *model, int nds, int nls, do
 
   for(k1=0; k1<num_gaussian; k1++)
   {
-    fg1 = exp(pm[idx + 1 + k1*3 + 0]);
-    tau1 =    pm[idx + 1 + k1*3 + 1] ;
-    wg1 = exp(pm[idx + 1 + k1*3 + 2]);
+    idxk1 = idx + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
 
     for(k2=0; k2<num_gaussian; k2++)
     {
-      fg2 = exp(pm[idx + 1 + k2*3 + 0]);
-      tau2 =    pm[idx + 1 + k2*3 + 1] ;
-      wg2 = exp(pm[idx + 1 + k2*3 + 2]);
+      idxk2 = idx + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
       
       A = sqrt(wg1*wg1 + wg2*wg2);
       At = A/taud;
@@ -1304,7 +1308,7 @@ void Sll_array(double *tline, int nline, const void *model, int nds, int nls, do
 double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2)
 {
   double *pm=(double *)model;
-  int idx1, idx2, idx, k1, k2;
+  int idx1, idx2, idx, k1, k2, idxk1, idxk2;
   double fg1, fg2, tau1, tau2, wg1, wg2, sigma, taud;
   double Dt, DT, St, Sttot, A;
 
@@ -1319,15 +1323,17 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
   Sttot = 0.0;
   for(k1 = 0; k1<num_gaussian; k1++)
   {
-    fg1 = exp(pm[idx1 + 1 + k1*3 + 0]);
-    tau1 =    pm[idx1 + 1 + k1*3 + 1] ;
-    wg1 = exp(pm[idx1 + 1 + k1*3 + 2]);
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
 
     for(k2 = 0; k2 < num_gaussian; k2++)
     {
-      fg2 = exp(pm[idx2 + 1 + k2*3 + 0]);
-      tau2 =    pm[idx2 + 1 + k2*3 + 1] ;
-      wg2 = exp(pm[idx2 + 1 + k2*3 + 2]);
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
 
   
       DT = Dt - (tau1-tau2);
@@ -1357,7 +1363,7 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
 void Sll2_array(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat)
 {
   double *pm=(double *)model;
-  int idx1, idx2, idx, k1, k2, i, j;
+  int idx1, idx2, idx, k1, k2, i, j, idxk1, idxk2;
   double fg1, fg2, fg12, tau1, tau2, wg1, wg2, sigma, taud;
   double Dt, DT, St, A, At, At2;
 
@@ -1378,15 +1384,17 @@ void Sll2_array(double *tline1, int nline1, double *tline2, int nline2, const vo
 
   for(k1 = 0; k1<num_gaussian; k1++)
   {
-    fg1 = exp(pm[idx1 + 1 + k1*3 + 0]);
-    tau1 =    pm[idx1 + 1 + k1*3 + 1] ;
-    wg1 = exp(pm[idx1 + 1 + k1*3 + 2]);
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
 
     for(k2 = 0; k2 < num_gaussian; k2++)
     {
-      fg2 = exp(pm[idx2 + 1 + k2*3 + 0]);
-      tau2 =    pm[idx2 + 1 + k2*3 + 1] ;
-      wg2 = exp(pm[idx2 + 1 + k2*3 + 2]);
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
       
       A = sqrt(wg1*wg1 + wg2*wg2);
       At = A/taud;
@@ -1424,7 +1432,7 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
 {
   double *pm = (double *)model;
   double Dt, DT, sigma, taud, fg, wg, tau0, St, Sttot, lnSt;
-  int idx, k;
+  int idx, k, idxk;
   
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
@@ -1437,9 +1445,10 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
   Sttot = 0.0;
   for(k=0; k<num_gaussian; k++)
   {
-    fg = exp(pm[idx + 1 + 3*k + 0]);
-    tau0 =   pm[idx + 1 + 3*k + 1] ;
-    wg = exp(pm[idx + 1 + 3*k + 2]);
+    idxk = idx + 1 + 3*k;
+    fg = exp(pm[idxk + 0]);
+    tau0 =   pm[idxk + 1] ;
+    wg = exp(pm[idxk + 2]);
 
     DT = Dt - tau0;
 
@@ -1479,7 +1488,7 @@ void Slc_array(double *tcon, int ncon, double *tline, int nline, const void *mod
 {
   double *pm = (double *)model;
   double Dt, DT, sigma, taud, fg, wg, tau0, St, wt, wt2;
-  int idx, i, j, k;
+  int idx, i, j, k, idxk;
   
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
@@ -1497,9 +1506,10 @@ void Slc_array(double *tcon, int ncon, double *tline, int nline, const void *mod
 
   for(k=0; k<num_gaussian; k++)
   {
-    fg = exp(pm[idx + 1 + 3*k + 0]);
-    tau0 =   pm[idx + 1 + 3*k + 1] ;
-    wg = exp(pm[idx + 1 + 3*k + 2]);
+    idxk = idx + 1 + 3*k;
+    fg = exp(pm[idxk + 0]);
+    tau0 =   pm[idxk + 1] ;
+    wg = exp(pm[idxk + 2]);
     
     wt = wg/taud;
     wt2 = wt*wt/2.0;

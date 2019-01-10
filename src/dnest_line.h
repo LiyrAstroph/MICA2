@@ -20,5 +20,8 @@ double log_likelihoods_cal_restart_line(const void *model);
 double perturb_line(void *model);
 void restart_action_line(int iflag);
 double log_likelihoods_cal_line_exam(const void *model);
+void read_particle_line(FILE *fp, void *model);
+void kill_action_line(int i, int i_copy);
+void accept_action_line();
 
 #endif

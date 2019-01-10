@@ -35,6 +35,10 @@ double dnest_line(int argc, char **argv)
   fptrset_line->log_likelihoods_cal_initial = log_likelihoods_cal_initial_line;
   fptrset_line->log_likelihoods_cal_restart = log_likelihoods_cal_restart_line;
   
+  fptrset_line->accept_action = accept_action_line;
+  fptrset_line->kill_action = kill_action_line;
+  fptrset_line->read_particle = read_particle_line;
+
   /* number of parameters for line */
   if(parset.flag_uniform_tranfuns == 1)
   {
@@ -301,6 +305,34 @@ int get_num_params_line()
 }
 
 void restart_action_line(int iflag)
+{
+  return;
+}
+
+void read_particle_line(FILE *fp, void *model)
+{
+  int j;
+  double *psample = (double *)model;
+
+  for(j=0; j < num_params; j++)
+  {
+    if(fscanf(fp, "%lf", psample+j) < 1)
+    {
+      printf("%f\n", *psample);
+      fprintf(stderr, "Error: Cannot read sample file.\n");
+      exit(0);
+    }
+  }
+
+  return;
+}
+
+void kill_action_line(int i, int i_copy)
+{
+  return;
+}
+
+void accept_action_line()
 {
   return;
 }

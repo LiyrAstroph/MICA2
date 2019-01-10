@@ -40,6 +40,9 @@ double dnest_con(int argc, char **argv)
   fptrset_con->log_likelihoods_cal = log_likelihoods_cal_con;
   fptrset_con->log_likelihoods_cal_initial = log_likelihoods_cal_initial_con;
   fptrset_con->log_likelihoods_cal_restart = log_likelihoods_cal_restart_con;
+  fptrset_con->accept_action = accept_action_con;
+  fptrset_con->kill_action = kill_action_con;
+  fptrset_con->read_particle = read_particle_con;
   
   set_par_range_con();
 
@@ -187,4 +190,30 @@ void restart_action_con(int iflag)
   return;
 }
 
+void read_particle_con(FILE *fp, void *model)
+{
+  int j;
+  double *psample = (double *)model;
 
+  for(j=0; j < num_params; j++)
+  {
+    if(fscanf(fp, "%lf", psample+j) < 1)
+    {
+      printf("%f\n", *psample);
+      fprintf(stderr, "Error: Cannot read sample file.\n");
+      exit(0);
+    }
+  }
+
+  return;
+}
+
+void kill_action_con(int i, int i_copy)
+{
+  return;
+}
+
+void accept_action_con()
+{
+  return;
+}

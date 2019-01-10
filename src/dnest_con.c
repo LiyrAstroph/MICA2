@@ -16,9 +16,10 @@
 
 DNestFptrSet *fptrset_con;
 
-int dnest_con(int argc, char **argv)
+double dnest_con(int argc, char **argv)
 {
   int i;
+  double logz;
 
   num_params = num_params_var;
 
@@ -56,7 +57,7 @@ int dnest_con(int argc, char **argv)
     }
   }
 
-  dnest(argc, argv, fptrset_con, num_params, dnest_options_file);
+  logz = dnest(argc, argv, fptrset_con, num_params, dnest_options_file);
 
   //free memory
   dnest_free_fptrset(fptrset_con);
@@ -69,7 +70,7 @@ int dnest_con(int argc, char **argv)
   free(par_fix);
   free(par_fix_val);
 
-  return 0;
+  return logz;
 }
 
 void set_par_range_con()

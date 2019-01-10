@@ -24,7 +24,8 @@ void *best_model_std_line;  /*!< standard deviation of the best model */
 
 void mc_line()
 {
-  int i, argc=0;
+  int i, j, argc=0, jzmax;
+  double logz_max;
   char **argv;
 
   argv = malloc(9*sizeof(char *));
@@ -47,10 +48,59 @@ void mc_line()
 
   mc_line_init();
 
-  dnest_line(argc, argv);
+  logz_max = -DBL_MAX;
+  for(j=0; j<parset.num_gaussian_diff; j++)
+  {
+    num_gaussian = parset.num_gaussian_low + j;
+    
+    if(thistask == roottask)
+    {
+      printf("# number of Gaussian: %d\n", num_gaussian);
+    }
+    
+    sprintf(postfix, "_%d", num_gaussian);
+    strcpy(argv[argc], "-x");
+    strcpy(argv[argc+1], postfix);
 
-  postprocess_line();
+    logz_arr[j] = dnest_line(argc+2, argv);
 
+    postprocess_line();
+
+    output_reconstrction(best_model_line);
+
+    if(logz_max < logz_arr[j])
+    {
+      logz_max = logz_max;
+      jzmax = j;
+    }
+  }
+  
+  if(thistask == roottask)
+  {
+    printf("*****************************************************\n");
+    for(j=0; j<parset.num_gaussian_diff; j++)
+    {
+      printf("number of Gaussian: %d, evidence: %f\n", parset.num_gaussian_low + j, logz_arr[j]);
+    }
+
+    printf("best number of Gaussian: %d.\n", parset.num_gaussian_low + jzmax);
+    printf("*****************************************************\n");
+  }  
+
+  mc_line_end();
+
+  /* clear up argv */
+  for(i=0; i<9; i++)
+  {
+    free(argv[i]);
+  }
+  free(argv);
+
+  return;
+}
+
+void output_reconstrction(const void *model)
+{
   if(thistask == roottask)
   {
     FILE *fp;
@@ -59,7 +109,7 @@ void mc_line()
     double *tall, *fall, *feall;
     int *nall, ntall, np;
 
-    sprintf(fname, "%s/%s", parset.file_dir, "data/pall.txt");
+    sprintf(fname, "%s/%s%s", parset.file_dir, "data/pall.txt", postfix);
     fp = fopen(fname, "w");
     if(fp == NULL)
     {
@@ -101,7 +151,7 @@ void mc_line()
 
       
       /* reconstuct all the light curves */
-      recostruct_line_from_varmodel(best_model_line, i, nall, tall, fall, feall);
+      recostruct_line_from_varmodel(model, i, nall, tall, fall, feall);
 
       fprintf(fp, "# %d",nall[0]);
       for(j=0;  j < dataset[i].nlset; j++)
@@ -131,20 +181,9 @@ void mc_line()
     free(feall);
     free(nall);
   }
-  
-
-  mc_line_end();
-
-  /* clear up argv */
-  for(i=0; i<9; i++)
-  {
-    free(argv[i]);
-  }
-  free(argv);
 
   return;
 }
-
 
 /*!
  *  this function does postprocess. 
@@ -169,6 +208,7 @@ void postprocess_line()
     get_posterior_sample_file(dnest_options_file, posterior_sample_file);
 
     /* open file for posterior sample */
+    strcat(posterior_sample_file, postfix);
     fp = fopen(posterior_sample_file, "r");
     if(fp == NULL)
     {

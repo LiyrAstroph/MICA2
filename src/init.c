@@ -95,7 +95,7 @@ void allocate_memory()
   }
 
   /* evidence */
-  logz = malloc(parset.num_gaussian_diff * sizeof(double));
+  logz_arr = malloc(parset.num_gaussian_diff * sizeof(double));
 
   return;
 }
@@ -145,6 +145,6 @@ void free_memory()
   free(workspace);
   free(workspace_ipiv);
 
-  free(logz);
+  free(logz_arr);
   return;
 }

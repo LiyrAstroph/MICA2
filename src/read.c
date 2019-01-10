@@ -144,7 +144,7 @@ int read_parset()
       exit(0);
     }
 
-    parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low;
+    parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low + 1;
   }
 
   MPI_Bcast(&parset, sizeof(parset), MPI_BYTE, roottask, MPI_COMM_WORLD);

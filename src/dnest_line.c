@@ -19,9 +19,10 @@
 /* function set for DNest */
 DNestFptrSet *fptrset_line;
 
-int dnest_line(int argc, char **argv)
+double dnest_line(int argc, char **argv)
 {
   int i;
+  double logz;
 
   fptrset_line = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
@@ -34,7 +35,6 @@ int dnest_line(int argc, char **argv)
   fptrset_line->log_likelihoods_cal_initial = log_likelihoods_cal_initial_line;
   fptrset_line->log_likelihoods_cal_restart = log_likelihoods_cal_restart_line;
   
-  num_gaussian = parset.num_gaussian_low;
   /* number of parameters for line */
   if(parset.flag_uniform_tranfuns == 1)
   {
@@ -85,7 +85,7 @@ int dnest_line(int argc, char **argv)
     }
   }
 
-  dnest(argc, argv, fptrset_line, num_params, dnest_options_file);
+  logz = dnest(argc, argv, fptrset_line, num_params, dnest_options_file);
 
   //free memory
   dnest_free_fptrset(fptrset_line);
@@ -98,7 +98,7 @@ int dnest_line(int argc, char **argv)
   free(par_fix);
   free(par_fix_val);
 
-  return 0;
+  return logz;
 }
 
 void set_idx_line_pm() 

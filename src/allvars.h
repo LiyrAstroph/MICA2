@@ -25,7 +25,7 @@ extern char proc_name[MPI_MAX_PROCESSOR_NAME];
 extern int which_level_update;
 extern double *limits;  // external from dnest
 extern char dnest_options_file[MICA_MAX_STR_LENGTH];
-
+extern char postfix[MICA_MAX_STR_LENGTH];
 
 /* con */
 extern int num_params, num_params_var, num_params_line;
@@ -46,7 +46,7 @@ extern int **idx_line_pm, *idx_con_pm;
 extern int num_gaussian;
 extern int nline_max;
 extern double *Smat_lc, *Smat_ll;
-extern double *logz; /* evidence */
+extern double *logz_arr; /* evidence */
 
 // error exit
 extern char str_error_exit[200];

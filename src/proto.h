@@ -27,7 +27,7 @@ void init();
 
 
 /* for con */
-int dnest_con();
+double dnest_con(int argc, char **argv);
 void set_par_range_con();
 void mc_con();
 int mc_con_init();
@@ -36,12 +36,13 @@ double prob_con_variability(const void *model);
 void set_covar_Pmat_data(double sigma, double tau, double alpha, double syserr, int n, double *t, double *f, double *fe);
 void set_covar_Umat(double sigma, double tau, double alpha, int ncon_data, double *tcon_data, int ncon, double *tcon);
 void postprocess_con();
+void output_reconstrction(const void *model);
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
   int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
 
 
 /* for line */
-int dnest_line();
+double dnest_line(int argc, char **argv);
 void set_par_range_line();
 void set_idx_line_pm();
 void mc_line();

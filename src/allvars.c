@@ -20,6 +20,7 @@ char proc_name[MPI_MAX_PROCESSOR_NAME];
 /* dnest */
 int which_level_update;
 char dnest_options_file[MICA_MAX_STR_LENGTH];
+char postfix[MICA_MAX_STR_LENGTH];
 
 PARSET parset;
 
@@ -46,7 +47,7 @@ int **idx_line_pm, *idx_con_pm;
 int num_gaussian;
 int nline_max;
 double *Smat_lc, *Smat_ll;
-double *logz; /* evidence */
+double *logz_arr; /* evidence */
 
 // mathematic functions
 int *workspace_ipiv;

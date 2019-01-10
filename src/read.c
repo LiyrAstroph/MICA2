@@ -377,7 +377,6 @@ int read_data()
     int n;
     for(i=0; i<nset; i++)
     {
-      printf("%d %d\n", dataset[i].con.n, dataset[i].line[0].n);
       printf("%f %f %f\n", dataset[i].con.t[0], dataset[i].con.f[0], dataset[i].con.fe[0]);
       printf("%f %f %f\n", dataset[i].con.t[dataset[i].con.n-1], dataset[i].con.f[dataset[i].con.n-1], dataset[i].con.fe[dataset[i].con.n-1]);
 

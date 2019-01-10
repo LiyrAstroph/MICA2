@@ -70,7 +70,7 @@ void mc_line()
 
     if(logz_max < logz_arr[j])
     {
-      logz_max = logz_max;
+      logz_max = logz_arr[j];
       jzmax = j;
     }
   }

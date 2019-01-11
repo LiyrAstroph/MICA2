@@ -165,6 +165,11 @@ int read_data()
   { 
     sprintf(buf, "%s/%s", parset.file_dir, parset.data_file);
     fp = fopen(buf, "r");
+    if(fp == NULL)
+    {
+      printf("Cannot open file %s.\n", buf);
+      exit(0);
+    }
     fgets(buf, 256, fp);
     sscanf(buf, "# %d\n", &nset);
   }

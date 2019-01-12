@@ -265,6 +265,11 @@ int read_data()
       /* continuum */
       for(j=0; j<dataset[i].con.n; j++)
       {
+        if(feof(fp) != 0)
+        {
+          printf("error in reading the data file %s.\n", parset.data_file);
+          exit(0);
+        }
         fscanf(fp, "%lf %lf %lf\n", &(dataset[i].con.t[j]), &(dataset[i].con.f[j]), &(dataset[i].con.fe[j]));
       }
       fscanf(fp, "\n");
@@ -274,6 +279,11 @@ int read_data()
       {
         for(k=0; k<dataset[i].line[j].n; k++)
         {
+          if(feof(fp) != 0)
+          {
+            printf("error in reading the data file %s.\n", parset.data_file);
+            exit(0);
+          }  
           fscanf(fp, "%lf %lf %lf\n", &(dataset[i].line[j].t[k]), &(dataset[i].line[j].f[k]), &(dataset[i].line[j].fe[k]));
         }
         fscanf(fp, "\n");

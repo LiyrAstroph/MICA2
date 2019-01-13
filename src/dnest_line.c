@@ -183,8 +183,16 @@ void set_par_range_line()
       par_range_model[i++][1] = line_range_model[1][1];
 
       /* center of gaussian */
-      par_range_model[i][0] = line_range_model[2][0] + k*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
-      par_range_model[i++][1] = line_range_model[2][0] + (k+1)*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
+      if(type_lag_prior_pr == 0)
+      {
+        par_range_model[i][0] = line_range_model[2][0]; 
+        par_range_model[i++][1] = line_range_model[2][1];
+      }
+      else
+      {
+        par_range_model[i][0] = line_range_model[2][0] + k*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
+        par_range_model[i++][1] =line_range_model[2][0] + (k+1)*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
+      }
 
       /* sigma of gaussian */
       par_range_model[i][0] = line_range_model[3][0];
@@ -210,6 +218,30 @@ void from_prior_line(void *model)
   for(i=num_params_var; i<num_params; i++)
   {
     pm[i] = par_range_model[i][0] + dnest_rand()*(par_range_model[i][1] - par_range_model[i][0]);
+  }
+
+  // sort the Gaussian centers
+  if(type_lag_prior_pr == 0)
+  {
+    double *centers;
+    int j, ic;
+    centers = malloc(num_gaussian * sizeof(double));
+
+    for(i=0; i<num_params_line; i+= 1+3*num_gaussian)
+    {
+      ic = num_params_var + i + 1;
+      for(j=0; j<num_gaussian; j++)
+      {
+        centers[j] = pm[ic+j*3 + 1];
+      }
+      qsort(centers, num_gaussian, sizeof(double), mica_cmp);
+
+      for(j=0; j<num_gaussian; j++)
+      {
+        pm[ic + j*3 + 1] = centers[j];
+      }
+    }
+    free(centers);
   }
 
   for(i=0; i<num_params; i++)
@@ -259,7 +291,7 @@ double perturb_line(void *model)
 {
   double *pm = (double *)model;
   double logH = 0.0, limit1, limit2, width;
-  int which, which_level;
+  int which, which_level, igau;
   
   /* sample variability parameters more frequently */
   do
@@ -292,12 +324,58 @@ double perturb_line(void *model)
   else
   {
     pm[which] += dnest_randh() * width;
-    dnest_wrap(&(pm[which]), par_range_model[which][0], par_range_model[which][1]);
+    if(check_gauss_center(which, &igau) == 1) // Gaussian center is perturbed
+    {
+      if(igau == 0)
+      {
+        dnest_wrap(&pm[which], par_range_model[which][0], pm[which+3]);
+      }
+      else if(igau < num_gaussian - 1)
+      {
+        dnest_wrap(&pm[which], pm[which-3], pm[which+3]);        
+      }
+      else
+      {
+        dnest_wrap(&pm[which], pm[which-3], par_range_model[which][1]);
+      }
+    }
+    else
+    {
+      dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
+    }  
   }
   
   return logH;
 }
 
+int check_gauss_center(int which, int *igau)
+{
+  int iwhich, idx;
+
+  if(type_lag_prior_pr == 0)
+  {
+    iwhich = which - num_params_var;
+
+    idx = (iwhich%(1+3*num_gaussian)-1)%3; //each line has (1+3*num_gaussian) parameters
+
+    *igau = (iwhich%(1+3*num_gaussian)-1)/3; //each gaussian has 3 parameters
+
+    if(idx == 1)
+    {
+      return 1;
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  else
+  {
+    return 0;
+  }
+
+  return 0;
+}
 
 int get_num_params_line()
 {
@@ -335,4 +413,10 @@ void kill_action_line(int i, int i_copy)
 void accept_action_line()
 {
   return;
+}
+
+
+int mica_cmp(const void * a, const void * b)
+{
+  return (*(double*)a) >= (*(double*)b)?1:-1;
 }

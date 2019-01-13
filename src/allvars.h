@@ -45,6 +45,7 @@ extern double tspan_max, tcadence_con_min, tcadence_line_min;
 extern int **idx_line_pm, *idx_con_pm;
 extern int num_gaussian;
 extern int nline_max;
+extern int type_lag_prior_pr;
 extern double *Smat_lc, *Smat_ll;
 extern double *logz_arr; /* evidence */
 
@@ -64,6 +65,7 @@ typedef struct
   int flag_uniform_var_params;
   int flag_uniform_tranfuns;
   int flag_con_sys_err, flag_line_sys_err;
+  int type_lag_prior;
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 

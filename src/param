@@ -3,7 +3,7 @@
 #
 
 FileDir                   ./
-DataFile                  data/ngc5548_data.txt
+DataFile                  data/NGC4593_data_U.txt
  
 FlagUniformVarParams      0                # whether each dataset has the same variability parameters
 
@@ -11,10 +11,18 @@ FlagUniformTranFuns       0                # whether each dataset has the same l
                                            # note that different lines have different parameters.
 
 LagLimitLow               0.0              # lower limit of the range of time lag to be explored
-LagLimitUpp               10.0             # upper limit of the range of time lag to be explored
+LagLimitUpp               5.0              # upper limit of the range of time lag to be explored
 
 NumGaussianLow            2                # lower limit of number of Gaussians
-NumGaussianUpp            2                # upper limit of number of Gaussians
+NumGaussianUpp            3                # upper limit of number of Gaussians
 
-FlagConSysErr             0                # 0, not include systematic error of contininuum; 1, include
-FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
+FlagConSysErr             1                # 0, not include systematic error of continuum; 1, include
+FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
+
+TypeLagPrior              0                # type of lag prior for each Gaussians.
+                                           # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
+                                           #
+                                           # 1,  limit0 + 0*width < lag0 < limit0 + 1*width
+                                           #     limit0 + 1*width < lag1 < limit0 + 2*width
+                                           #     ...
+                                           #     width = (limit1 - limit0)/num_gaussian

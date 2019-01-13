@@ -70,6 +70,10 @@ int read_parset()
     addr[nt] = &parset.flag_line_sys_err;
     id[nt++] = INT;
 
+    strcpy(tag[nt], "TypeLagPrior");
+    addr[nt] = &parset.type_lag_prior;
+    id[nt++] = INT;
+
     char fname[200];
     sprintf(fname, "%s", parset.param_file);
     
@@ -85,6 +89,8 @@ int read_parset()
     parset.flag_uniform_tranfuns = parset.flag_uniform_var_params = 0;
     parset.lag_limit_low = 0.0;
     parset.lag_limit_upper = -1.0;
+    parset.type_lag_prior = 1;
+
     while(!feof(fparam))
     {
       sprintf(str,"empty");
@@ -145,6 +151,12 @@ int read_parset()
     }
 
     parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low + 1;
+
+    if(parset.type_lag_prior < 0 || parset.type_lag_prior > 1)
+    {
+      printf("Incorrect TypeLagPrior, should be either 0 or 1.\n");
+      exit(0);
+    }
   }
 
   MPI_Bcast(&parset, sizeof(parset), MPI_BYTE, roottask, MPI_COMM_WORLD);

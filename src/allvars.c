@@ -40,7 +40,7 @@ double *workspace;
 int ncon_max, nall_max, nlset_max;
 int nq; /* order of long-term trend */
 double *var_param, *var_param_std;
-double tspan_max, tcadence_con_min, tcadence_line_min;
+double tspan_max, tcadence_con_min, tcadence_line_min, tcadence_min;
 
 /* line */
 int **idx_line_pm, *idx_con_pm; 

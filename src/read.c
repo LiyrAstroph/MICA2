@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "allvars.h"
 #include "proto.h"
@@ -397,6 +398,7 @@ int read_data()
         tcadence_line_min = tcad;
     }
   }
+  tcadence_min = fmin(tcadence_con_min, tcadence_line_min);
 
   /* test */
   if(thistask == roottask)

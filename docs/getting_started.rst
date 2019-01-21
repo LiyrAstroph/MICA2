@@ -68,6 +68,14 @@ A typical parameter file looks like::
   FlagConSysErr             1                # 0, not include systematic error of continuum; 1, include
   FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
 
+  TypeLagPrior              0                # type of lag prior for each Gaussians.
+                                             # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
+                                             #
+                                             # 1,  limit0 + 0*width < lag0 < limit0 + 1*width
+                                             #     limit0 + 1*width < lag1 < limit0 + 2*width
+                                             #     ...
+                                             #     width = (limit1 - limit0)/num_gaussian
+
 Data format
 ==============================
 
@@ -127,3 +135,22 @@ In the above example, there is one dataset and it contains 171 points in continu
   56830.4200           2.2900          0.0660
 
 As you can see, the numbers of lines in each datasets do not needs to be the same.
+
+Output
+=================================
+``mica2`` outputs the following main files in the folder ``data/``:  
+  
+  * **posterior_sample1d.txt_xx**
+
+    posterior sample for parameters. The postfix "_xx" means the number of Gaussians. 
+    The order of parameters in posterior sample file is arranged as: 
+
+    (systematic error of continuum, sigmad, taud) * number of datasets
+
+    (systematic error of line, (guassian amplitude, center, sigma) * number of gaussians * number of line datasets) * number of datasets
+
+  * **pall.txt_xx**
+
+    reconstruction of datasets, with the same format as the input data.
+
+In the end of running, ``mica2`` prints the obtained Bayesian evidence for each number of Gausssians explored.

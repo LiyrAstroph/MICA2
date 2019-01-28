@@ -1307,7 +1307,7 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
         t2 = tall[np + j];
         ASmat[i * ntall + np+j] = ASmat[(np+j)*ntall + i] = Slc(t1, t2, model, nds, k);
       }
-      np += nall[k];
+      np += nall[1+k];
     }
   }
 

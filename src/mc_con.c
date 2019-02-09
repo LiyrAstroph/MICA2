@@ -42,7 +42,8 @@ void mc_con()
     strcpy(argv[argc++], "-l");
   }
 
-  //strcpy(argv[argc++], "-p");
+  if(flag_postprc == 1)
+    strcpy(argv[argc++], "-p");
 
   mc_con_init();
 

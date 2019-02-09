@@ -54,6 +54,8 @@ extern char str_error_exit[200];
 // mathematic functions
 extern int *workspace_ipiv;
 
+extern int flag_postprc;
+
 typedef struct 
 {
   char param_file[MICA_MAX_STR_LENGTH];

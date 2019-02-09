@@ -18,6 +18,7 @@
 int main(int argc, char **argv)
 {
   double t0, t1, dt;
+  int opt;
 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &thistask);
@@ -30,8 +31,24 @@ int main(int argc, char **argv)
     printf("===============MICA2==================\n");
     printf("Starts to run...\n");
     printf("%d cores used.\n", totaltask);
-  }
 
+    opterr = 0; /* reset getopt. */
+    optind = 0; /* reset getopt. */
+    
+    flag_postprc = 0;
+
+    while( (opt = getopt(argc, argv, "p")) != -1)
+    {
+      switch(opt)
+      {
+        case 'p':
+          flag_postprc = 1;
+          break;
+      }
+    }
+  }
+  MPI_Bcast(&flag_postprc, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+  
   begin_run();
 
   end_run();

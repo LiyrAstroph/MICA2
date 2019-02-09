@@ -55,3 +55,5 @@ int *workspace_ipiv;
 
 // error exit
 char str_error_exit[200];
+
+int flag_postprc;

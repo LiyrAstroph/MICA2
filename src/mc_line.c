@@ -115,6 +115,7 @@ void output_reconstrction(const void *model)
     int i, j, k, m;
     double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std;
     int **nall, *ntall, np;
+    double tspan;
     
     int num_ps, size_of_modeltype;
     void *post_model;
@@ -173,19 +174,21 @@ void output_reconstrction(const void *model)
     {
       /* time nodes of continuum */
       nall[i][0] = dataset[i].con.n * 5;
+      tspan = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
       for(j=0; j<nall[i][0]; j++)
-        tall[i][j] = (dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0]+40.0)/(nall[i][0]-1.0) * j 
-                        + dataset[i].con.t[0]-20.0;
+        tall[i][j] = (tspan+0.1*tspan)/(nall[i][0]-1.0) * j 
+                        + dataset[i].con.t[0]-0.05*tspan;
 
       /* time nodes of lines */
       np = nall[i][0];
       for(j=0; j<dataset[i].nlset; j++)
       {
         nall[i][1+j] = dataset[i].line[j].n * 5;
+        tspan = dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0];
         for(k=0; k<nall[i][1+j]; k++)
         {
-          tall[i][np+k] = (dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0]+40.0)/(nall[i][1+j]-1.0) * k 
-                         + dataset[i].line[j].t[0]-20.0;
+          tall[i][np+k] = (tspan+0.1*tspan)/(nall[i][1+j]-1.0) * k 
+                         + dataset[i].line[j].t[0]-0.05*tspan;
         }
         np += nall[i][1+j];
       }

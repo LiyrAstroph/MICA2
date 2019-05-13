@@ -70,7 +70,7 @@ double dnest_line(int argc, char **argv)
     par_fix[i] = 0;
 
   /* fix systematic error of continuum */
-  if(parset.flag_line_sys_err == 0)
+  if(parset.flag_con_sys_err == 0)
   {
     for(i=0; i<num_params_var; i+=3)
     {

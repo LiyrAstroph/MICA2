@@ -56,7 +56,7 @@ void mc_con()
     FILE *fp;
     char fname[200];
     int j, idx;
-    double sigma, tau, alpha, syserr;
+    double sigma, tau, alpha, syserr, tspan;
     double *pm = best_model_con;
     double *tcon_data, *fcon_data, *fecon_data, *tcon, *fcon, *fecon;
     int ncon, ncon_data;
@@ -89,8 +89,9 @@ void mc_con()
 
       ncon = ncon_data * 5; 
 
+      tspan = tcon_data[ncon_data-1] - tcon_data[0];
       for(j=0; j<ncon; j++)
-        tcon[j] = (tcon_data[ncon_data-1] - tcon_data[0]+40.0)/(ncon-1.0) * j + tcon_data[0]-20.0;
+        tcon[j] = (tspan + 0.1*tspan)/(ncon-1.0) * j + tcon_data[0]-0.05*tspan;
 
       recostruct_con_from_varmodel(sigma, tau, alpha, syserr, ncon_data, tcon_data, fcon_data, fecon_data, ncon, tcon, fcon, fecon);
 
@@ -228,7 +229,6 @@ void postprocess_con()
   
   if(thistask == roottask)
   {
-    char fname[200];
     FILE *fp;
 
     /* get file name of posterior sample file */
@@ -406,7 +406,6 @@ double prob_con_variability(const void *model)
 
 int mc_con_init()
 {
-  int i;
 
   sprintf(dnest_options_file, "%s/src/OPTIONSCON", parset.file_dir);
 
@@ -421,7 +420,6 @@ int mc_con_init()
 
 int mc_con_end()
 {
-  int i;
 
   free(best_model_con);
   free(best_model_std_con);

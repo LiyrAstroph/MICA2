@@ -24,7 +24,7 @@ void *best_model_std_line;  /*!< standard deviation of the best model */
 
 void mc_line()
 {
-  int i, j, argc=0, jzmax;
+  int i, j, argc=0, jzmax=0;
   double logz_max;
   char **argv;
 
@@ -348,7 +348,6 @@ void postprocess_line()
   
   if(thistask == roottask)
   {
-    char fname[200];
     FILE *fp;
 
     /* get file name of posterior sample file */
@@ -442,7 +441,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   int i, j, k, m, info, idx;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
   int nall_data, nqall, ntall, np;
-  double *tall_data, *fall_data, *feall_data;
+  double *fall_data;
   double sigma, tau, *pm=(double *)model;
 
   idx = idx_con_pm[nds];
@@ -455,9 +454,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
 
   nqall = nq * (1  + dataset[nds].nlset);
   nall_data = alldata[nds].n;
-  tall_data = alldata[nds].t;
   fall_data = alldata[nds].f;
-  feall_data = alldata[nds].fe;
 
   Larr = workspace;
   ybuf = Larr + nall_data * nqall;
@@ -586,7 +583,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   int i, j, k, m, info, idx;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
   int nall_data, nqall, ntall, np;
-  double *tall_data, *fall_data, *feall_data;
+  double *fall_data;
   double sigma, tau, *pm=(double *)model;
 
   idx = idx_con_pm[nds];
@@ -599,9 +596,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
 
   nqall = nq * (1  + dataset[nds].nlset);
   nall_data = alldata[nds].n;
-  tall_data = alldata[nds].t;
   fall_data = alldata[nds].f;
-  feall_data = alldata[nds].fe;
 
   Larr = workspace;
   ybuf = Larr + nall_data * nqall;
@@ -733,7 +728,7 @@ double prob_line_variability(const void *model)
   int i, j, k, m, np, info, sign;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq, *yave;
-  double *tall, *fall, *feall;
+  double *fall;
   int nall, nqall, idx;
   double sigma, tau, *pm = (double *)model;
 
@@ -753,9 +748,7 @@ double prob_line_variability(const void *model)
     sigma = exp(pm[idx+1]) * sqrt(tau);
 
     nall = alldata[k].n;
-    tall = alldata[k].t;
     fall = alldata[k].f;
-    feall = alldata[k].fe;
     nqall = nq * (1+dataset[k].nlset);
 
     for(i=0;i<dataset[k].con.n;i++)
@@ -834,7 +827,7 @@ double prob_line_variability2(const void *model)
   int i, j, k, m, np, info, sign;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq;
-  double *tall, *fall, *feall;
+  double *fall;
   int nall, nqall, idx;
   double *pm = (double *)model;
 
@@ -853,9 +846,7 @@ double prob_line_variability2(const void *model)
     sigma = exp(pm[idx+1]) * sqrt(tau);
 
     nall = alldata[k].n;
-    tall = alldata[k].t;
     fall = alldata[k].f;
-    feall = alldata[k].fe;
     nqall = nq * (1+dataset[k].nlset);
 
     for(i=0;i<dataset[k].con.n;i++)
@@ -1182,7 +1173,7 @@ void set_covar_Pmat_data_line_array(const void *model, int k)
  */
 void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
 {
-  double sigma, taud, t1, t2;
+  double taud, t1, t2;
   int i, j, k, m, ntall, nall_data, np, npline, idx;
   double *pm = (double *)model;
 
@@ -1193,7 +1184,6 @@ void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   /* continuum - continuum/line */
   for(i=0; i<nall[0]; i++)
@@ -1277,7 +1267,7 @@ void set_covar_Umat_line(const void *model, int nds, int *nall, double *tall)
  */
 void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
 {
-  double t1, t2, sigma, taud;
+  double t1, t2, taud;
   int i, j, k, m, ntall, np, npline, idx;
   double *pm=(double *)model;
   
@@ -1287,7 +1277,6 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   /* continuum - continuum/lines*/
   for(i=0; i<nall[0]; i++)
@@ -1357,14 +1346,13 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
  */
 double Sll(double t1, double t2, const void *model, int nds, int nls)
 {
-  double Dt, DT, St, Sttot, lnSt, A;
-  double sigma, taud, fg1, tau1, wg1, fg2, tau2, wg2;
+  double Dt, DT, St, Sttot, A;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2;
   double *pm = (double *)model;
   int idx, k1, k2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
   Dt = t1 - t2;
 
   idx = idx_line_pm[nds][nls];
@@ -1427,13 +1415,12 @@ double Sll(double t1, double t2, const void *model, int nds, int nls)
 void Sll_array(double *tline, int nline, const void *model, int nds, int nls, double *Smat)
 {
   double Dt, DT, St, A, At, At2;
-  double sigma, taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12;
   double *pm = (double *)model;
   int idx, k1, k2, i, j, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   idx = idx_line_pm[nds][nls];
 
@@ -1496,12 +1483,11 @@ double Sll2(double t1, double t2, const void *model, int nds, int nls1, int nls2
 {
   double *pm=(double *)model;
   int idx1, idx2, idx, k1, k2, idxk1, idxk2;
-  double fg1, fg2, tau1, tau2, wg1, wg2, sigma, taud;
+  double fg1, fg2, tau1, tau2, wg1, wg2, taud;
   double Dt, DT, St, Sttot, A;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
   Dt = t1 - t2;
 
   idx1 = idx_line_pm[nds][nls1];
@@ -1551,12 +1537,11 @@ void Sll2_array(double *tline1, int nline1, double *tline2, int nline2, const vo
 {
   double *pm=(double *)model;
   int idx1, idx2, idx, k1, k2, i, j, idxk1, idxk2;
-  double fg1, fg2, fg12, tau1, tau2, wg1, wg2, sigma, taud;
+  double fg1, fg2, fg12, tau1, tau2, wg1, wg2, taud;
   double Dt, DT, St, A, At, At2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   idx1 = idx_line_pm[nds][nls1];
   idx2 = idx_line_pm[nds][nls2];
@@ -1618,12 +1603,11 @@ void Sll2_array(double *tline1, int nline1, double *tline2, int nline2, const vo
 double Slc(double tcon, double tline, const void *model, int nds, int nls)
 {
   double *pm = (double *)model;
-  double Dt, DT, sigma, taud, fg, wg, tau0, St, Sttot, lnSt;
+  double Dt, DT, taud, fg, wg, tau0, St, Sttot;
   int idx, k, idxk;
   
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   Dt = tline - tcon;
 
@@ -1674,12 +1658,11 @@ double Slc(double tcon, double tline, const void *model, int nds, int nls)
 void Slc_array(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat)
 {
   double *pm = (double *)model;
-  double Dt, DT, sigma, taud, fg, wg, tau0, St, wt, wt2;
+  double Dt, DT, taud, fg, wg, tau0, St, wt, wt2;
   int idx, i, j, k, idxk;
   
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
-  sigma = exp(pm[idx+1]) * sqrt(taud);
 
   idx = idx_line_pm[nds][nls];
 

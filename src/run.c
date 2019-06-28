@@ -14,7 +14,7 @@
 
 void begin_run()
 {
-  strcat(parset.param_file, "src/param");
+  //strcat(parset.param_file, "src/param");
 
   read_parset();
   read_data();

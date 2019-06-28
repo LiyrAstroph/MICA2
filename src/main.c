@@ -46,6 +46,14 @@ int main(int argc, char **argv)
           break;
       }
     }
+
+    if(argv[optind] != NULL) // parameter file is specified 
+      strcpy(parset.param_file, argv[optind]); /* copy input parameter file */
+    else
+    {
+      fprintf(stderr, "# Error: No parameter file specified!\n");
+      exit(0);
+    }
   }
   MPI_Bcast(&flag_postprc, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   

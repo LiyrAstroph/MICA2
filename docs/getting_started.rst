@@ -97,7 +97,7 @@ Data format
 
 The first line starting with "#" specifies the number of datasets. Here one dataset contains one continuum light curve (the driving source) and several line light curves (at least one). The second line starting with "#" specifies the numbers of points in light curves of continuum and lines, which are separated by ":". 
 
-The next follows data of light curves, going by datasets. For each dataset, the first block is continuum light curve and then line light curves successively. In each data block, the three columns are time, flux, and error, respectively. Blocks/datasets are separated by a blank line.
+The next follows data of light curves, going by datasets. For each dataset, the first block is continuum light curve and then line light curves successively. In each data block, the three columns are time, flux, and error, respectively. **Blocks/datasets are separated by a blank line.**
 
 In the above example, there is one dataset and it contains 171 points in continuum light curve and 269 point in one line light curve. If your data have 2 datasets,  the first dataset has 2 line light curves while the second dataset has one light curve, the data file should be formated as::
   
@@ -148,6 +148,8 @@ Output
     (systematic error of continuum, sigmad, taud) * number of datasets
 
     (systematic error of line, (guassian amplitude, center, sigma) * number of gaussians * number of line datasets) * number of datasets
+
+    sigmad, taud, gaussian amplitude and sigma are in logarithm scale; systematic errors (x) are dimensionless, defined as  x = log(1+err/err_data), where err is the real systematic error and err_data is the mean measurement error of the data.
 
   * **pall.txt_xx**
 

@@ -21,8 +21,6 @@ LAPACK_INCL = -I/usr/include/lapacke
 LAPACK_LIBS = -L/usr/lib64 -llapacke -llapack -lblas
 DNEST_INCL  = -I /home/liyropt/Projects/GIT/DNest/
 DNEST_LIBS  = -L /home/liyropt/Projects/GIT/DNest -ldnest
-FFTW_INCL   = $(shell pkg-config --cflags fftw3) 
-FFTW_LIBS   = $(shell pkg-config --libs fftw3) 
 
 MPICHINCL     = $(shell pkg-config --cflags mpich) 
 MPICHLIB    = $(shell pkg-config --libs mpich) 
@@ -35,8 +33,6 @@ MPICHLIB = -L/sharefs/mbh/user/liyanrong/soft/mpich3/lib -lmpich
 MPIINCL  = -I/sharefs/mbh/user/liyanrong/soft/mpich3/include
 LAPACK_INCL = -I/sharefs/mbh/user/liyanrong/soft/lapack/include
 LAPACK_LIBS = -L/sharefs/mbh/user/liyanrong/soft/lapack/lib -llapacke -llapack -lblas -lgfortran
-FFTW_INCL = -I/sharefs/mbh/user/liyanrong/soft/fftw/include
-FFTW_LIBS = -L/sharefs/mbh/user/liyanrong/soft/fftw/lib -lfftw3
 
 DNEST_INCL  = -I /sharefs/mbh/user/liyanrong/GIT/DNest/
 DNEST_LIBS  = -L /sharefs/mbh/user/liyanrong/GIT/DNest -ldnest
@@ -49,8 +45,6 @@ MPICHLIB = -lmpich
 MPIINCL  =
 LAPACK_INCL = -I/HOME/ihep_yrli_1/BIGDATA/soft/lapack/include
 LAPACK_LIBS = -L/HOME/ihep_yrli_1/BIGDATA/soft/lapack/lib -llapacke -llapack -lblas -lgfortran
-FFTW_INCL =
-FFTW_LIBS = -lfftw3
 
 DNEST_INCL  = -I /HOME/ihep_yrli_1/BIGDATA/soft/DNest/
 DNEST_LIBS  = -L /HOME/ihep_yrli_1/BIGDATA/soft/DNest -ldnest

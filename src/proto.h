@@ -44,6 +44,7 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
 /* for line */
 double dnest_line(int argc, char **argv);
 void set_par_range_line();
+void print_para_names_line();
 void set_idx_line_pm();
 void mc_line();
 int mc_line_init();

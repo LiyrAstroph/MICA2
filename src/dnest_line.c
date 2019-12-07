@@ -63,6 +63,7 @@ double dnest_line(int argc, char **argv)
   par_fix_val = (double *) malloc(num_params * sizeof(double));
   
   set_par_range_line();
+  print_para_names_line();
   set_idx_line_pm();
 
   /* setup fixed parameters */
@@ -203,6 +204,59 @@ void set_par_range_line()
   return;
 }
 
+
+void print_para_names_line()
+{
+  if(thistask != roottask)
+    return;
+
+  int i, j, k;
+  char fname[MICA_MAX_STR_LENGTH];
+
+  FILE *fp;
+
+  sprintf(fname, "%s/data/%s_%d", parset.file_dir, "para_names_line.txt", num_gaussian);
+  fp = fopen(fname, "w");
+  if(fp == NULL)
+  {
+    fprintf(stderr, "# Error: Cannot open file %s\n", fname);
+    exit(-1);
+  }
+
+  i=-1;
+  for(j=0; j<num_params_var; j+=3)
+  {
+    i++;
+    fprintf(fp, "%d %s LOG\n", i, "sys_err_con");
+
+    i++;
+    fprintf(fp, "%d %s LOG\n", i, "taud");
+
+    i++;
+    fprintf(fp, "%d %s LOG\n", i, "sigmad");
+  }
+
+  for(j = 0; j < num_params_line; j+= (1+3*num_gaussian))
+  {
+    i++;
+    fprintf(fp, "%d %s\n", i, "sys_err_line");
+
+    for(k=0; k<num_gaussian; k++)
+    {
+      i++;
+      fprintf(fp, "%d %d-th Gaussian %s  LOG\n", i, k, "applitude");
+
+      i++;
+      fprintf(fp, "%d %d-th Gaussian %s\n", i, k, "center ");
+
+      i++;
+      fprintf(fp, "%d %d-th Gaussian %s  LOG\n", i, k, "sigma");
+    }
+  }
+
+  fclose(fp);
+  return;
+}
 
 void from_prior_line(void *model)
 {

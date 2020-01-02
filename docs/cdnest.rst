@@ -3,4 +3,30 @@
 Diffusive Nested Sampling
 *************************
 
-``mica2`` employ the diffusive nested sampling technique  to explore the posterior probability distribution, which was developed by Brewer et al. (2009)
+``mica2`` employ the diffusive nested sampling technique  to explore the posterior probability distribution, 
+which was developed by Brewer et al. (2009). We wrote a C version of the code DNest developed by Brewer et al.
+and made some modification for our purpose.
+
+To initiate the sampling, we need to input options that control the sampling configurations. The options 
+should be written in a text file： **OPTIONS1D**. This option file looks like::
+
+  # File containing parameters for DNest
+  # Put comments at the top, or at the end of the line.
+  # Do not change the order of lines.
+  # Lines beginning with '#' are regarded as comments.
+  
+  2	    # Number of particles
+  100	# new level interval
+  100	# save interval
+  20	  # threadSteps - how many steps each thread should do independently before communication
+  60	  # maximum number of levels
+  10	  # Backtracking scale length (lambda in the paper)
+  100	  # Strength of effect to force histogram to equal push. 0-10 is best. (beta in the paper)
+  1500	  # Maximum number of saves 
+  data/sample1d.txt                 # sample file
+  data/sample_info1d.txt            # sample_info file
+  data/levels1d.txt                 # level file
+  data/sampler_state1d.txt          # sample state file
+  data/posterior_sample1d.txt       # posterior sample file
+  data/posterior_sample_info1d.txt  # posterior sample info file
+  data/limits1d.txt                 # limits file

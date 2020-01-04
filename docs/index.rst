@@ -21,6 +21,8 @@ Documentation
    about.rst
    getting_started.rst
    cdnest.rst
+   delay.rst
+   list.rst
 
 
 Attribution

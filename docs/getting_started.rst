@@ -2,7 +2,7 @@
 
 
 ***************
-Getting started
+Getting Started
 ***************
 
 .. _installing-docdir:

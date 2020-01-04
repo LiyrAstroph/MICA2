@@ -3,6 +3,7 @@ src/*
 !src/*.[ch]
 !src/OPTIONS*
 !src/param
+!docs/*.rst
 data/*
 mica2
 

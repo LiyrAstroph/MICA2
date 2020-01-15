@@ -25,3 +25,12 @@ A transfer function or delay map relates a time series  to its driving time seri
   
   Schematic of the transfer function for a system that consists of discrete clouds.
 
+Here is an example for reverberation mapping analysis of the light curves from Hu et al. (2020) using **MICA**,
+
+.. figure:: _static/fig_pg2130.jpg
+  :scale: 30 %
+  :align: center
+
+  Reverberation mapping analysis of the light curves data for PG 2130+099 (Hu et al. 2020, arXiv:2001.03086).
+  The left panel shows transfer functions and the right panel shows the light curves and their reconstructions.
+

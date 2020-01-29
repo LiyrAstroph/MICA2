@@ -13,7 +13,7 @@
 #include <mpi.h>
 
 #define PI            (M_PI)
-#define MICA_MAX_STR_LENGTH  (100)
+#define MICA_MAX_STR_LENGTH  (256)
 
 /* variables for MPICH */
 extern int thistask, totaltask, namelen;

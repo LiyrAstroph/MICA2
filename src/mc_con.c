@@ -404,6 +404,79 @@ double prob_con_variability(const void *model)
   return prob;
 }
 
+double prob_con_variability_semiseparable(const void *model)
+{
+  double prob = 0.0;
+  int i, k, info, sign;
+  double *pm = (double *)model;
+  double tau, sigma, sigma2, alpha, lndet, lndet_ICq, syserr;
+  double *Larr, *ybuf, *y, *yq, *Cq;
+  double *tcon, *fcon, *fecon;
+  int ncon, idx;
+  double *W, *D, *phi;
+
+  Larr = workspace;
+  ybuf = Larr + ncon_max;
+  y = ybuf + ncon_max;
+  yq = y + ncon_max;
+  Cq = yq + nq;
+  W = Cq + nq*nq;
+  D = W + ncon_max;
+  phi = D + ncon_max;
+
+  for(i=0;i<ncon_max;i++)
+  {
+    Larr[i*nq]=1.0;
+  }
+
+  /* iterate over all datasets */
+  for(k=0; k<nset; k++)
+  {
+    ncon = dataset[k].con.n;
+    tcon = dataset[k].con.t;
+    fcon = dataset[k].con.f;
+    fecon = dataset[k].con.fe;
+
+    idx = idx_con_pm[k];
+    syserr = (exp(pm[idx])-1.0)*dataset[k].con.error_mean;
+    tau = exp(pm[idx+2]);
+    sigma = exp(pm[idx+1]) * sqrt(tau);
+    alpha = 1.0;
+    
+    sigma2 = sigma*sigma;
+    compute_semiseparable_drw(tcon, ncon, sigma2, 1.0/tau, fecon, syserr, W, D, phi);
+    
+    lndet = 0.0;
+    for(i=0; i<ncon; i++)
+      lndet += log(D[i]);
+
+    // Cq^-1 = L^TxC^-1xL
+    multiply_mat_semiseparable_drw(Larr, W, D, phi, ncon, nq, sigma2, ybuf);
+    multiply_mat_MN_transposeA(Larr, ybuf, Cq, nq, nq, ncon);
+    
+    // L^TxC^-1xy
+    multiply_matvec_semiseparable_drw(fcon, W, D, phi, ncon, sigma2, ybuf);
+    multiply_mat_MN_transposeA(Larr, ybuf, yq, nq, 1, ncon);
+
+    /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
+    inverse_symat_lndet(Cq, nq, &lndet_ICq, &info);
+    multiply_mat_MN(Cq, yq, ybuf, nq, 1, nq);
+  
+    multiply_matvec_MN(Larr, ncon, nq, ybuf, y);
+    for(i=0; i<ncon; i++)
+    {
+      y[i] = fcon[i] - y[i];
+    }
+  
+    /* y^T x C^-1 y */
+    multiply_matvec_semiseparable_drw(y, W, D, phi, ncon, sigma2, ybuf);
+    prob += -0.5 * cblas_ddot(ncon, y, 1, ybuf, 1);
+    prob += -0.5*lndet - 0.5*lndet_ICq;
+  }
+  
+  return prob;
+}
+
 int mc_con_init()
 {
 

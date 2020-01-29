@@ -116,6 +116,37 @@ void inverse_mat(double * a, int n, int *info)
   free(ipiv);
   return;
 }
+/* A^-1 */
+void inverse_symat_lndet(double * a, int n, double *lndet, int *info)
+{
+  int * ipiv, i;
+  ipiv=malloc(n*sizeof(int));
+
+//  dgetrf_(&n, &n, a, &n, ipiv, info);
+//  dgetri_(&n, a, &n, ipiv, work, &lwork, info);
+
+  *info = LAPACKE_dsytrf(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
+  if(*info!=0)
+  {
+    strcpy(str_error_exit, "inverse_mat");
+    error_exit(9);
+  }
+
+  *lndet = 0.0;
+  for(i=0; i<n; i++)
+  {
+    *lndet += log(fabs(a[i*n+i]));
+  }
+
+  *info = LAPACKE_dgetri(LAPACK_ROW_MAJOR, n, a, n, ipiv);
+  if(*info!=0)
+  {
+    strcpy(str_error_exit, "inverse_mat");
+    error_exit(9);
+  }
+  free(ipiv);
+  return;
+}
 /* eigen vector and eigen values */
 void eigen_sym_mat(double *a, int n, double *val, int *info)
 {
@@ -354,4 +385,129 @@ double * array_malloc(int n)
   }
 
   return array;
+}
+
+/*
+ * semiseparable matrix
+ */
+void compute_semiseparable_drw(double *t, int n, double a1, double c1, double *sigma, double syserr, double *W, double *D, double *phi)
+{
+  int i;
+  double S, A;
+  phi[0] = 0.0;
+  for(i=1; i<n; i++)
+  {
+    phi[i] = exp(-c1 * (t[i] - t[i-1]));
+  }
+
+  S = 0.0;
+  A = sigma[0]*sigma[0] + syserr*syserr + a1;
+  D[0] = A;
+  W[0] = 1.0/D[0];
+  for(i=1; i<n; i++)
+  {
+    S = phi[i]*phi[i] * (S + D[i-1]*W[i-1]*W[i-1]);
+    A = sigma[i]*sigma[i] + syserr*syserr + a1;
+    D[i] = A - a1 * a1 * S;
+    W[i] = 1.0/D[i] * (1.0 - a1*S);
+  }
+}
+/*
+ * z = C^-1 x y
+ *
+ * y is a vector
+ */
+void multiply_matvec_semiseparable_drw(double *y, double  *W, double *D, double *phi, int n, double a1, double *z)
+{
+  int i;
+  double f, g;
+
+  // forward substitution
+  f = 0.0;
+  z[0] = y[0];
+  for(i=1; i<n;i++)
+  {
+    f = phi[i] * (f + W[i-1] * z[i-1]);
+    z[i] = y[i] - a1*f;
+  }
+
+  //backward substitution
+  g = 0.0;
+  z[n-1] = z[n-1]/D[n-1];
+  for(i=n-2; i>=0; i--)
+  {
+    g = phi[i+1] *(g + a1*z[i+1]);
+    z[i] = z[i]/D[i] - W[i]*g;
+  }
+}
+/*
+ * Z = C^-1 x Y
+ * 
+ * Y is an (nxm) matrix. 
+ * Note that Y is row-major
+ */
+void multiply_mat_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z)
+{
+  int i, j;
+  double f, g;
+
+  // forward substitution
+  for(j=0; j<m; j++)
+  {
+    f = 0.0;
+    Z[0*m+j] = Y[0*m+j];
+    for(i=1; i<n;i++)
+    {
+      f = phi[i] * (f + W[i-1] * Z[(i-1)*m + j]);
+      Z[i*m+j] = Y[i*m+j] - a1*f;
+    }
+  }
+
+  //backward substitution
+  for(j=0; j<m; j++)
+  {
+    g = 0.0;
+    Z[(n-1)*m+j] = Z[(n-1)*m+j]/D[n-1];
+    for(i=n-2; i>=0; i--)
+    {
+      g = phi[i+1] *(g + a1*Z[(i+1)*m+j]);
+      Z[i*m+j] = Z[i*m+j]/D[i] - W[i]*g;
+    }
+  }
+}
+
+/*
+ * Z = C^-1 x Y^T
+ * 
+ * Y is an (mxn) matrix. 
+ * Note that Y is row-major
+ */
+void multiply_mat_transposeB_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z)
+{
+  int i, j;
+  double f, g;
+
+  // forward substitution
+  for(j=0; j<m; j++)
+  {
+    f = 0.0;
+    Z[0*m+j] = Y[0+j*n];
+    for(i=1; i<n;i++)
+    {
+      f = phi[i] * (f + W[i-1] * Z[(i-1)*m + j]);
+      Z[i*m+j] = Y[i+j*n] - a1*f;
+    }
+  }
+
+  //backward substitution
+  for(j=0; j<m; j++)
+  {
+    g = 0.0;
+    Z[(n-1)*m+j] = Z[(n-1)*m+j]/D[n-1];
+    for(i=n-2; i>=0; i--)
+    {
+      g = phi[i+1] *(g + a1*Z[(i+1)*m+j]);
+      Z[i*m+j] = Z[i*m+j]/D[i] - W[i]*g;
+    }
+  }
 }

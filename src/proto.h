@@ -33,6 +33,7 @@ void mc_con();
 int mc_con_init();
 int mc_con_end();
 double prob_con_variability(const void *model);
+double prob_con_variability_semiseparable(const void *model);
 void set_covar_Pmat_data(double sigma, double tau, double alpha, double syserr, int n, double *t, double *f, double *fe);
 void set_covar_Umat(double sigma, double tau, double alpha, int ncon_data, double *tcon_data, int ncon, double *tcon);
 void postprocess_con();
@@ -70,6 +71,7 @@ int mica_cmp(const void * a, const void * b);
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info);
+void inverse_symat_lndet(double *a, int n, double *lndet, int *info);
 double det_mat(double *a, int n, int *info);
 double lndet_mat(double *a, int n, int *info);
 double lndet_mat2(double *a, int n, int *info, int *sign);
@@ -90,3 +92,7 @@ void eigen_sym_mat(double *a, int n, double *val, int *info);
 void Chol_decomp_U(double *a, int n, int *info);
 double ** matrix_malloc(int n1, int n2);
 double * array_malloc(int n);
+void compute_semiseparable_drw(double *t, int n, double a1, double c1, double *sigma, double syserr,  double *W, double *D, double *phi);
+void multiply_matvec_semiseparable_drw(double *y, double  *W, double *D, double *phi, int n, double a1, double *z);
+void multiply_mat_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z);
+void multiply_mat_transposeB_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z);

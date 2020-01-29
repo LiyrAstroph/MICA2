@@ -71,6 +71,7 @@ int mica_cmp(const void * a, const void * b);
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info);
+void inverse_symat(double *a, int n, int *info);
 void inverse_symat_lndet(double *a, int n, double *lndet, int *info);
 double det_mat(double *a, int n, int *info);
 double lndet_mat(double *a, int n, int *info);

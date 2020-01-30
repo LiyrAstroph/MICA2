@@ -71,7 +71,7 @@ void allocate_memory()
   Tmat2 = malloc(nall_max*nall_max*sizeof(double));
 
   workspace = malloc((50*nall_max)*sizeof(double));
-  workspace_ipiv = malloc(nall_max*sizeof(double));
+  workspace_ipiv = malloc(nall_max*sizeof(int));
 
   var_param = malloc(num_params_var * sizeof(double));
   var_param_std = malloc(num_params_var * sizeof(double));

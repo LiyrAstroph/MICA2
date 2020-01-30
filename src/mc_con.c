@@ -125,7 +125,7 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
   int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
-  int i, j, info;
+  int i, j, info, *ipiv;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
 
   Larr = workspace;
@@ -136,6 +136,8 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
   yuq = yq + nq; 
   Larr_rec = yuq + ncon;
 
+  ipiv = workspace_ipiv;
+
   PEmat1 = malloc(ncon * ncon_data * sizeof(double));
   PEmat2 = malloc(ncon * ncon * sizeof(double));
   PEmat3 = malloc(ncon * nq * sizeof(double));
@@ -145,7 +147,7 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
 
   set_covar_Umat(sigma, tau, alpha, ncon_data, tcon_data, ncon, tcon);
 
-  inverse_mat(PCmat, ncon_data, &info);
+  inverse_mat(PCmat, ncon_data, &info, ipiv);
 
   for(i=0;i<ncon_data;i++)
   {
@@ -163,7 +165,7 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
   multiply_mat_MN_transposeA(Larr, ybuf, yuq, nq, 1, ncon_data);
 
   /* (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
-  inverse_mat(Cq, nq, &info);
+  inverse_mat(Cq, nq, &info, ipiv);
   multiply_mat_MN(Cq, yuq, yq, nq, 1, nq);
 
   /*  L x q */
@@ -321,7 +323,7 @@ void postprocess_con()
 double prob_con_variability(const void *model)
 {
   double prob = 0.0;
-  int i, k, info, sign;
+  int i, k, info, sign, *ipiv;
   double *pm = (double *)model;
   double tau, sigma, alpha, lndet, lndet_ICq, syserr;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq;
@@ -334,6 +336,8 @@ double prob_con_variability(const void *model)
   yq = y + ncon_max;
   Cq = yq + nq;
   ICq = Cq + nq * nq;
+
+  ipiv = workspace_ipiv;
 
   for(i=0;i<ncon_max;i++)
   {
@@ -357,7 +361,7 @@ double prob_con_variability(const void *model)
     set_covar_Pmat_data(sigma, tau, alpha, syserr, ncon, tcon, fcon, fecon);
     memcpy(IPCmat, PCmat, ncon*ncon*sizeof(double));
 
-    inverse_mat(IPCmat, ncon, &info); /* calculate C^-1 */
+    inverse_mat(IPCmat, ncon, &info, ipiv); /* calculate C^-1 */
 
     /* calculate L^T*C^-1*L */
     multiply_mat_MN(IPCmat, Larr, ybuf, ncon, nq, ncon);
@@ -370,7 +374,7 @@ double prob_con_variability(const void *model)
     multiply_mat_MN_transposeA(Larr, ybuf, yq, nq, 1, ncon);
 
     /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
-    inverse_mat(Cq, nq, &info);
+    inverse_mat(Cq, nq, &info, ipiv);
     multiply_mat_MN(Cq, yq, ybuf, nq, 1, nq);
   
     multiply_matvec_MN(Larr, ncon, nq, ybuf, y);
@@ -383,14 +387,14 @@ double prob_con_variability(const void *model)
     multiply_matvec(IPCmat, y, ncon, ybuf);
     prob += -0.5 * cblas_ddot(ncon, y, 1, ybuf, 1)/(sigma * sigma);
 
-    lndet = lndet_mat3(PCmat, ncon, &info, &sign) + 2.0*ncon*log(sigma);
+    lndet = lndet_mat3(PCmat, ncon, &info, &sign, ipiv) + 2.0*ncon*log(sigma);
     if(info!=0|| sign==-1)
     {
       prob = -DBL_MAX;
       printf("lndet_C %f %d!\n", lndet, sign);
       return prob;
     }
-    lndet_ICq = lndet_mat3(ICq, nq, &info, &sign) - 2.0*nq*log(sigma);
+    lndet_ICq = lndet_mat3(ICq, nq, &info, &sign, ipiv) - 2.0*nq*log(sigma);
     if(info!=0 || sign==-1 )
     {
       prob = -DBL_MAX;

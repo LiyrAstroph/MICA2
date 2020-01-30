@@ -73,14 +73,14 @@ void error_exit(int);
 int mica_cmp(const void * a, const void * b);
 
 // mathfunc.c
-void inverse_mat(double *a, int n, int *info);
+void inverse_mat(double *a, int n, int *info, int *ipiv);
 void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign);
 void inverse_symat(double *a, int n, int *info);
 void inverse_symat_lndet(double *a, int n, double *lndet, int *info, int *sign);
-double det_mat(double *a, int n, int *info);
-double lndet_mat(double *a, int n, int *info);
-double lndet_mat2(double *a, int n, int *info, int *sign);
-double lndet_mat3(double *a, int n, int *info, int *sign);
+double det_mat(double *a, int n, int *info, int *ipiv);
+double lndet_mat(double *a, int n, int *info, int *ipiv);
+double lndet_mat2(double *a, int n, int *info, int *sign, int *ipiv);
+double lndet_mat3(double *a, int n, int *info, int *sign, int *ipiv);
 void display_mat(double *a, int m, int n);
 void multiply_mat(double * a, double *b, double *c, int n);
 void multiply_mat_transposeA(double * a, double *b, double *c, int n);

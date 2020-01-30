@@ -98,11 +98,8 @@ int multiply_mat_MN_inverseA(double * a, double *b, int m, int n)
  *  Contains the pivot indices; for 1 ≤i≤ min(m, n), 
  *  row i was interchanged with row ipiv(i).
  */
-void inverse_mat(double * a, int n, int *info)
+void inverse_mat(double * a, int n, int *info, int *ipiv)
 {
-  int * ipiv;
-  ipiv=malloc(n*sizeof(int));
-
 //  dgetrf_(&n, &n, a, &n, ipiv, info);
 //  dgetri_(&n, a, &n, ipiv, work, &lwork, info);
 
@@ -118,7 +115,6 @@ void inverse_mat(double * a, int n, int *info)
     strcpy(str_error_exit, "inverse_mat");
     error_exit(9);
   }
-  free(ipiv);
   return;
 }
 
@@ -269,13 +265,10 @@ void multiply_vec2mat(double * x, double * a, int n)
 }
 /* determinant of matrix A 
  * note that A is changed on exit. */
-double det_mat(double *a, int n, int *info)
+double det_mat(double *a, int n, int *info, int *ipiv)
 {
-  int *ipiv;
   int i;
   double det;
-
-  ipiv = workspace_ipiv;
 
 //  dgetrf_(&n, &n, a, &n, ipiv, info);
   *info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, a, n, ipiv);
@@ -299,12 +292,10 @@ double det_mat(double *a, int n, int *info)
 }
 /* natural logarithm of determinant of A
  * note that A is changed on exit. */
-double lndet_mat(double *a, int n, int *info)
+double lndet_mat(double *a, int n, int *info, int *ipiv)
 {
-  int * ipiv;
   int i;
   double lndet;
-  ipiv=workspace_ipiv;
 
 //  dgetrf_(&n, &n, a, &n, ipiv, info);
   *info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, a, n, ipiv);
@@ -325,15 +316,10 @@ double lndet_mat(double *a, int n, int *info)
  * if any sign of the eigen values is negtive, return sign=-1 
  * note that A is changed on exit 
  */
-double lndet_mat2(double *a, int n, int *info, int *sign)
+double lndet_mat2(double *a, int n, int *info, int *sign, int *ipiv)
 {
-  int * ipiv;
-  int i, *sign_all;
+  int i;
   double lndet;
-  //ipiv=malloc(n*sizeof(int));
-  //sign_all=malloc(n*sizeof(int));
-  ipiv = workspace_ipiv;
-  sign_all = ipiv + n;
 
 //  dgetrf_(&n, &n, a, &n, ipiv, info);
   *info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, a, n, ipiv);
@@ -347,25 +333,17 @@ double lndet_mat2(double *a, int n, int *info, int *sign)
   for(i=0; i<n; i++)
   {
     lndet += log(fabs(a[i*n+i]));
-    //*sign *= (a[i*n+i]>=0?1:-1);
-    sign_all[i] = (a[i*n+i]>=0?1:-1);
-
-    if(ipiv[i]!=i+1)
-    {
-      //printf("%e %d\n", a[i*n+i], n);
-      //ipiv[ipiv[i]] = ipiv[i];
-      //*sign *= -1;
-      sign_all[i] *= -1;
-    }
   }
 
-  for(i=0; i<n;i++)
+  for(i=0; i<n; i++)
   {
-    if(sign_all[i]==-1)
+    *sign = (a[i*n+i]>=0?1:-1);
+    if(ipiv[i]!=i+1)
     {
-      *sign=-1;      // if any sign is negtive, return sign=-1
-      break;
+      *sign *= -1;
     }
+    if(*sign==-1)
+      break;
   }
   return lndet;
 }
@@ -373,14 +351,10 @@ double lndet_mat2(double *a, int n, int *info, int *sign)
  * sign of all the eigen values
  * note that A is changed on exit 
  */
-double lndet_mat3(double *a, int n, int *info, int *sign)
+double lndet_mat3(double *a, int n, int *info, int *sign, int *ipiv)
 {
-  int *ipiv;
   int i;
   double lndet;
-  //ipiv=malloc(n*sizeof(int));
-  //sign_all=malloc(n*sizeof(int));
-  ipiv = workspace_ipiv;
 
 //  dgetrf_(&n, &n, a, &n, ipiv, info);
   *info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, a, n, ipiv);

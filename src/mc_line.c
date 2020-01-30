@@ -580,11 +580,13 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
 void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
-  int i, j, k, m, info, idx;
+  int i, j, k, m, info, idx, *ipiv;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
   int nall_data, nqall, ntall, np;
   double *fall_data;
   double sigma, tau, *pm=(double *)model;
+
+  ipiv = workspace_ipiv;
 
   idx = idx_con_pm[nds];
   tau = exp(pm[idx+2]);
@@ -699,7 +701,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   /* S x C^-1 x L - L */
   for(i=0; i<ntall*nqall; i++)PEmat3[i] -= Larr_rec[i];
   
-  inverse_mat(Cq, nqall, &info);
+  inverse_mat(Cq, nqall, &info, ipiv);
 
   multiply_mat_MN(PEmat3, Cq, PEmat2, ntall, nqall, nqall);
   /* (S x C^-1 x L - L) x Cq x (S x C^-1 x L - L)^T */
@@ -725,7 +727,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
 double prob_line_variability(const void *model)
 {
   double prob = 0.0, prob1;
-  int i, j, k, m, np, info, sign;
+  int i, j, k, m, np, info, sign, *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq, *yave;
   double *fall;
@@ -739,6 +741,8 @@ double prob_line_variability(const void *model)
   yave = yq + (1+nlset_max)*nq;
   Cq = yave + nall_max;
   ICq = Cq + (1+nlset_max)*nq * (1+nlset_max)*nq;
+
+  ipiv = workspace_ipiv;
 
   /* iterate over all datasets */
   for(k=0; k<nset; k++)
@@ -796,14 +800,14 @@ double prob_line_variability(const void *model)
       printf("prob >0!\n");
       return prob;
     }
-    lndet = lndet_mat3(PCmat, nall, &info, &sign) + 2.0*nall*log(sigma);
+    lndet = lndet_mat3(PCmat, nall, &info, &sign, ipiv) + 2.0*nall*log(sigma);
     if(info!=0|| sign==-1)
     {
       prob = -DBL_MAX;
       printf("lndet_C %f %d!\n", lndet, sign);
       return prob;
     }
-    lndet_ICq = lndet_mat3(ICq, nqall, &info, &sign) - 2.0*nqall*log(sigma);
+    lndet_ICq = lndet_mat3(ICq, nqall, &info, &sign, ipiv) - 2.0*nqall*log(sigma);
     if(info!=0 || sign==-1 )
     {
       prob = -DBL_MAX;
@@ -824,7 +828,7 @@ double prob_line_variability(const void *model)
 double prob_line_variability2(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau;
-  int i, j, k, m, np, info, sign;
+  int i, j, k, m, np, info, sign, *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq;
   double *fall;
@@ -837,6 +841,8 @@ double prob_line_variability2(const void *model)
   yq = y + nall_max;
   Cq = yq + (1+nlset_max)*nq;
   ICq = Cq + (1+nlset_max)*nq * (1+nlset_max)*nq;
+
+  ipiv = workspace_ipiv;
 
   /* iterate over all datasets */
   for(k=0; k<nset; k++)
@@ -871,7 +877,7 @@ double prob_line_variability2(const void *model)
     set_covar_Pmat_data_line_array(model, k);
     memcpy(IPCmat, PCmat, nall*nall*sizeof(double));
 
-    inverse_mat(IPCmat, nall, &info); /* calculate C^-1 */
+    inverse_mat(IPCmat, nall, &info, ipiv); /* calculate C^-1 */
     
     /* calculate L^T*C^-1*L */
     multiply_mat_MN(IPCmat, Larr, ybuf, nall, nqall, nall);
@@ -883,7 +889,7 @@ double prob_line_variability2(const void *model)
     multiply_mat_MN_transposeA(Larr, ybuf, yq, nqall, 1, nall);
 
     /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
-    inverse_mat(Cq, nqall, &info);
+    inverse_mat(Cq, nqall, &info, ipiv);
     multiply_mat_MN(Cq, yq, ybuf, nqall, 1, nqall);
   
     multiply_matvec_MN(Larr, nall, nqall, ybuf, y);
@@ -902,14 +908,14 @@ double prob_line_variability2(const void *model)
       printf("prob >0!\n");
       return prob;
     }
-    lndet = lndet_mat3(PCmat, nall, &info, &sign) + 2.0*nall*log(sigma);
+    lndet = lndet_mat3(PCmat, nall, &info, &sign, ipiv) + 2.0*nall*log(sigma);
     if(info!=0|| sign==-1)
     {
       prob = -DBL_MAX;
       printf("lndet_C %f %d!\n", lndet, sign);
       return prob;
     }
-    lndet_ICq = lndet_mat3(ICq, nqall, &info, &sign) - 2.0*nqall*log(sigma);
+    lndet_ICq = lndet_mat3(ICq, nqall, &info, &sign, ipiv) - 2.0*nqall*log(sigma);
     if(info!=0 || sign==-1 )
     {
       prob = -DBL_MAX;

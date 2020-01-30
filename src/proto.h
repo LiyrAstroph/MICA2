@@ -65,6 +65,7 @@ void set_covar_Pmat_data_line_array(const void *model, int k);
 void set_covar_Umat_line(const void *model, int k, int *nall, double *tall);
 void set_covar_Amat_line(const void *model, int k, int *nall, double *tall);
 void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall);
+void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall);
 int check_gauss_center(int which, int *igau);
 
 // error.c

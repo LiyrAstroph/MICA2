@@ -475,7 +475,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   
   set_covar_Amat_line(model, nds, nall, tall);
 
-  inverse_mat(PCmat, nall_data, &info);
+  inverse_symat(PCmat, nall_data, &info);
 
   for(i=0;i<dataset[nds].con.n;i++)
   {
@@ -505,7 +505,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   multiply_mat_MN_transposeA(Larr, ybuf, yuq, nqall, 1, nall_data);
 
   /* (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
-  inverse_mat(Cq, nqall, &info);
+  inverse_symat(Cq, nqall, &info);
   multiply_mat_MN(Cq, yuq, yq, nqall, 1, nqall);
 
   /*  L x q */

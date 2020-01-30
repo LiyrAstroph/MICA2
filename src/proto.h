@@ -51,6 +51,8 @@ void mc_line();
 int mc_line_init();
 int mc_line_end();
 double prob_line_variability(const void *model);
+double prob_line_variability2(const void *model);
+double prob_line_variability3(const void *model);
 void postprocess_line();
 double Sll(double t1, double t2, const void *model, int nds, int nls);
 void Sll_array(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
@@ -71,8 +73,9 @@ int mica_cmp(const void * a, const void * b);
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info);
+void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign);
 void inverse_symat(double *a, int n, int *info);
-void inverse_symat_lndet(double *a, int n, double *lndet, int *info);
+void inverse_symat_lndet(double *a, int n, double *lndet, int *info, int *sign);
 double det_mat(double *a, int n, int *info);
 double lndet_mat(double *a, int n, int *info);
 double lndet_mat2(double *a, int n, int *info, int *sign);

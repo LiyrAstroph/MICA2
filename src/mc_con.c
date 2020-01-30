@@ -459,7 +459,7 @@ double prob_con_variability_semiseparable(const void *model)
     multiply_mat_MN_transposeA(Larr, ybuf, yq, nq, 1, ncon);
 
     /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
-    inverse_symat_lndet(Cq, nq, &lndet_ICq, &info);
+    inverse_symat_lndet(Cq, nq, &lndet_ICq, &info, &sign);
     multiply_mat_MN(Cq, yq, ybuf, nq, 1, nq);
   
     multiply_matvec_MN(Larr, ncon, nq, ybuf, y);

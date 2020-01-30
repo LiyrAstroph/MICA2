@@ -92,7 +92,12 @@ int multiply_mat_MN_inverseA(double * a, double *b, int m, int n)
   free(ipiv);
   return info;
 }
-/* A^-1 */
+/*! A^-1
+ *
+ *  Note: ipiv, size at least max(1,min(m, n)). 
+ *  Contains the pivot indices; for 1 ≤i≤ min(m, n), 
+ *  row i was interchanged with row ipiv(i).
+ */
 void inverse_mat(double * a, int n, int *info)
 {
   int * ipiv;
@@ -116,6 +121,61 @@ void inverse_mat(double * a, int n, int *info)
   free(ipiv);
   return;
 }
+
+void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign)
+{
+  int * ipiv, i;
+  ipiv=malloc(n*sizeof(int));
+
+//  dgetrf_(&n, &n, a, &n, ipiv, info);
+//  dgetri_(&n, a, &n, ipiv, work, &lwork, info);
+
+  *info = LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, a, n, ipiv);
+  if(*info!=0)
+  {
+    strcpy(str_error_exit, "inverse_mat");
+    error_exit(9);
+  }
+
+  *lndet = 0.0;
+  *sign = 1;
+  for(i=0; i<n; i++)
+  {
+    *lndet += log(fabs(a[i*n+i]));
+    *sign *= (a[i*n+i]>=0?1:-1);
+
+    if(ipiv[i]!=i+1)
+    {
+      //printf("%e %d\n", a[i*n+i], n);
+      //ipiv[ipiv[i]] = ipiv[i];
+      *sign *= -1;
+    }
+  }
+
+  *info = LAPACKE_dgetri(LAPACK_ROW_MAJOR, n, a, n, ipiv);
+  if(*info!=0)
+  {
+    strcpy(str_error_exit, "inverse_mat");
+    error_exit(9);
+  }
+  free(ipiv);
+  return;
+}
+/*! A^-1, A is symmetric.
+ *  
+ * ipiv: array, size at least max(1, n). 
+ * Contains details of the interchanges and the block structure of D. 
+ * If ipiv[i-1] = k >0, then dii is a 1-by-1 block, and the i-th row 
+ * and column of A was interchanged with the k-th row and column.
+ * 
+ * If uplo = 'U' and ipiv[i] =ipiv[i-1] = -m < 0, then D has a 2-by-2 
+ * block in rows/columns i and i+1, and i-th row and column of A was 
+ * interchanged with the m-th row and column.
+ * 
+ * If uplo = 'L' and ipiv[i] =ipiv[i-1] = -m < 0, then D has a 2-by-2 
+ * block in rows/columns i and i+1, and (i+1)-th row and column of 
+ * A was interchanged with the m-th row and column.
+ */
 void inverse_symat(double * a, int n, int *info)
 {
   int * ipiv, i, j;
@@ -144,7 +204,7 @@ void inverse_symat(double * a, int n, int *info)
   return;
 }
 /* A^-1 */
-void inverse_symat_lndet(double * a, int n, double *lndet, int *info)
+void inverse_symat_lndet(double * a, int n, double *lndet, int *info, int *sign)
 {
   int * ipiv, i, j;
   ipiv=malloc(n*sizeof(int));
@@ -157,9 +217,11 @@ void inverse_symat_lndet(double * a, int n, double *lndet, int *info)
   }
 
   *lndet = 0.0;
+  *sign = 1;
   for(i=0; i<n; i++)
   {
     *lndet += log(fabs(a[i*n+i]));
+    *sign *= (a[i*n+i]>=0?1:-1);
   }
 
   *info = LAPACKE_dsytri(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);

@@ -53,6 +53,8 @@ extern double *logz_arr; /* evidence */
 extern char str_error_exit[200];
 // mathematic functions
 extern int *workspace_ipiv;
+extern double *workspace_inv;
+
 
 extern int flag_postprc;
 

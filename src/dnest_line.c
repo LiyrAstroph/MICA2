@@ -322,7 +322,7 @@ void print_particle_line(FILE *fp, const void *model)
 double log_likelihoods_cal_line(const void *model)
 {
   double logL;
-  logL = prob_line_variability3(model);
+  logL = prob_line_variability4(model);
   return logL;
 }
 
@@ -330,14 +330,14 @@ double log_likelihoods_cal_line(const void *model)
 double log_likelihoods_cal_initial_line(const void *model)
 {
   double logL;
-  logL = prob_line_variability3(model);
+  logL = prob_line_variability4(model);
   return logL;
 }
 
 double log_likelihoods_cal_restart_line(const void *model)
 {
   double logL;
-  logL = prob_line_variability3(model);
+  logL = prob_line_variability4(model);
   return logL;
 }
 

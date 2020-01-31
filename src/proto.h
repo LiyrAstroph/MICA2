@@ -53,6 +53,7 @@ int mc_line_end();
 double prob_line_variability(const void *model);
 double prob_line_variability2(const void *model);
 double prob_line_variability3(const void *model);
+double prob_line_variability4(const void *model);
 void postprocess_line();
 double Sll(double t1, double t2, const void *model, int nds, int nls);
 void Sll_array(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
@@ -74,9 +75,10 @@ int mica_cmp(const void * a, const void * b);
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info, int *ipiv);
-void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign);
-void inverse_symat(double *a, int n, int *info);
-void inverse_symat_lndet(double *a, int n, double *lndet, int *info, int *sign);
+void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, int *ipiv);
+void inverse_symat(double *a, int n, int *info, int *ipiv);
+void inverse_symat_lndet(double *a, int n, double *lndet, int *info, int *ipiv);
+void inverse_symat_lndet_sign(double *a, int n, double *lndet, int *info, int *sign, int *ipiv);
 double det_mat(double *a, int n, int *info, int *ipiv);
 double lndet_mat(double *a, int n, int *info, int *ipiv);
 double lndet_mat2(double *a, int n, int *info, int *sign, int *ipiv);
@@ -88,7 +90,7 @@ void multiply_mat_transposeB(double * a, double *b, double *c, int n);
 void multiply_mat_MN(double * a, double *b, double *c, int m, int n, int k);
 void multiply_mat_MN_transposeA(double * a, double *b, double *c, int m, int n, int k);
 void multiply_mat_MN_transposeB(double * a, double *b, double *c, int m, int n, int k);
-int multiply_mat_MN_inverseA(double * a, double *b, int m, int n);
+int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, int *ipiv);
 void multiply_matvec(double *a, double *x, int n, double *y);
 void multiply_matvec_transposeA(double *a, double *x, int n, double *y);
 void multiply_matvec_MN(double * a, int m, int n, double *x, double *y);
@@ -101,3 +103,16 @@ void compute_semiseparable_drw(double *t, int n, double a1, double c1, double *s
 void multiply_matvec_semiseparable_drw(double *y, double  *W, double *D, double *phi, int n, double a1, double *z);
 void multiply_mat_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z);
 void multiply_mat_transposeB_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z);
+void inverse_symat_partition(double *P, double *S, double *Q, int n1, int n2, 
+                             double *PN, double *SN, double *QN, double *work, int *ipiv);
+
+void inverse_symat_partition_inv(double *Pinv, double *S, double *Q, int n1, int n2, 
+                             double *PN, double *SN, double *QN, double *work, int *ipiv);
+
+
+void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n1, 
+                                 int n2, double *PN, double *SN, double *QN, 
+                                 double *lndet, double *work, int *ipiv);
+
+void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *lndet,
+                             double *work_inv, int *ipiv);

@@ -71,10 +71,9 @@ void multiply_matvec_MN(double * a, int m, int n, double *x, double *y)
 }
 /* A(mxm)^-1 * B(mxn), store the output in B
  * note that A will be changed on exit. */
-int multiply_mat_MN_inverseA(double * a, double *b, int m, int n)
+int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, int *ipiv)
 {
-  int * ipiv, info;
-  ipiv=malloc(m*sizeof(int));
+  int info;
 
   info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR, m, m, a, m, ipiv);
   if(info!=0)
@@ -89,7 +88,6 @@ int multiply_mat_MN_inverseA(double * a, double *b, int m, int n)
     error_exit(9);
   }
 
-  free(ipiv);
   return info;
 }
 /*! A^-1
@@ -118,10 +116,9 @@ void inverse_mat(double * a, int n, int *info, int *ipiv)
   return;
 }
 
-void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign)
+void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, int *ipiv)
 {
-  int * ipiv, i;
-  ipiv=malloc(n*sizeof(int));
+  int i;
 
 //  dgetrf_(&n, &n, a, &n, ipiv, info);
 //  dgetri_(&n, a, &n, ipiv, work, &lwork, info);
@@ -154,7 +151,7 @@ void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign)
     strcpy(str_error_exit, "inverse_mat");
     error_exit(9);
   }
-  free(ipiv);
+
   return;
 }
 /*! A^-1, A is symmetric.
@@ -172,10 +169,9 @@ void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign)
  * block in rows/columns i and i+1, and (i+1)-th row and column of 
  * A was interchanged with the m-th row and column.
  */
-void inverse_symat(double * a, int n, int *info)
+void inverse_symat(double * a, int n, int *info, int *ipiv)
 {
-  int * ipiv, i, j;
-  ipiv=malloc(n*sizeof(int));
+  int i, j;
 
   *info = LAPACKE_dsytrf(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
   if(*info!=0)
@@ -196,14 +192,32 @@ void inverse_symat(double * a, int n, int *info)
     for(j=0; j<i; j++)
       a[i*n+j] = a[j*n+i];
 
-  free(ipiv);
+  return;
+}
+void inverse_symat_lndet(double * a, int n, double *lndet, int *info, int *ipiv)
+{
+  int i, j;
+
+  *info = LAPACKE_dsytrf(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
+  
+  *lndet = 0.0;
+  for(i=0; i<n; i++)
+  {
+    *lndet += log(a[i*n+i]);
+  }
+
+  *info = LAPACKE_dsytri(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
+
+  /* fill up the lower triangle */
+  for(i=0; i<n; i++)
+    for(j=0; j<i; j++)
+      a[i*n+j] = a[j*n+i];
   return;
 }
 /* A^-1 */
-void inverse_symat_lndet(double * a, int n, double *lndet, int *info, int *sign)
+void inverse_symat_lndet_sign(double * a, int n, double *lndet, int *info, int *sign, int *ipiv)
 {
-  int * ipiv, i, j;
-  ipiv=malloc(n*sizeof(int));
+  int i, j;
 
   *info = LAPACKE_dsytrf(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
   if(*info!=0)
@@ -232,7 +246,6 @@ void inverse_symat_lndet(double * a, int n, double *lndet, int *info, int *sign)
     for(j=0; j<i; j++)
       a[i*n+j] = a[j*n+i];
 
-  free(ipiv);
   return;
 }
 
@@ -413,7 +426,7 @@ void display_mat(double *a, int m, int n)
     {
         for(j=0;j<n;j++)
         {
-            printf("%f\t", a[i*n+j]);
+            printf("%e\t", a[i*n+j]);
         }
         printf("\n");
     }
@@ -577,4 +590,349 @@ void multiply_mat_transposeB_semiseparable_drw(double *Y, double  *W, double *D,
       Z[i*m+j] = Z[i*m+j]/D[i] - W[i]*g;
     }
   }
+}
+
+/*!
+ * This function calculates A^-1 by partitioning, where A is symmetric.
+ * 
+ * A is partitioned into 
+ *  
+ *   P  ,  Q
+ *   Q^T,  S
+ * 
+ * where P(n1xn1), Q(n1xn2), S(n2xn2), n=n1+n2.
+ * 
+ * The size of work is (n1*n2 + n1*n1)=n1*n.
+ */
+void inverse_symat_partition(double *P, double *S, double *Q, int n1, int n2, 
+                             double *PN, double *SN, double *QN, double *work, 
+                             int *ipiv)
+{
+  int i, j, info;
+  double *pwork;
+
+  /* P^-1 */
+  memcpy(PN, P, (n1*n1)*sizeof(double));
+  inverse_symat(PN, n1, &info, ipiv);
+
+  /* P^-1 x Q */
+  multiply_mat_MN(PN, Q, work, n1, n2, n1);
+
+  /* Q^T x P^-1 x Q */
+  multiply_mat_MN_transposeA(Q, work, SN, n2, n2, n1);
+
+  /* (S - Q^T x P^-1 x Q)^-1; only upper triangle */
+  for(i=0; i<n2; i++)
+  {
+    for(j=i; j<n2; j++)
+    {
+      SN[i*n2 + j] = S[i*n2 + j] - SN[i*n2 + j];
+    }
+  }
+  inverse_symat(SN, n2, &info, ipiv);
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
+  multiply_mat_MN(work, SN, QN, n1, n2, n2);
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
+  pwork = work+n1*n2;
+  multiply_mat_MN_transposeB(QN, work, pwork, n1, n1, n2);
+
+  for(i=0; i<n1*n2; i++)
+  {
+    QN[i] = -QN[i];
+  }
+
+  for(i=0; i<n1*n1; i++)
+  {
+    PN[i] = PN[i] + pwork[i];
+  }
+
+  return;
+}
+
+/*!
+ * This function calculates A^-1 by partitioning and given P^-1, 
+ * where A is symmetric.
+ * 
+ * A is partitioned into 
+ *  
+ *   P  ,  Q
+ *   Q^T,  S
+ * 
+ * where P(n1xn1), Q(n1xn2), S(n2xn2), n=n1+n2.
+ * 
+ * The size of work is is (n1*n2 + n1*n1)=n1*n.
+ */
+void inverse_symat_partition_inv(double *Pinv, double *S, double *Q, int n1, 
+                                 int n2, double *PN, double *SN, double *QN, 
+                                 double *work, int *ipiv)
+{
+  int i, j, info;
+  double *pwork;
+
+  /* P^-1 x Q */
+  multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
+
+  /* Q^T x P^-1 x Q */
+  multiply_mat_MN_transposeA(Q, work, SN, n2, n2, n1);
+
+  /* (S - Q^T x P^-1 x Q)^-1; only upper triangle */
+  for(i=0; i<n2; i++)
+  {
+    for(j=i; j<n2; j++)
+    {
+      SN[i*n2 + j] = S[i*n2 + j] - SN[i*n2 + j];
+    }
+  }
+  inverse_symat(SN, n2, &info, ipiv);
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
+  multiply_mat_MN(work, SN, QN, n1, n2, n2);
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
+  pwork = work+n1*n2;
+  multiply_mat_MN_transposeB(QN, work, pwork, n1, n1, n2);
+
+  for(i=0; i<n1*n2; i++)
+  {
+    QN[i] = -QN[i];
+  }
+
+  for(i=0; i<n1*n1; i++)
+  {
+    PN[i] = Pinv[i] + pwork[i];
+  }
+
+  return;
+}
+
+void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n1, 
+                                 int n2, double *PN, double *SN, double *QN, 
+                                 double *lndet, double *work, int *ipiv)
+{
+  int i, j, info;
+  double *pwork;
+
+  /* P^-1 x Q */
+  multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
+
+  /* Q^T x P^-1 x Q */
+  multiply_mat_MN_transposeA(Q, work, SN, n2, n2, n1);
+
+  /* (S - Q^T x P^-1 x Q)^-1; only upper triangle*/
+  for(i=0; i<n2; i++)
+  {
+    for(j=i; j<n2; j++)
+    {
+      SN[i*n2 + j] = S[i*n2 + j] - SN[i*n2 + j];
+    }
+  }
+  /* note that lndet = lndet(SN^-1) */
+  inverse_symat_lndet(SN, n2, lndet, &info, ipiv); 
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
+  multiply_mat_MN(work, SN, QN, n1, n2, n2);
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
+  pwork = work+n1*n2;
+  multiply_mat_MN_transposeB(QN, work, pwork, n1, n1, n2);
+
+  for(i=0; i<n1*n2; i++)
+  {
+    QN[i] = -QN[i];
+  }
+
+  for(i=0; i<n1*n1; i++)
+  {
+    PN[i] = Pinv[i] + pwork[i];
+  }
+
+  return;
+}
+
+/*!
+ * This function calculates A^-1 by iterative partitioning,
+ * where A is symmetric.
+ * 
+ * A is partitioned into 
+ *  
+ *   An  ,  Qn
+ *   Qn^T,  Sn
+ * 
+ * and An is partitioned into 
+ * 
+ *   An-1  ,  Qn-1
+ *   Qn-1^T,  Sn-1
+ * 
+ * and so on ... in total n iterations.
+ * 
+ * narr stores the size of A1, S1， S2，..., Sn. note the size 
+ * of narr is n+1.
+ * 
+ * The size of work_inv is about 3*nt*nt.
+ * 
+ * On exit, calculate lndet(A).
+ */
+void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *lndet, 
+                                  double *work_inv, int *ipiv)
+{
+  int i, j, k, ni, nq, info;
+  double *Ai, *Qi, *Si, *ANi, *QNi, *SNi, *pwork, lndet_SN;
+
+  ni = narr[0];
+  Ai = work_inv;
+
+  /* A1; only upper triangle */
+  for(i=0; i<ni; i++)
+  {
+    for(j=i; j<ni; j++)
+    {
+      Ai[i*ni + j] = A[i*nt + j];
+    }
+  }
+  inverse_symat_lndet(Ai, ni, lndet, &info, ipiv);
+  
+  for(k=1; k<=np; k++)
+  {
+    nq = narr[k];
+    
+    Qi = Ai + nt*nt;
+    Si = Qi + ni*nq;
+  
+    ANi = Si + nq*nq;
+    QNi = ANi + ni*ni;
+    SNi = QNi + ni*nq;
+
+    pwork = SNi + nq*nq;
+  
+    for(i=0; i<ni; i++)
+    {
+      for(j=0; j<nq; j++)
+      {
+        Qi[i*nq+j] = A[i*nt + (ni+j)];
+      }
+    }
+  
+    for(i=0; i<nq; i++)
+    {
+      for(j=0; j<nq; j++)
+      {
+        Si[i*nq+j] = A[(ni+i)*nt+(ni+j)];
+      }
+    }
+  
+    inverse_symat_lndet_partition_inv(Ai, Si, Qi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
+    *lndet += lndet_SN; /* lndet_SN = -lndet(SN) */
+
+    /* new Ai */
+    for(i=0; i<ni; i++)
+    {
+      /* diagonal */
+      for(j=0; j<ni; j++)
+      {
+        Ai[i*(ni+nq) + j] = ANi[i*ni + j];
+      }
+
+      /* upper right and lower left corner */
+      for(j=0; j<nq; j++)
+      {
+        Ai[i*(ni+nq) + (ni+j)] = Ai[(ni+j)*(ni+nq) + i] = QNi[i*nq+j];
+      }
+    }
+
+    for(i=0; i<nq; i++)
+    {
+      for(j=0; j<nq; j++)
+      {
+        Ai[(ni+i)*(ni+nq) + (ni+j)] = SNi[i*nq + j];
+      }
+    }
+    ni += nq;
+  }
+  
+  memcpy(A, Ai, ni*ni*sizeof(double));
+  return;
+}
+
+void inverse_symat_partition_iter_semiseparable(double *A, int nt, int *narr, int np, 
+                                  double *W, double *D, double *phi, double *lndet, 
+                                  double *work_inv, int *ipiv)
+{
+  int i, j, k, ni, nq, info;
+  double *Ai, *Qi, *Si, *ANi, *QNi, *SNi, *pwork, lndet_SN;
+
+  ni = narr[0];
+  Ai = work_inv;
+
+  /* A1; only upper triangle */
+  for(i=0; i<ni; i++)
+  {
+    for(j=i; j<ni; j++)
+    {
+      Ai[i*ni + j] = A[i*nt + j];
+    }
+  }
+  inverse_symat_lndet(Ai, ni, lndet, &info, ipiv);
+  
+  for(k=1; k<=np; k++)
+  {
+    nq = narr[k];
+    
+    Qi = Ai + nt*nt;
+    Si = Qi + ni*nq;
+  
+    ANi = Si + nq*nq;
+    QNi = ANi + ni*ni;
+    SNi = QNi + ni*nq;
+
+    pwork = SNi + nq*nq;
+  
+    for(i=0; i<ni; i++)
+    {
+      for(j=0; j<nq; j++)
+      {
+        Qi[i*nq+j] = A[i*nt + (ni+j)];
+      }
+    }
+  
+    for(i=0; i<nq; i++)
+    {
+      for(j=0; j<nq; j++)
+      {
+        Si[i*nq+j] = A[(ni+i)*nt+(ni+j)];
+      }
+    }
+  
+    inverse_symat_lndet_partition_inv(Ai, Si, Qi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
+    *lndet += lndet_SN; /* lndet_SN = -lndet(SN) */
+
+    /* new Ai */
+    for(i=0; i<ni; i++)
+    {
+      /* diagonal */
+      for(j=0; j<ni; j++)
+      {
+        Ai[i*(ni+nq) + j] = ANi[i*ni + j];
+      }
+
+      /* upper right and lower left corner */
+      for(j=0; j<nq; j++)
+      {
+        Ai[i*(ni+nq) + (ni+j)] = Ai[(ni+j)*(ni+nq) + i] = QNi[i*nq+j];
+      }
+    }
+
+    for(i=0; i<nq; i++)
+    {
+      for(j=0; j<nq; j++)
+      {
+        Ai[(ni+i)*(ni+nq) + (ni+j)] = SNi[i*nq + j];
+      }
+    }
+    ni += nq;
+  }
+  
+  memcpy(A, Ai, ni*ni*sizeof(double));
+  return;
 }

@@ -72,6 +72,7 @@ void allocate_memory()
 
   workspace = malloc((50*nall_max)*sizeof(double));
   workspace_ipiv = malloc(nall_max*sizeof(int));
+  workspace_inv = malloc(3*nall_max*nall_max*sizeof(double));
 
   var_param = malloc(num_params_var * sizeof(double));
   var_param_std = malloc(num_params_var * sizeof(double));
@@ -144,6 +145,7 @@ void free_memory()
 
   free(workspace);
   free(workspace_ipiv);
+  free(workspace_inv);
 
   free(logz_arr);
   return;

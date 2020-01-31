@@ -438,12 +438,14 @@ void postprocess_line()
 void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
-  int i, j, k, m, info, idx;
+  int i, j, k, m, info, idx, *ipiv;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
   int nall_data, nqall, ntall, np;
   double *fall_data;
   double sigma, tau, *pm=(double *)model;
 
+  ipiv = workspace_ipiv;
+  
   idx = idx_con_pm[nds];
   tau = exp(pm[idx+2]);
   sigma = exp(pm[idx+1]) * sqrt(tau);
@@ -475,7 +477,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   
   set_covar_Amat_line(model, nds, nall, tall);
 
-  inverse_symat(PCmat, nall_data, &info);
+  inverse_symat(PCmat, nall_data, &info, ipiv);
 
   for(i=0;i<dataset[nds].con.n;i++)
   {
@@ -505,7 +507,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   multiply_mat_MN_transposeA(Larr, ybuf, yuq, nqall, 1, nall_data);
 
   /* (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
-  inverse_symat(Cq, nqall, &info);
+  inverse_symat(Cq, nqall, &info, ipiv);
   multiply_mat_MN(Cq, yuq, yq, nqall, 1, nqall);
 
   /*  L x q */
@@ -642,12 +644,12 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   memcpy(PEmat1, PCmat, nall_data*nall_data*sizeof(double));
   memcpy(PEmat2, Larr, nall_data*nqall*sizeof(double));
 
-  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, nqall); // Tmat2 = C^-1 * L;  NxNq
+  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, nqall, ipiv); // Tmat2 = C^-1 * L;  NxNq
 
   multiply_mat_MN_transposeA(Larr, PEmat2, Cq, nqall, nqall, nall_data); // ICq = L^T*C^-1*L; NqxNq
   multiply_mat_MN_transposeA(PEmat2, fall_data, yq, nqall, 1, nall_data); // yq = L^T*C^-1*y;  Nqx1
   memcpy(PEmat1, Cq, nqall*nqall*sizeof(double));
-  multiply_mat_MN_inverseA(PEmat1, yq, nqall, 1); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
+  multiply_mat_MN_inverseA(PEmat1, yq, nqall, 1, ipiv); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
 
   multiply_mat_MN(Larr, yq, yave, nall_data, 1, nqall); // yave = L * q; Nx1
   for(i=0; i<nall_data; i++)
@@ -655,7 +657,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
 
   memcpy(PEmat1, PCmat, nall_data*nall_data*sizeof(double));
   memcpy(PEmat2, y, nall_data*sizeof(double));
-  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, 1);  // C^-1 * (y - Lq)
+  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, 1, ipiv);  // C^-1 * (y - Lq)
 
   multiply_matvec_MN(USmat, ntall, nall_data, PEmat2, fall); // S * C^-1 * (y - Lq)
 
@@ -693,7 +695,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   memcpy(PEmat1, PCmat, nall_data*nall_data*sizeof(double));
   memcpy(PEmat2, USmatT, ntall*nall_data*sizeof(double));
 
-  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, ntall); // C^-1 x S; NdxN
+  multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, ntall, ipiv); // C^-1 x S; NdxN
   multiply_mat_MN(USmat, PEmat2, PEmat1, ntall, ntall, nall_data); // S x C^-1 x S; NxN
 
   /* S x C^-1 x L */
@@ -779,18 +781,18 @@ double prob_line_variability(const void *model)
     memcpy(Tmat1, PCmat, nall*nall*sizeof(double));
     memcpy(Tmat2, Larr, nall*nqall*sizeof(double));
 
-    multiply_mat_MN_inverseA(Tmat1, Tmat2, nall, nqall); // Tmat2 = C^-1 * L;  NxNq
+    multiply_mat_MN_inverseA(Tmat1, Tmat2, nall, nqall, ipiv); // Tmat2 = C^-1 * L;  NxNq
 
     multiply_mat_MN_transposeA(Larr, Tmat2, ICq, nqall, nqall, nall); // ICq = L^T*C^-1*L; NqxNq
     multiply_mat_MN_transposeA(Tmat2, fall, yq, nqall, 1, nall); // yq = L^T*C^-1*y;  Nqx1
     memcpy(Tmat1, ICq, nqall*nqall*sizeof(double));
-    multiply_mat_MN_inverseA(Tmat1, yq, nqall, 1); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
+    multiply_mat_MN_inverseA(Tmat1, yq, nqall, 1, ipiv); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
 
     multiply_mat_MN(Larr, yq, yave, nall, 1, nqall); // yave = L * q; Nx1
     for(i=0; i<nall; i++)y[i] = fall[i] - yave[i];
     memcpy(Tmat1, PCmat, nall*nall*sizeof(double));
     memcpy(ybuf, y, nall*sizeof(double));
-    multiply_mat_MN_inverseA(Tmat1, ybuf, nall, 1); // ybuf = C^-1 * y; Nx1
+    multiply_mat_MN_inverseA(Tmat1, ybuf, nall, 1, ipiv); // ybuf = C^-1 * y; Nx1
 
     prob1 = -0.5*cblas_ddot(nall, y, 1, ybuf, 1)/(sigma*sigma); // y^T * C^-1 * y
 
@@ -837,7 +839,7 @@ double prob_line_variability2(const void *model)
 
   Larr = workspace;
   ybuf = Larr + nall_max * ((1+nlset_max)*nq);
-  y = ybuf + nall_max;
+  y = ybuf + nall_max * ((1+nlset_max)*nq);
   yq = y + nall_max;
   Cq = yq + (1+nlset_max)*nq;
   ICq = Cq + (1+nlset_max)*nq * (1+nlset_max)*nq;
@@ -928,10 +930,13 @@ double prob_line_variability2(const void *model)
   return prob;
 }
 
+/*!
+ * calulate inverse and lndet simultaneously.
+ */
 double prob_line_variability3(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau;
-  int i, j, k, m, np, info, sign=0;
+  int i, j, k, m, np, info, sign, *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq;
   double *fall;
@@ -940,9 +945,11 @@ double prob_line_variability3(const void *model)
 
   Larr = workspace;
   ybuf = Larr + nall_max * ((1+nlset_max)*nq);
-  y = ybuf + nall_max;
+  y = ybuf + nall_max* ((1+nlset_max)*nq);
   yq = y + nall_max;
   Cq = yq + (1+nlset_max)*nq;
+
+  ipiv = workspace_ipiv;
 
   /* iterate over all datasets */
   for(k=0; k<nset; k++)
@@ -976,7 +983,7 @@ double prob_line_variability3(const void *model)
      
     set_covar_Pmat_data_line_array(model, k);
 
-    inverse_symat_lndet(PCmat, nall, &lndet, &info, &sign); /* calculate C^-1 */
+    inverse_symat_lndet_sign(PCmat, nall, &lndet, &info, &sign, ipiv); /* calculate C^-1 */
     if(info!=0|| sign==-1)
     {
       prob = -DBL_MAX;
@@ -994,7 +1001,7 @@ double prob_line_variability3(const void *model)
     multiply_mat_MN_transposeA(Larr, ybuf, yq, nqall, 1, nall);
 
     /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
-    inverse_symat_lndet(Cq, nqall, &lndet_ICq, &info, &sign);
+    inverse_symat_lndet_sign(Cq, nqall, &lndet_ICq, &info, &sign, ipiv);
     if(info!=0 || sign==-1 )
     {
       prob = -DBL_MAX;
@@ -1023,6 +1030,115 @@ double prob_line_variability3(const void *model)
     
     prob += prob1 -0.5*lndet - 0.5*lndet_ICq;
 
+  }
+  return prob;
+}
+
+/*!
+ * using semiseparable matrix and partitioning inverse
+ * 
+ */
+double prob_line_variability4(const void *model)
+{
+  double prob = 0.0, prob1, sigma, tau;
+  int i, j, k, m, np, info, sign, *ipiv;
+  double lndet, lndet_ICq;
+  double *Larr, *ybuf, *y, *yq, *Cq;
+  double *fall;
+  int nall, nqall, idx;
+  double *pm = (double *)model;
+  double *work;
+  int *narr, nd;
+
+  Larr = workspace;
+  ybuf = Larr + nall_max * ((1+nlset_max)*nq);
+  y = ybuf + nall_max * ((1+nlset_max)*nq);
+  yq = y + nall_max;
+  Cq = yq + (1+nlset_max)*nq;
+
+  narr = Cq + ((1+nlset_max)*nq) * ((1+nlset_max)*nq);
+
+  ipiv = workspace_ipiv;
+  work = workspace_inv;
+
+  /* iterate over all datasets */
+  for(k=0; k<nset; k++)
+  {
+    idx = idx_con_pm[k];
+    tau = exp(pm[idx+2]);
+    sigma = exp(pm[idx+1]) * sqrt(tau);
+
+    nall = alldata[k].n;
+    fall = alldata[k].f;
+    nqall = nq * (1+dataset[k].nlset);
+
+    for(i=0;i<dataset[k].con.n;i++)
+    {
+      Larr[i*nqall] = 1.0; 
+      for(j=0; j<dataset[k].nlset; j++)
+        Larr[i*nqall + 1 + j] = 0.0;
+    }
+    np = dataset[k].con.n;
+    for(j=0; j<dataset[k].nlset; j++)
+    {
+      for(m=0; m<dataset[k].line[j].n; m++)
+      {
+        for(i=0; i<nqall; i++)
+          Larr[(np+m)*nqall + i ]  = 0.0;
+        
+        Larr[(np + m) * nqall + 1 + j] = 1.0;
+      }
+      np += dataset[k].line[j].n;
+    }
+    
+    nd = dataset[k].nlset;
+    narr[0] = dataset[k].con.n;
+    for(i=1; i<=nd; i++)
+      narr[i] = dataset[k].line[i-1].n;
+
+    set_covar_Pmat_data_line_array(model, k);
+
+    /* C^-1 and lndet(C) */
+    inverse_symat_partition_iter(PCmat, nall, narr, nd, &lndet, work, ipiv); 
+    lndet += 2.0*nall*log(sigma);
+
+    /* calculate L^T*C^-1*L */
+    multiply_mat_MN(PCmat, Larr, ybuf, nall, nqall, nall);
+    multiply_mat_MN_transposeA(Larr, ybuf, Cq, nqall, nqall, nall);
+
+    /* calculate L^T*C^-1*y */
+    multiply_matvec(PCmat, fall, nall, ybuf);
+    multiply_mat_MN_transposeA(Larr, ybuf, yq, nqall, 1, nall);
+
+    /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
+    inverse_symat_lndet_sign(Cq, nqall, &lndet_ICq, &info, &sign, ipiv);
+    if(info!=0 || sign==-1 )
+    {
+      prob = -DBL_MAX;
+      printf("lndet_ICq %f %d!\n", lndet_ICq, sign);
+      return prob;
+    }
+    lndet_ICq += - 2.0*nqall*log(sigma);
+    multiply_mat_MN(Cq, yq, ybuf, nqall, 1, nqall);
+  
+    multiply_matvec_MN(Larr, nall, nqall, ybuf, y);
+    for(i=0; i<nall; i++)
+    {
+      y[i] = fall[i] - y[i];
+    }
+
+    /* y^T x C^-1 x y */
+    multiply_matvec(PCmat, y, nall, ybuf);
+    prob1 = -0.5 * cblas_ddot(nall, y, 1, ybuf, 1)/(sigma*sigma);
+    
+    if(prob1 > 0.0 )  // check if prob is positive
+    { 
+      prob = -DBL_MAX;
+      printf("prob >0!\n");
+      return prob;
+    }
+    
+    prob += prob1 -0.5*lndet - 0.5*lndet_ICq;
   }
   return prob;
 }

@@ -411,13 +411,15 @@ double prob_con_variability(const void *model)
 double prob_con_variability_semiseparable(const void *model)
 {
   double prob = 0.0;
-  int i, k, info, sign;
+  int i, k, info, sign, *ipiv;
   double *pm = (double *)model;
   double tau, sigma, sigma2, alpha, lndet, lndet_ICq, syserr;
   double *Larr, *ybuf, *y, *yq, *Cq;
   double *tcon, *fcon, *fecon;
   int ncon, idx;
   double *W, *D, *phi;
+
+  ipiv = workspace_ipiv;
 
   Larr = workspace;
   ybuf = Larr + ncon_max;
@@ -463,7 +465,7 @@ double prob_con_variability_semiseparable(const void *model)
     multiply_mat_MN_transposeA(Larr, ybuf, yq, nq, 1, ncon);
 
     /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
-    inverse_symat_lndet(Cq, nq, &lndet_ICq, &info, &sign);
+    inverse_symat_lndet(Cq, nq, &lndet_ICq, &info, ipiv);
     multiply_mat_MN(Cq, yq, ybuf, nq, 1, nq);
   
     multiply_matvec_MN(Larr, ncon, nq, ybuf, y);

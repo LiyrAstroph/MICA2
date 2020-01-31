@@ -52,6 +52,7 @@ double *logz_arr; /* evidence */
 
 // mathematic functions
 int *workspace_ipiv;
+double *workspace_inv;
 
 // error exit
 char str_error_exit[200];

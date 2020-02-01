@@ -855,25 +855,109 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
   return;
 }
 
-void inverse_symat_partition_iter_semiseparable(double *A, int nt, int *narr, int np, 
-                                  double *W, double *D, double *phi, double *lndet, 
-                                  double *work_inv, int *ipiv)
+void inverse_symat_lndet_partition_inv_semiseparable(double *Pinv, double *W, double *D, 
+                                 double *phi, double a1,  
+                                 double *S, double *Q, int n1, 
+                                 int n2, double *PN, double *SN, double *QN, 
+                                 double *lndet, double *work, int *ipiv)
 {
-  int i, j, k, ni, nq, info;
-  double *Ai, *Qi, *Si, *ANi, *QNi, *SNi, *pwork, lndet_SN;
+  int i, j, info;
+  double *pwork;
 
+  /* P^-1 x Q */
+  multiply_mat_semiseparable_drw(Q, W, D, phi, n1, n2, a1, work);
+  //multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
+
+  /* Q^T x P^-1 x Q */
+  multiply_mat_MN_transposeA(Q, work, SN, n2, n2, n1);
+
+  /* (S - Q^T x P^-1 x Q)^-1; only upper triangle*/
+  for(i=0; i<n2; i++)
+  {
+    for(j=i; j<n2; j++)
+    {
+      SN[i*n2 + j] = S[i*n2 + j] - SN[i*n2 + j];
+    }
+  }
+  /* note that lndet = lndet(SN^-1) */
+  inverse_symat_lndet(SN, n2, lndet, &info, ipiv); 
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
+  multiply_mat_MN(work, SN, QN, n1, n2, n2);
+
+  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
+  pwork = work+n1*n2;
+  multiply_mat_MN_transposeB(QN, work, pwork, n1, n1, n2);
+
+  for(i=0; i<n1*n2; i++)
+  {
+    QN[i] = -QN[i];
+  }
+
+  for(i=0; i<n1*n1; i++)
+  {
+    PN[i] = Pinv[i] + pwork[i];
+  }
+
+  return;
+}
+
+/*!
+ *  calculate A^-1 and lndet(A).
+ * 
+ *  A = LxDxL^T, L = I + tril(UxW^T), D is a diagonal matrix.
+ * 
+ *  M = LxD^1/2,  A = MxM^T,  A^-1 = (M^T)^-1xM^-1.
+ */
+void inverse_semiseparable(double *t, int n, double a1, double c1, double *sigma, 
+                           double syserr, double *W, double *D, double *phi,
+                           double *A, double *lndet)
+{
+  int i, j;
+
+  compute_semiseparable_drw(t, n, a1, c1, sigma, syserr, W, D, phi);
+  
+  *lndet = 0.0;
+  for(i=0; i<n; i++)
+  {
+    A[i*n + i] = 1.0 * sqrt(D[i]);
+    for(j=0; j<i; j++)
+    {
+      A[i*n + j] = a1 * (exp(-c1*(t[i]-t[j]))*W[j]) * sqrt(D[j]);
+    }
+
+    *lndet += log(D[i]);
+  }
+  LAPACKE_dtrtri(LAPACK_ROW_MAJOR, 'L', 'N', n, A, n);
+
+  LAPACKE_dlauum(LAPACK_ROW_MAJOR, 'L', n, A, n);
+
+  /* fill up upper triangle */
+  for(i=0; i<n; i++)
+    for(j=i+1; j<n; j++)
+      A[i*n+j] = A[j*n+i];
+  return;
+}
+
+/*!
+ *  calculate A^-1 and lndet(A) by iterative partitioning.
+ * 
+ *  A = LxDxL^T, L = I + tril(UxW^T), D is a diagonal matrix.
+ * 
+ *  M = LxD^1/2,  A = MxM^T,  A^-1 = (M^T)^-1xM^-1.
+ */
+void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *sigma, 
+                           double syserr, double *W, double *D, double *phi,
+                           double *A, int nt, int *narr, int np, double *lndet,
+                           double *work_inv, int *ipiv)
+{
+  int i, j, k, ni, nq;
+  double *Ai, *Qi, *Si, *ANi, *QNi, *SNi, *pwork, lndet_SN;
+ 
   ni = narr[0];
   Ai = work_inv;
 
-  /* A1; only upper triangle */
-  for(i=0; i<ni; i++)
-  {
-    for(j=i; j<ni; j++)
-    {
-      Ai[i*ni + j] = A[i*nt + j];
-    }
-  }
-  inverse_symat_lndet(Ai, ni, lndet, &info, ipiv);
+  inverse_semiseparable(t, ni, a1, c1, sigma, syserr, W, D, phi, Ai, lndet);
   
   for(k=1; k<=np; k++)
   {

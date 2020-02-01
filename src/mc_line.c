@@ -1040,10 +1040,10 @@ double prob_line_variability3(const void *model)
  */
 double prob_line_variability4(const void *model)
 {
-  double prob = 0.0, prob1, sigma, tau;
+  double prob = 0.0, prob1, sigma, sigma2, tau, syserr;
   int i, j, k, m, np, info, sign, *ipiv;
   double lndet, lndet_ICq;
-  double *Larr, *ybuf, *y, *yq, *Cq;
+  double *Larr, *ybuf, *y, *yq, *Cq, *W, *D, *phi, *fe;
   double *fall;
   int nall, nqall, idx;
   double *pm = (double *)model;
@@ -1056,7 +1056,13 @@ double prob_line_variability4(const void *model)
   yq = y + nall_max;
   Cq = yq + (1+nlset_max)*nq;
 
-  narr = Cq + ((1+nlset_max)*nq) * ((1+nlset_max)*nq);
+  W = Cq + ((1+nlset_max)*nq) * ((1+nlset_max)*nq);
+  D = W + nall_max;
+  phi = D + nall_max;
+  
+  fe = phi + nall_max;
+
+  narr = fe + nall_max;
 
   ipiv = workspace_ipiv;
   work = workspace_inv;
@@ -1067,6 +1073,8 @@ double prob_line_variability4(const void *model)
     idx = idx_con_pm[k];
     tau = exp(pm[idx+2]);
     sigma = exp(pm[idx+1]) * sqrt(tau);
+    sigma2 = sigma*sigma;
+    syserr = (exp(pm[idx+0])-1.0)*dataset[k].con.error_mean/sigma;
 
     nall = alldata[k].n;
     fall = alldata[k].f;
@@ -1098,8 +1106,15 @@ double prob_line_variability4(const void *model)
 
     set_covar_Pmat_data_line_array(model, k);
 
+    for(i=0; i<dataset[k].con.n; i++)
+      fe[i] = dataset[k].con.fe[i]/sigma;
+      
+    inverse_semiseparable_iter(dataset[k].con.t, dataset[k].con.n, 1.0, 1.0/tau, 
+                          fe, syserr, W, D, phi, PCmat, nall, narr, nd,
+                          &lndet, work, ipiv);
+
     /* C^-1 and lndet(C) */
-    inverse_symat_partition_iter(PCmat, nall, narr, nd, &lndet, work, ipiv); 
+    //inverse_symat_partition_iter(PCmat, nall, narr, nd, &lndet, work, ipiv); 
     lndet += 2.0*nall*log(sigma);
 
     /* calculate L^T*C^-1*L */

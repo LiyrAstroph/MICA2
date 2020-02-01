@@ -114,5 +114,21 @@ void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n
                                  int n2, double *PN, double *SN, double *QN, 
                                  double *lndet, double *work, int *ipiv);
 
+void inverse_symat_lndet_partition_inv_semiseparable(double *Pinv, double *W, double *D, 
+                                 double *phi, double a1,  
+                                 double *S, double *Q, int n1, 
+                                 int n2, double *PN, double *SN, double *QN, 
+                                 double *lndet, double *work, int *ipiv);
+
 void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *lndet,
                              double *work_inv, int *ipiv);
+
+void inverse_semiseparable(double *t, int n, double a1, double c1, double *sigma, 
+                           double syserr, double *W, double *D, double *phi,
+                           double *A, double *lndet);
+
+
+void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *sigma, 
+                           double syserr, double *W, double *D, double *phi,
+                           double *A, int nt, int *narr, int np, double *lndet,
+                           double *work_inv, int *ipiv);

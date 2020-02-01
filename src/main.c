@@ -17,7 +17,7 @@
 
 int main(int argc, char **argv)
 {
-  double t0, t1, dt;
+  double t0=0.0, t1=0.0, dt;
   int opt;
 
   MPI_Init(&argc, &argv);
@@ -36,13 +36,19 @@ int main(int argc, char **argv)
     optind = 0; /* reset getopt. */
     
     flag_postprc = 0;
+    flag_end = 0;
 
-    while( (opt = getopt(argc, argv, "p")) != -1)
+    while( (opt = getopt(argc, argv, "pv")) != -1)
     {
       switch(opt)
       {
         case 'p':
           flag_postprc = 1;
+          break;
+        
+        case 'v':
+          flag_end = 1;
+          print_version();
           break;
       }
     }
@@ -56,10 +62,14 @@ int main(int argc, char **argv)
     }
   }
   MPI_Bcast(&flag_postprc, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+  MPI_Bcast(&flag_end, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   
-  begin_run();
+  if(flag_end != 1)
+  {
+    begin_run();
 
-  end_run();
+    end_run();
+  }
 
   MPI_Finalize();   /* clean up and finalize MPI */
   if(thistask == roottask)

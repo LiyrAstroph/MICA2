@@ -25,6 +25,7 @@ void get_posterior_sample_file(char *fname, char *samplefile);
 
 void init();
 
+void print_version();
 
 /* for con */
 double dnest_con(int argc, char **argv);

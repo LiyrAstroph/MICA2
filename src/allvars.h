@@ -56,7 +56,7 @@ extern int *workspace_ipiv;
 extern double *workspace_inv;
 
 
-extern int flag_postprc;
+extern int flag_postprc, flag_end;
 
 typedef struct 
 {

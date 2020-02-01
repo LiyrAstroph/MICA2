@@ -56,10 +56,10 @@ SRC      = ./src
 OBJS     = $(SRC)/main.o $(SRC)/allvars.o $(SRC)/system.o $(SRC)/run.o        \
            $(SRC)/dnest_con.o  $(SRC)/dnest_line.o $(SRC)/read.o              \
            $(SRC)/mc_con.o $(SRC)/init.o $(SRC)/mathfun.o                     \
-           $(SRC)/mc_line.o  $(SRC)/error.o
+           $(SRC)/mc_line.o  $(SRC)/error.o  ${SRC}/version.o
   
 INCL     = Makefile $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h \
-           $(SRC)/dnest_line.h 
+           $(SRC)/dnest_line.h $(SRC)/version.h
 
 OPTIONS  = $(OPTIMIZE)
 CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL)

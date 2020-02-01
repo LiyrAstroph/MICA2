@@ -1040,7 +1040,7 @@ double prob_line_variability3(const void *model)
  */
 double prob_line_variability4(const void *model)
 {
-  double prob = 0.0, prob1, sigma, sigma2, tau, syserr;
+  double prob = 0.0, prob1, sigma, tau, syserr;
   int i, j, k, m, np, info, sign, *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *W, *D, *phi, *fe;
@@ -1062,7 +1062,7 @@ double prob_line_variability4(const void *model)
   
   fe = phi + nall_max;
 
-  narr = fe + nall_max;
+  narr = (int *)(fe + nall_max);
 
   ipiv = workspace_ipiv;
   work = workspace_inv;
@@ -1073,7 +1073,6 @@ double prob_line_variability4(const void *model)
     idx = idx_con_pm[k];
     tau = exp(pm[idx+2]);
     sigma = exp(pm[idx+1]) * sqrt(tau);
-    sigma2 = sigma*sigma;
     syserr = (exp(pm[idx+0])-1.0)*dataset[k].con.error_mean/sigma;
 
     nall = alldata[k].n;

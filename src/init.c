@@ -55,7 +55,7 @@ void init()
 
 void allocate_memory()
 {
-  int i;
+  int i, ns, n;
 
   PNmat = malloc(nall_max*nall_max*sizeof(double));
   PSmat = malloc(nall_max*nall_max*sizeof(double));
@@ -69,9 +69,11 @@ void allocate_memory()
 
   Tmat1 = malloc(nall_max*nall_max*sizeof(double));
   Tmat2 = malloc(nall_max*nall_max*sizeof(double));
-
-  workspace = malloc((50*nall_max)*sizeof(double));
-  workspace_ipiv = malloc(nall_max*sizeof(int));
+  
+  ns = ((1+nlset_max)*nq);
+  n = 10*nall_max + (6*nall_max + 1 + ns) * ns;
+  workspace = malloc((n)*sizeof(double));
+  workspace_ipiv = malloc(5*nall_max*sizeof(int));
   workspace_inv = malloc(3*nall_max*nall_max*sizeof(double));
 
   var_param = malloc(num_params_var * sizeof(double));

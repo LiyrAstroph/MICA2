@@ -28,8 +28,8 @@ void mc_line()
   double logz_max;
   char **argv;
 
-  argv = malloc(9*sizeof(char *));
-  for(i=0; i<9; i++)
+  argv = malloc(11*sizeof(char *));
+  for(i=0; i<11; i++)
   {
     argv[i] = malloc(MICA_MAX_STR_LENGTH*sizeof(char));
   }
@@ -46,6 +46,10 @@ void mc_line()
 
   if(flag_postprc == 1)
     strcpy(argv[argc++], "-p");
+  
+  // sample tag 
+  strcpy(argv[argc++], "-g");
+  strcpy(argv[argc++], "1d");
 
   mc_line_init();
 

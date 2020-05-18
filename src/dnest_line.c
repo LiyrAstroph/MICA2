@@ -90,7 +90,7 @@ double dnest_line(int argc, char **argv)
     }
   }
 
-  logz = dnest(argc, argv, fptrset_line, num_params, dnest_options_file);
+  logz = dnest(argc, argv, fptrset_line, num_params, "data/", dnest_options_file);
 
   //free memory
   dnest_free_fptrset(fptrset_line);

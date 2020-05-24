@@ -128,9 +128,8 @@ void output_reconstrction(const void *model)
     size_of_modeltype = num_params * sizeof(double);
 
     /* get file name of posterior sample file */
-    get_posterior_sample_file(dnest_options_file, posterior_sample_file);
+    dnest_get_posterior_sample_file(posterior_sample_file);
     /* open file for posterior sample */
-    strcat(posterior_sample_file, postfix);
     fp_sample = fopen(posterior_sample_file, "r");
     if(fp_sample == NULL)
     {

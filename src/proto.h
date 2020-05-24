@@ -21,7 +21,6 @@ int read_data();
 void scale_con_line();
 void cal_mean_error();
 void get_num_particles(char *fname);
-void get_posterior_sample_file(char *fname, char *samplefile);
 
 void init();
 

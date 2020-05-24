@@ -354,10 +354,9 @@ void postprocess_line()
     FILE *fp;
 
     /* get file name of posterior sample file */
-    get_posterior_sample_file(dnest_options_file, posterior_sample_file);
+    dnest_get_posterior_sample_file(posterior_sample_file);
 
     /* open file for posterior sample */
-    strcat(posterior_sample_file, postfix);
     fp = fopen(posterior_sample_file, "r");
     if(fp == NULL)
     {

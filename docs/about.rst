@@ -31,6 +31,6 @@ Here is an example for reverberation mapping analysis of the light curves from H
   :scale: 30 %
   :align: center
 
-  Reverberation mapping analysis of the light curves data for PG 2130+099 (Hu et al. 2020, arXiv:2001.03086).
+  Reverberation mapping analysis of the light curve data for PG 2130+099 (Hu et al. 2020, ApJ, 890, 71).
   The left panel shows transfer functions and the right panel shows the light curves and their reconstructions.
 

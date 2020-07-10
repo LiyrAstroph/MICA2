@@ -22,11 +22,10 @@ should be written in a text file： **OPTIONS1D**. This option file looks like::
   60	  # maximum number of levels
   10	  # Backtracking scale length (lambda in the paper)
   100	  # Strength of effect to force histogram to equal push. 0-10 is best. (beta in the paper)
-  1500	  # Maximum number of saves 
-  data/sample1d.txt                 # sample file
-  data/sample_info1d.txt            # sample_info file
-  data/levels1d.txt                 # level file
-  data/sampler_state1d.txt          # sample state file
-  data/posterior_sample1d.txt       # posterior sample file
-  data/posterior_sample_info1d.txt  # posterior sample info file
-  data/limits1d.txt                 # limits file
+  1500	  # Maximum number of saves
+
+
+In generic, the most import options are the maximum number of levels and the maximum number of saves. Unfornatuately, 
+there is not yet a satisfactory rule to determine the best values for these options before running the code. If one 
+finds the results not good or the effective sample two few, increase the maximum number of saves. If this does not 
+work, then increase the maximum number of levels.

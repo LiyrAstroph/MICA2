@@ -9,5 +9,5 @@ Here is a list of references that used MICA in the time lag analysis, retrieved 
 - `Huang, Y. et al. 2019, ApJ, 876, 102 <https://ui.adsabs.harvard.edu/abs/2019ApJ...876..102H/abstract>`_,
   *Reverberation Mapping of the Narrow-line Seyfert 1 Galaxy I Zwicky 1: Black Hole Mass*
 
-- Hu, C. et al. 2020, ApJ accepted,
+- `Hu, C. et al. 2020, ApJ, 890, 71 <https://ui.adsabs.harvard.edu/abs/2020ApJ...890...71H/abstract>`_,
   *Broad-Line Region of the Quasar PG 2130+099 from a Two-Year Reverberation Camgaign With High Cadence*

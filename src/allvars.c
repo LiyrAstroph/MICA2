@@ -27,6 +27,9 @@ PARSET parset;
 DATASET *dataset;
 int nset;
 
+PARDICT *pardict;
+int num_pardict;
+
 LC *alldata;
 
 /* con */

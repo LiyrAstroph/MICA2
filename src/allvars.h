@@ -80,6 +80,16 @@ extern PARSET parset;
 
 typedef struct
 {
+  int id;
+  void *addr;
+  char tag[50];
+  int isset;
+}PARDICT;
+extern PARDICT *pardict;
+extern int num_pardict;
+
+typedef struct
+{
   int n;
   double scale, error_mean;
   double *t, *f, *fe;

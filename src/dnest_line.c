@@ -10,7 +10,7 @@
 #include <math.h>
 
 #include "allvars.h"
-#include "dnestvars.h"
+#include "dnest.h"
 
 #include "dnest_line.h"
 
@@ -90,7 +90,7 @@ double dnest_line(int argc, char **argv)
     }
   }
 
-  logz = dnest(argc, argv, fptrset_line, num_params, "data/", dnest_options_file);
+  logz = dnest(argc, argv, fptrset_line, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL);
 
   //free memory
   dnest_free_fptrset(fptrset_line);
@@ -345,7 +345,7 @@ double perturb_line(void *model)
 {
   double *pm = (double *)model;
   double logH = 0.0, limit1, limit2, width;
-  int which, which_level, igau;
+  int which, which_level, igau, size_levels;
   
   /* sample variability parameters more frequently */
   do
@@ -356,6 +356,8 @@ double perturb_line(void *model)
 
   /* level-dependent width */
   which_level_update = dnest_get_which_level_update();
+  size_levels = dnest_get_size_levels();
+  
   which_level = which_level_update > (size_levels - 10)?(size_levels-10):which_level_update;
   if( which_level > 0)
   {

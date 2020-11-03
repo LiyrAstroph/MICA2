@@ -26,55 +26,67 @@ int read_parset()
     FILE *fparam;
     int i, j, nt;
     char str[200], buf1[200], buf2[200], buf3[200];
-    int id[MAXTAGS];
-    void *addr[MAXTAGS];
-    char tag[MAXTAGS][50];
+
+    pardict = malloc(MAXTAGS * sizeof(PARDICT));
 
     nt = 0;
-    strcpy(tag[nt], "FileDir");
-    addr[nt] = &parset.file_dir;
-    id[nt++] = STRING;
+    strcpy(pardict[nt].tag, "FileDir");
+    pardict[nt].addr = &parset.file_dir;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = STRING;
 
-    strcpy(tag[nt], "DataFile");
-    addr[nt] = &parset.data_file;
-    id[nt++] = STRING;
+    strcpy(pardict[nt].tag, "DataFile");
+    pardict[nt].addr = &parset.data_file;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = STRING;
 
-    strcpy(tag[nt], "FlagUniformVarParams");
-    addr[nt] = &parset.flag_uniform_var_params;
-    id[nt++] = INT;
+    strcpy(pardict[nt].tag, "FlagUniformVarParams");
+    pardict[nt].addr = &parset.flag_uniform_var_params;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
-    strcpy(tag[nt], "FlagUniformTranFuns");
-    addr[nt] = &parset.flag_uniform_tranfuns;
-    id[nt++] = INT;
+    strcpy(pardict[nt].tag, "FlagUniformTranFuns");
+    pardict[nt].addr = &parset.flag_uniform_tranfuns;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
-    strcpy(tag[nt], "LagLimitLow");
-    addr[nt] = &parset.lag_limit_low;
-    id[nt++] = DOUBLE;
+    strcpy(pardict[nt].tag, "LagLimitLow");
+    pardict[nt].addr = &parset.lag_limit_low;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
 
-    strcpy(tag[nt], "LagLimitUpp");
-    addr[nt] = &parset.lag_limit_upper;
-    id[nt++] = DOUBLE;
+    strcpy(pardict[nt].tag, "LagLimitUpp");
+    pardict[nt].addr = &parset.lag_limit_upper;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
 
-    strcpy(tag[nt], "NumGaussianLow");
-    addr[nt] = &parset.num_gaussian_low;
-    id[nt++] = INT;
+    strcpy(pardict[nt].tag, "NumGaussianLow");
+    pardict[nt].addr = &parset.num_gaussian_low;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
-    strcpy(tag[nt], "NumGaussianUpp");
-    addr[nt] = &parset.num_gaussian_upper;
-    id[nt++] = INT;
+    strcpy(pardict[nt].tag, "NumGaussianUpp");
+    pardict[nt].addr = &parset.num_gaussian_upper;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
-    strcpy(tag[nt], "FlagConSysErr");
-    addr[nt] = &parset.flag_con_sys_err;
-    id[nt++] = INT;
+    strcpy(pardict[nt].tag, "FlagConSysErr");
+    pardict[nt].addr = &parset.flag_con_sys_err;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
-    strcpy(tag[nt], "FlagLineSysErr");
-    addr[nt] = &parset.flag_line_sys_err;
-    id[nt++] = INT;
+    strcpy(pardict[nt].tag, "FlagLineSysErr");
+    pardict[nt].addr = &parset.flag_line_sys_err;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
-    strcpy(tag[nt], "TypeLagPrior");
-    addr[nt] = &parset.type_lag_prior;
-    id[nt++] = INT;
+    strcpy(pardict[nt].tag, "TypeLagPrior");
+    pardict[nt].addr = &parset.type_lag_prior;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
+    num_pardict = nt;
+    
     char fname[200];
     sprintf(fname, "%s", parset.param_file);
     
@@ -102,25 +114,25 @@ int read_parset()
       if(buf1[0]=='#')
         continue;
       for(i=0, j=-1; i<nt; i++)
-        if(strcmp(buf1, tag[i]) == 0)
+        if(strcmp(buf1, pardict[i].tag) == 0 && pardict[i].isset == 0)
         {
           j = i;
-          tag[i][0] = 0;
+          pardict[i].isset = 1;
           //printf("%s %s\n", buf1, buf2);
           break;
         }
       if(j >=0)
       {
-        switch(id[j])
+        switch(pardict[j].id)
         {
           case DOUBLE:
-            *((double *) addr[j]) = atof(buf2);
+            *((double *) pardict[j].addr) = atof(buf2);
             break;
           case STRING:
-            strcpy(addr[j], buf2);
+            strcpy(pardict[j].addr, buf2);
             break;
           case INT:
-            *((int *)addr[j]) = (int) atof(buf2);
+            *((int *)pardict[j].addr) = (int) atof(buf2);
             break;
         }
       }

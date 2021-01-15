@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "allvars.h"
 #include "dnest.h"
@@ -60,7 +61,7 @@ double dnest_con(int argc, char **argv)
     }
   }
 
-  logz = dnest(argc, argv, fptrset_con, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL);
+  logz = dnest(argc, argv, fptrset_con, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
 
   //free memory
   dnest_free_fptrset(fptrset_con);

@@ -6,4 +6,5 @@ src/*
 !docs/*.rst
 data/*
 mica2
-
+!postprocess.py
+!plotfig.py

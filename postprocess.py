@@ -30,10 +30,20 @@ def postprocess(fdir, ngau, temperature=1.0):
   zoom_in = True
   moreSamples = 1
  
-
-  levels_orig = np.genfromtxt(fdir+"/data/levels1d.txt_%d"%ngau, comments='#', dtype=float)
-  sample_info = np.genfromtxt(fdir+"/data/sample_info1d.txt_%d"%ngau, comments='#', dtype=float, skip_header=0)
-  sample = np.atleast_2d(np.genfromtxt(fdir+"/data/sample1d.txt_%d"%ngau, comments='#', dtype=float, skip_header=0))
+  try:
+    levels_orig = np.genfromtxt(fdir+"/data/levels1d.txt_%d"%ngau, comments='#', dtype=float)
+  except:
+    levels_orig = np.genfromtxt(fdir+"/data/levels1d.txt_%d"%ngau, comments='#', dtype=float, skip_footer=1)
+  
+  try:
+    sample_info = np.genfromtxt(fdir+"/data/sample_info1d.txt_%d"%ngau, comments='#', dtype=float, skip_header=0)
+  except:
+    sample_info = np.genfromtxt(fdir+"/data/sample_info1d.txt_%d"%ngau, comments='#', dtype=float, skip_header=0, skip_footer=1)
+  
+  try:
+    sample = np.atleast_2d(np.genfromtxt(fdir+"/data/sample1d.txt_%d"%ngau, comments='#', dtype=float, skip_header=0))
+  except:
+    sample = np.atleast_2d(np.genfromtxt(fdir+"/data/sample1d.txt_%d"%ngau, comments='#', dtype=float, skip_header=0, skip_footer=1))
   
   sample = sample[int(cut*sample.shape[0]):, :]
   sample_info = sample_info[int(cut*sample_info.shape[0]):, :]
@@ -211,7 +221,11 @@ def postprocess(fdir, ngau, temperature=1.0):
         break
     posterior_sample[i, :] = sample[which, :]
   
-  #np.savetxt('./posterior_sample'+str_dim+'.txt', posterior_sample)
+  # output posterior samples
+  fp = open(fdir+'/data/posterior_sample1d.txt_%d'%ngau, "w")
+  fp.write("# %d\n"%N)
+  np.savetxt(fp, posterior_sample)
+  fp.close()
 
 def postprocess_all(fdir, ngau_low=1, ngau_upp=1, temperature=1.0):
    

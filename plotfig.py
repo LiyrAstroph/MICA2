@@ -21,6 +21,14 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp):
   ls = line[1:].split(":")
   ns = np.array([int(i) for i in ls])
   fp.close()
+
+  # print time lags, median, and 68.3% confidence limits
+  print("ID: lag  -elo   +eup")
+  for j in range(1, len(ns)):
+    lag, err1, err2 = np.quantile(sample[:, 3+(j-1)*4+2], q=(0.5, (1.0-0.683)/2.0, 1.0-(1.0-0.683)/2.0))
+    err1 = lag-err1
+    err2 = err2 - lag
+    print("%d: %.3f -%.3f +%.3f"%(j, lag, err1, err2))
   
   dtau = tau_upp - tau_low 
   tau = np.linspace(tau_low-0.5*dtau, tau_upp+0.5*dtau, 100)
@@ -131,6 +139,7 @@ def _param_parser(fname):
 if __name__ == "__main__":
   if(len(sys.argv) < 2):
     print("Please specify paramter file!")
+    print("e.g., python plotfig.py src/param")
     exit(0)
   fparam = sys.argv[1]
   param = _param_parser(fparam)

@@ -254,6 +254,7 @@ def _param_parser(fname):
 if __name__ == "__main__":
   if(len(sys.argv) < 2):
     print("Please specify paramter file!")
+    print("e.g., python postprocess.py src/param")
     exit(0)
   fparam = sys.argv[1]
 

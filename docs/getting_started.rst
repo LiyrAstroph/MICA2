@@ -156,3 +156,14 @@ Output
     reconstruction of datasets, with the same format as the input data.
 
 In the end of running, ``mica2`` prints the obtained Bayesian evidence for each number of Gausssians explored.
+
+Plotting
+========================
+There is a Python script **plotfig.py** provided in the package that can be used to plot the results. 
+Run it with 
+
+.. code:: python
+
+  ptyhon plotfig.py param
+
+This will generate a PDF file **fig_xx.pdf** in the subdirectory **data/**.

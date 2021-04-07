@@ -147,7 +147,7 @@ Output
 
     (systematic error of continuum, sigmad, taud) * number of datasets
 
-    (systematic error of line, (guassian amplitude, center, sigma) * number of gaussians * number of line datasets) * number of datasets
+    (systematic error of line, (gaussian amplitude, center, sigma) * number of gaussians * number of line datasets) * number of datasets
 
     sigmad, taud, gaussian amplitude and sigma are in logarithm scale; systematic errors (x) are dimensionless, defined as  x = log(1+err/err_data), where err is the real systematic error and err_data is the mean measurement error of the data.
 

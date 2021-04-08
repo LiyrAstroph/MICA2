@@ -23,12 +23,21 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp):
   fp.close()
 
   # print time lags, median, and 68.3% confidence limits
-  print("ID: lag  -elo   +eup")
+  print("========No. Gaussian: %d========="%ngau)
+  print("ID:      lag     -elo      +eup")
+  sample_lag = np.zeros(sample.shape[0])
+  weight_lag = np.zeros(sample.shape[0])
   for j in range(1, len(ns)):
-    lag, err1, err2 = np.quantile(sample[:, 3+(j-1)*4+2], q=(0.5, (1.0-0.683)/2.0, 1.0-(1.0-0.683)/2.0))
+    sample_lag[:] = 0.0
+    weight_lag[:] = 0.0
+    for k in range(ngau):
+      sample_lag[:] +=  sample[:, 3+(j-1)*(1+ngau*3)+1+k*3+1] * np.exp(sample[:, 3+(j-1)*(1+ngau*3)+1+k*3+0])
+      weight_lag[:] +=  np.exp(sample[:, 3+(j-1)*(1+ngau*3)+1+k*3+0])
+
+    lag, err1, err2 = np.quantile(sample_lag/weight_lag, q=(0.5, (1.0-0.683)/2.0, 1.0-(1.0-0.683)/2.0))
     err1 = lag-err1
     err2 = err2 - lag
-    print("%d: %.3f -%.3f +%.3f"%(j, lag, err1, err2))
+    print("Line %d: %.3f -%.3f +%.3f"%(j, lag, err1, err2))
   
   dtau = tau_upp - tau_low 
   tau = np.linspace(tau_low-0.5*dtau, tau_upp+0.5*dtau, 100)
@@ -69,11 +78,14 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp):
     sall_hb = sall[np.sum(ns[:j])*scale:np.sum(ns[:j+1])*scale, :] 
     ax = fig.add_axes((0.08, 0.95-(j+1)*axheight, 0.3, axheight))
     
+    tran[:, :] = 0.0
     for i in range(sample.shape[0]):
-      amp = np.exp(sample[i, 3+(j-1)*4+1])
-      cen =        sample[i, 3+(j-1)*4+2]
-      sig = np.exp(sample[i, 3+(j-1)*4+3])
-      tran[i, :] = amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+      # loop over gaussians
+      for k in range(ngau):
+        amp = np.exp(sample[i, 3+(j-1)*(1+ngau*3)+1+k*3+0])
+        cen =        sample[i, 3+(j-1)*(1+ngau*3)+1+k*3+1]
+        sig = np.exp(sample[i, 3+(j-1)*(1+ngau*3)+1+k*3+2])
+        tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
     
     tran_best = np.percentile(tran, 50.0, axis=0)
     tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)

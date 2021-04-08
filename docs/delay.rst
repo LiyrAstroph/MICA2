@@ -17,6 +17,6 @@ compute a weighted time lag, e.g.,
 
 .. math::
   
-  \tau &= \int \Psi(\tau) \tau d\tau \\
-       &= \sum_k \int \frac{f_k }{\sqrt{2\pi}\omega_k} \exp\left[-\frac{(\tau-\tau_k)^2}{2\omega_k^2}\right] \tau d\tau\\
-       &= \sum_k f_k \tau_k
+  \tau &= \int \Psi(\tau) \tau d\tau \bigg/ \int \Psi(\tau) d\tau \\
+       &= \sum_k \int \frac{f_k }{\sqrt{2\pi}\omega_k} \exp\left[-\frac{(\tau-\tau_k)^2}{2\omega_k^2}\right] \tau d\tau \bigg/\sum_k f_k\\
+       &= \sum_k f_k \tau_k \bigg/ \sum_k f_k

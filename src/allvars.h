@@ -68,6 +68,7 @@ typedef struct
 
   int flag_uniform_var_params;
   int flag_uniform_tranfuns;
+  int flag_trend;
   int flag_con_sys_err, flag_line_sys_err;
   int type_lag_prior;
 

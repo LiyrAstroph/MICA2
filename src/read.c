@@ -50,6 +50,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "FlagLongtermTrend");
+    pardict[nt].addr = &parset.flag_trend;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
     strcpy(pardict[nt].tag, "LagLimitLow");
     pardict[nt].addr = &parset.lag_limit_low;
     pardict[nt].isset = 0;
@@ -103,6 +108,7 @@ int read_parset()
     parset.lag_limit_low = 0.0;
     parset.lag_limit_upper = -1.0;
     parset.type_lag_prior = 1;
+    parset.flag_trend = 0;
 
     while(!feof(fparam))
     {
@@ -168,6 +174,17 @@ int read_parset()
     if(parset.type_lag_prior < 0 || parset.type_lag_prior > 1)
     {
       printf("Incorrect TypeLagPrior, should be either 0 or 1.\n");
+      exit(0);
+    }
+
+    if(parset.flag_trend < 0)
+    {
+      printf("Incorrect FlagLongtermTrend, should be equal to or larger than 0.\n");
+      exit(0);
+    }
+    if(parset.flag_trend > 2)
+    {
+      printf("FlagLongtermTrend seems too large.\n");
       exit(0);
     }
   }

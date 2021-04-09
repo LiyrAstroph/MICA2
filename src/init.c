@@ -15,7 +15,7 @@
 void init()
 {
   // order of long-term trend in light curve
-  nq = 1;
+  nq = parset.flag_trend+1;
 
   if(parset.flag_uniform_var_params == 1)
   {

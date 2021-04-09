@@ -117,7 +117,7 @@ void output_reconstrction(const void *model)
     FILE *fp, *fp_sample;
     char fname[200];
     int i, j, k, m;
-    double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std;
+    double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq, **yq_best, **yq_std;
     int **nall, *ntall, np;
     double tspan;
     
@@ -160,6 +160,8 @@ void output_reconstrction(const void *model)
     fall_best = malloc(nset*sizeof(double *));
     fall_std = malloc(nset*sizeof(double *));
     ntall = malloc(nset*sizeof(int));
+    yq_best = malloc(nset*sizeof(double *));
+    yq_std = malloc(nset*sizeof(double *));
     for(i=0; i<nset; i++)
     {
       nall[i] = malloc((1+nlset_max) * sizeof(int));
@@ -169,9 +171,13 @@ void output_reconstrction(const void *model)
       feall_max[i] = malloc(nall_max*5 * sizeof(double));
       fall_best[i] = malloc(nall_max*5 * sizeof(double));
       fall_std[i] = malloc(nall_max*5 * sizeof(double));
+
+      yq_best[i] = malloc(nq*(1+nlset_max)*sizeof(double));
+      yq_std[i] = malloc(nq*(1+nlset_max)*sizeof(double));
     }
     
     post_model = malloc(size_of_modeltype);
+    yq = malloc(nq*(1+nlset_max)*sizeof(double));
 
     for(i=0; i<nset; i++)
     {
@@ -204,7 +210,6 @@ void output_reconstrction(const void *model)
 
     for(i=0; i<nset; i++)
     { 
-
       for(k=0; k<nall[i][0]; k++)
       {
         fall_best[i][k] = 0.0;
@@ -222,7 +227,13 @@ void output_reconstrction(const void *model)
           feall_max[i][np+k] = 0.0;
         }          
         np += nall[i][1+j];
-      }  
+      } 
+
+      for(k=0; k<(1+nlset_max)*nq; k++)
+      {
+        yq_best[i][k] = 0.0;
+        yq_std[i][k] = 0.0;
+      } 
     }
 
     for(m=0; m<num_ps; m++)
@@ -241,7 +252,7 @@ void output_reconstrction(const void *model)
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel(post_model, i, nall[i], tall[i], fall[i], feall[i]); 
+        recostruct_line_from_varmodel(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -261,6 +272,12 @@ void output_reconstrction(const void *model)
           }          
           np += nall[i][1+j];
         }  
+        
+        for(k=0; k<nq*(1+dataset[i].nlset); k++)
+        {
+          yq_best[i][k] += yq[k];
+          yq_std[i][k] += yq[k]*yq[k];
+        } 
       }
     }
 
@@ -307,6 +324,29 @@ void output_reconstrction(const void *model)
         fprintf(fp, "\n");
         np += nall[i][1+j];
       }  
+
+      /* output yq */
+      for(j=0; j<(1+dataset[i].nlset)*nq; j++)
+      {
+        yq_best[i][j] /= num_ps;
+        yq_std[i][j] /= num_ps;
+        yq_std[i][j] = sqrt(yq_std[i][j] - yq_best[i][j]*yq_best[i][j]);
+      }
+      
+      printf("Longterm q of dataset %d\n", i);
+      printf("Val: ");
+      for(j=0; j<(1+dataset[i].nlset)*nq; j++)
+      {
+        printf("%e ", yq_best[i][j]);
+      }
+      printf("\n");
+      
+      printf("Err: ");
+      for(j=0; j<(1+dataset[i].nlset)*nq; j++)
+      {
+        printf("%e ", yq_std[i][j]);
+      }
+      printf("\n");
     }
 
     fclose(fp);
@@ -320,6 +360,9 @@ void output_reconstrction(const void *model)
       free(nall[i]);
       free(fall_best[i]);
       free(fall_std[i]);
+
+      free(yq_best[i]);
+      free(yq_std[i]);
     }
     free(tall);
     free(fall);
@@ -330,6 +373,9 @@ void output_reconstrction(const void *model)
     free(nall);
     free(ntall);
     free(post_model);
+    free(yq);
+    free(yq_best);
+    free(yq_std);
   }
 
   return;
@@ -437,7 +483,7 @@ void postprocess_line()
  *    inverse_mat()
  *    multiply_mat_MN()
  */
-void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
+void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
   int i, j, k, m, info, idx, *ipiv;
@@ -484,8 +530,11 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   for(i=0;i<dataset[nds].con.n;i++)
   {
     Larr[i*nqall] = 1.0; 
-    for(j=0; j<dataset[nds].nlset; j++)
-      Larr[i*nqall + 1 + j] = 0.0;
+    for(j=1; j<nq; j++)
+      Larr[i*nqall+j] = pow(dataset[nds].con.t[i], j);
+
+    for(j=nq; j<nqall; j++)
+      Larr[i*nqall + j] = 0.0;
   }
   np = dataset[nds].con.n;
   for(j=0; j<dataset[nds].nlset; j++)
@@ -495,7 +544,9 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
       for(i=0; i<nqall; i++)
         Larr[(np+m)*nqall + i ]  = 0.0;
         
-      Larr[(np + m) * nqall + 1 + j] = 1.0;
+      Larr[(np+m)*nqall + nq + j*nq + 0] = 1.0;
+      for(i=1; i<nq; i++)
+        Larr[(np+m)*nqall + nq + j*nq + i] = pow(dataset[nds].line[j].t[m], i);
     }
     np += dataset[nds].line[j].n;
   }
@@ -511,6 +562,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   /* (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
   inverse_symat(Cq, nqall, &info, ipiv);
   multiply_mat_MN(Cq, yuq, yq, nqall, 1, nqall);
+  memcpy(yqall, yq, nqall*sizeof(double));
 
   /*  L x q */
   multiply_matvec_MN(Larr, nall_data, nqall, yq, ybuf);
@@ -526,7 +578,10 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
   for(i=0;i<nall[0];i++)
   {
     Larr_rec[i*nqall + 0]=1.0;
-    for(j=1; j<nqall; j++)
+    for(j=1; j<nq; j++)
+      Larr_rec[i*nqall + j]=pow(tall[i], j);
+
+    for(j=nq; j<nqall; j++)
       Larr_rec[i*nqall + j] = 0.0;
   }
 
@@ -539,7 +594,10 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
       {
         Larr_rec[(np+i)*nqall + j] = 0.0;
       }
-      Larr_rec[(np+i)*nqall + 1+k ] = 1.0;
+      
+      Larr_rec[(np+i)*nqall + nq + k*nq + 0] = 1.0;
+      for(j=1; j<nq; j++)
+        Larr_rec[(np+i)*nqall + nq + k*nq + j] = pow(tall[np+i], j);
     }
     np += nall[1+k];
   }
@@ -581,7 +639,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
  *    multiply_mat_MN_inverseA()
  * 
  */
-void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall)
+void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
   int i, j, k, m, info, idx, *ipiv;
@@ -627,8 +685,11 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   for(i=0;i<dataset[nds].con.n;i++)
   {
     Larr[i*nqall] = 1.0; 
-    for(j=0; j<dataset[nds].nlset; j++)
-      Larr[i*nqall + 1 + j] = 0.0;
+    for(j=1; j<nq; j++)
+      Larr[i*nqall+j] = pow(dataset[nds].con.t[i], j);
+
+    for(j=nq; j<nqall; j++)
+      Larr[i*nqall + j] = 0.0;
   }
   np = dataset[nds].con.n;
   for(j=0; j<dataset[nds].nlset; j++)
@@ -638,7 +699,9 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
       for(i=0; i<nqall; i++)
         Larr[(np+m)*nqall + i ]  = 0.0;
         
-      Larr[(np + m) * nqall + 1 + j] = 1.0;
+      Larr[(np+m)*nqall + nq + j*nq + 0] = 1.0;
+      for(i=1; i<nq; i++)
+        Larr[(np+m)*nqall + nq + j*nq + i] = pow(dataset[nds].line[j].t[m], i);
     }
     np += dataset[nds].line[j].n;
   }
@@ -652,6 +715,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   multiply_mat_MN_transposeA(PEmat2, fall_data, yq, nqall, 1, nall_data); // yq = L^T*C^-1*y;  Nqx1
   memcpy(PEmat1, Cq, nqall*nqall*sizeof(double));
   multiply_mat_MN_inverseA(PEmat1, yq, nqall, 1, ipiv); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
+  memcpy(yqall, yq, nqall*sizeof(double));
 
   multiply_mat_MN(Larr, yq, yave, nall_data, 1, nqall); // yave = L * q; Nx1
   for(i=0; i<nall_data; i++)
@@ -666,7 +730,10 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   for(i=0;i<nall[0];i++)
   {
     Larr_rec[i*nqall + 0]=1.0;
-    for(j=1; j<nqall; j++)
+    for(j=1; j<nq; j++)
+      Larr_rec[i*nqall + j]=pow(tall[i], j);
+
+    for(j=nq; j<nqall; j++)
       Larr_rec[i*nqall + j] = 0.0;
   }
 
@@ -679,7 +746,10 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
       {
         Larr_rec[(np+i)*nqall + j] = 0.0;
       }
-      Larr_rec[(np+i)*nqall + 1+k ] = 1.0;
+
+      Larr_rec[(np+i)*nqall + nq + k*nq + 0] = 1.0;
+      for(j=1; j<nq; j++)
+        Larr_rec[(np+i)*nqall + nq + k*nq + j] = pow(tall[np+i], j);
     }
     np += nall[1+k];
   }
@@ -762,8 +832,11 @@ double prob_line_variability(const void *model)
     for(i=0;i<dataset[k].con.n;i++)
     {
       Larr[i*nqall] = 1.0; 
-      for(j=0; j<dataset[k].nlset; j++)
-        Larr[i*nqall + 1 + j] = 0.0;
+      for(j=1; j<nq; j++)
+        Larr[i*nqall + j] = pow(dataset[k].con.t[i], j);
+
+      for(j=nq; j<nqall; j++)
+        Larr[i*nqall + j] = 0.0;
     }
     np = dataset[k].con.n;
     for(j=0; j<dataset[k].nlset; j++)
@@ -773,7 +846,9 @@ double prob_line_variability(const void *model)
         for(i=0; i<nqall; i++)
           Larr[(np+m)*nqall + i ]  = 0.0;
         
-        Larr[(np + m) * nqall + 1 + j] = 1.0;
+        Larr[(np+m)*nqall + nq + j*nq + 0] = 1.0;
+        for(i=1; i<nq; i++)
+          Larr[(np+m)*nqall + nq + j*nq + i] = pow(dataset[k].line[j].t[m], i);
       }
       np += dataset[k].line[j].n;
     }
@@ -862,8 +937,11 @@ double prob_line_variability2(const void *model)
     for(i=0;i<dataset[k].con.n;i++)
     {
       Larr[i*nqall] = 1.0; 
-      for(j=0; j<dataset[k].nlset; j++)
-        Larr[i*nqall + 1 + j] = 0.0;
+      for(j=1; j<nq; j++)
+        Larr[i*nqall + j] = pow(dataset[k].con.t[i], j);
+
+      for(j=nq; j<nqall; j++)
+        Larr[i*nqall + j] = 0.0;
     }
     np = dataset[k].con.n;
     for(j=0; j<dataset[k].nlset; j++)
@@ -873,7 +951,9 @@ double prob_line_variability2(const void *model)
         for(i=0; i<nqall; i++)
           Larr[(np+m)*nqall + i ]  = 0.0;
         
-        Larr[(np + m) * nqall + 1 + j] = 1.0;
+        Larr[(np+m)*nqall + nq + j*nq + 0] = 1.0;
+        for(i=1; i<nq; i++)
+          Larr[(np+m)*nqall + nq + j*nq + i] = pow(dataset[k].line[j].t[m], i);
       }
       np += dataset[k].line[j].n;
     }
@@ -967,8 +1047,11 @@ double prob_line_variability3(const void *model)
     for(i=0;i<dataset[k].con.n;i++)
     {
       Larr[i*nqall] = 1.0; 
-      for(j=0; j<dataset[k].nlset; j++)
-        Larr[i*nqall + 1 + j] = 0.0;
+      for(j=1; j<nq; j++)
+        Larr[i*nqall + j] = pow(dataset[k].con.t[i], j);
+
+      for(j=nq; j<nqall; j++)
+        Larr[i*nqall + j] = 0.0;
     }
     np = dataset[k].con.n;
     for(j=0; j<dataset[k].nlset; j++)
@@ -978,7 +1061,9 @@ double prob_line_variability3(const void *model)
         for(i=0; i<nqall; i++)
           Larr[(np+m)*nqall + i ]  = 0.0;
         
-        Larr[(np + m) * nqall + 1 + j] = 1.0;
+        Larr[(np+m)*nqall + nq + j*nq + 0] = 1.0;
+        for(i=1; i<nq; i++)
+          Larr[(np+m)*nqall + nq + j*nq + i] = pow(dataset[k].line[j].t[m], i);
       }
       np += dataset[k].line[j].n;
     }
@@ -1084,8 +1169,11 @@ double prob_line_variability4(const void *model)
     for(i=0;i<dataset[k].con.n;i++)
     {
       Larr[i*nqall] = 1.0; 
-      for(j=0; j<dataset[k].nlset; j++)
-        Larr[i*nqall + 1 + j] = 0.0;
+      for(j=1; j<nq; j++)
+        Larr[i*nqall+j] = pow(dataset[k].con.t[i], j);
+
+      for(j=nq; j<nqall; j++)
+        Larr[i*nqall + j] =  0.0;
     }
     np = dataset[k].con.n;
     for(j=0; j<dataset[k].nlset; j++)
@@ -1095,7 +1183,9 @@ double prob_line_variability4(const void *model)
         for(i=0; i<nqall; i++)
           Larr[(np+m)*nqall + i ]  = 0.0;
         
-        Larr[(np + m) * nqall + 1 + j] = 1.0;
+        Larr[(np+m)*nqall + nq + j*nq + 0] = 1.0;
+        for(i=1; i<nq; i++)
+          Larr[(np+m)*nqall + nq + j*nq + i] = pow(dataset[k].line[j].t[m], i);
       }
       np += dataset[k].line[j].n;
     }

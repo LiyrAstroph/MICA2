@@ -323,7 +323,7 @@ void postprocess_con()
 double prob_con_variability(const void *model)
 {
   double prob = 0.0;
-  int i, k, info, sign, *ipiv;
+  int i, j, k, info, sign, *ipiv;
   double *pm = (double *)model;
   double tau, sigma, alpha, lndet, lndet_ICq, syserr;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq;
@@ -331,18 +331,13 @@ double prob_con_variability(const void *model)
   int ncon, idx;
 
   Larr = workspace;
-  ybuf = Larr + ncon_max;
+  ybuf = Larr + ncon_max*nq;
   y = ybuf + ncon_max;
   yq = y + ncon_max;
   Cq = yq + nq;
   ICq = Cq + nq * nq;
 
   ipiv = workspace_ipiv;
-
-  for(i=0;i<ncon_max;i++)
-  {
-    Larr[i*nq]=1.0;
-  }
 
   /* iterate over all datasets */
   for(k=0; k<nset; k++)
@@ -357,6 +352,15 @@ double prob_con_variability(const void *model)
     tau = exp(pm[idx+2]);
     sigma = exp(pm[idx+1]) * sqrt(tau);
     alpha = 1.0;
+
+    for(i=0; i<ncon; i++)
+    {
+      Larr[i*nq]=1.0;
+      for(j=1; j<nq; j++)
+      {
+        Larr[i*nq+j] = pow(tcon[i], j);
+      }
+    }
     
     set_covar_Pmat_data(sigma, tau, alpha, syserr, ncon, tcon, fcon, fecon);
     memcpy(IPCmat, PCmat, ncon*ncon*sizeof(double));
@@ -411,7 +415,7 @@ double prob_con_variability(const void *model)
 double prob_con_variability_semiseparable(const void *model)
 {
   double prob = 0.0;
-  int i, k, info, sign, *ipiv;
+  int i, j, k, info, sign, *ipiv;
   double *pm = (double *)model;
   double tau, sigma, sigma2, alpha, lndet, lndet_ICq, syserr;
   double *Larr, *ybuf, *y, *yq, *Cq;
@@ -422,18 +426,13 @@ double prob_con_variability_semiseparable(const void *model)
   ipiv = workspace_ipiv;
 
   Larr = workspace;
-  ybuf = Larr + ncon_max;
+  ybuf = Larr + ncon_max*nq;
   y = ybuf + ncon_max;
   yq = y + ncon_max;
   Cq = yq + nq;
   W = Cq + nq*nq;
   D = W + ncon_max;
   phi = D + ncon_max;
-
-  for(i=0;i<ncon_max;i++)
-  {
-    Larr[i*nq]=1.0;
-  }
 
   /* iterate over all datasets */
   for(k=0; k<nset; k++)
@@ -448,6 +447,15 @@ double prob_con_variability_semiseparable(const void *model)
     tau = exp(pm[idx+2]);
     sigma = exp(pm[idx+1]) * sqrt(tau);
     alpha = 1.0;
+
+    for(i=0; i<ncon; i++)
+    {
+      Larr[i*nq]=1.0;
+      for(j=1; j<nq; j++)
+      {
+        Larr[i*nq+j] = pow(tcon[i], j);
+      }
+    }
     
     sigma2 = sigma*sigma;
     compute_semiseparable_drw(tcon, ncon, sigma2, 1.0/tau, fecon, syserr, W, D, phi);

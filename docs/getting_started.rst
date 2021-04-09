@@ -56,6 +56,11 @@ A typical parameter file looks like::
   FileDir                   ./
   DataFile                  data/data.txt
  
+  FlagUniformVarParams      0                # whether each dataset has the same variability parameters
+
+  FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
+                                             # note that different lines have different parameters.
+
   FlagLongtermTrend         1                # Longterm trend in light curves, use a polynomial to fit 
                                              # input the order of the polynomial, e.g.,
                                              # 0, constant  (default)

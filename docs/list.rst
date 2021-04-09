@@ -1,6 +1,6 @@
-*************************
-Lists of Reference Used MICA
-*************************
+******************************
+A List of References Used MICA
+******************************
 Here is a list of references that used MICA in the time lag analysis, retrieved from the NASA ADS.
 
 - `Chelouche, D. et al. 2018, Nature Astronomy, 3, 251 <https://ui.adsabs.harvard.edu/abs/2019NatAs...3..251C/abstract>`_,

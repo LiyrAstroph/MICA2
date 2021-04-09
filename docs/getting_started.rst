@@ -18,7 +18,9 @@ Third-party package dependence
 
   * **CDNest** --- Diffusive nested sampling, downloaded at https://github.com/LiyrAstroph/CDNest
 
-Note that in Linux system, there are package managers that can install the above libraries convienently. If so, use them. In this case, the libraries usually are installed in standard environment path. Otherwise, any of the above libraries is not installed in standard locations on your system, the ``Makefile`` provided with the code may need slight adjustments.
+Note that in Linux system, there are package managers that can install the above libraries convienently (except CDNest). 
+If so, use them. In this case, the libraries usually are installed in standard environment path. Otherwise, any of the above 
+libraries is not installed in standard locations on your system, the ``Makefile`` provided with the code may need slight adjustments.
 
 Compiling
 =============================
@@ -54,20 +56,23 @@ A typical parameter file looks like::
   FileDir                   ./
   DataFile                  data/data.txt
  
-  FlagUniformVarParams      0                # whether each dataset has the same variability parameters
-
-  FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
-                                             # note that different lines have different parameters.
-
+  FlagLongtermTrend         1                # Longterm trend in light curves, use a polynomial to fit 
+                                             # input the order of the polynomial, e.g.,
+                                             # 0, constant  (default)
+                                             # 1, linear line 
+                                             # 2, conic line
+                                             # Use the default if you do not know this.
+  
   LagLimitLow               0.0              # lower limit of the range of time lag to be explored
-  LagLimitUpp               10.0             # upper limit of the range of time lag to be explored
-
-  NumGaussianLow            2                # lower limit of number of Gaussians
-  NumGaussianUpp            2                # upper limit of number of Gaussians
-
-  FlagConSysErr             1                # 0, not include systematic error of continuum; 1, include
-  FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
-
+  LagLimitUpp               5.0              # upper limit of the range of time lag to be explored
+                                             # can be negative
+  
+  NumGaussianLow            1                # lower limit of number of Gaussians
+  NumGaussianUpp            1                # upper limit of number of Gaussians
+  
+  FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
+  FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
+  
   TypeLagPrior              0                # type of lag prior for each Gaussians.
                                              # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
                                              #

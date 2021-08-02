@@ -52,5 +52,11 @@ whether option settings are appropriate. The file shows plots like
   :align: center
 
   (Top) the likelihood (:math:`\log L`) and (bottom) posterior weigth (:math:`L\Delta X`) as 
-  a function of prior mass :math:`X`. For a good run, there should appear a peak in the 
-  bottom panel (see also the documentation of DNest3, https://github.com/eggplantbren/DNest3).
+  a function of prior mass :math:`X`. **For a good run, there should appear a peak in the 
+  bottom panel** (see also the documentation of DNest3, https://github.com/eggplantbren/DNest3).
+
+.. figure:: _static/fig_post_bad.jpg
+  :scale: 60%
+  :align: center 
+
+  **An example for a bad run: there is no peak in the bottom panel.**

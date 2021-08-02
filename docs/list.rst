@@ -1,6 +1,6 @@
-******************************
-A List of References Used MICA
-******************************
+***********************************
+A List of References That Used MICA
+***********************************
 Here is a list of references that used MICA in the time lag analysis, retrieved from the NASA ADS.
 
 - `Chelouche, D. et al. 2018, Nature Astronomy, 3, 251 <https://ui.adsabs.harvard.edu/abs/2019NatAs...3..251C/abstract>`_,
@@ -11,3 +11,6 @@ Here is a list of references that used MICA in the time lag analysis, retrieved 
 
 - `Hu, C. et al. 2020, ApJ, 890, 71 <https://ui.adsabs.harvard.edu/abs/2020ApJ...890...71H/abstract>`_,
   *Broad-Line Region of the Quasar PG 2130+099 from a Two-Year Reverberation Camgaign With High Cadence*
+
+- `Li, S.-S. et al. 2021, ApJ in press <https://ui.adsabs.harvard.edu/abs/2021arXiv210605655L/abstract>`_,
+  *Reverberation Mapping of Two Luminous Quasars: the Broad-line Region Structure and Black Hole Mass*

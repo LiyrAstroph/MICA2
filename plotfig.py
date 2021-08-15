@@ -38,7 +38,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
   indx_con_data.append(0)
   for i in range(1, nd):
     ns = nl[i-1]
-    indx_con_data.append(np.sum(ns))
+    indx_con_data.append(np.sum(ns) + indx_con_data[i-1])
 
   # assign index of the parmaeter for the first line of each dataset 
   indx_line = []

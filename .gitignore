@@ -8,3 +8,4 @@ data/*
 mica2
 !postprocess.py
 !plotfig.py
+!docs/_static/*.jpg

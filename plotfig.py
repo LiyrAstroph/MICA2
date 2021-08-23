@@ -6,7 +6,7 @@ import sys, os
 import configparser as cp 
 
 
-def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
+def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend):
   plt.rc('text', usetex=True)
   plt.rc('font', family='serif', size=18)
 
@@ -14,6 +14,9 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
   data = np.loadtxt(fdir+fname)
   sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
   scale = int(sall.shape[0]/data.shape[0])
+
+  if flagtrend > 0:
+    trend = np.loadtxt(fdir+"/data/trend.txt_%d"%ngau)
 
   fp = open(fdir+fname)
   # read numbe of datasets
@@ -23,6 +26,9 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
     num_params_var = 3
   else:
     num_params_var = 3*nd
+  
+  # number of parameters for long-term trend
+  nq = flagtrend + 1
   
   # read number of data points in each dataset
   nl = []
@@ -79,6 +85,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
   # open pdf file
   pdf = PdfPages(fdir+"/data/fig_%d.pdf"%ngau)
 
+  idx_q = 0 # index for long-term trend parameters
   for m in range(nd):
     ns = nl[m]
     fig = plt.figure(figsize=(12, 4+2*(len(ns)-2)))
@@ -96,6 +103,16 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
     ax.plot(sall_con0[:, 0]-shift, sall_con0[:, 1], color='k', lw=1)
     ax.fill_between(sall_con0[:, 0]-shift, y1=sall_con0[:, 1]-sall_con0[:, 2], y2=sall_con0[:, 1]+sall_con0[:, 2], color='darkgrey')
     
+    # plot long-term trend
+    if flagtrend > 0:
+      xlim = ax.get_xlim()
+      x = np.linspace(sall_con0[0, 0], sall_con0[-1, 0], 100)
+      y = np.zeros(100)
+      for j in range(nq):
+        y += trend[idx_q + j, 0] * x**(j)
+  
+      ax.plot(x, y, ls='--', color='grey')
+
     ax.xaxis.set_tick_params(labeltop=False)
     ax.xaxis.set_tick_params(labelbottom=False)
     ax.yaxis.set_tick_params(labelleft=False)
@@ -143,7 +160,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
       ax.set_xlim((tau[0], tau[-1]))
-      ax.set_ylim(0.0, np.min((ylim[1], np.max(tran_best)))*2.0)
+      ax.set_ylim(0.0, np.min((ylim[1], np.max(tran_best)))*1.5)
       
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
@@ -155,8 +172,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
     
       ax.yaxis.set_tick_params(labelleft=False)
       ax.minorticks_on()
-      if(tau[0]<0.0):
-        ax.axvline(x=0.0, ls='--', color='red')
+      #if(tau[0]<0.0):
+      #  ax.axvline(x=0.0, ls='--', color='red')
       
       # then line light curve
       ax = fig.add_axes((0.5, 0.95-(j+1)*axheight, 0.4, axheight))
@@ -165,6 +182,17 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
       
       ax.plot(sall_hb[:, 0]-shift, sall_hb[:, 1], color='k')
       ax.fill_between(sall_hb[:, 0]-shift, y1=sall_hb[:, 1]-sall_hb[:, 2], y2=sall_hb[:, 1]+sall_hb[:, 2], color='darkgrey')
+      
+      # plot long-term trend 
+      if flagtrend > 0:
+        xlim = ax.get_xlim()
+        x = np.linspace(sall_hb[0, 0], sall_hb[-1, 0], 100)
+        y = np.zeros(100)
+        for k in range(nq):
+          y+= trend[idx_q + 1*nq + k, 0]* x**(k)
+        
+        ax.plot(x, y, ls='--', color='grey')
+
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
       else:
@@ -177,6 +205,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
       xlim = ax.get_xlim()
       ylim = ax.get_ylim()
       ax.minorticks_on()
+
+      idx_q += len(ns) * nq
   
     plt.show()
     pdf.savefig(fig)
@@ -184,9 +214,9 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran):
   pdf.close()
   return
 
-def plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran):
+def plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend):
   for ngau in range(ngau_low, ngau_upp+1):
-    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran)
+    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend)
 
 def _param_parser(fname):
   """
@@ -212,9 +242,10 @@ if __name__ == "__main__":
   fdir = param["FileDir"]
   flagvar = int(param["FlagUniformVarParams"])
   flagtran = int(param["FlagUniformTranFuns"])
+  flagtrend = int(param["FlagLongtermTrend"])
   ngau_low = int(param["NumGaussianLow"])
   ngau_upp = int(param["NumGaussianUpp"])
   tau_low = float(param["LagLimitLow"])
   tau_upp = float(param["LagLimitUpp"])
   fname = param["DataFile"]
-  plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran)
+  plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend)

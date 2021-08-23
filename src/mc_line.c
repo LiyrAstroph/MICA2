@@ -114,7 +114,7 @@ void output_reconstrction(const void *model)
 {
   if(thistask == roottask)
   {
-    FILE *fp, *fp_sample;
+    FILE *fp, *fp_sample, *fpq;
     char fname[200];
     int i, j, k, m;
     double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq, **yq_best, **yq_std;
@@ -151,6 +151,14 @@ void output_reconstrction(const void *model)
       exit(-1);
     }
     fprintf(fp, "# %d\n", nset);
+
+    sprintf(fname, "%s/%s%s", parset.file_dir, "data/trend.txt", postfix);
+    fpq = fopen(fname, "w");
+    if(fpq == NULL)
+    {
+      fprintf(stderr, "# Error: Cannot open file %s\n", fname);
+      exit(-1);
+    }
  
     nall = malloc(nset*sizeof(int *));
     tall = malloc(nset*sizeof(double *));
@@ -325,32 +333,38 @@ void output_reconstrction(const void *model)
         np += nall[i][1+j];
       }  
 
-      /* output yq */
+      /* output long-term trend yq */
       for(j=0; j<(1+dataset[i].nlset)*nq; j++)
       {
         yq_best[i][j] /= num_ps;
         yq_std[i][j] /= num_ps;
         yq_std[i][j] = sqrt(yq_std[i][j] - yq_best[i][j]*yq_best[i][j]);
       }
+      for(j=0; j<1*nq; j++)
+        fprintf(fpq, "%e %e\n", yq_best[i][j]* dataset[i].con.scale, yq_std[i][j]* dataset[i].con.scale);
+      for(j=0; j<dataset[i].nlset; j++)
+        for(k=0; k<nq; k++)
+          fprintf(fpq, "%e %e\n", yq_best[i][(1+j)*nq+k]* dataset[i].line[j].scale, yq_std[i][(1+j)*nq+k]* dataset[i].line[j].scale);
+      fprintf(fpq, "\n");
       
-      printf("Longterm q of dataset %d\n", i);
-      printf("Val: ");
-      for(j=0; j<(1+dataset[i].nlset)*nq; j++)
+      if(parset.flag_trend > 0)
       {
-        printf("%e ", yq_best[i][j]);
+        printf("Longterm q of dataset %d: Val and Err\n", i);
+        for(j=0; j<1*nq; j++)
+        {
+          printf("%e %e\n", yq_best[i][j]*dataset[i].con.scale, yq_std[i][j]* dataset[i].con.scale);
+        }
+        for(j=0; j<dataset[i].nlset; j++)
+        {
+          for(k=0; k<nq; k++)
+            printf("%e %e\n", yq_best[i][(1+j)*nq+k] * dataset[i].line[j].scale, yq_std[i][(1+j)*nq+k]* dataset[i].line[j].scale);
+        }
       }
-      printf("\n");
-      
-      printf("Err: ");
-      for(j=0; j<(1+dataset[i].nlset)*nq; j++)
-      {
-        printf("%e ", yq_std[i][j]);
-      }
-      printf("\n");
     }
 
     fclose(fp);
     fclose(fp_sample);
+    fclose(fpq);
 
     for(i=0; i<nset; i++)
     {

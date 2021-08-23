@@ -22,6 +22,7 @@ Documentation
    getting_started.rst
    cdnest.rst
    delay.rst
+   detrend.rst
    list.rst
 
 

@@ -1,11 +1,12 @@
 *.*
 src/*
 !src/*.[ch]
-!src/OPTIONS*
-!src/param
 !docs/*.rst
 data/*
 mica2
 !postprocess.py
 !plotfig.py
 !docs/_static/*.jpg
+!param
+!param/param
+!param/OPTIONS*

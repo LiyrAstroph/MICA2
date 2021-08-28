@@ -1267,12 +1267,21 @@ int mc_line_init()
 {
   int i;
 
-  sprintf(dnest_options_file, "%s/src/OPTIONS1D", parset.file_dir);
-
   if(thistask == roottask)
   {
+    if(strlen(dnest_options_file_line) == 0)
+    {
+      sprintf(dnest_options_file, "%s/param/OPTIONS1D", parset.file_dir);
+      write_options_line(dnest_options_file);
+    }
+    else 
+    {
+      strcpy(dnest_options_file, dnest_options_file_line);
+    }
+
     get_num_particles(dnest_options_file);
   }
+  MPI_Bcast(dnest_options_file, MICA_MAX_STR_LENGTH, MPI_CHAR, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&parset.num_particles, 1, MPI_INT, roottask, MPI_COMM_WORLD);
 
   idx_line_pm = malloc(nset * sizeof(double *));

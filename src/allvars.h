@@ -24,7 +24,9 @@ extern char proc_name[MPI_MAX_PROCESSOR_NAME];
 /* for dnest */
 extern int which_level_update;
 extern double *limits;  // external from dnest
-extern char dnest_options_file[MICA_MAX_STR_LENGTH];
+extern char dnest_options_file[MICA_MAX_STR_LENGTH], 
+            dnest_options_file_con[MICA_MAX_STR_LENGTH],
+            dnest_options_file_line[MICA_MAX_STR_LENGTH];
 extern char postfix[MICA_MAX_STR_LENGTH];
 
 /* con */

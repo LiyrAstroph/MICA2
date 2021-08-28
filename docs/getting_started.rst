@@ -40,9 +40,18 @@ To run the package in a parallel computer/cluster, use the following command:
 
 .. code:: bash
 
-   mpiexec -n np ./mica2 param
+   mpiexec -n np ./mica2 param/param
 
-where ``np`` is the number of cores and ``param`` is the paramter file.
+where ``np`` is the number of cores and ``param`` is the paramter file, stored in the directory ``param/``.
+
+If the results are not as good as expected, one may want to modify options for Markov-chain Monte Carlo sampling as 
+
+.. code:: bash
+
+  mpiexec -n np ./mica2 param/param param/OPTIONS1D
+
+where ``OPTIONS1D`` is an options file stored in the directory ``param/``, 
+see :ref:`Diffusive Nested Sampling` for the detail.
 
 Parameter file
 =============================

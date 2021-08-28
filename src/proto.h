@@ -40,6 +40,7 @@ void postprocess_con();
 void output_reconstrction(const void *model);
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
   int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
+int write_options_con(char *fname);
 
 
 /* for line */
@@ -68,6 +69,7 @@ void set_covar_Amat_line(const void *model, int k, int *nall, double *tall);
 void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall);
 void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall);
 int check_gauss_center(int which, int *igau);
+int write_options_line(char *fname);
 
 // error.c
 void error_exit(int);

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
 
 #include "allvars.h"
 #include "proto.h"
@@ -151,4 +152,88 @@ void free_memory()
 
   free(logz_arr);
   return;
+}
+
+/* write down OPTIONS file of the continuum run for CDNest */
+int write_options_con(char *fname)
+{
+  FILE *fp;
+  fp = fopen(fname, "w");
+  if(fp == NULL)
+  {
+    printf("Cannot open file %s\n", fname);
+    exit(-1);
+  }
+  
+  fprintf(fp, "# File containing parameters for DNest.\n"
+              "# Put comments at the top, or at the end of the line.\n"
+              "# Do not change the order of lines.\n"
+              "# Lines beginning with '#' are regarded as comments."
+              "# DNest ptions for continuum reconstruction\n\n\n");
+  
+  fprintf(fp, "MaxNumberSaves            1500\n");
+  fprintf(fp, "PTol                      0.1\n");
+  fprintf(fp, "NumberParticles           2\n");
+  fprintf(fp, "NewLevelIntervalFactor    5\n");
+  fprintf(fp, "ThreadStepsFactor         20\n\n\n");
+  
+
+  fprintf(fp, "# Full options and their default values (if not specified) are:\n"
+              "# MaxNumberSaves           10000 #maximum number of saving\n"
+              "# PTol                     0.1   #likelihood tolerance in loge\n"
+              "# NumberParticles          1  #number of particles\n"
+              "# NewLevelIntervalFactor   2  #new level interval\n"
+              "# SaveIntervalFactor       2  #particular saving interval\n"
+              "# ThreadStepsFactor        10 #thread steps before communications between cores\n"
+              "# MaxNumberLevels          0  #maximum number of levels; unlimited for 0\n"
+              "# BacktrackingLength       10.0  #backforward tracking length (lambda)\n"
+              "# StrengthEqualPush        100.0 #strength to force equal push (beta)");
+  fflush(fp);
+  fsync(fileno(fp));
+
+  fclose(fp);
+
+  return 0;
+}
+
+/* write down OPTIONS file of the line run for CDNest */
+int write_options_line(char *fname)
+{
+  FILE *fp;
+  fp = fopen(fname, "w");
+  if(fp == NULL)
+  {
+    printf("Cannot open file %s\n", fname);
+    exit(-1);
+  }
+  
+  fprintf(fp, "# File containing parameters for DNest.\n"
+              "# Put comments at the top, or at the end of the line.\n"
+              "# Do not change the order of lines.\n"
+              "# Lines beginning with '#' are regarded as comments."
+              "# DNest ptions for continuum-line time lag analysis\n\n\n");
+  
+  fprintf(fp, "MaxNumberSaves            1500\n");
+  fprintf(fp, "PTol                      0.1\n");
+  fprintf(fp, "NumberParticles           2\n");
+  fprintf(fp, "NewLevelIntervalFactor    2\n");
+  fprintf(fp, "ThreadStepsFactor         2\n\n\n");
+  
+
+  fprintf(fp, "# Full options and their default values (if not specified) are:\n"
+              "# MaxNumberSaves           10000 #maximum number of saving\n"
+              "# PTol                     0.1   #likelihood tolerance in loge\n"
+              "# NumberParticles          1  #number of particles\n"
+              "# NewLevelIntervalFactor   2  #new level interval\n"
+              "# SaveIntervalFactor       2  #particular saving interval\n"
+              "# ThreadStepsFactor        10 #thread steps before communications between cores\n"
+              "# MaxNumberLevels          0  #maximum number of levels; unlimited for 0\n"
+              "# BacktrackingLength       10.0  #backforward tracking length (lambda)\n"
+              "# StrengthEqualPush        100.0 #strength to force equal push (beta)");
+  fflush(fp);
+  fsync(fileno(fp));
+
+  fclose(fp);
+
+  return 0;
 }

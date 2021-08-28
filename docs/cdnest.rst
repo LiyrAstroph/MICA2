@@ -16,8 +16,8 @@ should be written in a text file： **OPTIONS1D**. This option file looks like::
   # Lines beginning with '#' are regarded as comments.
   
   NumberParticles           2	     # Number of particles
-  NewLevelIntervalFactor    2	     # new level interval
-  ThreadStepsFactor         2     # threadSteps - how many steps each thread should do independently before communication
+  NewLevelIntervalFactor    2	     # New level interval
+  ThreadStepsFactor         2      # Thread steps before communications between cores 
   MaxNumberSaves            10000	 # Maximum number of saves
   PTol                      0.1    # Likelihood tolerance in loge
   
@@ -37,6 +37,18 @@ In generic, the most import options are the likelihood tolerance in loge (PTol) 
 (MaxNumberSaves). Unfornatuately, there is not yet a satisfactory rule to determine the best values for these options 
 before running the code. If one finds the results not good or the effective sample two few, increase the maximum number of saves.
 If this does not work, then decrease PTol option.
+
+If one wants to use an own OPTIONS file, run with the command 
+
+.. code:: bash
+
+  mpiexec -n np ./mica2 param/parm param/OPTIONS1D
+
+where ``OPTIONS1D`` is the name of the OPTIONS file, stored in the directory ``param/``. Otherwise, if there 
+is no OPTIONS file input, ``mica2`` will use the default options and create the file ``OPTIONS1D`` in 
+the directory ``param/``. **So if one wants to increase/decrease running steps, one needs to modify the OPTIONS 
+file mannually (e.g., the option ``MaxNumberSaves``) and then run with the above command.** An example OPTIONS file
+can be find in the directory ``param`` in the package.
 
 After MICA2 running finishes, one can run the Python script "postprocess.py" provided in the package as
 

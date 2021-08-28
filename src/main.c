@@ -53,12 +53,24 @@ int main(int argc, char **argv)
       }
     }
 
-    if(argv[optind] != NULL) // parameter file is specified 
+    if(optind < argc ) // parameter file is specified 
       strcpy(parset.param_file, argv[optind]); /* copy input parameter file */
     else
     {
       fprintf(stderr, "# Error: No parameter file specified!\n");
       exit(0);
+    }
+    
+    strcpy(dnest_options_file_line, "\0"); /* empty the string */
+    if(optind+1 < argc)
+    {
+      strcpy(dnest_options_file_line, argv[optind+1]); /* copy input OPTIONS1D file */
+    }
+    
+    strcpy(dnest_options_file_con, "\0"); /* empty the string */
+    if(optind+2 < argc)
+    {
+      strcpy(dnest_options_file_con, argv[optind+2]); /* copy input OPTIONSCON file */
     }
   }
   MPI_Bcast(&flag_postprc, 1, MPI_INT, roottask, MPI_COMM_WORLD);

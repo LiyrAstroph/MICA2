@@ -494,12 +494,20 @@ double prob_con_variability_semiseparable(const void *model)
 int mc_con_init()
 {
 
-  sprintf(dnest_options_file, "%s/src/OPTIONSCON", parset.file_dir);
-
   if(thistask == roottask)
   {
+    if(strlen(dnest_options_file_con) == 0)
+    {
+      sprintf(dnest_options_file, "%s/param/OPTIONSCON", parset.file_dir);
+      write_options_con(dnest_options_file);
+    }
+    else
+    {
+      strcpy(dnest_options_file, dnest_options_file_con);
+    }
     get_num_particles(dnest_options_file);
   }
+  MPI_Bcast(dnest_options_file, MICA_MAX_STR_LENGTH, MPI_CHAR, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&parset.num_particles, 1, MPI_INT, roottask, MPI_COMM_WORLD);
 
   return 0;

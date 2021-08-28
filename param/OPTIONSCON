@@ -1,0 +1,24 @@
+# File containing parameters for DNest.
+# Put comments at the top, or at the end of the line.
+# Do not change the order of lines.
+# Lines beginning with '#' are regarded as comments.
+# DNest ptions for continuum reconstruction
+
+
+MaxNumberSaves            1500
+PTol                      0.1
+NumberParticles           2
+NewLevelIntervalFactor    5
+ThreadStepsFactor         20
+
+
+# Full options and their default values (if not specified) are:
+# MaxNumberSaves           10000 #maximum number of saving
+# PTol                     0.1   #likelihood tolerance in loge
+# NumberParticles          1  #number of particles
+# NewLevelIntervalFactor   2  #new level interval
+# SaveIntervalFactor       2  #particular saving interval
+# ThreadStepsFactor        10 #thread steps before communications between cores
+# MaxNumberLevels          0  #maximum number of levels; unlimited for 0
+# BacktrackingLength       10.0  #backforward tracking length (lambda)
+# StrengthEqualPush        100.0 #strength to force equal push (beta)

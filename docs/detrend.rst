@@ -12,7 +12,7 @@ trends by using a polynomial to do detrending. The order of the polynomial is sp
                                              # Use the default if you do not know this.
 
 
-The default is using a constant and if there are visible non-echoed trends, usually a line polynomial is sufficient.
+The default is using a constant and if there are visible non-echoed trends, usually a linear polynomial is sufficient.
 ``mica2`` outputs the values of the polynomial coefficients in a file ``data/trend.txt_xx``, in which two columns 
 represent the best value and its uncertainties. The orders of rows in this file are: first the polynomial coefficients for 
 the continuum, followed by those for lines. Then there is a blank row and goes for next dataset.

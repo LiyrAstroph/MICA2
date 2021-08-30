@@ -8,7 +8,7 @@ import configparser as cp
 
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend):
   plt.rc('text', usetex=True)
-  plt.rc('font', family='serif', size=18)
+  plt.rc('font', family='serif', size=15)
 
   sample = np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau)
   data = np.loadtxt(fdir+fname)
@@ -77,8 +77,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       print("Line %d: %.3f -%.3f +%.3f"%(j, lag, err1, err2))
 
   dtau = tau_upp - tau_low 
-  tau = np.linspace(tau_low, tau_upp, 500)
-  tran = np.zeros((sample.shape[0], 500))
+  ntau = 500
+  tran = np.zeros((sample.shape[0], ntau))
   
   shift = 0.0
   
@@ -96,7 +96,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     sall_con0 = sall[indx_con_data[m]*scale:(indx_con_data[m]+ns[0])*scale, :] 
     
     axheight = 0.8/(len(ns))
-    ax = fig.add_axes((0.5, 0.95-axheight, 0.4, axheight))
+    ax = fig.add_axes((0.6, 0.95-axheight, 0.35, axheight))
     
     ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10)
     
@@ -119,6 +119,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     ax.yaxis.set_tick_params(labelright=True)
     ax.yaxis.set_label_position("right")
     ax.set_ylabel('Flux')
+    ax.minorticks_on()
     #ax.xaxis.set_label_position("top")
     #ax.set_xlabel('HJD - 2450000')
     
@@ -129,21 +130,65 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     # plot line
     for j in range(1, len(ns)):
       hb = data[indx_con_data[m] + np.sum(ns[:j]):indx_con_data[m] + np.sum(ns[:j+1]), :] 
-      sall_hb = sall[(indx_con_data[m] + np.sum(ns[:j]))*scale:(indx_con_data[m] + np.sum(ns[:j+1]))*scale, :] 
-      
+      sall_hb = sall[(indx_con_data[m] + np.sum(ns[:j]))*scale:(indx_con_data[m] + np.sum(ns[:j+1]))*scale, :]
+
+      # set hist range 
+      tau1 = 1.0e10
+      tau2 = -1.0e10
+      for k in range(ngau):
+        tau1 = np.min((tau1, np.min(sample[:, indx_line[m]+1+k*3+1]-2)))
+        tau2 = np.max((tau2, np.max(sample[:, indx_line[m]+1+k*3+1]+2)))
+
       # histogram of time lags 
-      ax = fig.add_axes((0.05, 0.95-(j+1)*axheight, 0.2, axheight))
+      ax = fig.add_axes((0.09, 0.95-(j+1)*axheight, 0.16, axheight))
       for k in range(ngau):
         cen = sample[:, indx_line[m]+1+k*3+1]
-        ax.hist(cen, density=True)
+        if k == 0:
+          ax.hist(cen, density=True, range=(tau1, tau2), bins=20, alpha=1)
+        else:
+          ax.hist(cen, density=True, range=(tau1, tau2), bins=20, alpha=0.6)
       ax.yaxis.set_tick_params(labelleft=False)
-      ax.set_xlabel("Time Lag (day)")
       if j == 1:
         ax.set_title("Gaussian Centers")
+      ax.minorticks_on()
+      if j != len(ns)-1:
+        ax.xaxis.set_tick_params(labelbottom=False)
+      else:
+        ax.set_xlabel("Time Lag (day)")
+
+      # centroid time lag
+      ax = fig.add_axes((0.26, 0.95-(j+1)*axheight, 0.16, axheight))
+
+      cent = np.zeros(sample.shape[0])
+      norm = np.zeros(sample.shape[0])
+      for k in range(ngau):
+        norm += np.exp(sample[:, indx_line[m]+1+k*3+0])
+        cent += np.exp(sample[:, indx_line[m]+1+k*3+0]) * sample[:, indx_line[m]+1+k*3+1]
+      
+      ax.hist(cent/norm, density=True, bins=20)
+      ax.minorticks_on()
+      ax.yaxis.set_tick_params(labelleft=False)
+      if j == 1:
+        ax.set_title("Centroid Time Lag")
+      if j != len(ns)-1:
+        ax.xaxis.set_tick_params(labelbottom=False)
+      else:
+        ax.set_xlabel("Time Lag (day)")
 
       # transfer function
-      ax = fig.add_axes((0.28, 0.95-(j+1)*axheight, 0.2, axheight))
+      ax = fig.add_axes((0.43, 0.95-(j+1)*axheight, 0.16, axheight))
       
+      # set time lag range 
+      tau1 = 1.0e10
+      tau2 = -1.0e10
+      for k in range(ngau):
+        tau1 = np.min((tau1, np.min(sample[:, indx_line[m]+1+k*3+1]-2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau2 = np.max((tau2, np.max(sample[:, indx_line[m]+1+k*3+1]+2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+      
+      tau1 = np.min((tau_low, tau1))
+      tau2 = np.max((tau_upp, tau2))
+      tau = np.linspace(tau1, tau2, ntau)
+
       tran[:, :] = 0.0
       for i in range(sample.shape[0]):
         # loop over gaussians
@@ -160,13 +205,13 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
       ax.set_xlim((tau[0], tau[-1]))
-      ax.set_ylim(0.0, np.min((ylim[1], np.max(tran_best)))*1.5)
+      ax.set_ylim(0.0, np.max((ylim[1], np.max(tran_best)))*1.5)
       
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
       else:
         ax.set_xlabel("Time Lag (day)")
-    
+      
       if j == 1:
         ax.set_title("Transfer Function")
     
@@ -176,7 +221,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       #  ax.axvline(x=0.0, ls='--', color='red')
       
       # then line light curve
-      ax = fig.add_axes((0.5, 0.95-(j+1)*axheight, 0.4, axheight))
+      ax = fig.add_axes((0.6, 0.95-(j+1)*axheight, 0.35, axheight))
       
       ax.errorbar(hb[:, 0]-shift, hb[:, 1], yerr=hb[:, 2], ls='none', zorder=10, color='b')
       

@@ -205,7 +205,7 @@ def postprocess(fdir, ngau, temperature=1.0):
   print("Effective sample size = " + str(ESS))
   
   #plt.show()
-  plt.close()
+  plt.close('all')
   
   N = int(moreSamples*ESS)
   posterior_sample = np.zeros((N, sample.shape[1]))

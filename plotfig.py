@@ -96,7 +96,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     sall_con0 = sall[indx_con_data[m]*scale:(indx_con_data[m]+ns[0])*scale, :] 
     
     axheight = 0.8/(len(ns))
-    ax = fig.add_axes((0.6, 0.95-axheight, 0.35, axheight))
+    ax = fig.add_axes((0.56, 0.95-axheight, 0.35, axheight))
     
     ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10)
     
@@ -136,11 +136,11 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       tau1 = 1.0e10
       tau2 = -1.0e10
       for k in range(ngau):
-        tau1 = np.min((tau1, np.min(sample[:, indx_line[m]+1+k*3+1]-2)))
-        tau2 = np.max((tau2, np.max(sample[:, indx_line[m]+1+k*3+1]+2)))
+        tau1 = np.min((tau1, np.min(sample[:, indx_line[m]+1+k*3+1])))
+        tau2 = np.max((tau2, np.max(sample[:, indx_line[m]+1+k*3+1])))
 
       # histogram of time lags 
-      ax = fig.add_axes((0.09, 0.95-(j+1)*axheight, 0.16, axheight))
+      ax = fig.add_axes((0.05, 0.95-(j+1)*axheight, 0.16, axheight))
       for k in range(ngau):
         cen = sample[:, indx_line[m]+1+k*3+1]
         if k == 0:
@@ -157,7 +157,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         ax.set_xlabel("Time Lag (day)")
 
       # centroid time lag
-      ax = fig.add_axes((0.26, 0.95-(j+1)*axheight, 0.16, axheight))
+      ax = fig.add_axes((0.22, 0.95-(j+1)*axheight, 0.16, axheight))
 
       cent = np.zeros(sample.shape[0])
       norm = np.zeros(sample.shape[0])
@@ -165,7 +165,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         norm += np.exp(sample[:, indx_line[m]+1+k*3+0])
         cent += np.exp(sample[:, indx_line[m]+1+k*3+0]) * sample[:, indx_line[m]+1+k*3+1]
       
-      ax.hist(cent/norm, density=True, bins=20)
+      ax.hist(cent/norm, density=True, range=(tau1, tau2), bins=20)
       ax.minorticks_on()
       ax.yaxis.set_tick_params(labelleft=False)
       if j == 1:
@@ -176,7 +176,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         ax.set_xlabel("Time Lag (day)")
 
       # transfer function
-      ax = fig.add_axes((0.43, 0.95-(j+1)*axheight, 0.16, axheight))
+      ax = fig.add_axes((0.39, 0.95-(j+1)*axheight, 0.16, axheight))
       
       # set time lag range 
       tau1 = 1.0e10
@@ -221,7 +221,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       #  ax.axvline(x=0.0, ls='--', color='red')
       
       # then line light curve
-      ax = fig.add_axes((0.6, 0.95-(j+1)*axheight, 0.35, axheight))
+      ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))
       
       ax.errorbar(hb[:, 0]-shift, hb[:, 1], yerr=hb[:, 2], ls='none', zorder=10, color='b')
       

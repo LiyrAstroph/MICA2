@@ -49,7 +49,7 @@ void init()
   line_range_model[2][1] = fmin(parset.lag_limit_upper, tspan_max/2.0);
 
   line_range_model[3][0] = log(tcadence_min/10.0); // sigma of Gaussian
-  line_range_model[3][1] = log(tspan_max);
+  line_range_model[3][1] = log(tspan_max/4.0); //2sigma * 2 < time span
 
   allocate_memory();
 }

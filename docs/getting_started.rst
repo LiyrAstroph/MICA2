@@ -36,6 +36,9 @@ This creates an executable file ``mica2``.
 Running
 =============================
 
+First create two subdirectories ``data/`` and ``param`` in the current working directory. All the output files will be placed 
+into ``data/``. The subdirectory ``param`` is used to place options for CDNest. 
+
 To run the package in a parallel computer/cluster, use the following command: 
 
 .. code:: bash

@@ -67,22 +67,22 @@ def postprocess(fdir, ngau, temperature=1.0):
   ax1.set_xlabel("Iteration")
   ax1.set_ylabel("Level")
   
-  ax=fig.add_subplot(3,2,3)
-  ax.plot(np.diff(levels_orig[:,0]), "k")
-  ax.set_ylabel("Compression")
-  ax.set_xlabel("Level")
+  ax2=fig.add_subplot(3,2,3)
+  ax2.plot(np.diff(levels_orig[:,0]), "k")
+  ax2.set_ylabel("Compression")
+  ax2.set_xlabel("Level")
   xlim = plt.gca().get_xlim()
-  ax.axhline(-1., color='g')
-  ax.axhline(-np.log(10.), color='g', linestyle="--")
-  ax.set_ylim(ymax=0.05)
+  ax2.axhline(-1., color='g')
+  ax2.axhline(-np.log(10.), color='g', linestyle="--")
+  ax2.set_ylim(ymax=0.05)
   
-  ax=fig.add_subplot(3,2,5)
+  ax3=fig.add_subplot(3,2,5)
   good = np.nonzero(levels_orig[:,4] > 0)[0]
-  ax.plot(levels_orig[good,3]/levels_orig[good,4], marker='o')
-  ax.set_xlim(xlim)
-  ax.set_ylim([0., 1.])
-  ax.set_xlabel("Level")
-  ax.set_ylabel("MH Acceptance")
+  ax3.plot(levels_orig[good,3]/levels_orig[good,4], marker='o')
+  ax3.set_xlim(xlim)
+  ax3.set_ylim([0., 1.])
+  ax3.set_xlabel("Level")
+  ax3.set_ylabel("MH Acceptance")
   
   logl_levels = [(levels_orig[i,1], levels_orig[i, 2]) for i in range(0, levels_orig.shape[0])]
   logl_samples = [(sample_info[i, 1], sample_info[i, 2], i) for i in range(0, sample.shape[0])]
@@ -156,12 +156,12 @@ def postprocess(fdir, ngau, temperature=1.0):
     P_samples[:,z] = np.exp(logP_samples[:,z])
     H_estimates[z] = -logz_estimates[z] + np.sum(P_samples[:,z]*logl)
   
-    ax=fig.add_subplot(3,2,4)
-    ax.plot(logx_samples[:,z], sample_info[:,1], 'b.', label='Samples')
-    ax.plot(levels[1:,0], levels[1:,1], 'r.', label='Levels')
-    ax.legend(numpoints=1, loc='lower left')
-    ax.set_ylabel('log(L)')
-    ax.set_xlabel('log(X)')
+    ax4=fig.add_subplot(3,2,4)
+    ax4.plot(logx_samples[:,z], sample_info[:,1], 'b.', label='Samples')
+    ax4.plot(levels[1:,0], levels[1:,1], 'r.', label='Levels')
+    ax4.legend(numpoints=1, loc='lower left')
+    ax4.set_ylabel('log(L)')
+    ax4.set_xlabel('log(X)')
     ax1.set_title(str(z+1) + "/" + str(numResampleLogX) + ", log(Z) = " + str(logz_estimates[z][0]))
 
     # Use all plotted logl values to set ylim
@@ -173,24 +173,28 @@ def postprocess(fdir, ngau, temperature=1.0):
     lower -= 0.05*diff
     upper += 0.05*diff
     if zoom_in:
-      ax.set_ylim([lower, upper])
+      ax4.set_ylim([lower, upper])
   
-    xlim = ax.get_xlim()
+    xlim = ax4.get_xlim()
 
-    ax=fig.add_subplot(3,2,6)
-    ax.plot(logx_samples[:,z], P_samples[:,z], 'b.')
-    ax.set_ylabel('Posterior Weights')
-    ax.set_xlabel('log(X)')
-    ax.set_xlim(xlim)
+    ax5=fig.add_subplot(3,2,6)
+    ax5.plot(logx_samples[:,z], P_samples[:,z], 'b.')
+    ax5.set_ylabel('Posterior Weights')
+    ax5.set_xlabel('log(X)')
+    ax5.set_xlim(xlim)
     
-    xlim = ax.get_xlim()
-    ylim = ax.get_ylim()
-    ax.text(xlim[0]+0.1*(xlim[1]-xlim[0]), ylim[1]-0.1*(ylim[1]-ylim[0]), 'T='+str(temperature))
+    xlim = ax5.get_xlim()
+    ylim = ax5.get_ylim()
+    ax5.text(xlim[0]+0.1*(xlim[1]-xlim[0]), ylim[1]-0.1*(ylim[1]-ylim[0]), 'T='+str(temperature))
 
     fig.align_ylabels()
     pdf.savefig()
-    plt.close()
+    ax4.clear()
+    ax4.remove()
+    ax5.clear()
+    ax5.remove()
   
+  plt.close()
   pdf.close()
   P_samples = np.mean(P_samples, 1)
   P_samples = P_samples/np.sum(P_samples)

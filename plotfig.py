@@ -68,8 +68,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       sample_lag[:] = 0.0
       weight_lag[:] = 0.0
       for k in range(ngau):
-        sample_lag[:] +=  sample[:, indx_line[m]+1+k*3+1] * np.exp(sample[:, indx_line[m]+1+k*3+0])
-        weight_lag[:] +=  np.exp(sample[:, indx_line[m]+1+k*3+0])
+        sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
   
       lag, err1, err2 = np.quantile(sample_lag/weight_lag, q=(0.5, (1.0-0.683)/2.0, 1.0-(1.0-0.683)/2.0))
       err1 = lag-err1
@@ -156,7 +156,6 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax = fig.add_axes((0.05, 0.95-(j+1)*axheight, 0.16, axheight))
       for k in range(ngau):
         cen = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-        print(cen)
         if k == 0:
           ax.hist(cen, density=True, range=(tau1, tau2), bins=20, alpha=1)
         else:

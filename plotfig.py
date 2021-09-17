@@ -128,25 +128,41 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     xlim0 = xlim 
   
     # plot line
+    # set time lag range for Gaussian centers and centriods
+    tau1 = 1.0e10
+    tau2 = -1.0e10
+    for j in range(1, len(ns)):      
+      for k in range(ngau):
+        tau1 = np.min((tau1, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
+        tau2 = np.max((tau2, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
+
+    # set time lag range for transfer function 
+    tau1_tf = 1.0e10
+    tau2_tf = -1.0e10
+    for j in range(1, len(ns)):   
+      for k in range(ngau):
+        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m]+1+k*3+1]-2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m]+1+k*3+1]+2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+      
+    tau1_tf = np.min((tau_low, tau1_tf))
+    tau2_tf = np.max((tau_upp, tau2_tf))
+
+    # now do plotting
     for j in range(1, len(ns)):
       hb = data[indx_con_data[m] + np.sum(ns[:j]):indx_con_data[m] + np.sum(ns[:j+1]), :] 
       sall_hb = sall[(indx_con_data[m] + np.sum(ns[:j]))*scale:(indx_con_data[m] + np.sum(ns[:j+1]))*scale, :]
-
-      # set hist range 
-      tau1 = 1.0e10
-      tau2 = -1.0e10
-      for k in range(ngau):
-        tau1 = np.min((tau1, np.min(sample[:, indx_line[m]+1+k*3+1])))
-        tau2 = np.max((tau2, np.max(sample[:, indx_line[m]+1+k*3+1])))
-
+      
       # histogram of time lags 
       ax = fig.add_axes((0.05, 0.95-(j+1)*axheight, 0.16, axheight))
       for k in range(ngau):
-        cen = sample[:, indx_line[m]+1+k*3+1]
+        cen = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        print(cen)
         if k == 0:
           ax.hist(cen, density=True, range=(tau1, tau2), bins=20, alpha=1)
         else:
           ax.hist(cen, density=True, range=(tau1, tau2), bins=20, alpha=0.6)
+
+      ax.set_xlim((tau1, tau2))
       ax.yaxis.set_tick_params(labelleft=False)
       if j == 1:
         ax.set_title("Gaussian Centers")
@@ -162,10 +178,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       cent = np.zeros(sample.shape[0])
       norm = np.zeros(sample.shape[0])
       for k in range(ngau):
-        norm += np.exp(sample[:, indx_line[m]+1+k*3+0])
-        cent += np.exp(sample[:, indx_line[m]+1+k*3+0]) * sample[:, indx_line[m]+1+k*3+1]
+        norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
       
       ax.hist(cent/norm, density=True, range=(tau1, tau2), bins=20)
+      ax.set_xlim((tau1, tau2))
       ax.minorticks_on()
       ax.yaxis.set_tick_params(labelleft=False)
       if j == 1:
@@ -178,24 +196,14 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       # transfer function
       ax = fig.add_axes((0.39, 0.95-(j+1)*axheight, 0.16, axheight))
       
-      # set time lag range 
-      tau1 = 1.0e10
-      tau2 = -1.0e10
-      for k in range(ngau):
-        tau1 = np.min((tau1, np.min(sample[:, indx_line[m]+1+k*3+1]-2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
-        tau2 = np.max((tau2, np.max(sample[:, indx_line[m]+1+k*3+1]+2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
-      
-      tau1 = np.min((tau_low, tau1))
-      tau2 = np.max((tau_upp, tau2))
-      tau = np.linspace(tau1, tau2, ntau)
-
+      tau = np.linspace(tau1_tf, tau2_tf, ntau)
       tran[:, :] = 0.0
       for i in range(sample.shape[0]):
         # loop over gaussians
         for k in range(ngau):
-          amp = np.exp(sample[i, indx_line[m]+1+k*3+0])
-          cen =        sample[i, indx_line[m]+1+k*3+1]
-          sig = np.exp(sample[i, indx_line[m]+1+k*3+2])
+          amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+          sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
           tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
       
       tran_best = np.percentile(tran, 50.0, axis=0)

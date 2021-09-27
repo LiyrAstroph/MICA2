@@ -56,7 +56,7 @@ After MICA2 running finishes, one can run the Python script "postprocess.py" pro
 
 .. code:: python
 
-  python postprocess.py param
+  python postprocess.py param/param
 
 This will generate a PDF file **dnest_xx.pdf** in subdirectory **data/** that can be used to diagnose the 
 whether option settings are appropriate. The file shows plots like 

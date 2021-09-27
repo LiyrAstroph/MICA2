@@ -22,4 +22,4 @@ Then changes the step numbers in the option files (e.g., param/OPTIONS1D) and re
 
 .. code:: bash 
   
-  mpiexec -n np ./mica2 para/param param/OPTIONS1D
+  mpiexec -n np ./mica2 para/param param/OPTIONS1D -r

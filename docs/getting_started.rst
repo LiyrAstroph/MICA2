@@ -54,7 +54,7 @@ If the results are not as good as expected, one may want to modify options for M
   mpiexec -n np ./mica2 param/param param/OPTIONS1D
 
 where ``OPTIONS1D`` is an options file stored in the directory ``param/``, 
-see :ref:`Diffusive Nested Sampling` for the detail.
+see :ref:`cdnest_label` for the detail.
 
 Parameter file
 =============================

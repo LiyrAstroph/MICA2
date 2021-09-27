@@ -1,4 +1,6 @@
 
+.. _cdnest_label:
+
 *************************
 Diffusive Nested Sampling
 *************************

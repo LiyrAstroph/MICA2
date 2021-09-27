@@ -21,6 +21,7 @@ Documentation
    about.rst
    getting_started.rst
    cdnest.rst
+   resume.rst
    delay.rst
    detrend.rst
    list.rst

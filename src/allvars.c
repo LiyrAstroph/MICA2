@@ -62,4 +62,4 @@ double *workspace_inv;
 // error exit
 char str_error_exit[200];
 
-int flag_postprc, flag_end;
+int flag_postprc, flag_end, flag_restart;

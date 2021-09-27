@@ -42,6 +42,14 @@ void mc_con()
     strcpy(argv[argc++], "-l");
   }
 
+  if(flag_restart == 1)
+  {
+    strcpy(argv[argc++], "-r");
+    strcpy(argv[argc], parset.file_dir);
+    strcat(argv[argc], "/");
+    strcat(argv[argc++], "data/restart_dnest.txt");
+  }
+
   if(flag_postprc == 1)
     strcpy(argv[argc++], "-p");
 

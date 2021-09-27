@@ -241,7 +241,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         x = np.linspace(sall_hb[0, 0], sall_hb[-1, 0], 100)
         y = np.zeros(100)
         for k in range(nq):
-          y+= trend[idx_q + 1*nq + k, 0]* x**(k)
+          y+= trend[idx_q + j*nq + k, 0]* x**(k)
         
         ax.plot(x, y, ls='--', color='grey')
 
@@ -258,10 +258,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ylim = ax.get_ylim()
       ax.minorticks_on()
 
-      idx_q += len(ns) * nq
-  
     plt.show()
     pdf.savefig(fig)
+
+    idx_q += len(ns) * nq
   
   pdf.close()
   return

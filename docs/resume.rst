@@ -14,10 +14,12 @@ different steps, change the snapshot name accordingly.
 Rename the above files as 
 
 .. code:: bash
+
   cp restart_dnest.txt_xxx restart_dnest.txt
   cp restart_dnest1d.txt_xxx restart_dnest1d.txt
 
 Then changes the step numbers in the option files (e.g., param/OPTIONS1D) and resume from last run as 
 
 .. code:: bash 
+  
   mpiexec -n np ./mica2 para/param param/OPTIONS1D

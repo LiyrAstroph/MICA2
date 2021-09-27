@@ -253,7 +253,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.yaxis.set_tick_params(labelright=True)
       ax.yaxis.set_label_position("right")
       ax.set_ylabel("Flux")
-      ax.set_xlim(xlim[0], xlim[1])
+      ax.set_xlim(xlim0[0], xlim0[1])
       xlim = ax.get_xlim()
       ylim = ax.get_ylim()
       ax.minorticks_on()

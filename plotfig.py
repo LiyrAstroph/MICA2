@@ -291,13 +291,50 @@ if __name__ == "__main__":
     exit(0)
   fparam = sys.argv[1]
   param = _param_parser(fparam)
-  fdir = param["FileDir"]
-  flagvar = int(param["FlagUniformVarParams"])
-  flagtran = int(param["FlagUniformTranFuns"])
-  flagtrend = int(param["FlagLongtermTrend"])
-  ngau_low = int(param["NumGaussianLow"])
-  ngau_upp = int(param["NumGaussianUpp"])
-  tau_low = float(param["LagLimitLow"])
-  tau_upp = float(param["LagLimitUpp"])
-  fname = param["DataFile"]
+
+  try:
+    fdir = param["FileDir"]+"/"
+  except:
+    raise IOError("FileDir is not set!")
+
+  try:
+    flagvar = int(param["FlagUniformVarParams"])
+  except:
+    flagvar = 0
+  
+  try:
+    flagtran = int(param["FlagUniformTranFuns"])
+  except:
+    flagtran = 0
+
+  try:
+    flagtrend = int(param["FlagLongtermTrend"])
+  except:
+    flagtrend = 0
+
+  try:  
+    ngau_low = int(param["NumGaussianLow"])
+  except:
+    raise IOError("NumGaussianLow is not set!")
+
+  try: 
+    ngau_upp = int(param["NumGaussianUpp"])
+  except:
+    raise IOError("NumGaussianUpp is not set!")
+  
+  try:
+    tau_low = float(param["LagLimitLow"])
+  except:
+    raise IOError("LagLimitLow is not set!")
+  
+  try:
+    tau_upp = float(param["LagLimitUpp"])
+  except:
+    raise IOError("LagLimitUpp is not set!")
+  
+  try:
+    fname = param["DataFile"]
+  except:
+    raise IOError("DataFile is not set!")
+
   plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend)

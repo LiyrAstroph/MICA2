@@ -211,6 +211,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
+
+      ylim = ax.get_ylim()
       ax.set_xlim((tau[0], tau[-1]))
       ax.set_ylim(0.0, np.min((ylim[1], np.max(tran_best)*1.5)))
       

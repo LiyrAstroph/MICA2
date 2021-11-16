@@ -12,5 +12,8 @@ Here is a list of references that used MICA in the time lag analysis, retrieved 
 - `Hu, C. et al. 2020, ApJ, 890, 71 <https://ui.adsabs.harvard.edu/abs/2020ApJ...890...71H/abstract>`_,
   *Broad-Line Region of the Quasar PG 2130+099 from a Two-Year Reverberation Camgaign With High Cadence*
 
-- `Li, S.-S. et al. 2021, ApJ in press <https://ui.adsabs.harvard.edu/abs/2021arXiv210605655L/abstract>`_,
+- `Li, S.-S. et al. 2021, ApJ, 920, 9 <https://ui.adsabs.harvard.edu/abs/2021ApJ...920....9L/abstract>`_,
   *Reverberation Mapping of Two Luminous Quasars: the Broad-line Region Structure and Black Hole Mass*
+
+- `Fian, C. et al. 2021, arXiv:2111.07385 <https://arxiv.org/abs/2111.07385>`_,
+  *Continuum reverberation mapping of the quasar PG 2130+099*

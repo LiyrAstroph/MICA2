@@ -168,8 +168,8 @@ int write_options_con(char *fname)
   fprintf(fp, "# File containing parameters for DNest.\n"
               "# Put comments at the top, or at the end of the line.\n"
               "# Do not change the order of lines.\n"
-              "# Lines beginning with '#' are regarded as comments."
-              "# DNest ptions for continuum reconstruction\n\n\n");
+              "# Lines beginning with '#' are regarded as comments.\n"
+              "# DNest options for continuum reconstruction\n\n\n");
   
   fprintf(fp, "MaxNumberSaves            1500\n");
   fprintf(fp, "PTol                      0.1\n");
@@ -210,8 +210,8 @@ int write_options_line(char *fname)
   fprintf(fp, "# File containing parameters for DNest.\n"
               "# Put comments at the top, or at the end of the line.\n"
               "# Do not change the order of lines.\n"
-              "# Lines beginning with '#' are regarded as comments."
-              "# DNest ptions for continuum-line time lag analysis\n\n\n");
+              "# Lines beginning with '#' are regarded as comments.\n"
+              "# DNest options for continuum-line time lag analysis\n\n\n");
   
   fprintf(fp, "MaxNumberSaves            1500\n");
   fprintf(fp, "PTol                      0.1\n");

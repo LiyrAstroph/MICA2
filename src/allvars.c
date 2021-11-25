@@ -63,3 +63,5 @@ double *workspace_inv;
 char str_error_exit[200];
 
 int flag_postprc, flag_end, flag_restart;
+
+int flag_warning = 0;

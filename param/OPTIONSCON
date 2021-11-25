@@ -2,7 +2,7 @@
 # Put comments at the top, or at the end of the line.
 # Do not change the order of lines.
 # Lines beginning with '#' are regarded as comments.
-# DNest ptions for continuum reconstruction
+# DNest options for continuum reconstruction
 
 
 MaxNumberSaves            1500

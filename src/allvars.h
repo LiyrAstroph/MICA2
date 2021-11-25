@@ -110,4 +110,6 @@ extern int nset;
 
 extern LC *alldata;
 
+// whether print warning
+extern int flag_warning;
 #endif

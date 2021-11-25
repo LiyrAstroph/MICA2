@@ -1243,7 +1243,7 @@ double prob_line_variability4(const void *model)
     if(info!=0 || sign==-1 )
     {
       prob = -DBL_MAX;
-      printf("lndet_ICq %f %d!\n", lndet_ICq, sign);
+      if(flag_warning)printf("lndet_ICq %f %d!\n", lndet_ICq, sign);
       return prob;
     }
     lndet_ICq += - 2.0*nqall*log(sigma);
@@ -1262,7 +1262,7 @@ double prob_line_variability4(const void *model)
     if(prob1 > 0.0 )  // check if prob is positive
     { 
       prob = -DBL_MAX;
-      printf("prob >0!\n");
+      if(flag_warning)printf("prob >0!\n");
       return prob;
     }
     

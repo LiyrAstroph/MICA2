@@ -46,8 +46,11 @@ To run the package in a parallel computer/cluster, use the following command:
    mpiexec -n np ./mica2 param/param
 
 where ``np`` is the number of cores and ``param`` is the paramter file, stored in the directory ``param/``.
+This will also generate CDNest option files ``OPTIONSCON`` and ``OPTIONS1D`` in the subdirectory ``param/``.
 
-If the results are not as good as expected, one may want to modify options for Markov-chain Monte Carlo sampling as 
+If the results are not as good as expected, one may want to modify options for Markov-chain Monte Carlo sampling.
+There are two ways. The first way is directly editing the parameter file (such as ``param/param`` in the above; see below).
+The second way is editing the above generated option file ``OPTIONS1D`` and transfer it to ``mica2`` in the command line as
 
 .. code:: bash
 
@@ -63,17 +66,21 @@ A typical parameter file looks like::
 
   #
   # lines starting with "#" are regarded as comments and are neglected
-  #
-
+  # if want to turn on the line, remove the beginning "#"
+  
+  #==============================================================
+  
   FileDir                   ./
-  DataFile                  data/data.txt
- 
+  DataFile                  data/Paa_mica2.txt
+  
+  MaxNumberSaves            2000             # number of MCMC sampling steps
+  
   FlagUniformVarParams      0                # whether each dataset has the same variability parameters
-
+  
   FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
                                              # note that different lines have different parameters.
-
-  FlagLongtermTrend         1                # Longterm trend in light curves, use a polynomial to fit 
+  
+  FlagLongtermTrend         0                # Longterm trend in light curves, use a polynomial to fit 
                                              # input the order of the polynomial, e.g.,
                                              # 0, constant  (default)
                                              # 1, linear line 
@@ -97,6 +104,21 @@ A typical parameter file looks like::
                                              #     limit0 + 1*width < lag1 < limit0 + 2*width
                                              #     ...
                                              #     width = (limit1 - limit0)/num_gaussian
+  
+  #==================================================================
+  # options for cdnest sampling
+  # use the default values or do not turn thme on IF NOT familiar with them
+  
+  # PTol                     0.1             # likelihood tolerance in loge
+  # NumberParticles          1               # number of particles
+  # NewLevelIntervalFactor   2               # new level interval
+  # SaveIntervalFactor       2               # particular saving interval
+  # ThreadStepsFactor        10              # thread steps before communications between cores
+  # MaxNumberLevels          0               # maximum number of levels; unlimited for 0
+  # BacktrackingLength       10.0            # backforward tracking length (lambda)
+  # StrengthEqualPush        100.0           # strength to force equal push (beta)
+  
+  #===================================================================
 
 Data format
 ==============================

@@ -66,8 +66,6 @@ typedef struct
   char file_dir[MICA_MAX_STR_LENGTH];
   char data_file[MICA_MAX_STR_LENGTH];
 
-  int num_particles;
-
   int flag_uniform_var_params;
   int flag_uniform_tranfuns;
   int flag_trend;
@@ -77,7 +75,13 @@ typedef struct
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 
   double lag_limit_low, lag_limit_upper;
-
+  
+  /* otpions for cdnest */
+  int max_num_saves;
+  int num_particles;
+  int max_num_levels;
+  double lam, beta, max_ptol;
+  double thread_steps_factor, new_level_interval_factor, save_interval_factor;
 }PARSET;
 extern PARSET parset;
 

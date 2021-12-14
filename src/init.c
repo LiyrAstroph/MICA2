@@ -171,7 +171,7 @@ int write_options_con(char *fname)
               "# Lines beginning with '#' are regarded as comments.\n"
               "# DNest options for continuum reconstruction\n\n\n");
   
-  fprintf(fp, "MaxNumberSaves            1500\n");
+  fprintf(fp, "MaxNumberSaves            2000\n");
   fprintf(fp, "PTol                      0.1\n");
   fprintf(fp, "NumberParticles           2\n");
   fprintf(fp, "NewLevelIntervalFactor    5\n");
@@ -179,7 +179,7 @@ int write_options_con(char *fname)
   
 
   fprintf(fp, "# Full options and their default values (if not specified) are:\n"
-              "# MaxNumberSaves           10000 #maximum number of saving\n"
+              "# MaxNumberSaves           10000 #maximum number of saves\n"
               "# PTol                     0.1   #likelihood tolerance in loge\n"
               "# NumberParticles          1  #number of particles\n"
               "# NewLevelIntervalFactor   2  #new level interval\n"
@@ -213,15 +213,18 @@ int write_options_line(char *fname)
               "# Lines beginning with '#' are regarded as comments.\n"
               "# DNest options for continuum-line time lag analysis\n\n\n");
   
-  fprintf(fp, "MaxNumberSaves            1500\n");
-  fprintf(fp, "PTol                      0.1\n");
-  fprintf(fp, "NumberParticles           2\n");
-  fprintf(fp, "NewLevelIntervalFactor    2\n");
-  fprintf(fp, "ThreadStepsFactor         2\n\n\n");
-  
+  fprintf(fp, "MaxNumberSaves            %d\n", parset.max_num_saves);
+  fprintf(fp, "PTol                      %.2f\n", parset.max_ptol);
+  fprintf(fp, "NumberParticles           %d\n",parset.num_particles);
+  fprintf(fp, "NewLevelIntervalFactor    %.2f\n", parset.new_level_interval_factor);
+  fprintf(fp, "SaveIntervalFactor        %.2f\n", parset.save_interval_factor);
+  fprintf(fp, "ThreadStepsFactor         %.2f\n", parset.thread_steps_factor);
+  fprintf(fp, "MaxNumberLevels           %d\n", parset.max_num_levels);
+  fprintf(fp, "BacktrackingLength        %.2f\n", parset.lam);
+  fprintf(fp, "StrengthEqualPush         %.2f\n\n\n", parset.beta);         
 
   fprintf(fp, "# Full options and their default values (if not specified) are:\n"
-              "# MaxNumberSaves           10000 #maximum number of saving\n"
+              "# MaxNumberSaves           10000 #maximum number of saves\n"
               "# PTol                     0.1   #likelihood tolerance in loge\n"
               "# NumberParticles          1  #number of particles\n"
               "# NewLevelIntervalFactor   2  #new level interval\n"

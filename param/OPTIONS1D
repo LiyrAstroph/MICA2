@@ -5,15 +5,19 @@
 # DNest options for continuum-line time lag analysis
 
 
-MaxNumberSaves            1500
-PTol                      0.1
+MaxNumberSaves            2000
+PTol                      0.10
 NumberParticles           2
-NewLevelIntervalFactor    2
-ThreadStepsFactor         2
+NewLevelIntervalFactor    2.00
+SaveIntervalFactor        2.00
+ThreadStepsFactor         2.00
+MaxNumberLevels           0
+BacktrackingLength        10.00
+StrengthEqualPush         100.00
 
 
 # Full options and their default values (if not specified) are:
-# MaxNumberSaves           10000 #maximum number of saving
+# MaxNumberSaves           10000 #maximum number of saves
 # PTol                     0.1   #likelihood tolerance in loge
 # NumberParticles          1  #number of particles
 # NewLevelIntervalFactor   2  #new level interval

@@ -5,7 +5,7 @@
 # DNest options for continuum reconstruction
 
 
-MaxNumberSaves            1500
+MaxNumberSaves            2000
 PTol                      0.1
 NumberParticles           2
 NewLevelIntervalFactor    5
@@ -13,7 +13,7 @@ ThreadStepsFactor         20
 
 
 # Full options and their default values (if not specified) are:
-# MaxNumberSaves           10000 #maximum number of saving
+# MaxNumberSaves           10000 #maximum number of saves
 # PTol                     0.1   #likelihood tolerance in loge
 # NumberParticles          1  #number of particles
 # NewLevelIntervalFactor   2  #new level interval

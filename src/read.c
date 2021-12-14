@@ -40,6 +40,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = STRING;
 
+    strcpy(pardict[nt].tag, "MaxNumberSaves");
+    pardict[nt].addr = &parset.max_num_saves;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
     strcpy(pardict[nt].tag, "FlagUniformVarParams");
     pardict[nt].addr = &parset.flag_uniform_var_params;
     pardict[nt].isset = 0;
@@ -90,6 +95,41 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "NewLevelIntervalFactor");
+    pardict[nt].addr = &parset.new_level_interval_factor;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+  
+    strcpy(pardict[nt].tag, "SaveIntervalFactor");
+    pardict[nt].addr = &parset.save_interval_factor;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+  
+    strcpy(pardict[nt].tag, "ThreadStepsFactor");
+    pardict[nt].addr = &parset.thread_steps_factor;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+  
+    strcpy(pardict[nt].tag, "MaxNumberLevels");
+    pardict[nt].addr = &parset.max_num_levels;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+  
+    strcpy(pardict[nt].tag, "BacktrackingLength");
+    pardict[nt].addr = &parset.lam;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+   
+    strcpy(pardict[nt].tag, "StrengthEqualPush");
+    pardict[nt].addr = &parset.beta;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+
+    strcpy(pardict[nt].tag, "PTol");
+    pardict[nt].addr = &parset.max_ptol;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+
     num_pardict = nt;
     
     char fname[200];
@@ -109,6 +149,15 @@ int read_parset()
     parset.lag_limit_upper = -1.0;
     parset.type_lag_prior = 1;
     parset.flag_trend = 0;
+    /*cdnest options */
+    parset.max_num_saves = 2000;
+    parset.new_level_interval_factor = 2;
+    parset.save_interval_factor = parset.new_level_interval_factor;
+    parset.thread_steps_factor = 2;
+    parset.lam = 10.0;
+    parset.beta = 100.0;
+    parset.max_num_levels = 0;
+    parset.max_ptol = 0.1;
 
     while(!feof(fparam))
     {

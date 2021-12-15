@@ -65,3 +65,5 @@ char str_error_exit[200];
 int flag_postprc, flag_end, flag_restart;
 
 int flag_warning = 0;
+
+int nscale, nrec_max;

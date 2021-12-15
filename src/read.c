@@ -431,6 +431,7 @@ int read_data()
   nline_max = 0;
   nall_max = 0;
   nlset_max = 0;
+  nrec_max = 0;
   for(i=0; i<nset; i++)
   {
     if(ncon_max < dataset[i].con.n)
@@ -447,6 +448,9 @@ int read_data()
       if(nline_max < dataset[i].line[j].n)
         nline_max = dataset[i].line[j].n;
     }
+
+    if(nrec_max < alldata[i].n * (1+dataset[i].nlset))
+      nrec_max = alldata[i].n * (1+dataset[i].nlset);
   }
 
   tspan_max = 0.0;

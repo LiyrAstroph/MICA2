@@ -48,33 +48,38 @@ void init()
   line_range_model[2][0] = fmax(parset.lag_limit_low, -tspan_max/2.0); // center of Gaussian
   line_range_model[2][1] = fmin(parset.lag_limit_upper, tspan_max/2.0);
 
-  line_range_model[3][0] = log(tcadence_min/10.0); // sigma of Gaussian
+  line_range_model[3][0] = log(tcadence_min/3.0); // sigma of Gaussian
   line_range_model[3][1] = log(tspan_max/3.0); //3*sigma < time span
+
+  nscale = 3;
+  nrec_max *= nscale;
 
   allocate_memory();
 }
 
 void allocate_memory()
 {
-  int i, ns, n;
+  int i, ns, n, n_max;
+
+  n_max = nall_max>nrec_max?nall_max:nrec_max;
 
   PNmat = malloc(nall_max*nall_max*sizeof(double));
   PSmat = malloc(nall_max*nall_max*sizeof(double));
   PCmat = malloc(nall_max*nall_max*sizeof(double));
   IPCmat = malloc(nall_max*nall_max*sizeof(double));
 
-  USmat = malloc(nall_max*nall_max*5*sizeof(double));
-  USmatT = malloc(nall_max*nall_max*5*sizeof(double));
+  USmat = malloc(nall_max*nrec_max*sizeof(double));
+  USmatT = malloc(nall_max*nrec_max*sizeof(double));
 
-  ASmat = malloc(nall_max*nall_max*25*sizeof(double));
+  ASmat = malloc(nrec_max*nrec_max*sizeof(double));
 
   Tmat1 = malloc(nall_max*nall_max*sizeof(double));
   Tmat2 = malloc(nall_max*nall_max*sizeof(double));
   
   ns = ((1+nlset_max)*nq);
-  n = 10*nall_max + (6*nall_max + 1 + ns) * ns;
+  n = 3*nall_max + (nall_max + 2*nrec_max + 1 + ns) * ns;
   workspace = malloc((n)*sizeof(double));
-  workspace_ipiv = malloc(5*nall_max*sizeof(int));
+  workspace_ipiv = malloc(n_max*sizeof(int));
   workspace_inv = malloc(3*nall_max*nall_max*sizeof(double));
 
   var_param = malloc(num_params_var * sizeof(double));

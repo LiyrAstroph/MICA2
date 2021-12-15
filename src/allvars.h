@@ -114,6 +114,8 @@ extern int nset;
 
 extern LC *alldata;
 
+extern int nscale, nrec_max; /* determine number of points of reconstruction */
+
 // whether print warning
 extern int flag_warning;
 #endif

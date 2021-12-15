@@ -208,6 +208,6 @@ Run it with
 
 .. code:: python
 
-  ptyhon plotfig.py param
+  ptyhon plotfig.py param/param
 
 This will generate a PDF file **fig_xx.pdf** in the subdirectory **data/**.

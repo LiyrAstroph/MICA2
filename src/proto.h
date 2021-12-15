@@ -38,6 +38,7 @@ void set_covar_Pmat_data(double sigma, double tau, double alpha, double syserr, 
 void set_covar_Umat(double sigma, double tau, double alpha, int ncon_data, double *tcon_data, int ncon, double *tcon);
 void postprocess_con();
 void output_reconstrction(const void *model);
+void output_reconstrction2(const void *model);
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
   int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
 int write_options_con(char *fname);

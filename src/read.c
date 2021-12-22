@@ -95,6 +95,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "NumberParticles");
+    pardict[nt].addr = &parset.num_particles;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
     strcpy(pardict[nt].tag, "NewLevelIntervalFactor");
     pardict[nt].addr = &parset.new_level_interval_factor;
     pardict[nt].isset = 0;
@@ -150,6 +155,7 @@ int read_parset()
     parset.type_lag_prior = 1;
     parset.flag_trend = 0;
     /*cdnest options */
+    parset.num_particles = 2;
     parset.max_num_saves = 2000;
     parset.new_level_interval_factor = 2;
     parset.save_interval_factor = parset.new_level_interval_factor;

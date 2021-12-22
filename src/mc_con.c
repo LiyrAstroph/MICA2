@@ -512,8 +512,8 @@ int mc_con_init()
     else
     {
       strcpy(dnest_options_file, dnest_options_file_con);
+      get_num_particles(dnest_options_file);
     }
-    get_num_particles(dnest_options_file);
   }
   MPI_Bcast(dnest_options_file, MICA_MAX_STR_LENGTH, MPI_CHAR, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&parset.num_particles, 1, MPI_INT, roottask, MPI_COMM_WORLD);

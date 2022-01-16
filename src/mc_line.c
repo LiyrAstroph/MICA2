@@ -605,6 +605,15 @@ void output_reconstrction2(const void *model)
       }
     }
 
+    /* first output number of points of reconstructions */
+    for(i=0; i<nset; i++)
+    {
+      fprintf(fp, "# %d",nall[i][0]);
+      for(j=0;  j < dataset[i].nlset; j++)
+        fprintf(fp, ":%d", nall[i][1+j]);
+      fprintf(fp, "\n");
+    }
+    /* then output reconstructions */
     for(i=0; i<nset; i++)
     { 
       for(k=0; k<nall[i][0]; k++)
@@ -627,12 +636,6 @@ void output_reconstrction2(const void *model)
         }          
         np += nall[i][1+j];
       }
-
-
-      fprintf(fp, "# %d",nall[i][0]);
-      for(j=0;  j < dataset[i].nlset; j++)
-        fprintf(fp, ":%d", nall[i][1+j]);
-      fprintf(fp, "\n");
       
       /* output reconstructed continuum */
       for(k=0; k<nall[i][0]; k++)

@@ -222,6 +222,11 @@ void output_reconstrction(const void *model)
     {
       tbeg = dataset[i].con.t[0];
       tend = dataset[i].con.t[dataset[i].con.n-1];
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        tbeg = fmin(tbeg, dataset[i].line[j].t[0]);
+        tend = fmax(tend, dataset[i].line[j].t[dataset[i].line[j].n-1]);
+      }
       tspan = tend - tbeg;
       tbeg -= 0.05*tspan;
       tend += 0.05*tspan;

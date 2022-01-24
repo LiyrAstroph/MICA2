@@ -120,6 +120,8 @@ A typical parameter file looks like::
   
   #===================================================================
 
+see :ref:`cdnest_label` for the detail of CDNest options.
+
 Data format
 ==============================
 

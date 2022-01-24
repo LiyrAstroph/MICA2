@@ -13,8 +13,9 @@ SYSTEM="Linux"
 #SYSTEM="Cluster"
 #SYSTEM="TianheII"
 
+#=======================================================
+# make editing according to your system's configurations
 ifeq ($(SYSTEM), "Linux")
-NCORE      :=$(grep -c ^processor /proc/cpuinfo)
 GSL_INCL    = $(shell pkg-config --cflags gsl) 
 GSL_LIBS    = $(shell pkg-config --libs gsl) 
 LAPACK_INCL = -I/usr/include/lapacke
@@ -49,7 +50,7 @@ LAPACK_LIBS = -L/HOME/ihep_yrli_1/BIGDATA/soft/lapack/lib -llapacke -llapack -lb
 DNEST_INCL  = -I /HOME/ihep_yrli_1/BIGDATA/soft/DNest/
 DNEST_LIBS  = -L /HOME/ihep_yrli_1/BIGDATA/soft/DNest -ldnest
 endif
-
+#=======================================================
 
 EXEC     = mica2
 SRC      = ./src

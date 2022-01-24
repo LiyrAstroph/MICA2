@@ -1,7 +1,7 @@
 ***********************************
 A List of References That Used MICA
 ***********************************
-Here is a list of references that used MICA in the time lag analysis, retrieved from the NASA ADS.
+Here is a list of references that used MICA in time lag analysis, retrieved from the NASA ADS.
 
 - `Chelouche, D. et al. 2018, Nature Astronomy, 3, 251 <https://ui.adsabs.harvard.edu/abs/2019NatAs...3..251C/abstract>`_,
   *Direct evidence of non-disk optical continuum emission around an active black hole*
@@ -17,3 +17,6 @@ Here is a list of references that used MICA in the time lag analysis, retrieved 
 
 - `Fian, C. et al. 2021, arXiv:2111.07385 <https://arxiv.org/abs/2111.07385>`_,
   *Continuum reverberation mapping of the quasar PG 2130+099*
+
+- `Guo, W.-J., Li, Y.-R., et al. 2022, ApJ in press (arXiv:2201.08533) <https://arxiv.org/abs/2201.08533>`_,
+  *Accretion Disk Size Measurements of Active Galactic Nuclei Monitored by the Zwicky Transient Facility*

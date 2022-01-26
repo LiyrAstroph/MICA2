@@ -21,8 +21,8 @@ DNestFptrSet *fptrset_line;
 
 double dnest_line(int argc, char **argv)
 {
-  int i;
-  double logz;
+  int i, j, k, ic;
+  double logz, dlag;
 
   fptrset_line = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
@@ -42,7 +42,7 @@ double dnest_line(int argc, char **argv)
   /* number of parameters for line */
   if(parset.flag_uniform_tranfuns == 1)
   {
-    num_params_line = (1+3*num_gaussian) * nlset_max;   /* each line has Gussians */
+    num_params_line = (1+3*num_gaussian) * nlset_max;   /* each line has the same Gussians */
   }
   else
   {
@@ -87,6 +87,41 @@ double dnest_line(int argc, char **argv)
     {
       par_fix[i+num_params_var] = 1;
       par_fix_val[i+num_params_var] = log(1.0);
+    }
+  }
+
+  /* fix Gaussian lags if type_lag_prior == 2 */
+  if(parset.type_lag_prior == 2)
+  {
+    dlag = (parset.lag_limit_upper - parset.lag_limit_low)/(num_gaussian-1);
+    if(parset.flag_uniform_tranfuns == 0)
+    {
+      ic = num_params_var;
+      for(j=0; j<nset; j++)
+      {
+        for(k=0; k<dataset[j].nlset; k++)
+        {
+          ic += 1;  /* error parameter of each line */
+          for(i=0; i<num_gaussian; i++)
+          {
+            par_fix[ic + 1] = 1;  
+            par_fix_val[ic + 1] = parset.lag_limit_low + i*dlag;
+            ic += 3; 
+          }
+        }
+      }
+    }
+    else   /* each line has the same Gussians */
+    {
+      for(j=0; j<nlset_max; j++)
+      {
+        for(i=0; i<num_gaussian; i++)
+        {
+          ic = num_params_var + j*(1+3*num_gaussian) + 1 + i*3 + 1;
+          par_fix[ic] = 1;
+          par_fix_val[ic] = parset.lag_limit_low + i*dlag;
+        }
+      }
     }
   }
 

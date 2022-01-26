@@ -226,9 +226,15 @@ int read_parset()
 
     parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low + 1;
 
-    if(parset.type_lag_prior < 0 || parset.type_lag_prior > 1)
+    if(parset.type_lag_prior < 0 || parset.type_lag_prior > 2)
     {
-      printf("Incorrect TypeLagPrior, should be either 0 or 1.\n");
+      printf("Incorrect TypeLagPrior, should be 0, 1, or 2.\n");
+      exit(0);
+    }
+
+    if(parset.type_lag_prior == 2 && parset.num_gaussian_low < 3)
+    {
+      printf("For prior type 2, better to use more Gaussians (>=3)!\n");
       exit(0);
     }
 

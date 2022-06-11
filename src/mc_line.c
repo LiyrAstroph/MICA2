@@ -982,7 +982,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
   int i, j, k, m, info, idx, *ipiv;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
-  int nall_data, nqall, ntall, np;
+  int nall_data, nqall, ntall, np, ntall_max;
   double *fall_data;
   double sigma, tau, *pm=(double *)model;
 
@@ -1008,11 +1008,14 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   yave = yq + nqall;
   yuq = yave + nall_data; 
   Larr_rec = yuq + ntall;
-
-  PEmat1 = malloc(ntall * ntall * sizeof(double));
-  PEmat2 = malloc(ntall * ntall * sizeof(double));
-  PEmat3 = malloc(ntall * ntall * sizeof(double));
-  PEmat4 = malloc(ntall * ntall * sizeof(double));
+  
+  /* determine the maximum size */
+  ntall_max = ntall>nall_max?ntall:nall_max;
+  
+  PEmat1 = malloc(ntall_max * ntall_max * sizeof(double));
+  PEmat2 = malloc(ntall_max * ntall_max * sizeof(double));
+  PEmat3 = malloc(ntall_max * ntall_max * sizeof(double));
+  PEmat4 = malloc(ntall_max * ntall_max * sizeof(double));
 
   set_covar_Pmat_data_line(model, nds);
   

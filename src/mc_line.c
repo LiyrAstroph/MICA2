@@ -278,6 +278,8 @@ void output_reconstrction(const void *model)
 
     for(m=0; m<num_ps; m++)
     {
+      printf("# sample %d\n", m);
+      
       // read sample
       for(j=0; j<num_params; j++)
       {

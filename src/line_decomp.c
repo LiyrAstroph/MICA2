@@ -180,7 +180,7 @@ void output_decompose_line()
       ps = (double *)post_model;
       for(m=0; m<num_ps; m++)
       {
-        printf("# sample %d of %d-th gaussian\n", m, kgau);      
+        printf("# sample %d of %d-th gaussian\n", m, kgau+1);      
         for(i=0; i<nset; i++)
         {
           /* reconstuct all the light curves */

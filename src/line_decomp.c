@@ -229,9 +229,9 @@ void output_decompose_line()
       fprintf(fp, "\n");
       
       /* output reconstructed continuum */
-      //for(k=0; k<nall[i][0]; k++)
-      //  fprintf(fp, "%f %f %f\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
-      //fprintf(fp, "\n");
+      for(k=0; k<nall[i][0]; k++)
+        fprintf(fp, "%f %f %f\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
+      fprintf(fp, "\n");
 
       /* output reconstructed lines */
       np = nall[i][0];
@@ -283,7 +283,7 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
   int nall_data, nqall, ntall, np, ntall_max;
   double *fall_data;
   double sigma, tau, *pm=(double *)model;
-  int kgau = 0;
+  int kgau = 1;
 
   ipiv = workspace_ipiv;
 
@@ -644,7 +644,7 @@ void set_covar_Umat_line_single(const void *model, int nds, int *nall, double *t
       for(j=0; j < dataset[nds].line[k].n; j++)
       {
         t2 = dataset[nds].line[k].t[j];
-        USmat[ i * nall_data + j + np ] = Slc_single(t1, t2, model, nds, k, kgau);
+        USmat[ i * nall_data + j + np ] = Slc(t1, t2, model, nds, k);
       }
       np += dataset[nds].line[k].n;
     }

@@ -81,6 +81,7 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
 double Slc_single(double tcon, double tline, const void *model, int nds, int nls, int kgau);
 double Sll2_single(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
 double Sll_single(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double Sll_single2(double t1, double t2, const void *model, int nds, int nls, int kgau);
 void set_covar_Umat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
 void set_covar_Amat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
 void output_decompose_line();

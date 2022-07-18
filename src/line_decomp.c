@@ -429,7 +429,8 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
   
   for(i=0; i<ntall; i++)
   {
-    feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat1[i*ntall+i] + PEmat4[i*ntall + i]);
+    //feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat1[i*ntall+i] + PEmat4[i*ntall + i]);
+    feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat1[i*ntall+i]);
   }
 
   free(PEmat1);
@@ -613,6 +614,73 @@ double Sll_single(double t1, double t2, const void *model, int nds, int nls, int
   return Sttot;
 }
 
+/*
+ * auto-covariance of line for a given Gaussian component
+ *
+ * nds: index of dataset
+ * nls: index of line
+ *
+ */
+double Sll_single2(double t1, double t2, const void *model, int nds, int nls, int kgau)
+{
+  double Dt, DT, St, Sttot, A;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  k1 = kgau;
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    k2 = kgau;
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+      
+      DT = Dt - (tau1 - tau2);
+    
+     /* 
+      * for very large x 
+      * erfc(x) = exp(-x^2)/(x * pi^1/2) * ( 1 - 1/(2*x*x) + 3/(2*x*x)^2 ... )
+      * 
+      * (see https://en.wikipedia.org/wiki/Error_function)
+      *
+      * with this equation, the factor exp(wg*wg/taud/taud) will be canceled out.
+      */
+     /*
+      {
+        St = exp(wg*wg/taud/taud) * ( exp(-DT/taud) * erfc( -DT/2.0/wg + wg/taud )
+                                 +exp( DT/taud) * erfc(  DT/2.0/wg + wg/taud ) );
+      }
+     */
+
+      A = sqrt(wg1*wg1 + wg2*wg2);
+
+      St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud )
+          +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud ) ;
+
+      St *= 1.0/2.0 * fg1*fg2;
+
+      Sttot += St;
+    }
+  }
+  
+  return Sttot;
+}
+
+
 /*!
  * this function sets the covariance matrix at time of data points and reconstruction points
  * for a given Gaussian component
@@ -745,7 +813,7 @@ void set_covar_Amat_line_single(const void *model, int nds, int *nall, double *t
       for(j=0; j<nall[1+k]; j++)
       {
         t2 = tall[np + j];
-        ASmat[i * ntall + np+j] = ASmat[(np+j)*ntall + i] = Slc_single(t1, t2, model, nds, k, kgau);
+        ASmat[i * ntall + np+j] = ASmat[(np+j)*ntall + i] = Slc(t1, t2, model, nds, k);
       }
       np += nall[1+k];
     }
@@ -765,7 +833,7 @@ void set_covar_Amat_line_single(const void *model, int nds, int *nall, double *t
         t2 = tall[np + i];
         ASmat[(j+np)*ntall + np+i] = ASmat[(i+np)*ntall + np+j] = Sll_single(t1, t2, model, nds, k, kgau);
       }
-      ASmat[(j+np)*ntall + (j+np)] = Sll(t1, t1, model, nds, k);
+      ASmat[(j+np)*ntall + (j+np)] = Sll_single2(t1, t1, model, nds, k, kgau);
       
       /* line different */
       npline = np + nall[1+k];

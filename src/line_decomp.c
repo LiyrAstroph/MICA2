@@ -30,13 +30,14 @@ void output_decompose_line()
 
     FILE *fp, *fp_sample;
     char fname[200];
-    int i, j, k, m;
+    int i, j, k, m, kgau;
     double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq;
     int **nall, *ntall, np;
     double tspan;
     
     int num_ps, size_of_modeltype;
     void *post_model;
+    double *ps;
     char posterior_sample_file[MICA_MAX_STR_LENGTH];
 
     /* time span of reconstruction */
@@ -59,15 +60,23 @@ void output_decompose_line()
       fprintf(stderr, "# Error: Cannot read file %s.\n", posterior_sample_file);
       exit(0);
     }
-
-    sprintf(fname, "%s/%s%s", parset.file_dir, "data/pline.txt", postfix);
-    fp = fopen(fname, "w");
-    if(fp == NULL)
-    {
-      fprintf(stderr, "# Error: Cannot open file %s\n", fname);
-      exit(-1);
+    post_model = malloc(size_of_modeltype*num_ps);
+    ps = (double *)post_model;
+    for(m=0; m<num_ps; m++)
+    {      
+      // read sample
+      for(j=0; j<num_params; j++)
+      {
+        if(fscanf(fp_sample, "%lf", ps + j) < 1)
+        {
+          fprintf(stderr, "# Error: Cannot read file %s.\n", posterior_sample_file);
+          exit(0);
+        }
+      }
+      fscanf(fp_sample, "\n");
+      ps += num_params;
     }
-    fprintf(fp, "# %d\n", nset);
+    fclose(fp_sample);
  
     nall = malloc(nset*sizeof(int *));
     tall = malloc(nset*sizeof(double *));
@@ -103,7 +112,6 @@ void output_decompose_line()
       fall_std[i] = malloc(ntall[i] * sizeof(double));
     }
     
-    post_model = malloc(size_of_modeltype);
     yq = malloc(nq*(1+nlset_max)*sizeof(double));
 
     for(i=0; i<nset; i++)
@@ -135,117 +143,117 @@ void output_decompose_line()
         np += nall[i][1+j];
       }
     }
-
-    for(i=0; i<nset; i++)
-    { 
-      for(k=0; k<nall[i][0]; k++)
-      {
-        fall_best[i][k] = 0.0;
-        fall_std[i][k] = 0.0;
-        feall_max[i][k] = 0.0;
-      }
-        
-      np = nall[i][0];
-      for(j=0; j<dataset[i].nlset; j++)
-      {
-        for(k=0; k<nall[i][1+j]; k++)
-        {
-          fall_best[i][np+k] = 0.0;
-          fall_std[i][np+k] = 0.0;
-          feall_max[i][np+k] = 0.0;
-        }          
-        np += nall[i][1+j];
-      } 
-
-    }
-
-    for(m=0; m<num_ps; m++)
+    
+    for(kgau=0; kgau<num_gaussian; kgau++)
     {
-      printf("# sample %d\n", m);
-      
-      // read sample
-      for(j=0; j<num_params; j++)
+      sprintf(fname, "%s/%s%s_comp%d", parset.file_dir, "data/pline.txt", postfix, kgau);
+      fp = fopen(fname, "w");
+      if(fp == NULL)
       {
-        if(fscanf(fp_sample, "%lf", (double *)post_model + j) < 1)
-        {
-          fprintf(stderr, "# Error: Cannot read file %s.\n", posterior_sample_file);
-          exit(0);
-        }
+        fprintf(stderr, "# Error: Cannot open file %s\n", fname);
+        exit(-1);
       }
-      fscanf(fp_sample, "\n");
+      fprintf(fp, "# %d\n", nset);
       
       for(i=0; i<nset; i++)
-      {
-        /* reconstuct all the light curves */
-        decompose_single_component(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
-
+      { 
         for(k=0; k<nall[i][0]; k++)
         {
-          fall_best[i][k] += fall[i][k];
-          fall_std[i][k] += fall[i][k]*fall[i][k];
-          feall_max[i][k] = fmax(feall_max[i][k], feall[i][k]);
+          fall_best[i][k] = 0.0;
+          fall_std[i][k] = 0.0;
+          feall_max[i][k] = 0.0;
         }
-        /* reconstructed lines */
+          
         np = nall[i][0];
         for(j=0; j<dataset[i].nlset; j++)
         {
           for(k=0; k<nall[i][1+j]; k++)
           {
-            fall_best[i][np+k] += fall[i][np+k];
-            fall_std[i][np+k] += fall[i][np+k]*fall[i][np+k];
-            feall_max[i][np+k] = fmax(feall_max[i][np+k], feall[i][np+k]);
+            fall_best[i][np+k] = 0.0;
+            fall_std[i][np+k] = 0.0;
+            feall_max[i][np+k] = 0.0;
           }          
+          np += nall[i][1+j];
+        } 
+      }
+      
+      ps = (double *)post_model;
+      for(m=0; m<num_ps; m++)
+      {
+        printf("# sample %d of %d-th gaussian\n", m, kgau);      
+        for(i=0; i<nset; i++)
+        {
+          /* reconstuct all the light curves */
+          decompose_single_component((void *)ps, i, nall[i], tall[i], fall[i], feall[i], yq, kgau); 
+  
+          for(k=0; k<nall[i][0]; k++)
+          {
+            fall_best[i][k] += fall[i][k];
+            fall_std[i][k] += fall[i][k]*fall[i][k];
+            feall_max[i][k] = fmax(feall_max[i][k], feall[i][k]);
+          }
+          /* reconstructed lines */
+          np = nall[i][0];
+          for(j=0; j<dataset[i].nlset; j++)
+          {
+            for(k=0; k<nall[i][1+j]; k++)
+            {
+              fall_best[i][np+k] += fall[i][np+k];
+              fall_std[i][np+k] += fall[i][np+k]*fall[i][np+k];
+              feall_max[i][np+k] = fmax(feall_max[i][np+k], feall[i][np+k]);
+            }          
+            np += nall[i][1+j];
+          }  
+        }
+        ps += num_params;
+      }
+  
+      for(i=0; i<nset; i++)
+      { 
+        for(k=0; k<nall[i][0]; k++)
+        {
+          fall_best[i][k] /= num_ps;
+          fall_std[i][k] /= num_ps;
+          fall_std[i][k] = sqrt(fall_std[i][k] - fall_best[i][k]*fall_best[i][k]);
+          fall_std[i][k] = fmax(fall_std[i][k], feall_max[i][k]);
+        }
+          
+        np = nall[i][0];
+        for(j=0; j<dataset[i].nlset; j++)
+        {
+          for(k=0; k<nall[i][1+j]; k++)
+          {
+            fall_best[i][np+k] /= num_ps;
+            fall_std[i][np+k] /= num_ps;
+            fall_std[i][np+k] = sqrt(fall_std[i][np+k] - fall_best[i][np+k]*fall_best[i][np+k]);
+            fall_std[i][np+k] = fmax(fall_std[i][np+k], feall_max[i][np+k]);
+          }          
+          np += nall[i][1+j];
+        }
+  
+        fprintf(fp, "# %d",nall[i][0]);
+        for(j=0;  j < dataset[i].nlset; j++)
+          fprintf(fp, ":%d", nall[i][1+j]);
+        fprintf(fp, "\n");
+        
+        /* output reconstructed continuum */
+        for(k=0; k<nall[i][0]; k++)
+          fprintf(fp, "%f %f %f\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
+        fprintf(fp, "\n");
+  
+        /* output reconstructed lines */
+        np = nall[i][0];
+        for(j=0; j<dataset[i].nlset; j++)
+        {
+          for(k=0; k<nall[i][1+j]; k++)
+            fprintf(fp, "%f %f %f\n", tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
+          fprintf(fp, "\n");
           np += nall[i][1+j];
         }  
       }
+  
+      fclose(fp);
     }
-
-    for(i=0; i<nset; i++)
-    { 
-      for(k=0; k<nall[i][0]; k++)
-      {
-        fall_best[i][k] /= num_ps;
-        fall_std[i][k] /= num_ps;
-        fall_std[i][k] = sqrt(fall_std[i][k] - fall_best[i][k]*fall_best[i][k]);
-        fall_std[i][k] = fmax(fall_std[i][k], feall_max[i][k]);
-      }
-        
-      np = nall[i][0];
-      for(j=0; j<dataset[i].nlset; j++)
-      {
-        for(k=0; k<nall[i][1+j]; k++)
-        {
-          fall_best[i][np+k] /= num_ps;
-          fall_std[i][np+k] /= num_ps;
-          fall_std[i][np+k] = sqrt(fall_std[i][np+k] - fall_best[i][np+k]*fall_best[i][np+k]);
-          fall_std[i][np+k] = fmax(fall_std[i][np+k], feall_max[i][np+k]);
-        }          
-        np += nall[i][1+j];
-      }
-
-      fprintf(fp, "# %d",nall[i][0]);
-      for(j=0;  j < dataset[i].nlset; j++)
-        fprintf(fp, ":%d", nall[i][1+j]);
-      fprintf(fp, "\n");
-      
-      /* output reconstructed continuum */
-      for(k=0; k<nall[i][0]; k++)
-        fprintf(fp, "%f %f %f\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
-      fprintf(fp, "\n");
-
-      /* output reconstructed lines */
-      np = nall[i][0];
-      for(j=0; j<dataset[i].nlset; j++)
-      {
-        for(k=0; k<nall[i][1+j]; k++)
-          fprintf(fp, "%f %f %f\n", tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
-        fprintf(fp, "\n");
-        np += nall[i][1+j];
-      }  
-    }
-
-    fclose(fp);
-    fclose(fp_sample);
 
     for(i=0; i<nset; i++)
     {
@@ -255,7 +263,6 @@ void output_decompose_line()
       free(nall[i]);
       free(fall_best[i]);
       free(fall_std[i]);
-
     }
     free(tall);
     free(fall);
@@ -275,7 +282,7 @@ void output_decompose_line()
 /* 
  * decompose line component from each Gaussian
  */
-void decompose_single_component(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
+void decompose_single_component(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall, int kgau)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
   int i, j, k, m, info, idx, *ipiv;
@@ -283,7 +290,6 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
   int nall_data, nqall, ntall, np, ntall_max;
   double *fall_data;
   double sigma, tau, *pm=(double *)model;
-  int kgau = 1;
 
   ipiv = workspace_ipiv;
 

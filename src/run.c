@@ -21,7 +21,11 @@ void begin_run()
 
   init();
 
-  mc_con();
+  /* do not need to run mc_con if only postprocessing */
+  if(flag_postprc!=1)
+  {
+    mc_con();
+  }
 
   mc_line();
 }

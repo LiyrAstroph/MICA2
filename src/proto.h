@@ -37,8 +37,8 @@ double prob_con_variability_semiseparable(const void *model);
 void set_covar_Pmat_data(double sigma, double tau, double alpha, double syserr, int n, double *t, double *f, double *fe);
 void set_covar_Umat(double sigma, double tau, double alpha, int ncon_data, double *tcon_data, int ncon, double *tcon);
 void postprocess_con();
-void output_reconstrction(const void *model);
-void output_reconstrction2(const void *model);
+void output_reconstrction();
+void output_reconstrction2();
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
   int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
 int write_options_con(char *fname);
@@ -75,6 +75,15 @@ int write_options_line(char *fname);
 // error.c
 void error_exit(int);
 int mica_cmp(const void * a, const void * b);
+
+//line decomponent
+void decompose_single_component(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall, int kgau);
+double Slc_single(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double Sll2_single(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double Sll_single(double t1, double t2, const void *model, int nds, int nls, int kgau);
+void set_covar_Umat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
+void set_covar_Amat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
+void output_decompose_line();
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info, int *ipiv);

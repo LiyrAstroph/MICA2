@@ -85,7 +85,12 @@ void mc_line()
 
     postprocess_line();
 
-    output_reconstrction(best_model_line);
+    output_reconstrction();
+    
+    if(num_gaussian > 1)
+    {
+      output_decompose_line();
+    }
 
     if(logz_max < logz_arr[j])
     {
@@ -121,7 +126,7 @@ void mc_line()
 /* 
  * reconstruct line lcs acording to the time span of the continuum.
  */
-void output_reconstrction(const void *model)
+void output_reconstrction()
 {
   if(thistask == roottask)
   {
@@ -433,7 +438,7 @@ void output_reconstrction(const void *model)
 /* 
  * reconstruct line lcs acording to their own time spans.
  */
-void output_reconstrction2(const void *model)
+void output_reconstrction2()
 {
   if(thistask == roottask)
   {

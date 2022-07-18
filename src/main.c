@@ -38,8 +38,9 @@ int main(int argc, char **argv)
     flag_postprc = 0;
     flag_end = 0;
     flag_restart = 0;
+    flag_decomp = 0;
 
-    while( (opt = getopt(argc, argv, "pvr")) != -1)
+    while( (opt = getopt(argc, argv, "pvrd")) != -1)
     {
       switch(opt)
       {
@@ -54,6 +55,11 @@ int main(int argc, char **argv)
         
         case 'r':
           flag_restart = 1;
+          break;
+        
+        case 'd':
+          flag_postprc = 1;
+          flag_decomp = 1;
           break;
       }
     }
@@ -81,6 +87,7 @@ int main(int argc, char **argv)
   MPI_Bcast(&flag_postprc, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&flag_end, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&flag_restart, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+  MPI_Bcast(&flag_decomp, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   
   if(flag_end != 1)
   {

@@ -82,20 +82,19 @@ void mc_line()
     strcpy(argv[argc+1], postfix);
 
     logz_arr[j] = dnest_line(argc+2, argv);
+    if(logz_max < logz_arr[j])
+    {
+      logz_max = logz_arr[j];
+      jzmax = j;
+    }
 
     postprocess_line();
 
     output_reconstrction();
     
-    if(num_gaussian > 1)
+    if(num_gaussian > 1 && flag_decomp == 1)
     {
       output_decompose_line();
-    }
-
-    if(logz_max < logz_arr[j])
-    {
-      logz_max = logz_arr[j];
-      jzmax = j;
     }
   }
   

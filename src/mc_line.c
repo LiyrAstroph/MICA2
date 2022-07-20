@@ -326,6 +326,15 @@ void output_reconstrction()
         } 
       }
     }
+    
+    /* write headers */
+    for(i=0; i<nset; i++)
+    {
+      fprintf(fp, "# %d",nall[i][0]);
+      for(j=0;  j < dataset[i].nlset; j++)
+        fprintf(fp, ":%d", nall[i][1+j]);
+      fprintf(fp, "\n");
+    }
 
     for(i=0; i<nset; i++)
     { 
@@ -349,11 +358,6 @@ void output_reconstrction()
         }          
         np += nall[i][1+j];
       }
-
-      fprintf(fp, "# %d",nall[i][0]);
-      for(j=0;  j < dataset[i].nlset; j++)
-        fprintf(fp, ":%d", nall[i][1+j]);
-      fprintf(fp, "\n");
       
       /* output reconstructed continuum */
       for(k=0; k<nall[i][0]; k++)

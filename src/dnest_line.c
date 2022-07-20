@@ -27,7 +27,10 @@ double dnest_line(int argc, char **argv)
   fptrset_line = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
   fptrset_line->from_prior = from_prior_line;
-  fptrset_line->perturb = perturb_line;
+  if(type_lag_prior_pr == 0)
+    fptrset_line->perturb = perturb_line_prior0;
+  else /* prior 1 or 2 */
+    fptrset_line->perturb = perturb_line_prior1;
   fptrset_line->print_particle = print_particle_line;
   fptrset_line->restart_action = restart_action_line;
 
@@ -376,7 +379,8 @@ double log_likelihoods_cal_restart_line(const void *model)
   return logL;
 }
 
-double perturb_line(void *model)
+/* need to check that lag0 < lag1 < lag2... */
+double perturb_line_prior0(void *model)
 {
   double *pm = (double *)model;
   double logH = 0.0, limit1, limit2, width;
@@ -439,32 +443,71 @@ double perturb_line(void *model)
   return logH;
 }
 
+/* need not to check lag orders */
+double perturb_line_prior1(void *model)
+{
+  double *pm = (double *)model;
+  double logH = 0.0, limit1, limit2, width;
+  int which, which_level, igau, size_levels;
+  
+  /* sample variability parameters more frequently */
+  do
+  {
+    which = dnest_rand_int(num_params);
+    
+  }while(par_fix[which] == 1);
+
+  /* level-dependent width */
+  which_level_update = dnest_get_which_level_update();
+  size_levels = dnest_get_size_levels();
+  
+  which_level = which_level_update > (size_levels - 10)?(size_levels-10):which_level_update;
+  if( which_level > 0)
+  {
+    limit1 = limits[(which_level-1) * num_params *2 + which *2];
+    limit2 = limits[(which_level-1) * num_params *2 + which *2 + 1];
+    width = limit2 - limit1;
+  }
+  else
+  {
+    width = ( par_range_model[which][1] - par_range_model[which][0] );
+  }
+
+  if(which < num_params_var)
+  {
+    logH -= (-0.5*pow((pm[which]-var_param[which])/var_param_std[which], 2.0) );
+    pm[which] += dnest_randh() * width;
+    dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
+    logH += (-0.5*pow((pm[which]-var_param[which])/var_param_std[which], 2.0) );
+  }
+  else
+  {
+    pm[which] += dnest_randh() * width;
+    dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
+  }
+  
+  return logH;
+}
+
+/* check where a Gaussian center is updated */
 int check_gauss_center(int which, int *igau)
 {
   int iwhich, idx;
 
-  if(type_lag_prior_pr == 0)
+  iwhich = which - num_params_var;
+
+  idx = (iwhich%(1+3*num_gaussian)-1)%3; //which gaussian parameter is updated; each line has (1+3*num_gaussian) parameters
+
+  *igau = (iwhich%(1+3*num_gaussian)-1)/3; //which gaussian is updated; each gaussian has 3 parameters
+
+  if(idx == 1)
   {
-    iwhich = which - num_params_var;
-
-    idx = (iwhich%(1+3*num_gaussian)-1)%3; //each line has (1+3*num_gaussian) parameters
-
-    *igau = (iwhich%(1+3*num_gaussian)-1)/3; //each gaussian has 3 parameters
-
-    if(idx == 1)
-    {
-      return 1;
-    }
-    else
-    {
-      return 0;
-    }
+    return 1;
   }
   else
   {
     return 0;
   }
-
   return 0;
 }
 

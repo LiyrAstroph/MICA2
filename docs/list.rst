@@ -18,5 +18,11 @@ Here is a list of references that used MICA in time lag analysis, retrieved from
 - `Fian, C. et al. 2021, arXiv:2111.07385 <https://arxiv.org/abs/2111.07385>`_,
   *Continuum reverberation mapping of the quasar PG 2130+099*
 
-- `Guo, W.-J., Li, Y.-R., et al. 2022, ApJ in press (arXiv:2201.08533) <https://arxiv.org/abs/2201.08533>`_,
+- `Guo, W.-J., Li, Y.-R., et al. 2022, ApJ, 929, 19 <https://ui.adsabs.harvard.edu/abs/2022ApJ...929...19G/abstract>`_,
   *Accretion Disk Size Measurements of Active Galactic Nuclei Monitored by the Zwicky Transient Facility*
+
+- `González-Buitrago, D. H., et al., 2022, MNRAS, in press <https://ui.adsabs.harvard.edu/abs/2022arXiv220702474G/abstract>`_,
+  *Revisiting the Continuum Reverberation Lags in the AGN PKS 0558-504*
+
+- `Bao, D.-W., et al., 2022, ApJ, in press <https://ui.adsabs.harvard.edu/abs/2022arXiv220700297B/abstract>`_,
+  *Monitoring AGNs with Hβ Asymmetry. III. Long-term Reverberation Mapping Results of 15 Palomar-Green Quasars*

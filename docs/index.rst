@@ -24,6 +24,7 @@ Documentation
    resume.rst
    delay.rst
    detrend.rst
+   decomp.rst
    list.rst
 
 

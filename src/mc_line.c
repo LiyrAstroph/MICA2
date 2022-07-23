@@ -113,7 +113,7 @@ void mc_line()
   mc_line_end();
 
   /* clear up argv */
-  for(i=0; i<9; i++)
+  for(i=0; i<11; i++)
   {
     free(argv[i]);
   }

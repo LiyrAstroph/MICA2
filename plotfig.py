@@ -102,6 +102,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   
   # open pdf file
   pdf = PdfPages(fdir+"/data/fig_%d.pdf"%ngau)
+  print("Plotting to %s."%(fdir+"/data/fig_%d.pdf"%ngau))
 
   idx_q = 0 # index for long-term trend parameters
   for m in range(nd):
@@ -141,6 +142,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     ax.minorticks_on()
     #ax.xaxis.set_label_position("top")
     #ax.set_xlabel('HJD - 2450000')
+
+    # set ylim
+    ymin = np.min(con0[:, 1])
+    ymax = np.max(con0[:, 1])
+    dy = ymax - ymin
+    ax.set_ylim(ymin-0.1*dy, ymax+0.1*dy)
     
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
@@ -275,6 +282,13 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.yaxis.set_label_position("right")
       ax.set_ylabel("Flux")
       ax.set_xlim(xlim0[0], xlim0[1])
+      
+      # set ylim
+      ymin = np.min(hb[:, 1])
+      ymax = np.max(hb[:, 1])
+      dy = ymax - ymin
+      ax.set_ylim(ymin-0.1*dy, ymax+0.1*dy)
+
       xlim = ax.get_xlim()
       ylim = ax.get_ylim()
       ax.minorticks_on()

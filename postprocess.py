@@ -237,7 +237,7 @@ def postprocess_all(fdir, ngau_low=1, ngau_upp=1, temperature=1.0):
     print("=====================================")
     print("Number of Gaussians: %d"%ngau)
     postprocess(fdir, ngau, temperature)
-    print("Output dnest info to "+fdir+"/data/dnest_%d.pdf"%ngau)
+    print("Output dnest info to "+fdir+"/data/cdnest_%d.pdf"%ngau)
   
   print("=====================================")
 

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 
 #include "allvars.h"
 #include "dnest.h"
@@ -66,12 +67,14 @@ double dnest_line(int argc, char **argv)
   par_fix_val = (double *) malloc(num_params * sizeof(double));
   
   set_par_range_line();
-  print_para_names_line();
   set_idx_line_pm();
 
   /* setup fixed parameters */
   for(i=0; i<num_params; i++)
+  {
     par_fix[i] = 0;
+    par_fix_val[i] = -DBL_MAX;
+  }
 
   /* fix systematic error of continuum */
   if(parset.flag_con_sys_err == 0)
@@ -127,6 +130,8 @@ double dnest_line(int argc, char **argv)
       }
     }
   }
+  
+  print_para_names_line();
 
   logz = dnest(argc, argv, fptrset_line, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
 
@@ -249,7 +254,7 @@ void print_para_names_line()
     return;
 
   int i, j, k;
-  char fname[MICA_MAX_STR_LENGTH];
+  char fname[MICA_MAX_STR_LENGTH], fstr[25];
 
   FILE *fp;
 
@@ -265,30 +270,40 @@ void print_para_names_line()
   for(j=0; j<num_params_var; j+=3)
   {
     i++;
-    fprintf(fp, "%d %s LOG\n", i, "sys_err_con");
+    fprintf(fp, "%2d %-25s LOGUNI %10.6f %10.6f %4d %15.6e\n", i, "sys_err_con", par_range_model[i][0], par_range_model[i][1], 
+            par_fix[i], par_fix_val[i]);
 
     i++;
-    fprintf(fp, "%d %s LOG\n", i, "taud");
+    fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, "taud", par_range_model[i][0], par_range_model[i][1], 
+            par_fix[i], par_fix_val[i]);
 
     i++;
-    fprintf(fp, "%d %s LOG\n", i, "sigmad");
+    fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, "sigmad", par_range_model[i][0], par_range_model[i][1], 
+            par_fix[i], par_fix_val[i]);
   }
 
   for(j = 0; j < num_params_line; j+= (1+3*num_gaussian))
   {
     i++;
-    fprintf(fp, "%d %s\n", i, "sys_err_line");
+    fprintf(fp, "%2d %-25s LOGUNI %10.6f %10.6f %4d %15.6e\n", i, "sys_err_line", par_range_model[i][0], par_range_model[i][1], 
+            par_fix[i], par_fix_val[i]);
 
     for(k=0; k<num_gaussian; k++)
     {
       i++;
-      fprintf(fp, "%d %d-th Gaussian %s  LOG\n", i, k, "applitude");
+      sprintf(fstr, "%d-th Gaussian %s", k, "applitude");
+      fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
+              par_fix[i], par_fix_val[i]);
 
       i++;
-      fprintf(fp, "%d %d-th Gaussian %s\n", i, k, "center ");
+      sprintf(fstr, "%d-th Gaussian %s", k, "center");
+      fprintf(fp, "%2d %-25s UNI    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
+              par_fix[i], par_fix_val[i]);
 
       i++;
-      fprintf(fp, "%d %d-th Gaussian %s  LOG\n", i, k, "sigma");
+      sprintf(fstr, "%d-th Gaussian %s", k, "sigma");
+      fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
+              par_fix[i], par_fix_val[i]);
     }
   }
 

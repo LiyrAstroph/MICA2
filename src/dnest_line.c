@@ -97,7 +97,7 @@ double dnest_line(int argc, char **argv)
   }
 
   /* fix Gaussian lags if type_lag_prior == 2 */
-  if(parset.type_lag_prior == 2)
+  if(parset.type_lag_prior >= 2 )
   {
     dlag = (parset.lag_limit_upper - parset.lag_limit_low)/(num_gaussian-1);
     if(parset.flag_uniform_tranfuns == 0)
@@ -239,8 +239,16 @@ void set_par_range_line()
       }
 
       /* sigma of gaussian */
-      par_range_model[i][0] = line_range_model[3][0];
-      par_range_model[i++][1] = line_range_model[3][1];
+      if(parset.type_lag_prior == 3 && num_gaussian > 1) /* set the range of sigma to (width/2, width) */
+      {
+        par_range_model[i][0] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1)/2);
+        par_range_model[i++][1] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1));
+      }
+      else 
+      {
+        par_range_model[i][0] = line_range_model[3][0];
+        par_range_model[i++][1] = line_range_model[3][1];
+      }
     }
   }
   

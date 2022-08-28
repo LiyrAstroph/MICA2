@@ -14,6 +14,7 @@
 #include <gsl/gsl_cblas.h>
 #include <gsl/gsl_sf_erf.h>
 
+#include "dnest.h"
 #include "dnest_line.h"
 #include "allvars.h"
 
@@ -290,6 +291,7 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
   int nall_data, nqall, ntall, np, ntall_max;
   double *fall_data;
   double sigma, tau, *pm=(double *)model;
+  double fq_weight, *fq_all; /* q weight of each component */
 
   ipiv = workspace_ipiv;
 
@@ -313,6 +315,18 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
   yave = yq + nqall;
   yuq = yave + nall_data; 
   Larr_rec = yuq + ntall;
+
+  /* calculate total responses of each dataset */
+  fq_all = malloc((dataset[nds].nlset)*sizeof(double));
+  for(j=0; j<dataset[nds].nlset; j++)
+  {
+    idx = idx_line_pm[nds][j];
+    fq_all[j] = 0.0;
+    for(k=0; k<num_gaussian; k++)
+    {
+      fq_all[j] += exp(pm[idx+1+k*3]);
+    }
+  }
   
   /* determine the maximum size */
   ntall_max = ntall>nall_max?ntall:nall_max;
@@ -386,6 +400,8 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
   np = nall[0];
   for(k=0; k<dataset[nds].nlset; k++)
   {
+    idx = idx_line_pm[nds][k];
+    fq_weight = exp(pm[idx+1+3*kgau])/fq_all[k];
     for(i=0; i<nall[1+k]; i++)
     {
       for(j=0; j<nqall; j++)
@@ -393,17 +409,17 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
         Larr_rec[(np+i)*nqall + j] = 0.0;
       }
 
-      Larr_rec[(np+i)*nqall + nq + k*nq + 0] = 1.0;
+      Larr_rec[(np+i)*nqall + nq + k*nq + 0] = 1.0 * fq_weight;
       for(j=1; j<nq; j++)
-        Larr_rec[(np+i)*nqall + nq + k*nq + j] = pow(tall[np+i], j);
+        Larr_rec[(np+i)*nqall + nq + k*nq + j] = pow(tall[np+i], j) * fq_weight;
     }
     np += nall[1+k];
   }
 
   multiply_matvec_MN(Larr_rec, ntall, nqall, yq, yuq);
 
-  //for(i=0; i<ntall; i++)
-  //  fall[i] += yuq[i];
+  for(i=0; i<ntall; i++)
+    fall[i] += yuq[i];
 
   /* Transpose of USmat */
   for(i=0; i<ntall; i++)
@@ -437,6 +453,7 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
   free(PEmat2);
   free(PEmat3);
   free(PEmat4);
+  free(fq_all);
   return;
 }
 

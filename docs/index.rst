@@ -20,6 +20,7 @@ Documentation
 
    about.rst
    getting_started.rst
+   prior.rst
    cdnest.rst
    resume.rst
    delay.rst

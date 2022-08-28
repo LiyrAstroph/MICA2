@@ -104,7 +104,19 @@ A typical parameter file looks like::
                                              #     limit0 + 1*width < lag1 < limit0 + 2*width
                                              #     ...
                                              #     width = (limit1 - limit0)/num_gaussian
-  
+                                             #
+                                             # 2,  lags fixed at specific values, no limit on Guassian sigma
+                                             #     lag0 = limit0 + 0*dlag
+                                             #     lag1 = limit0 + 1*dlag
+                                             #     ...
+                                             #     dlag = (limit1 - limit0)/(num_gaussian-1)
+                                             #     
+                                             # 3,  lags fixed at specific values and Gaussian sigma ranges at (dlag/2, dlag)
+                                             #     lag0 = limit0 + 0*dlag
+                                             #     lag1 = limit0 + 1*dlag
+                                             #     ...
+                                             #     dlag = (limit1 - limit0)/(num_gaussian-1)
+                                             #     better to set a large Guassian mumber
   #==================================================================
   # options for cdnest sampling
   # use the default values or do not turn thme on IF NOT familiar with them
@@ -200,6 +212,15 @@ Output
   * **pall.txt_xx**
 
     reconstruction of datasets, with the same format as the input data.
+  
+  * **pline.txt_xx_compyy** (applicable with ``-d`` option)
+    
+    decomposed light curves for each Gaussian component, with the same format as the input data. **yy** (a number) indicates which Gaussian component.
+    Note that the continuum light curve is not decomposed and only line light curves are decomposed. 
+
+  * **para_names_line.txt_xx**
+    
+    parameters and their priors.
 
 In the end of running, ``mica2`` prints the obtained Bayesian evidence for each number of Gausssians explored.
 

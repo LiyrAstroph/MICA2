@@ -108,6 +108,15 @@ void mc_line()
 
     printf("best number of Gaussian: %d.\n", parset.num_gaussian_low + jzmax);
     printf("*****************************************************\n");
+
+    FILE *fp;
+    fp = fopen("data/evidence.txt", "w");
+    fprintf(fp, "# number_of_gaussians     evidence\n");
+    for(j=0; j<parset.num_gaussian_diff; j++)
+    {
+      fprintf(fp, "%d       %f\n", parset.num_gaussian_low + j, logz_arr[j]);
+    }
+    fclose(fp);
   }  
 
   mc_line_end();

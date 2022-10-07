@@ -6,7 +6,7 @@ import sys, os
 import configparser as cp 
 
 
-def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend):
+def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf):
   """
   reconstruct line lcs according to the time sapns of the continuum.
   """
@@ -167,8 +167,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     tau2_tf = -1.0e10
     for j in range(1, len(ns)):   
       for k in range(ngau):
-        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m]+1+k*3+1]-2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
-        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m]+1+k*3+1]+2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m]+1+k*3+1]-np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m]+1+k*3+1]+np.exp(sample[:, indx_line[m]+1+k*3+2]))))
       
     tau1_tf = np.min((tau_low, tau1_tf))
     tau2_tf = np.max((tau_upp, tau2_tf))
@@ -223,13 +223,23 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       
       tau = np.linspace(tau1_tf, tau2_tf, ntau)
       tran[:, :] = 0.0
-      for i in range(sample.shape[0]):
-        # loop over gaussians
-        for k in range(ngau):
-          amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-          cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-          sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-          tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+      if typetf == 0:
+        for i in range(sample.shape[0]):
+          # loop over gaussians
+          for k in range(ngau):
+            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+            tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+      else:
+        for i in range(sample.shape[0]):
+          # loop over gaussians
+          for k in range(ngau):
+            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+            
+            tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
       
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
@@ -301,7 +311,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   pdf.close()
   return
 
-def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend):
+def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf):
   """
   reconstruct line lcs according to their own time sapns.
   """
@@ -440,8 +450,8 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     tau2_tf = -1.0e10
     for j in range(1, len(ns)):   
       for k in range(ngau):
-        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m]+1+k*3+1]-2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
-        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m]+1+k*3+1]+2*np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m]+1+k*3+1]-np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m]+1+k*3+1]+np.exp(sample[:, indx_line[m]+1+k*3+2]))))
       
     tau1_tf = np.min((tau_low, tau1_tf))
     tau2_tf = np.max((tau_upp, tau2_tf))
@@ -496,13 +506,23 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       
       tau = np.linspace(tau1_tf, tau2_tf, ntau)
       tran[:, :] = 0.0
-      for i in range(sample.shape[0]):
-        # loop over gaussians
-        for k in range(ngau):
-          amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-          cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-          sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-          tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+      if typetf == 0:
+        for i in range(sample.shape[0]):
+          # loop over gaussians
+          for k in range(ngau):
+            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+            tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+      else:
+        for i in range(sample.shape[0]):
+          # loop over gaussians
+          for k in range(ngau):
+            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+            
+            tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
       
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
@@ -567,9 +587,9 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
   pdf.close()
   return
 
-def plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend):
+def plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf):
   for ngau in range(ngau_low, ngau_upp+1):
-    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend)
+    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf)
 
 def _param_parser(fname):
   """
@@ -637,5 +657,10 @@ if __name__ == "__main__":
     fname = param["DataFile"]
   except:
     raise IOError("DataFile is not set!")
+  
+  try:
+    typetf = int(param["TypeTF"])
+  except:
+    typetf = 0
 
-  plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend)
+  plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf)

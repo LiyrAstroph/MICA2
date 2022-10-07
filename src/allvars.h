@@ -71,6 +71,7 @@ typedef struct
   int flag_trend;
   int flag_con_sys_err, flag_line_sys_err;
   int type_lag_prior;
+  int type_tf;
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 

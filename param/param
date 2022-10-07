@@ -7,6 +7,9 @@
 FileDir                   ./
 DataFile                  data/sim_data.txt
 
+TypeTF                    0                # 0: Gaussian
+                                           # 1: Top-hat
+
 MaxNumberSaves            2000             # number of MCMC sampling steps
 
 FlagUniformVarParams      0                # whether each dataset has the same variability parameters

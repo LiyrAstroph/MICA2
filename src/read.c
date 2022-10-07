@@ -95,6 +95,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "TypeTF");
+    pardict[nt].addr = &parset.type_tf;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
     strcpy(pardict[nt].tag, "NumberParticles");
     pardict[nt].addr = &parset.num_particles;
     pardict[nt].isset = 0;
@@ -154,6 +159,7 @@ int read_parset()
     parset.lag_limit_upper = -1.0;
     parset.type_lag_prior = 1;
     parset.flag_trend = 0;
+    parset.type_tf = 0;
     /*cdnest options */
     parset.num_particles = 2;
     parset.max_num_saves = 2000;

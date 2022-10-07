@@ -54,6 +54,25 @@ void init()
   nscale = 3;
   nrec_max *= nscale;
 
+  if(parset.type_tf == 0)
+  {
+    Slc = Slc_gauss;
+    Sll = Sll_gauss;
+    Sll2 = Sll2_gauss;
+    Slc_array = Slc_array_gauss;
+    Sll_array = Sll_array_gauss;
+    Sll2_array = Sll2_array_gauss;
+  }
+  else
+  {
+    Slc = Slc_tophat;
+    Sll = Sll_tophat;
+    Sll2 = Sll2_tophat;
+    Slc_array = Slc_array_tophat;
+    Sll_array = Sll_array_tophat;
+    Sll2_array = Sll2_array_tophat; 
+  }
+
   allocate_memory();
 }
 

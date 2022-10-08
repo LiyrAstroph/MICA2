@@ -25,6 +25,20 @@ A transfer function or delay map relates a time series  to its driving time seri
   
   Schematic of the transfer function for a system that consists of discrete clouds.
 
+As an alternative option, ``mica2`` also supports top-hat transfer functions as 
+
+.. math::
+
+  \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{2\omega_k} H(\tau, \tau_k, \omega_k),
+
+where :math:`H(\tau, \tau_k, \omega_k)` is the top-hat function
+
+.. math:: 
+
+  H(\tau, \tau_k, \omega_k) =~1~{if}~\tau_k-\omega_k \leqslant \tau \leqslant \tau_k + \omega_k
+
+                            =~0~else~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Here is an example for reverberation mapping analysis of the light curves from Hu et al. (2020) using **MICA**,
 
 .. figure:: _static/fig_pg2130.jpg

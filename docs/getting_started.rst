@@ -71,7 +71,10 @@ A typical parameter file looks like::
   #==============================================================
   
   FileDir                   ./
-  DataFile                  data/Paa_mica2.txt
+  DataFile                  data/sim_data.txt
+  
+  TypeTF                    0                # 0: Gaussian
+                                             # 1: Top-hat
   
   MaxNumberSaves            2000             # number of MCMC sampling steps
   
@@ -88,35 +91,38 @@ A typical parameter file looks like::
                                              # Use the default if you do not know this.
   
   LagLimitLow               0.0              # lower limit of the range of time lag to be explored
-  LagLimitUpp               5.0              # upper limit of the range of time lag to be explored
+  LagLimitUpp               100.0              # upper limit of the range of time lag to be explored
                                              # can be negative
   
-  NumGaussianLow            1                # lower limit of number of Gaussians
-  NumGaussianUpp            1                # upper limit of number of Gaussians
+  NumCompLow                2                # lower limit of number of Gaussians/tophats
+  NumCompUpp                2                # upper limit of number of Gaussians/tophats
   
   FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
   FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
   
-  TypeLagPrior              0                # type of lag prior for each Gaussians.
+  TypeLagPrior              0                # type of lag prior for each Gaussians/tophats.
                                              # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
                                              #
                                              # 1,  limit0 + 0*width < lag0 < limit0 + 1*width
                                              #     limit0 + 1*width < lag1 < limit0 + 2*width
                                              #     ...
-                                             #     width = (limit1 - limit0)/num_gaussian
+                                             #     width = (limit1 - limit0)/num_comp
                                              #
-                                             # 2,  lags fixed at specific values, no limit on Guassian sigma
+                                             # 2,  lags fixed at specific values, no limit on Guassian sigma/tophat width
                                              #     lag0 = limit0 + 0*dlag
                                              #     lag1 = limit0 + 1*dlag
                                              #     ...
-                                             #     dlag = (limit1 - limit0)/(num_gaussian-1)
+                                             #     dlag = (limit1 - limit0)/(num_comp-1)
                                              #     
-                                             # 3,  lags fixed at specific values and Gaussian sigma ranges at (dlag/2, dlag)
+                                             # 3,  lags fixed at specific values
+                                             #     Gaussian sigma ranges at (dlag/2, dlag), tophat wdith=dlag/2
                                              #     lag0 = limit0 + 0*dlag
                                              #     lag1 = limit0 + 1*dlag
                                              #     ...
-                                             #     dlag = (limit1 - limit0)/(num_gaussian-1)
-                                             #     better to set a large Guassian mumber
+                                             #     dlag = (limit1 - limit0)/(num_comp-1)
+                                             #     better to set a large  mumber of components
+  
+  
   #==================================================================
   # options for cdnest sampling
   # use the default values or do not turn thme on IF NOT familiar with them
@@ -221,6 +227,10 @@ Output
   * **para_names_line.txt_xx**
     
     parameters and their priors.
+
+  * **evidence.txt**
+    
+    Bayesian evidence for each number of Gaussians explored.
 
 In the end of running, ``mica2`` prints the obtained Bayesian evidence for each number of Gausssians explored.
 

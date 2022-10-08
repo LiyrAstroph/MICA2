@@ -46,3 +46,8 @@ Prior Types of Lags
   :math:`\Delta T = (T_1 - T_0)/(K-1)`, where :math:`K` is the number of Gaussians.
 
 For Types 2 and 3, it is better to use a relatively large number of Gaussians.
+
+**Note that for top-hat transfer function, the above types are generally similar 
+(amplitude, center, and sigma of Gaussians correspond to amplitude, center, and width of top-hats, 
+respectively), except for type 3, in which 
+the top-hat widths are fixed to be** :math:`\Delta T/2`.

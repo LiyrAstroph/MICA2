@@ -69,13 +69,27 @@ int read_parset()
     pardict[nt].addr = &parset.lag_limit_upper;
     pardict[nt].isset = 0;
     pardict[nt++].id = DOUBLE;
-
+    
+    /*===========================================*/
+    /* to compatible with older version */
     strcpy(pardict[nt].tag, "NumGaussianLow");
     pardict[nt].addr = &parset.num_gaussian_low;
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
     strcpy(pardict[nt].tag, "NumGaussianUpp");
+    pardict[nt].addr = &parset.num_gaussian_upper;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+    /* to compatible with older version */
+    /*===========================================*/
+
+    strcpy(pardict[nt].tag, "NumCompLow");
+    pardict[nt].addr = &parset.num_gaussian_low;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
+    strcpy(pardict[nt].tag, "NumCompUpp");
     pardict[nt].addr = &parset.num_gaussian_upper;
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;

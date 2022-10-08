@@ -634,14 +634,14 @@ if __name__ == "__main__":
     flagtrend = 0
 
   try:  
-    ngau_low = int(param["NumGaussianLow"])
+    ngau_low = int(param["NumCompLow"])
   except:
-    raise IOError("NumGaussianLow is not set!")
+    raise IOError("NumCompLow is not set!")
 
   try: 
-    ngau_upp = int(param["NumGaussianUpp"])
+    ngau_upp = int(param["NumCompUpp"])
   except:
-    raise IOError("NumGaussianUpp is not set!")
+    raise IOError("NumCompUpp is not set!")
   
   try:
     tau_low = float(param["LagLimitLow"])

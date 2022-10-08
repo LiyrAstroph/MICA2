@@ -130,6 +130,41 @@ double dnest_line(int argc, char **argv)
       }
     }
   }
+
+  /* fix tophat widths if type_lag_prior == 3 and type_tf = 1 */
+  if(parset.type_tf == 1 && parset.type_lag_prior == 3)
+  {
+    dlag = (parset.lag_limit_upper - parset.lag_limit_low)/(num_gaussian-1);
+    if(parset.flag_uniform_tranfuns == 0)
+    {
+      ic = num_params_var;
+      for(j=0; j<nset; j++)
+      {
+        for(k=0; k<dataset[j].nlset; k++)
+        {
+          ic += 1;  /* error parameter of each line */
+          for(i=0; i<num_gaussian; i++)
+          {
+            par_fix[ic + 2] = 1;  
+            par_fix_val[ic + 2] = log(dlag/2.0);
+            ic += 3; 
+          }
+        }
+      }
+    }
+    else   /* each line has the same Gussians/tophats */
+    {
+      for(j=0; j<nlset_max; j++)
+      {
+        for(i=0; i<num_gaussian; i++)
+        {
+          ic = num_params_var + j*(1+3*num_gaussian) + 1 + i*3 + 2;
+          par_fix[ic] = 1;
+          par_fix_val[ic] = log(dlag/2.0);
+        }
+      }
+    }
+  }
   
   print_para_names_line();
 

@@ -2031,6 +2031,10 @@ void set_covar_Amat_line(const void *model, int nds, int *nall, double *tall)
   return;
 }
 
+/*===============================================================================
+ * Gaussian transfer function 
+ *===============================================================================
+ */
 /*
  * auto-covariance of line
  *
@@ -2143,6 +2147,7 @@ void Sll_array_gauss(double *tline, int nline, const void *model, int nds, int n
       A = sqrt(wg1*wg1 + wg2*wg2);
       At = A/taud;
       At2 = At*At/2.0;
+
       fg12 = fg1*fg2/2.0;
 
       for(i=0; i<nline; i++)
@@ -2265,6 +2270,7 @@ void Sll2_array_gauss(double *tline1, int nline1, double *tline2, int nline2, co
       A = sqrt(wg1*wg1 + wg2*wg2);
       At = A/taud;
       At2 = At*At/2.0;
+
       fg12 = fg1*fg2/2.0;
 
       for(i=0; i<nline1; i++)
@@ -2377,6 +2383,7 @@ void Slc_array_gauss(double *tcon, int ncon, double *tline, int nline, const voi
     
     wt = wg/taud;
     wt2 = wt*wt/2.0;
+    
     for(i=0; i<ncon; i++)
     {
       for(j=0; j<nline; j++)

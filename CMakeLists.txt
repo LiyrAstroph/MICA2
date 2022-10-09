@@ -1,0 +1,106 @@
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+project(mica2 LANGUAGES C)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_C_FLAGS "-Wall -Wextra -finline-functions -fcommon")
+set(CMAKE_C_FLAGS_DEBUG "-g")
+set(CMAKE_C_FLAGS_RELEASE "-O3")
+
+##if using clang compiler, add c++11/c++14/c++17... support (https://clang.llvm.org/cxx_status.html)
+if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+  message(${CMAKE_C_COMPILER_ID})
+  set(CMAKE_C_FLAGS "-std=c++11 ${CMAKE_C_FLAGS}")
+endif()
+
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+# when installing directly in CMake, redirect its intall root to dist dir
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set (CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/dist" CACHE PATH "default install path" FORCE )
+endif()
+
+set(SRC "src")
+
+add_executable(mica2
+  ${SRC}/main.c
+  ${SRC}/allvars.c
+  ${SRC}/run.c 
+  ${SRC}/dnest_con.c
+  ${SRC}/dnest_line.c 
+  ${SRC}/read.c
+  ${SRC}/mc_con.c
+  ${SRC}/mc_line.c
+  ${SRC}/init.c
+  ${SRC}/mathfun.c
+  ${SRC}/line_decomp.c
+  ${SRC}/system.c
+  ${SRC}/version.c
+  ${SRC}/error.c
+  )
+
+#=====================================================
+# CDNEST
+find_path(CDNEST_INCLUDE_DIR 
+          NAMES dnest.h 
+          HINTS /home/liyropt/Projects/GIT/CDNest
+         )
+if(CDNEST_INCLUDE_DIR)
+  include_directories(${CDNEST_INCLUDE_DIR})
+else(CDNEST_INCLUDE_DIR)
+  message(FATAL_ERROR "dnest.h not found")
+endif(CDNEST_INCLUDE_DIR)
+
+find_library(CDNEST_LIB 
+             NAMES dnest
+             HINTS /home/liyropt/Projects/GIT/CDNest
+             )
+if(CDNEST_LIB)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${CDNEST_LIB})
+else(CDNEST_LIB) 
+  message(FATAL_ERROR "dnest library not found")
+endif(CDNEST_LIB)
+
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC m)
+
+#=====================================================
+# MPI
+find_package(MPI REQUIRED)
+if(MPI_FOUND)
+  include_directories(${MPI_C_INCLUDE_DIRS})
+  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${MPI_C_LIBRARIES})
+else(MPI_FOUND)
+message(FATAL_ERROR "MPI not found")
+endif(MPI_FOUND)
+
+#=====================================================
+# GSL
+find_package(GSL REQUIRED)
+if(GSL_FOUND)
+  include_directories(${GSL_INCLUDE_DIRS})
+  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${GSL_LIBRARIES})
+else(GSL_FOUND)
+  message(FATAL_ERROR "GSL not found")
+endif(GSL_FOUND)
+
+#=====================================================
+# BLAS
+find_package(BLAS REQUIRED)
+if(BLAS_FOUND)
+  include_directories(${BLAS_INCLUDE_DIRS})
+  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${BLAS_LIBRARIES})
+else(BLAS_FOUND)
+  message(FATAL_ERROR "BLAS not found")
+endif(BLAS_FOUND)
+
+#=====================================================
+# LAPACK
+find_package(LAPACK REQUIRED)
+if(LAPACK_FOUND)
+  target_link_options(${CMAKE_PROJECT_NAME} PUBLIC ${LAPACK_LINKER_FLAGS})
+  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LAPACK_LIBRARIES} lapacke)
+else(LAPACK_FOUND)
+  message(FATAL_ERROR "LAPACKE not found")
+endif(LAPACK_FOUND)

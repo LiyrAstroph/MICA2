@@ -20,12 +20,22 @@ Third-party package dependence
 
 Note that in Linux system, there are package managers that can install the above libraries convienently (except CDNest). 
 If so, use them. In this case, the libraries usually are installed in standard environment path. Otherwise, any of the above 
-libraries is not installed in standard locations on your system, the ``Makefile`` provided with the code may need slight adjustments.
+libraries is not installed in standard locations on your system, the compiling configurations below may need slight adjustments.
 
 Compiling
 =============================
 
-Edit the configurations in ``Makefile`` to be consistent with your system if necessary. Then compile the package with the command
+Edit CMake compiling configurations to be consistent with your system if necessary, using the command
+
+.. code:: bash
+
+  ccmake .
+
+This will draw out a CMake GUI and edit the configurations accordingly. **If this is your first installation, the GUI might be 
+empty and type ``c`` to do initial configurating.** Please refer to 
+`CMake <https://cmake.org/cmake/help/book/mastering-cmake/index.html>`_ for more details about the useage of CMake GUI.
+
+After this step, compile the package with the command
 
 .. code:: bash
 

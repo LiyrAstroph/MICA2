@@ -24,7 +24,7 @@ endif()
 
 set(SRC "src")
 
-add_executable(mica2
+add_executable(${CMAKE_PROJECT_NAME}
   ${SRC}/main.c
   ${SRC}/allvars.c
   ${SRC}/run.c 

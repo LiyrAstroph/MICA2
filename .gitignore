@@ -10,3 +10,6 @@ mica2
 !param
 !param/param
 !param/OPTIONS*
+!Makefile_deprecated
+CMakeFiles/*
+!CMakeLists.txt

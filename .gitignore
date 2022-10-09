@@ -13,3 +13,4 @@ mica2
 !Makefile_deprecated
 CMakeFiles/*
 !CMakeLists.txt
+!plotdecomp.py

@@ -12,7 +12,14 @@ via supplying an option "-d" and rerun ``mica`` based on previously obtained pos
 
 Note that the second command does not redo sampling, instead, it only decompose the light curve.
 The results are output to files named as "data/pline.txt_xx_comp1", where "xx" is the number of Gaussians and "comp1" means 
-the first Gaussian component.
+the first Gaussian component. 
+
+``mica2`` provides a python script to plot the decomposed light curves. Supply the script the option file (param/param) and run 
+the script as
+
+.. code:: bash 
+
+   python plotdecomp.py param/param
 
 
 .. figure:: _static/fig_decomp.jpg

@@ -1,3 +1,9 @@
+# MICA2
+# A code for time lag measurement in reverberation mapping
+# 
+# Yan-Rong Li, liyanrong@mail.ihep.ac.cn
+# Jun 22, 2018
+#
 import copy
 import numpy as np
 import matplotlib.pyplot as plt

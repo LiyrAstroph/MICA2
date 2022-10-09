@@ -865,7 +865,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
 
   Larr = workspace;
   ybuf = Larr + nall_data * nqall;
-  y = ybuf + nall_data;
+  y = ybuf + nall_data * nqall;
   Cq = y + nall_data;
   yq = Cq + nqall*nqall;
   yuq = yq + nqall; 
@@ -1021,7 +1021,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
 
   Larr = workspace;
   ybuf = Larr + nall_data * nqall;
-  y = ybuf + nall_data;
+  y = ybuf + nall_data * nqall;
   Cq = y + nall_data;
   yq = Cq + nqall*nqall;
   yave = yq + nqall;

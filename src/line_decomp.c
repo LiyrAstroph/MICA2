@@ -309,7 +309,7 @@ void decompose_single_component(const void *model, int nds, int *nall, double *t
 
   Larr = workspace;
   ybuf = Larr + nall_data * nqall;
-  y = ybuf + nall_data;
+  y = ybuf + nall_data * nqall;
   Cq = y + nall_data;
   yq = Cq + nqall*nqall;
   yave = yq + nqall;

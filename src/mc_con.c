@@ -340,7 +340,7 @@ double prob_con_variability(const void *model)
 
   Larr = workspace;
   ybuf = Larr + ncon_max*nq;
-  y = ybuf + ncon_max;
+  y = ybuf + ncon_max*nq;
   yq = y + ncon_max;
   Cq = yq + nq;
   ICq = Cq + nq * nq;
@@ -435,7 +435,7 @@ double prob_con_variability_semiseparable(const void *model)
 
   Larr = workspace;
   ybuf = Larr + ncon_max*nq;
-  y = ybuf + ncon_max;
+  y = ybuf + ncon_max*nq;
   yq = y + ncon_max;
   Cq = yq + nq;
   W = Cq + nq*nq;
@@ -458,7 +458,7 @@ double prob_con_variability_semiseparable(const void *model)
 
     for(i=0; i<ncon; i++)
     {
-      Larr[i*nq]=1.0;
+      Larr[i*nq+0]=1.0;
       for(j=1; j<nq; j++)
       {
         Larr[i*nq+j] = pow(tcon[i], j);

@@ -97,13 +97,23 @@ int mica_cmp(const void * a, const void * b);
 
 //line decomponent
 void decompose_single_component(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall, int kgau);
-double Slc_single(double tcon, double tline, const void *model, int nds, int nls, int kgau);
-double Sll2_single(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
-double Sll_single(double t1, double t2, const void *model, int nds, int nls, int kgau);
-double Sll_single2(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double (*Slc_single)(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double (*Sll2_single)(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double (*Sll_single)(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double (*Sll_single2)(double t1, double t2, const void *model, int nds, int nls, int kgau);
 void set_covar_Umat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
 void set_covar_Amat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
 void output_decompose_line();
+
+double Slc_single_gauss(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double Sll2_single_gauss(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double Sll_single_gauss(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double Sll_single2_gauss(double t1, double t2, const void *model, int nds, int nls, int kgau);
+
+double Slc_single_tophat(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double Sll2_single_tophat(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double Sll_single_tophat(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double Sll_single2_tophat(double t1, double t2, const void *model, int nds, int nls, int kgau);
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info, int *ipiv);

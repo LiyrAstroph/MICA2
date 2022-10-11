@@ -16,6 +16,8 @@ Third-party package dependence
 
   * **LAPACKE** --- the C-interface of LAPACK, downloaded at http://www.netlib.org/lapack/
 
+  * **CMake** ---- the compilation tool, downloaded at https://cmake.org/download/
+
   * **CDNest** --- Diffusive nested sampling, downloaded at https://github.com/LiyrAstroph/CDNest
 
 Note that in Linux system, there are package managers that can install the above libraries convienently (except CDNest). 
@@ -259,3 +261,8 @@ to print help information about this script.
 .. code:: bash
 
   python plotfig.py --help
+
+Testing
+========================
+To test ``mica2``, change to the subdirectory ``tests/`` and there are two suites of tests. One is for two Gaussians
+and the other is for two tophats. See :ref:`tests_label` for more details.

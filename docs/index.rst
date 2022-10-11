@@ -26,6 +26,7 @@ Documentation
    delay.rst
    detrend.rst
    decomp.rst
+   tests.rst
    list.rst
 
 

@@ -1,0 +1,73 @@
+#
+# lines starting with "#" are regarded as comments and are neglected
+# if want to turn on the line, remove the beginning "#"
+
+#==============================================================
+
+FileDir                   ./
+DataFile                  data/sim_data.txt
+
+TypeTF                    0                # 0: Gaussian
+                                           # 1: Top-hat
+
+MaxNumberSaves            1000             # number of MCMC sampling steps
+
+FlagUniformVarParams      0                # whether each dataset has the same variability parameters
+
+FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
+                                           # note that different lines have different parameters.
+
+FlagLongtermTrend         0                # Longterm trend in light curves, use a polynomial to fit 
+                                           # input the order of the polynomial, e.g.,
+                                           # 0, constant  (default)
+                                           # 1, linear line 
+                                           # 2, conic line
+                                           # Use the default if you do not know this.
+
+LagLimitLow               0.0              # lower limit of the range of time lag to be explored
+LagLimitUpp               100.0              # upper limit of the range of time lag to be explored
+                                           # can be negative
+
+NumCompLow                1                # lower limit of number of Gaussians/tophats
+NumCompUpp                2                # upper limit of number of Gaussians/tophats
+
+FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
+FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
+
+TypeLagPrior              0                # type of lag prior for each Gaussians/tophats.
+                                           # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
+                                           #
+                                           # 1,  limit0 + 0*width < lag0 < limit0 + 1*width
+                                           #     limit0 + 1*width < lag1 < limit0 + 2*width
+                                           #     ...
+                                           #     width = (limit1 - limit0)/num_comp
+                                           #
+                                           # 2,  lags fixed at specific values, no limit on Guassian sigma/tophat width
+                                           #     lag0 = limit0 + 0*dlag
+                                           #     lag1 = limit0 + 1*dlag
+                                           #     ...
+                                           #     dlag = (limit1 - limit0)/(num_comp-1)
+                                           #     
+                                           # 3,  lags fixed at specific values
+                                           #     Gaussian sigma ranges at (dlag/2, dlag), tophat wdith=dlag/2
+                                           #     lag0 = limit0 + 0*dlag
+                                           #     lag1 = limit0 + 1*dlag
+                                           #     ...
+                                           #     dlag = (limit1 - limit0)/(num_comp-1)
+                                           #     better to set a large  mumber of components
+
+
+#==================================================================
+# options for cdnest sampling
+# use the default values or do not turn thme on IF NOT familiar with them
+
+# PTol                     0.1             # likelihood tolerance in loge
+# NumberParticles          1               # number of particles
+# NewLevelIntervalFactor   2               # new level interval
+# SaveIntervalFactor       2               # particular saving interval
+# ThreadStepsFactor        10              # thread steps before communications between cores
+# MaxNumberLevels          0               # maximum number of levels; unlimited for 0
+# BacktrackingLength       10.0            # backforward tracking length (lambda)
+# StrengthEqualPush        100.0           # strength to force equal push (beta)
+
+#===================================================================

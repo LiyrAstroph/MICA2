@@ -11,6 +11,7 @@ from matplotlib.ticker import (MultipleLocator)
 import sys, os
 import configparser as cp 
 from matplotlib.backends.backend_pdf import PdfPages
+import argparse
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
@@ -146,11 +147,18 @@ def _param_parser(fname):
   return config['dump']
 
 if __name__ == "__main__":
-  if(len(sys.argv) < 2):
+
+  #
+  parser = argparse.ArgumentParser(usage="python plotdecomp.py [options]")
+  parser.add_argument('--param', type=str, help="parameter file")
+  args = parser.parse_args()
+
+  if args.param == None:
     print("Please specify paramter file!")
-    print("e.g., python plotfig.py src/param")
-    exit(0)
-  fparam = sys.argv[1]
+    print("e.g., python plotdecomp.py --param src/param")
+    sys.exit(0)
+
+  fparam = args.param
   param = _param_parser(fparam)
   
   try:
@@ -179,7 +187,8 @@ if __name__ == "__main__":
     typetf = 0
   
   if ngau_upp < 2:
-    raise IOError("The number of Gaussian < 2, no need to show decomposition!")
+    print("The number of Gaussian < 2, no need to show decomposition!")
+    sys.exit()
 
   for ngau in range(2, ngau_upp+1):
     plot_line_decomp(fdir, fname, ngau, typetf)

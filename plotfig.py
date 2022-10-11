@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import sys, os
 import configparser as cp 
+import argparse
 
 
-def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf):
+def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, resp_input):
   """
   reconstruct line lcs according to the time sapns of the continuum.
   """
@@ -99,6 +100,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       err1 = lag-err1
       err2 = err2 - lag
       print("Line %d: %.3f -%.3f +%.3f"%(j, lag, err1, err2))
+  
+  # load input respon function
+  if resp_input != None:
+    tran_input = np.loadtxt(resp_input)
 
   dtau = tau_upp - tau_low 
   ntau = 500
@@ -254,9 +259,19 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
 
+      #plot input response function
+      if resp_input != None:
+        tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
+        tran_input[:, 1] *= tran_scale
+        ax.plot(tran_input[:, 0], tran_input[:, 1], label='input')
+        ax.legend()
+
       ylim = ax.get_ylim()
       ax.set_xlim((tau[0], tau[-1]))
-      ax.set_ylim(0.0, np.min((ylim[1], np.max(tran_best)*1.5)))
+      if resp_input == None:
+        ax.set_ylim(0.0, np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
+      else:
+        ax.set_ylim(0.0, np.min((ylim[1], np.max((np.max(tran_best)*1.5, np.max(tran_input[:, 1])*1.5)))))
       
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
@@ -292,7 +307,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
       else:
-        ax.set_xlabel("JD")
+        ax.set_xlabel("Time")
       ax.yaxis.set_tick_params(labelleft=False)
       ax.yaxis.set_tick_params(labelright=True)
       ax.yaxis.set_label_position("right")
@@ -317,7 +332,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   pdf.close()
   return
 
-def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf):
+def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, resp_input):
   """
   reconstruct line lcs according to their own time sapns.
   """
@@ -390,6 +405,10 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       err1 = lag-err1
       err2 = err2 - lag
       print("Line %d: %.3f -%.3f +%.3f"%(j, lag, err1, err2))
+  
+  # load input respon function
+  if resp_input != None:
+    tran_input = np.loadtxt(resp_input)
 
   dtau = tau_upp - tau_low 
   ntau = 500
@@ -537,9 +556,20 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
 
+      #plot input response function
+      if resp_input != None:
+        tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
+        tran_input[:, 1] *= tran_scale
+        ax.plot(tran_input[:, 0], tran_input[:, 1], label='input')
+        ax.legend()
+
       ylim = ax.get_ylim()
       ax.set_xlim((tau[0], tau[-1]))
-      ax.set_ylim(0.0, np.min((ylim[1], np.max(tran_best)*1.5)))
+
+      if resp_input == None:
+        ax.set_ylim(0.0, np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
+      else:
+        ax.set_ylim(0.0, np.min((ylim[1], np.max((np.max(tran_best)*1.5, np.max(tran_input[:, 1])*1.5)))))
       
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
@@ -575,7 +605,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
       else:
-        ax.set_xlabel("JD")
+        ax.set_xlabel("Time")
       ax.yaxis.set_tick_params(labelleft=False)
       ax.yaxis.set_tick_params(labelright=True)
       ax.yaxis.set_label_position("right")
@@ -593,32 +623,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
   pdf.close()
   return
 
-def plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf):
-  for ngau in range(ngau_low, ngau_upp+1):
-    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf)
-
-def _param_parser(fname):
-  """
-  parse parameter file
-  """
-  config = cp.RawConfigParser(delimiters=' ', comment_prefixes='#', inline_comment_prefixes='#', 
-  default_section=cp.DEFAULTSECT, empty_lines_in_values=False)
-  
-  with open(fname) as f:
-    file_content = '[dump]\n' + f.read()
-
-  config.read_string(file_content)
-    
-  return config['dump']
-
-if __name__ == "__main__":
-  if(len(sys.argv) < 2):
-    print("Please specify paramter file!")
-    print("e.g., python plotfig.py src/param")
-    exit(0)
-  fparam = sys.argv[1]
-  param = _param_parser(fparam)
-
+def plot_results_all(args, param):
   try:
     fdir = param["FileDir"]+"/"
   except:
@@ -669,4 +674,36 @@ if __name__ == "__main__":
   except:
     typetf = 0
 
-  plot_results_all(fdir, fname, ngau_low, ngau_upp, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf)
+  for ngau in range(ngau_low, ngau_upp+1):
+    plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, args.resp_input)
+
+def _param_parser(fname):
+  """
+  parse parameter file
+  """
+  config = cp.RawConfigParser(delimiters=' ', comment_prefixes='#', inline_comment_prefixes='#', 
+  default_section=cp.DEFAULTSECT, empty_lines_in_values=False)
+  
+  with open(fname) as f:
+    file_content = '[dump]\n' + f.read()
+
+  config.read_string(file_content)
+    
+  return config['dump']
+
+if __name__ == "__main__":
+  #
+  parser = argparse.ArgumentParser(usage="python plotfig.py [options]")
+  parser.add_argument('--param', type=str, help="parameter file")
+  parser.add_argument('--resp_input', type=str, help="a file storing input response function")
+  args = parser.parse_args()
+
+  if args.param == None:
+    print("Please specify paramter file!")
+    print("e.g., python plotfig.py --param src/param")
+    sys.exit()
+
+  fparam = args.param
+  param = _param_parser(fparam)
+
+  plot_results_all(args, param)

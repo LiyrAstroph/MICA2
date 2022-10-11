@@ -249,8 +249,13 @@ Plotting
 There is a Python script **plotfig.py** provided in the package that can be used to plot the results. 
 Run it with 
 
-.. code:: python
+.. code:: bash
 
-  ptyhon plotfig.py param/param
+  ptyhon plotfig.py --param param/param
 
-This will generate a PDF file **fig_xx.pdf** in the subdirectory **data/**.
+This will generate a PDF file **fig_xx.pdf** in the subdirectory **data/**.  Use the following command 
+to print help information about this script.  
+
+.. code:: bash
+
+  python plotfig.py --help

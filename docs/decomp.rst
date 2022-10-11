@@ -19,7 +19,7 @@ the script as
 
 .. code:: bash 
 
-   python plotdecomp.py param/param
+   python plotdecomp.py --param param/param
 
 
 .. figure:: _static/fig_decomp.jpg

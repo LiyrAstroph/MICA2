@@ -367,13 +367,28 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     ns = np.array([int(i) for i in ls])
     nl.append(ns)
   fp.close()
+
+  # read number of points of reconstructions
+  fp = open(fdir+"/data/pall.txt_%d"%ngau, "r")
+  line = fp.readline()
+  nl_rec = []
+  for i in range(nd):
+    line = fp.readline()
+    ls = line[1:].split(":")
+    ns = np.array([int(i) for i in ls])
+    nl_rec.append(ns)
+  fp.close()
   
   # assign index of cont data
   indx_con_data = []
+  indx_con_rec = []
   indx_con_data.append(0)
+  indx_con_rec.append(0)
   for i in range(1, nd):
     ns = nl[i-1]
+    ns_rec = nl_rec[i-1]
     indx_con_data.append(np.sum(ns) + indx_con_data[i-1])
+    indx_con_rec.append(np.sum(ns_rec) + indx_con_rec[i-1])
 
   # assign index of the parmaeter for the first line of each dataset 
   indx_line = []
@@ -422,12 +437,13 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
   idx_q = 0 # index for long-term trend parameters
   for m in range(nd):
     ns = nl[m]
+    ns_rec = nl_rec[m]
     fig = plt.figure(figsize=(12, 4+2*(len(ns)-2)))
     
     #===================================
     # plot continuum
     con0 = data[indx_con_data[m]:indx_con_data[m]+ns[0], :]
-    sall_con0 = sall[indx_con_data[m]*scale:(indx_con_data[m]+ns[0])*scale, :] 
+    sall_con0 = sall[indx_con_rec[m]:(indx_con_rec[m]+ns_rec[0]), :] 
     
     axheight = 0.8/(len(ns))
     ax = fig.add_axes((0.56, 0.95-axheight, 0.35, axheight))
@@ -484,7 +500,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     # now do plotting
     for j in range(1, len(ns)):
       hb = data[indx_con_data[m] + np.sum(ns[:j]):indx_con_data[m] + np.sum(ns[:j+1]), :] 
-      sall_hb = sall[(indx_con_data[m] + np.sum(ns[:j]))*scale:(indx_con_data[m] + np.sum(ns[:j+1]))*scale, :]
+      sall_hb = sall[(indx_con_rec[m] + np.sum(ns_rec[:j])):(indx_con_rec[m] + np.sum(ns_rec[:j+1])), :]
       
       # histogram of time lags 
       ax = fig.add_axes((0.05, 0.95-(j+1)*axheight, 0.16, axheight))
@@ -675,7 +691,7 @@ def plot_results_all(args, param):
     typetf = 0
 
   for ngau in range(ngau_low, ngau_upp+1):
-    plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, args.resp_input)
+    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, args.resp_input)
 
 def _param_parser(fname):
   """

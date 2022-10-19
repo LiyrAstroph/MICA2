@@ -114,6 +114,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "FlagLagPositivity");
+    pardict[nt].addr = &parset.flag_lag_posivity;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
     strcpy(pardict[nt].tag, "NumberParticles");
     pardict[nt].addr = &parset.num_particles;
     pardict[nt].isset = 0;
@@ -174,6 +179,9 @@ int read_parset()
     parset.type_lag_prior = 1;
     parset.flag_trend = 0;
     parset.type_tf = 0;
+    parset.flag_lag_posivity = 0;
+    parset.num_gaussian_low = 1;
+    parset.num_gaussian_upper = 1;
     /*cdnest options */
     parset.num_particles = 2;
     parset.max_num_saves = 2000;
@@ -266,6 +274,11 @@ int read_parset()
     if(parset.flag_trend > 2)
     {
       printf("FlagLongtermTrend seems too large.\n");
+      exit(0);
+    }
+    if(parset.flag_lag_posivity != 0 && parset.lag_limit_low < 0.0)
+    {
+      printf("LagLimitLow shoule be >=0 when enabling FlagLagPositivity.\n");
       exit(0);
     }
   }

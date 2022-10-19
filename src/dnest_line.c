@@ -495,7 +495,21 @@ double perturb_line_prior0(void *model)
     else
     {
       dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
-    }  
+    } 
+
+    if(parset.flag_lag_posivity)
+    {
+      int idx;
+      idx = check_gauss_positivity(which);
+      if(idx == 1 && (pm[which] - 3.0*exp(pm[which+1]) < 0.0))
+      {
+        logH = -DBL_MAX; /* give a huge penalty */
+      }
+      else if(idx == 2 && (pm[which-1] - 3.0*exp(pm[which]) < 0.0))
+      {
+        logH = -DBL_MAX; /* give a huge penalty */
+      }
+    }
   }
   
   return logH;
@@ -542,6 +556,20 @@ double perturb_line_prior1(void *model)
   {
     pm[which] += dnest_randh() * width;
     dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
+
+    if(parset.flag_lag_posivity)
+    {
+      int idx;
+      idx = check_gauss_positivity(which);
+      if(idx == 1 && (pm[which] - 3.0*exp(pm[which+1]) < 0.0))
+      {
+        logH = -DBL_MAX; /* give a huge penalty */
+      }
+      else if(idx == 2 && (pm[which-1] - 3.0*exp(pm[which]) < 0.0))
+      {
+        logH = -DBL_MAX; /* give a huge penalty */
+      }
+    }
   }
   
   return logH;
@@ -567,6 +595,11 @@ int check_gauss_center(int which, int *igau)
     return 0;
   }
   return 0;
+}
+
+inline int check_gauss_positivity(int which)
+{
+  return ((which - num_params_var)%(1+3*num_gaussian)-1)%3;
 }
 
 int get_num_params_line()

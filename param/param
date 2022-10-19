@@ -9,13 +9,17 @@ DataFile                  data/sim_data.txt
 
 TypeTF                    0                # 0: Gaussian
                                            # 1: Top-hat
+                                           # default: 0
 
-MaxNumberSaves            2000             # number of MCMC sampling steps
+MaxNumberSaves            500             # number of MCMC sampling steps
+                                           # default: 2000
 
 FlagUniformVarParams      0                # whether each dataset has the same variability parameters
+                                           # default: 0
 
 FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
                                            # note that different lines have different parameters.
+                                           # default: 0
 
 FlagLongtermTrend         0                # Longterm trend in light curves, use a polynomial to fit 
                                            # input the order of the polynomial, e.g.,
@@ -25,16 +29,23 @@ FlagLongtermTrend         0                # Longterm trend in light curves, use
                                            # Use the default if you do not know this.
 
 LagLimitLow               0.0              # lower limit of the range of time lag to be explored
-LagLimitUpp               100.0              # upper limit of the range of time lag to be explored
+LagLimitUpp               100.0            # upper limit of the range of time lag to be explored
                                            # can be negative
 
-NumCompLow                2                # lower limit of number of Gaussians/tophats
-NumCompUpp                2                # upper limit of number of Gaussians/tophats
+FlagLagPositivity         1                # whether force Gaussians overall located at non-negative lags
+                                           # 0: no;  1: yes
+                                           # default: 0
+
+NumCompLow                1                # lower limit of number of Gaussians/tophats
+NumCompUpp                3                # upper limit of number of Gaussians/tophats
+                                           # default: 1, 1
 
 FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
 FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
+                                           # defaul: 0, 0
 
 TypeLagPrior              0                # type of lag prior for each Gaussians/tophats.
+                                           # default: 0
                                            # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
                                            #
                                            # 1,  limit0 + 0*width < lag0 < limit0 + 1*width

@@ -67,3 +67,5 @@ int flag_postprc, flag_end, flag_restart, flag_decomp;
 int flag_warning = 0;
 
 int nscale, nrec_max;
+
+double width_factor;

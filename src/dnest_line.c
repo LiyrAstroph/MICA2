@@ -501,11 +501,11 @@ double perturb_line_prior0(void *model)
     {
       int idx;
       idx = check_gauss_positivity(which);
-      if(idx == 1 && (pm[which] - 3.0*exp(pm[which+1]) < 0.0))
+      if(idx == 1 && (pm[which] - width_factor*exp(pm[which+1]) < 0.0))
       {
         logH = -DBL_MAX; /* give a huge penalty */
       }
-      else if(idx == 2 && (pm[which-1] - 3.0*exp(pm[which]) < 0.0))
+      else if(idx == 2 && (pm[which-1] - width_factor*exp(pm[which]) < 0.0))
       {
         logH = -DBL_MAX; /* give a huge penalty */
       }
@@ -561,11 +561,11 @@ double perturb_line_prior1(void *model)
     {
       int idx;
       idx = check_gauss_positivity(which);
-      if(idx == 1 && (pm[which] - 3.0*exp(pm[which+1]) < 0.0))
+      if(idx == 1 && (pm[which] - width_factor*exp(pm[which+1]) < 0.0))
       {
         logH = -DBL_MAX; /* give a huge penalty */
       }
-      else if(idx == 2 && (pm[which-1] - 3.0*exp(pm[which]) < 0.0))
+      else if(idx == 2 && (pm[which-1] - width_factor*exp(pm[which]) < 0.0))
       {
         logH = -DBL_MAX; /* give a huge penalty */
       }

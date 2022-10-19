@@ -67,6 +67,8 @@ void init()
     Sll_single = Sll_single_gauss;
     Sll2_single = Sll2_single_gauss;
     Sll_single2 = Sll_single2_gauss;
+
+    width_factor = 3.0;
   }
   else
   {
@@ -81,6 +83,8 @@ void init()
     Sll_single = Sll_single_tophat;
     Sll2_single = Sll2_single_tophat;
     Sll_single2 = Sll_single2_tophat;
+
+    width_factor = 1.0;
   }
 
   allocate_memory();

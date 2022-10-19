@@ -111,6 +111,8 @@ typedef struct /* each dataset contains one continuum and several line */
   LC *line;
 }DATASET;
 
+extern double width_factor;
+
 extern DATASET *dataset; 
 extern int nset;
 

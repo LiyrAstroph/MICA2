@@ -11,7 +11,7 @@ TypeTF                    0                # 0: Gaussian
                                            # 1: Top-hat
                                            # default: 0
 
-MaxNumberSaves            500             # number of MCMC sampling steps
+MaxNumberSaves            2000             # number of MCMC sampling steps
                                            # default: 2000
 
 FlagUniformVarParams      0                # whether each dataset has the same variability parameters
@@ -32,12 +32,12 @@ LagLimitLow               0.0              # lower limit of the range of time la
 LagLimitUpp               100.0            # upper limit of the range of time lag to be explored
                                            # can be negative
 
-FlagLagPositivity         1                # whether force Gaussians overall located at non-negative lags
+FlagLagPositivity         0                # whether force Gaussians overall located at non-negative lags
                                            # 0: no;  1: yes
                                            # default: 0
 
 NumCompLow                1                # lower limit of number of Gaussians/tophats
-NumCompUpp                3                # upper limit of number of Gaussians/tophats
+NumCompUpp                1                # upper limit of number of Gaussians/tophats
                                            # default: 1, 1
 
 FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include

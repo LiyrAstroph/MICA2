@@ -356,7 +356,7 @@ void print_para_names_line()
 
 void from_prior_line(void *model)
 {
-  int i;
+  int i, j, ic;
   double *pm = (double *)model;
   
   for(i=0; i<num_params_var; i++)
@@ -370,11 +370,10 @@ void from_prior_line(void *model)
     pm[i] = par_range_model[i][0] + dnest_rand()*(par_range_model[i][1] - par_range_model[i][0]);
   }
 
-  // sort the Gaussian centers
+  /* sort Gaussian centers */
   if(type_lag_prior_pr == 0)
   {
     double *centers;
-    int j, ic;
     centers = malloc(num_gaussian * sizeof(double));
 
     for(i=0; i<num_params_line; i+= 1+3*num_gaussian)
@@ -392,6 +391,27 @@ void from_prior_line(void *model)
       }
     }
     free(centers);
+  }
+
+  /* constrain Gaussian widths */
+  if(parset.flag_lag_posivity != 0)
+  {
+    for(i=0; i<num_params_line; i+= 1+3*num_gaussian)
+    {
+      ic = num_params_var + i + 2;
+      j = 0;
+      while(pm[ic-1] - width_factor*pm[ic] < 0.0)
+      {
+        pm[ic-1] = par_range_model[ic-1][0] + dnest_rand()*(par_range_model[ic-1][1] - par_range_model[ic-1][0]);
+        pm[ic] = par_range_model[ic][0] + dnest_rand()*(par_range_model[ic][1] - par_range_model[ic][0]);
+        j+1;
+        if(j>100)
+        {
+          pm[ic] = pm[ic-1]/width_factor; 
+          break;
+        }
+      }
+    }
   }
 
   for(i=0; i<num_params; i++)

@@ -317,11 +317,11 @@ void print_para_names_line()
             par_fix[i], par_fix_val[i]);
 
     i++;
-    fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, "taud", par_range_model[i][0], par_range_model[i][1], 
+    fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, "sigmad", par_range_model[i][0], par_range_model[i][1], 
             par_fix[i], par_fix_val[i]);
 
     i++;
-    fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, "sigmad", par_range_model[i][0], par_range_model[i][1], 
+    fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, "taud", par_range_model[i][0], par_range_model[i][1], 
             par_fix[i], par_fix_val[i]);
   }
 

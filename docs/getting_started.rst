@@ -51,13 +51,13 @@ Running
 First create two subdirectories ``data/`` and ``param`` in the current working directory. All the output files will be placed 
 into ``data/``. The subdirectory ``param`` is used to place options for CDNest. 
 
-To run the package in a parallel computer/cluster, use the following command: 
+To run the package in a parallel computer/cluster, use the following command, e.g.: 
 
 .. code:: bash
 
-   mpiexec -n np ./mica2 param/param
+   mpiexec -n 6 ./mica2 param/param  # here use 6 cores, change it to the numbers you want
 
-where ``np`` is the number of cores and ``param`` is the paramter file, stored in the directory ``param/``.
+where ``param`` is the paramter file, stored in the directory ``param/``.
 This will also generate CDNest option files ``OPTIONSCON`` and ``OPTIONS1D`` in the subdirectory ``param/``.
 
 If the results are not as good as expected, one may want to modify options for Markov-chain Monte Carlo sampling.
@@ -66,7 +66,7 @@ The second way is editing the above generated option file ``OPTIONS1D`` and tran
 
 .. code:: bash
 
-  mpiexec -n np ./mica2 param/param param/OPTIONS1D
+  mpiexec -n 6 ./mica2 param/param param/OPTIONS1D # here use 6 cores, change it to the numbers you want
 
 where ``OPTIONS1D`` is an options file stored in the directory ``param/``, 
 see :ref:`cdnest_label` for the detail.

@@ -29,3 +29,5 @@ tests/twotophat/*
 !tests/twotophat/sim_data.txt
 !tests/twotophat/resp_input.txt
 Makefile
+!setup.py
+!example.py

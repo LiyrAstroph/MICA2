@@ -17,6 +17,7 @@ double timediff(double t0, double t1);
 void get_hms(double dt, int *h, int *m, double *s);
 
 
+void set_param_file(char *fname);
 void free_memory();
 void allocate_memory();
 int read_parset();

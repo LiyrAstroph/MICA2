@@ -13,6 +13,12 @@
 #include "allvars.h"
 #include "proto.h"
 
+void set_param_file(char *fname)
+{
+  strcpy(parset.param_file, fname);
+  return;
+}
+
 /* read parset from param file */
 int read_parset()
 {

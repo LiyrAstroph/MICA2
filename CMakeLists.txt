@@ -23,6 +23,8 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 
 set(SRC "src")
+set(CDNEST "cdnest")
+include_directories(${CDNEST})
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${SRC}/main.c
@@ -39,30 +41,12 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${SRC}/system.c
   ${SRC}/version.c
   ${SRC}/error.c
+  ${CDNEST}/dnest.c
+  ${CDNEST}/dnestvars.c
+  ${CDNEST}/dnestpostprocess.c
   )
 
-#=====================================================
-# CDNEST
-find_path(CDNEST_INCLUDE_DIR 
-          NAMES dnest.h 
-          HINTS /home/liyropt/Projects/GIT/CDNest
-         )
-if(CDNEST_INCLUDE_DIR)
-  include_directories(${CDNEST_INCLUDE_DIR})
-else(CDNEST_INCLUDE_DIR)
-  message(FATAL_ERROR "dnest.h not found")
-endif(CDNEST_INCLUDE_DIR)
-
-find_library(CDNEST_LIB 
-             NAMES dnest
-             HINTS /home/liyropt/Projects/GIT/CDNest
-             )
-if(CDNEST_LIB)
-  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${CDNEST_LIB})
-else(CDNEST_LIB) 
-  message(FATAL_ERROR "dnest library not found")
-endif(CDNEST_LIB)
-
+# Math library
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC m)
 
 #=====================================================

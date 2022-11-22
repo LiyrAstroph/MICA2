@@ -7,7 +7,8 @@ Diffusive Nested Sampling
 
 ``mica2`` employs the diffusive nested sampling technique  to explore the posterior probability distribution, 
 which was developed by Brewer et al. (2009). We wrote a C version of the code DNest developed by Brewer et al.
-and made some modification for our purpose, available at https://github.com/LiyrAstroph/CDNest.
+and made some modification for our purpose, available at https://github.com/LiyrAstroph/CDNest. ``mica2`` has 
+incorporated CDNEST so that there is no need to install it when using ``mica2``.
 
 To initiate the sampling, we need to input options that control the sampling configurations. 
 There are two ways to do so. If one is not familiar with the options, just use the default options.

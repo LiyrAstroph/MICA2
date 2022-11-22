@@ -18,9 +18,7 @@ Third-party package dependence
 
   * **CMake** ---- the compilation tool, downloaded at https://cmake.org/download/
 
-  * **CDNest** --- Diffusive nested sampling, downloaded at https://github.com/LiyrAstroph/CDNest
-
-Note that in Linux system, there are package managers that can install the above libraries convienently (except CDNest). 
+Note that in Linux system, there are package managers that can install the above libraries convienently. 
 If so, use them. In this case, the libraries usually are installed in standard environment path. Otherwise, any of the above 
 libraries is not installed in standard locations on your system, the compiling configurations below may need slight adjustments.
 

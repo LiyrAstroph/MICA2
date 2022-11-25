@@ -31,3 +31,5 @@ tests/twotophat/*
 Makefile
 !setup.py
 !example.py
+cdnest/*
+!cdnest/*.[ch]

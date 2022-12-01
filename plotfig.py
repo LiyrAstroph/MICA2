@@ -12,6 +12,7 @@ import sys, os
 import configparser as cp 
 import argparse
 
+__all__ = ["plot_results"]
 
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, resp_input):
   """

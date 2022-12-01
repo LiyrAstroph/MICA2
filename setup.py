@@ -32,23 +32,25 @@ mpiconf = configure_mpi()
 basedir = os.path.dirname(os.path.abspath(__file__))
 homedir = os.environ['HOME']
 include_dirs = [basedir, os.path.join(basedir, "src"), numpy.get_include(),] + mpiconf['include_dirs'] \
-              +["/home/liyropt/Projects/GIT/CDNest",]
-library_dirs = [basedir] + mpiconf['library_dirs'] + ["/home/liyropt/Projects/GIT/CDNest",]
+              +[os.path.join(basedir, "cdnest"),]
+library_dirs = [basedir] + mpiconf['library_dirs']
 
 if os.name == 'nt':  # Windows, assumming MSVC compiler
   libraries = ['dnest']
   compiler_args = ['/Ox', '/fp:fast']
   link_args = []
 elif os.name == 'posix':  # UNIX, assumming GCC compiler
-  libraries = ['m', 'c', 'gsl', 'gslcblas', 'lapack', 'lapacke'] + mpiconf['libraries'] + ['dnest',]
+  libraries = ['m', 'c', 'gsl', 'gslcblas', 'lapack', 'lapacke'] + mpiconf['libraries']
   compiler_args = ['-O3', '-ffast-math', '-fcommon'] 
   link_args = []
 
-src = [os.path.join(basedir, "python", "pymica", "pymica.pyx")] + glob(os.path.join(basedir, "src", "*.c"))
-headerfiles = [os.path.join(basedir, "python", "pymica", "pymica.pxd")] + glob(os.path.join(basedir, "src", "*.h"))
+src = [os.path.join(basedir, "python", "pymica", "pymica.pyx")] + glob(os.path.join(basedir, "src", "*.c")) \
+     + glob(os.path.join(basedir, "cdnest", "*.c"))
+headerfiles = [os.path.join(basedir, "python", "pymica", "pymica.pxd")] + glob(os.path.join(basedir, "src", "*.h")) \
+     + glob(os.path.join(basedir, "cdnest", "*.h"))
 
 extensions = cythonize([
-    Extension("pymica", 
+    Extension("pymica.pymica", 
 	  sources=src,
     depends=headerfiles,
 	  extra_compile_args=compiler_args,
@@ -61,7 +63,10 @@ extensions = cythonize([
 
 setup(
       name="pymica",
-      packages=["pymica"],
-      package_dir={"":"python"},
+      version="2.1.1",
+      author="Yan-Rong Li",
+      author_email="liyanrong@mail.ihep.ac.cn",
+      packages=["pymica", "pymica.utility"],
+      package_dir={"pymica":"python/pymica", "pymica.utility":''},
       ext_modules = extensions,
 )

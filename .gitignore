@@ -14,7 +14,6 @@ mica2
 CMakeFiles/*
 !CMakeLists.txt
 !plotdecomp.py
-!tests
 tests/*
 !tests/twogauss
 tests/twogauss/*
@@ -30,6 +29,6 @@ tests/twotophat/*
 !tests/twotophat/resp_input.txt
 Makefile
 !setup.py
-!example.py
+!tests/example.py
 cdnest/*
 !cdnest/*.[ch]

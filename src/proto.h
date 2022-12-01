@@ -8,8 +8,14 @@
 #ifndef MICA_PROTO_H
 #define MICA_PROTO_H
 
+#include "allvars.h"
+
 void begin_run();
 void end_run();
+void set_argv(int flag_pp, int flag_de);
+
+/* mpi */
+void set_mpi();
 
 /* time */
 double second();
@@ -18,6 +24,7 @@ void get_hms(double dt, int *h, int *m, double *s);
 
 
 void set_param_file(char *fname);
+void set_parset(PARSET *ps);
 void free_memory();
 void allocate_memory();
 int read_parset();

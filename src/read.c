@@ -19,6 +19,12 @@ void set_param_file(char *fname)
   return;
 }
 
+void set_parset(PARSET *ps)
+{
+  memcpy(&parset, ps, sizeof(PARSET));
+  return;
+}
+
 /* read parset from param file */
 int read_parset()
 {

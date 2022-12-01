@@ -41,6 +41,7 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${SRC}/system.c
   ${SRC}/version.c
   ${SRC}/error.c
+  ${SRC}/mpifunc.c
   ${CDNEST}/dnest.c
   ${CDNEST}/dnestvars.c
   ${CDNEST}/dnestpostprocess.c

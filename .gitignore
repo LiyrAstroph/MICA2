@@ -32,3 +32,6 @@ Makefile
 !tests/example.py
 cdnest/*
 !cdnest/*.[ch]
+!python/pymica/__init__.py
+!python/pymica/pymica.pxd
+!python/pymica/pymica.pyx

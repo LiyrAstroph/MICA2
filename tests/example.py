@@ -19,9 +19,9 @@ data_input = {"set1":[con, line]}
 model = pymica.model()
 model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 1], max_num_saves=200)
 
-#model.run()
+model.postrun()
 
-model.decompose()
+#model.decompose()
 
 if rank == 0:
   model.plot_results()

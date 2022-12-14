@@ -19,6 +19,8 @@ np.import_array()
 
 from . import utility as ut
 
+import os
+
 cdef class model:
   """
   Model class
@@ -43,6 +45,14 @@ cdef class model:
         read_parset()
       else:
         raise ValueError("param_file should be a string!")
+    
+    if self.rank == 0:
+      # check data folder
+      if not os.path.exists("./data"):
+        os.mkdir("./data/")
+      # check param folder
+      if not os.path.exists("./param"):
+        os.mkdir("./param/")
 
     return
   

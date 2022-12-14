@@ -29,7 +29,10 @@ tests/twotophat/*
 !tests/twotophat/resp_input.txt
 Makefile
 !setup.py
-!tests/example.py
+!tests/python
+tests/python/*
+!tests/python/example.py
+!tests/python/sim_data.txt
 cdnest/*
 !cdnest/*.[ch]
 !python/pymica/__init__.py

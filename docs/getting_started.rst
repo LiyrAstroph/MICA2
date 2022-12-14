@@ -25,6 +25,9 @@ libraries is not installed in standard locations on your system, the compiling c
 Compiling
 =============================
 
+Exectuable Binary Version
+-------------------------
+
 Edit CMake compiling configurations to be consistent with your system if necessary, using the command
 
 .. code:: bash
@@ -42,6 +45,18 @@ After this step, compile the package with the command
    make
 
 This creates an executable file ``mica2``.
+
+Python Callable Version
+-----------------------
+
+Make installation using the command 
+
+.. code:: bash 
+
+  python setup.py install --user 
+
+This will generate a Python package ``pymica`` and install it to the user's Python package sites. 
+In the folder ``tests/python``, the Python script ``example.py`` shows how to use pymica.
 
 Running
 =============================

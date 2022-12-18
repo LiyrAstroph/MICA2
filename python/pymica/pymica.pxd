@@ -41,6 +41,7 @@ cdef extern from "proto.h":
   void set_mpi()
   void set_param_file(char *fname)
   void set_parset(PARSET *ps)
+  void get_parset(PARSET *ps)
   void read_parset()
   void read_data()
   void init()

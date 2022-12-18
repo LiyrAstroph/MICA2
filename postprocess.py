@@ -211,25 +211,25 @@ def postprocess(fdir, ngau, temperature=1.0):
   #plt.show()
   plt.close('all')
   
-  N = int(moreSamples*ESS)
-  posterior_sample = np.zeros((N, sample.shape[1]))
-  w = P_samples
-  w = w/np.max(w)
-  
-  #np.savetxt('./weigths'+str_dim+'.txt', w)
-  
-  for i in range(0, N):
-    while True:
-      which = np.random.randint(sample.shape[0])
-      if np.random.rand() < w[which]:
-        break
-    posterior_sample[i, :] = sample[which, :]
-  
-  # output posterior samples
-  fp = open(fdir+'/data/posterior_sample1d.txt_%d'%ngau, "w")
-  fp.write("# %d\n"%N)
-  np.savetxt(fp, posterior_sample)
-  fp.close()
+  #N = int(moreSamples*ESS)
+  #posterior_sample = np.zeros((N, sample.shape[1]))
+  #w = P_samples
+  #w = w/np.max(w)
+  #
+  ##np.savetxt('./weigths'+str_dim+'.txt', w)
+  #
+  #for i in range(0, N):
+  #  while True:
+  #    which = np.random.randint(sample.shape[0])
+  #    if np.random.rand() < w[which]:
+  #      break
+  #  posterior_sample[i, :] = sample[which, :]
+  #
+  ## output posterior samples
+  #fp = open(fdir+'/data/posterior_sample1d.txt_%d'%ngau, "w")
+  #fp.write("# %d\n"%N)
+  #np.savetxt(fp, posterior_sample)
+  #fp.close()
 
 def postprocess_all(fdir, ngau_low=1, ngau_upp=1, temperature=1.0):
    

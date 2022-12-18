@@ -8,6 +8,7 @@
 from __future__ import absolute_import
 
 from libc.string cimport *  
+from cpython.mem cimport PyMem_Malloc, PyMem_Free, PyMem_Realloc
 
 from mpi4py import MPI
 cimport mpi4py.MPI as MPI
@@ -27,22 +28,36 @@ cdef class model:
   """
   cdef PARSET parset
   cdef int rank, size
+  cdef int nset, num_param_var 
+  cdef list nlset
 
   def __cinit__(self, param_file=None):
     """
     initialise with a parameter file.
     """
     
-    set_mpi()
+    set_mpi()  # setup MPI enviroment in C
+    self._set_default_parset()
 
     self.size  = MPI.COMM_WORLD.Get_size()
     self.rank  = MPI.COMM_WORLD.Get_rank()
+    self.nset = 0
+    self.num_param_var = 0
 
     if param_file != None:
       if isinstance(param_file, str):
         strcpy(self.parset.param_file, param_file.encode("UTF-8"))
         set_param_file(self.parset.param_file)
         read_parset()
+        get_parset(&self.parset)  # get parset from C
+
+        self._get_data_dimension()
+        # uniform variability parameters of mulitple datasets
+        if self.parset.flag_uniform_var_params == 0:
+          self.num_param_var = 3*self.nset
+        elif self.parset.flag_uniform_var_params == 1:
+          self.num_param_var = 3
+
       else:
         raise ValueError("param_file should be a string!")
     
@@ -57,7 +72,6 @@ cdef class model:
     return
   
   def __cdealloc__(self):
-    end_run()
     return
   
 
@@ -71,17 +85,21 @@ cdef class model:
     """
     setup parameters
     """
-
-    self._set_default_parset()
-
     # data file
     if data_file != None:
       if isinstance(data_file, str):
         strcpy(self.parset.data_file, data_file.encode("UTF-8"))
+        self._get_data_dimension()
       else:
         raise ValueError("data_file is unrecognized!")
     elif data != None:
       self.create_data_file(data=data)
+      # set data dimensions
+      self.nset = len(data)
+      self.nlset = []
+      for key in data.keys():
+        self.nlset.append(len(data[key])-1)
+
     else:
       raise ValueError("either data or data_file should not be None!")
 
@@ -99,15 +117,17 @@ cdef class model:
     # uniform variability parameters of mulitple datasets
     if flag_uniform_var_params == False:
       self.parset.flag_uniform_var_params = 0
+      self.num_param_var = 3*self.nset
     elif flag_uniform_var_params == True:
       self.parset.flag_uniform_var_params = 1
+      self.num_param_var = 3
     else:
       raise ValueError("flag_uniform_var_params is unrecognized!")
     
     # uniform transfer function parameters of mulitple datasets
     if flag_uniform_tranfuns == False:
       self.parset.flag_uniform_tranfuns = 0
-    elif flag_uniform_var_params == True:
+    elif flag_uniform_tranfuns == True:
       self.parset.flag_uniform_tranfuns = 1
     else:
       raise ValueError("flag_uniform_tranfuns is unrecognized!")
@@ -128,8 +148,12 @@ cdef class model:
     self.parset.lag_limit_upper = lag_limit[1]
 
     # number of component
-    self.parset.num_gaussian_low = number_component[0]
-    self.parset.num_gaussian_upper = number_component[1]
+    if isinstance(number_component, int):
+      self.parset.num_gaussian_low = number_component
+      self.parset.num_gaussian_upper = number_component
+    elif isinstance(number_component, list):
+      self.parset.num_gaussian_low = number_component[0]
+      self.parset.num_gaussian_upper = number_component[1]
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
 
     # continuum systematic error
@@ -155,11 +179,29 @@ cdef class model:
 
     # finally set parameters in C.
     set_parset(&self.parset)
-
-    read_data()
-    init()
     return
   
+  def _get_data_dimension(self):
+    """
+    get data dimensions
+    """
+    if self.rank == 0:
+      fp = open(self.parset.data_file.decode("UTF-8"), "r")
+      line = fp.readline()
+      self.nset = int(line[1:])
+      self.nlset = []
+      for i in range(self.nset):
+        line = fp.readline()
+        ls = line[1:].split(":")
+        self.nlset.append(len(ls)-1)
+      
+      fp.close()
+    
+    self.nset = MPI.COMM_WORLD.bcast(self.nset, root=0)
+    self.nlset = MPI.COMM_WORLD.bcast(self.nlset, root=0)
+    
+    return
+
   def _set_default_parset(self):
     """
     set the default parameters
@@ -270,9 +312,11 @@ cdef class model:
     """
     run mica
     """
+    read_data()
+    init()
     mc_con()
     mc_line()
-    
+    end_run()
     return
   
   def postrun(self):
@@ -280,7 +324,10 @@ cdef class model:
     do posterior running
     """
     set_argv(1, 0)
+    read_data()
+    init()
     mc_line()
+    end_run()
     return
   
   def plot_results(self):
@@ -304,5 +351,39 @@ cdef class model:
     do decomposition
     """
     set_argv(1, 1)
+    read_data()
+    init()
     mc_line()
+    end_run()
     return
+  
+  def get_posterior_sample(self):
+    """
+    get posterior sample
+    """
+    sample=[]
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+      sample.append(np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i))
+    
+    return sample 
+  
+  def get_posterior_sample_timelag(self, set=0, line=0):
+    """
+    get the posterior sample of time lags of the line in set  
+    """    
+    timelag = []
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+      sample = np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)
+      if self.parset.flag_uniform_tranfuns == 0:
+        idx_line = self.num_param_var
+        for j in range(0, set-1):
+          idx_line += (1+(i*3))*self.nlset[j]
+
+        idx_line += (1+(i*3))*line
+        timelag.append(sample[:, idx_line+2:idx_line+2+i*3:3])
+      else:
+        idx_line = self.num_param_var
+        idx_line += (1+(i*3))*line
+        timelag.append(sample[:, idx_line+2:idx_line+2+i*3:3])
+
+    return timelag

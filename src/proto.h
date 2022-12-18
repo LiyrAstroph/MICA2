@@ -25,6 +25,7 @@ void get_hms(double dt, int *h, int *m, double *s);
 
 void set_param_file(char *fname);
 void set_parset(PARSET *ps);
+void get_parset(PARSET *ps);
 void free_memory();
 void allocate_memory();
 int read_parset();

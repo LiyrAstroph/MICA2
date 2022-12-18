@@ -25,6 +25,12 @@ void set_parset(PARSET *ps)
   return;
 }
 
+void get_parset(PARSET *ps)
+{
+  memcpy(ps, &parset, sizeof(PARSET));
+  return;
+}
+
 /* read parset from param file */
 int read_parset()
 {

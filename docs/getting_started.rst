@@ -25,8 +25,8 @@ libraries is not installed in standard locations on your system, the compiling c
 Compiling
 =============================
 
-Exectuable Binary Version
--------------------------
+Exectuable Binary Version: ``mica2``
+------------------------------------
 
 Edit CMake compiling configurations to be consistent with your system if necessary, using the command
 
@@ -46,8 +46,8 @@ After this step, compile the package with the command
 
 This creates an executable file ``mica2``.
 
-Python Callable Version
------------------------
+Python Callable Version: ``pymica``
+-------------------------------
 
 Make installation using the command 
 

@@ -24,7 +24,7 @@ and then run mica in a terminal , e.g.,
 
   mpiexec -n 6 ./mica2 param 
 
-Here **-n 6** means using 6 cores.
+Here **-n 6** means using 6 cores. Change the number according to your need.
 
 Python Module Version: pymica
 --------------------------------
@@ -74,15 +74,28 @@ Edit a Python script named, e.g., example.py, as the following.
     # ...
     sample = model.get_posterior_sample()
   
-    # get the posterior sample of time lags of the line in dataset 
+    # get the posterior sample of time lags of the "line" in the dataset "set"
     # timelag is a list, each element contains an array of posterior samples
     # timelag[0] is for the case of number_component[0]
     # timelag[1] is for the case of number_component[1]
     # ...
-    timelag = model.get_posterior_sample_timelag(set=0, line=0)  
+    timelag = model.get_posterior_sample_timelag(set=0, line=0) 
+    plt.plot(timelag[0][:, 0])
+    plt.plot(timelag[0][:, 1])
+    plt.show()
+
+    # get the posterior sample of widths of the "line" in the dataset "set"
+    # width is a list, each element contains an array of posterior samples
+    # width[0] is for the case of number_component[0]
+    # width[1] is for the case of number_component[1]
+    # ...
+    width = model.get_posterior_sample_width(set=0, line=0)  
+    plt.plot(width[0][:, 0])
+    plt.plot(width[0][:, 1])
+    plt.show() 
   
     model.plot_results() # plot results
-    model.postprocess()  # generate plots for the properties of MCMC sampling 
+    model.post_process()  # generate plots for the properties of MCMC sampling 
   
 
 Run this script using the terminal command as 

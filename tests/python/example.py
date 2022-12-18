@@ -45,7 +45,7 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #            type_lag_prior=0): 
 
 #run mica
-model.run()
+#model.run()
 
 #posterior run, only re-generate posterior samples, do not run MCMC
 #model.postrun()
@@ -62,12 +62,25 @@ if rank == 0:
   # ...
   sample = model.get_posterior_sample()
 
-  # get the posterior sample of time lags of the line in dataset 
+  # get the posterior sample of time lags of the "line" in the dataset "set"
   # timelag is a list, each element contains an array of posterior samples
   # timelag[0] is for the case of number_component[0]
   # timelag[1] is for the case of number_component[1]
   # ...
-  timelag = model.get_posterior_sample_timelag(set=0, line=0)  
+  timelag = model.get_posterior_sample_timelag(set=10, line=0) 
+  plt.plot(timelag[0][:, 0])
+  plt.plot(timelag[0][:, 1])
+  plt.show()
+
+  # get the posterior sample of widths of the "line" in the dataset "set"
+  # width is a list, each element contains an array of posterior samples
+  # width[0] is for the case of number_component[0]
+  # width[1] is for the case of number_component[1]
+  # ...
+  width = model.get_posterior_sample_width(set=0, line=0) 
+  plt.plot(width[0][:, 0])
+  plt.plot(width[0][:, 1])
+  plt.show()  
 
   model.plot_results() # plot results
-  model.postprocess()  # generate plots for the properties of MCMC sampling 
+  model.post_process()  # generate plots for the properties of MCMC sampling 

@@ -319,7 +319,7 @@ cdef class model:
     end_run()
     return
   
-  def postrun(self):
+  def post_run(self):
     """
     do posterior running
     """
@@ -339,7 +339,7 @@ cdef class model:
                       self.parset.flag_trend, self.parset.type_tf, None)
     return
   
-  def postprocess(self, temperature=1.0):
+  def post_process(self, temperature=1.0):
 
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
       ut.postprocess(self.parset.file_dir.decode("UTF-8"), i, temperature)
@@ -371,6 +371,16 @@ cdef class model:
     """
     get the posterior sample of time lags of the line in set  
     """    
+    if set >= self.nset:
+      raise ValueError("there are only %d datasets!\n set exceeds this limit!"%self.nset)
+    elif set < 0:
+      raise ValueError("set should be non-negative!")
+    
+    if line >= self.nlset[set]:
+      raise ValueError("there are only %d lines!\n line exceeds this limit!"%self.nset)
+    elif line < 0:
+      raise ValueError("line should be non-negative!")
+
     timelag = []
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
       sample = np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)
@@ -387,3 +397,35 @@ cdef class model:
         timelag.append(sample[:, idx_line+2:idx_line+2+i*3:3])
 
     return timelag
+  
+  def get_posterior_sample_width(self, set=0, line=0):
+    """
+    get the posterior sample of widths of the line in set  
+    """  
+
+    if set >= self.nset:
+      raise ValueError("there are only %d datasets!\n set exceeds this limit!"%self.nset)
+    elif set < 0:
+      raise ValueError("set should be non-negative!")
+    
+    if line >= self.nlset[set]:
+      raise ValueError("there are only %d lines!\n line exceeds this limit!"%self.nset)
+    elif line < 0:
+      raise ValueError("line should be non-negative!")
+
+    width = []
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+      sample = np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)
+      if self.parset.flag_uniform_tranfuns == 0:
+        idx_line = self.num_param_var
+        for j in range(0, set-1):
+          idx_line += (1+(i*3))*self.nlset[j]
+
+        idx_line += (1+(i*3))*line
+        width.append(sample[:, idx_line+3:idx_line+3+i*3:3])
+      else:
+        idx_line = self.num_param_var
+        idx_line += (1+(i*3))*line
+        width.append(sample[:, idx_line+3:idx_line+3+i*3:3])
+
+    return width

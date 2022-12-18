@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
-
 # load data
 data = np.loadtxt("./sim_data.txt")
 con = data[:126, :]
@@ -23,6 +22,10 @@ line= data[126:, :]
 
 # make a data dict 
 data_input = {"set1":[con, line]}
+# if multiple datasets, e.g., 
+#data_input = {"set1":[con1, line1], "set2":[con2, line2]}
+# if a dataset has multiple lines, e.g.,
+#data_input = {"set1":[con, line1, line2]}
 
 #create a model
 #there are two ways
@@ -42,10 +45,10 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #            flag_trend=0, flag_lag_posivity=False,
 #            lag_limit=[0, 100], number_component=[1, 1],
 #            flag_con_sys_err=False, flag_line_sys_err=False,
-#            type_lag_prior=0): 
+#            type_lag_prior=0)
 
 #run mica
-#model.run()
+model.run()
 
 #posterior run, only re-generate posterior samples, do not run MCMC
 #model.postrun()

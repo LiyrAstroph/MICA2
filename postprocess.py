@@ -269,6 +269,6 @@ if __name__ == "__main__":
 
   param = _param_parser(fparam)
   fdir = param["FileDir"]
-  ngau_low = int(param["NumGaussianLow"])
-  ngau_upp = int(param["NumGaussianUpp"])
+  ngau_low = int(param["NumCompLow"])
+  ngau_upp = int(param["NumCompUpp"])
   postprocess_all(fdir, ngau_low, ngau_upp, temperature)

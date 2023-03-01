@@ -21,7 +21,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   plt.rc('text', usetex=True)
   plt.rc('font', family='serif', size=15)
 
-  sample = np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau)
+  sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
   data = np.loadtxt(fdir+fname)
   sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
 
@@ -340,7 +340,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
   plt.rc('text', usetex=True)
   plt.rc('font', family='serif', size=15)
 
-  sample = np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau)
+  sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
   data = np.loadtxt(fdir+fname)
   sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
   scale = int(sall.shape[0]/data.shape[0])

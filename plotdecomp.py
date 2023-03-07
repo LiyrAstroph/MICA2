@@ -51,9 +51,24 @@ def plot_line_decomp(fdir, fname, ngau, typetf):
   for i in range(ngau):
     comps.append(np.loadtxt(fdir+"data/pline.txt_%d_comp%d"%(ngau, i)))
   
+  # load posterior samples
   sample = np.loadtxt(fdir+"data/posterior_sample1d.txt_2")
+  
+  # determine the maximum and minimum delays
+  tau_min =  1.0e10
+  tau_max = -1.0e10
+  idx = nd*3
+  for i in range(nd):
+    tau_min = min(tau_min, np.min(sample[idx+1::3]))
+    tau_max = max(tau_max, np.max(sample[idx+1::3]))
 
-  tau = np.linspace(0, 80, 500)
+    idx += len(nls[i])*(ngau*3+1) # each line has (ngau*3+1) parameters
+  
+  dtau = tau_max - tau_min 
+  tau_min -= 0.2*dtau 
+  tau_max += 0.2*dtau
+  
+  tau = np.linspace(tau_min, tau_max, 500)
   tran = np.zeros((sample.shape[0], 500))
   
   pdf = PdfPages(fdir+"data/fig_line_decomp_%d.pdf"%ngau)
@@ -103,7 +118,7 @@ def plot_line_decomp(fdir, fname, ngau, typetf):
       ax.plot(pall[:nl[0], 0], pall[:nl[0], 1], lw=1)
       ax.fill_between(pall[:nl[0],0], y1=pall[:nl[0], 1]-pall[:nl[0], 2], y2=pall[:nl[0], 1]+pall[:nl[0], 2], color='darkgrey', zorder=0)
       ax.set_ylabel(r"$F_\lambda$(cont)")
-      ax.set_xlim((-10.0, 260.0))
+      #ax.set_xlim((-10.0, 260.0))
       ax.set_xticklabels([])
       ax.yaxis.set_major_locator(MultipleLocator(0.2))
       
@@ -121,7 +136,7 @@ def plot_line_decomp(fdir, fname, ngau, typetf):
 
       ax.set_xlabel(r"Time")
       ax.set_ylabel(r"$F(\rm line$)")
-      ax.set_xlim((-10.0, 260.0))
+      #ax.set_xlim((-10.0, 260.0))
       ylim = ax.get_ylim()
 
       plt.show()

@@ -130,7 +130,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     axheight = 0.8/(len(ns))
     ax = fig.add_axes((0.56, 0.95-axheight, 0.35, axheight))
     
-    ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10, marker='o', markersize=2)
+    ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10, marker='o', markersize=1.5, elinewidth=0.5)
     
     ax.plot(sall_con0[:, 0]-shift, sall_con0[:, 1], color='k', lw=1)
     ax.fill_between(sall_con0[:, 0]-shift, y1=sall_con0[:, 1]-sall_con0[:, 2], y2=sall_con0[:, 1]+sall_con0[:, 2], color='darkgrey')
@@ -290,7 +290,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       # then line light curve
       ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))
       
-      ax.errorbar(hb[:, 0]-shift, hb[:, 1], yerr=hb[:, 2], ls='none', zorder=10, color='b', marker='o', markersize=2)
+      ax.errorbar(hb[:, 0]-shift, hb[:, 1], yerr=hb[:, 2], ls='none', zorder=10, color='b', marker='o', markersize=1.5, elinewidth=0.5)
       
       ax.plot(sall_hb[:, 0]-shift, sall_hb[:, 1], color='k')
       ax.fill_between(sall_hb[:, 0]-shift, y1=sall_hb[:, 1]-sall_hb[:, 2], y2=sall_hb[:, 1]+sall_hb[:, 2], color='darkgrey')
@@ -449,7 +449,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     axheight = 0.8/(len(ns))
     ax = fig.add_axes((0.56, 0.95-axheight, 0.35, axheight))
     
-    ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10, marker='o', markersize=2)
+    ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10, marker='o', markersize=1.5, elinewidth=0.5)
     
     ax.plot(sall_con0[:, 0]-shift, sall_con0[:, 1], color='k', lw=1)
     ax.fill_between(sall_con0[:, 0]-shift, y1=sall_con0[:, 1]-sall_con0[:, 2], y2=sall_con0[:, 1]+sall_con0[:, 2], color='darkgrey')
@@ -604,7 +604,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       # then line light curve
       ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))
       
-      ax.errorbar(hb[:, 0]-shift, hb[:, 1], yerr=hb[:, 2], ls='none', zorder=10, color='b', marker='o', markersize=2)
+      ax.errorbar(hb[:, 0]-shift, hb[:, 1], yerr=hb[:, 2], ls='none', zorder=10, color='b', marker='o', markersize=1.5, elinewidth=0.5)
       
       ax.plot(sall_hb[:, 0]-shift, sall_hb[:, 1], color='k')
       ax.fill_between(sall_hb[:, 0]-shift, y1=sall_hb[:, 1]-sall_hb[:, 2], y2=sall_hb[:, 1]+sall_hb[:, 2], color='darkgrey')

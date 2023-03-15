@@ -4,7 +4,6 @@
 # Yan-Rong Li, liyanrong@mail.ihep.ac.cn
 # Jun 22, 2018
 # 
-# use Crtl+z to stop
 
 from mpi4py import MPI
 import numpy as np
@@ -36,7 +35,7 @@ data_input = {"set1":[con, line]}
 #2) the ohter way is through the setup function
 
 model = pymica.model()
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=200)
+model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,
@@ -51,13 +50,17 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 model.run()
 
 #posterior run, only re-generate posterior samples, do not run MCMC
-#model.postrun()
+#model.post_run()
 
 #do decomposition for the cases of multiple components 
 #model.decompose()
 
 # plot results
 if rank == 0:
+  
+  model.plot_results() # plot results
+  model.post_process()  # generate plots for the properties of MCMC sampling 
+
   # get the full sample 
   # sample is a list, each element contains an array of posterior samples
   # sample[0] is for the case of number_component[0]
@@ -83,7 +86,4 @@ if rank == 0:
   width = model.get_posterior_sample_width(set=0, line=0) 
   plt.plot(width[0][:, 0])
   plt.plot(width[0][:, 1])
-  plt.show()  
-
-  model.plot_results() # plot results
-  model.post_process()  # generate plots for the properties of MCMC sampling 
+  plt.show()

@@ -81,7 +81,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       indx_line.append(indx_line[i-1] + (len(nl[i-1])-1)*(1+ngau*3))
 
   # print time lags, median, and 68.3% confidence limits
-  print("========No. Gaussian: %d========="%ngau)
+  print("========No. Gaussian/Tophat: %d========="%ngau)
   print("ID:      lag     -elo      +eup")
   sample_lag = np.zeros(sample.shape[0])
   weight_lag = np.zeros(sample.shape[0])
@@ -202,7 +202,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.set_xlim((tau1, tau2))
       ax.yaxis.set_tick_params(labelleft=False)
       if j == 1:
-        ax.set_title("Gaussian Centers")
+        ax.set_title("Centers")
       ax.minorticks_on()
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
@@ -224,7 +224,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.minorticks_on()
       ax.yaxis.set_tick_params(labelleft=False)
       if j == 1:
-        ax.set_title("Centroid Time Lag")
+        ax.set_title("Centroid")
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
       else:
@@ -401,7 +401,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       indx_line.append(indx_line[i-1] + (len(nl[i-1])-1)*(1+ngau*3))
 
   # print time lags, median, and 68.3% confidence limits
-  print("========No. Gaussian: %d========="%ngau)
+  print("========No. Gaussian/Tophat: %d========="%ngau)
   print("ID:      lag     -elo      +eup")
   sample_lag = np.zeros(sample.shape[0])
   weight_lag = np.zeros(sample.shape[0])
@@ -515,7 +515,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       ax.set_xlim((tau1, tau2))
       ax.yaxis.set_tick_params(labelleft=False)
       if j == 1:
-        ax.set_title("Gaussian Centers")
+        ax.set_title("Centers")
       ax.minorticks_on()
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
@@ -537,7 +537,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       ax.minorticks_on()
       ax.yaxis.set_tick_params(labelleft=False)
       if j == 1:
-        ax.set_title("Centroid Time Lag")
+        ax.set_title("Centroid")
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
       else:

@@ -74,7 +74,7 @@ void mc_line()
     
     if(thistask == roottask)
     {
-      printf("# number of Gaussian: %d\n", num_gaussian);
+      printf("# number of Gaussian/Tophat: %d\n", num_gaussian);
     }
     
     sprintf(postfix, "_%d", num_gaussian);
@@ -103,15 +103,15 @@ void mc_line()
     printf("*****************************************************\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
-      printf("number of Gaussian: %d, evidence: %f\n", parset.num_gaussian_low + j, logz_arr[j]);
+      printf("number of Gaussian/Tophat: %d, evidence: %f\n", parset.num_gaussian_low + j, logz_arr[j]);
     }
 
-    printf("best number of Gaussian: %d.\n", parset.num_gaussian_low + jzmax);
+    printf("best number of Gaussian/Tophat: %d.\n", parset.num_gaussian_low + jzmax);
     printf("*****************************************************\n");
 
     FILE *fp;
     fp = fopen("data/evidence.txt", "w");
-    fprintf(fp, "# number_of_gaussians     evidence\n");
+    fprintf(fp, "# number_of_gaussians/tophats     evidence\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
       fprintf(fp, "%d       %f\n", parset.num_gaussian_low + j, logz_arr[j]);

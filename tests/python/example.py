@@ -35,7 +35,11 @@ data_input = {"set1":[con, line]}
 #2) the ohter way is through the setup function
 
 model = pymica.model()
+# use Gaussians
 model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
+
+# or use tophats
+#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,
@@ -45,6 +49,7 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #            lag_limit=[0, 100], number_component=[1, 1],
 #            flag_con_sys_err=False, flag_line_sys_err=False,
 #            type_lag_prior=0)
+
 
 #run mica
 model.run()

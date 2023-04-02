@@ -30,7 +30,7 @@ double dnest_line(int argc, char **argv)
   fptrset_line->from_prior = from_prior_line;
   if(type_lag_prior_pr == 0)
     fptrset_line->perturb = perturb_line_prior0;
-  else /* prior 1 or 2 */
+  else /* prior 1 or 2 or 3 or 4 */
     fptrset_line->perturb = perturb_line_prior1;
   fptrset_line->print_particle = print_particle_line;
   fptrset_line->restart_action = restart_action_line;
@@ -97,7 +97,7 @@ double dnest_line(int argc, char **argv)
   }
 
   /* fix Gaussian lags if type_lag_prior == 2 */
-  if(parset.type_lag_prior >= 2 )
+  if(parset.type_lag_prior >= 2 && parset.type_lag_prior <=3)
   {
     dlag = (parset.lag_limit_upper - parset.lag_limit_low)/(num_gaussian-1);
     if(parset.flag_uniform_tranfuns == 0)
@@ -262,7 +262,12 @@ void set_par_range_line()
       par_range_model[i++][1] = line_range_model[1][1];
 
       /* center of gaussian */
-      if(type_lag_prior_pr == 0)
+      if(parset.type_lag_prior == 4)
+      {
+        par_range_model[i][0] = lag_prior[k*2+0]; 
+        par_range_model[i++][1] = lag_prior[k*2+1];
+      }
+      else if(type_lag_prior_pr == 0)
       {
         par_range_model[i][0] = line_range_model[2][0]; 
         par_range_model[i++][1] = line_range_model[2][1];

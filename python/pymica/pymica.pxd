@@ -17,6 +17,7 @@ cdef extern from "allvars.h":
     char param_file[256]
     char file_dir[256]
     char data_file[256]
+    char str_lag_prior[256]
   
     int flag_uniform_var_params
     int flag_uniform_tranfuns

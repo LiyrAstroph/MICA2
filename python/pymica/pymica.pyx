@@ -22,6 +22,8 @@ from . import utility as ut
 
 import os
 
+__all__ = ["model"]
+
 cdef class model:
   """
   Model class
@@ -81,7 +83,7 @@ cdef class model:
                   flag_trend=0, flag_lag_posivity=False,
                   lag_limit=[0, 100], number_component=[1, 1],
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  type_lag_prior=0):     
+                  type_lag_prior=0, lag_prior=None):     
     """
     setup parameters
     """
@@ -174,6 +176,21 @@ cdef class model:
 
     
     self.parset.type_lag_prior = type_lag_prior
+
+    # if lag_prior is input
+    if lag_prior != None:
+      if self.parset.num_gaussian_upper > 1:
+        self.parset.type_lag_prior=4
+        # write string of lag prior
+        sstr = "["
+        sstr += "%f:%f"%(lag_prior[0][0], lag_prior[0][1])
+        for i in range(1, self.parset.num_gaussian_upper):
+          sstr += ":%f:%f"%(lag_prior[i][0], lag_prior[i][1])
+        
+        sstr += "]"
+        strcpy(self.parset.str_lag_prior, sstr.encode("UTF-8"))
+      else:
+        self.parset.type_lag_prior=0
 
     self.print_parset()
 
@@ -292,6 +309,7 @@ cdef class model:
       fp.write("{:30}{}\n".format("FlagConSysErr", self.parset.flag_con_sys_err))
       fp.write("{:30}{}\n".format("FlagLineSysErr", self.parset.flag_line_sys_err))
       fp.write("{:30}{}\n".format("TypeLagPrior", self.parset.type_lag_prior))
+      fp.write("{:30}{}\n".format("StrLagPrior", self.parset.str_lag_prior.decode("UTF-8")))
       fp.write("#==============================================================\n")
       fp.write("# options for cdnest sampling\n")
       fp.write("# use the default values or do not turn thme on IF NOT familiar with them\n\n")

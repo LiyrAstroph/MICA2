@@ -127,6 +127,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "StrLagPrior");
+    pardict[nt].addr = &parset.str_lag_prior;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = STRING;
+
     strcpy(pardict[nt].tag, "TypeTF");
     pardict[nt].addr = &parset.type_tf;
     pardict[nt].isset = 0;
@@ -200,6 +205,7 @@ int read_parset()
     parset.flag_lag_posivity = 0;
     parset.num_gaussian_low = 1;
     parset.num_gaussian_upper = 1;
+    strcpy(parset.str_lag_prior,"");
     /*cdnest options */
     parset.num_particles = 2;
     parset.max_num_saves = 2000;
@@ -272,13 +278,18 @@ int read_parset()
 
     parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low + 1;
 
-    if(parset.type_lag_prior < 0 || parset.type_lag_prior > 3)
+    if(parset.num_gaussian_upper == 1)
     {
-      printf("Incorrect TypeLagPrior, should be 0, 1, or 2.\n");
+      parset.type_lag_prior = 0;
+    }
+
+    if(parset.type_lag_prior < 0 || parset.type_lag_prior > 4)
+    {
+      printf("Incorrect TypeLagPrior, should be 0-4.\n");
       exit(0);
     }
 
-    if(parset.type_lag_prior >= 2 && parset.num_gaussian_low < 3)
+    if(parset.type_lag_prior >= 2 && parset.type_lag_prior <=3 && parset.num_gaussian_low < 3)
     {
       printf("For prior type 2 or 3, better to use more Gaussians (>=3)!\n");
       exit(0);

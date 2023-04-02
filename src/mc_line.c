@@ -1637,6 +1637,36 @@ int mc_line_init()
 
   Smat_lc = malloc(ncon_max * nline_max * sizeof(double));
   Smat_ll = malloc(nline_max * nline_max * sizeof(double));
+
+  /* get lag prior from parset.str_lag_prior */
+  if(parset.type_lag_prior == 4)
+  {
+    lag_prior = malloc(parset.num_gaussian_upper * 2 * sizeof(double));
+    char *pstr = parset.str_lag_prior;
+    int j;
+
+    pstr += 1;
+    j = 0;
+    for(i=0; i<parset.num_gaussian_upper*2-1; i++)
+    {
+      sscanf(pstr, "%lf", &lag_prior[j]);
+      j++;
+
+      pstr = strchr(pstr, ':'); /* values are separated by ":" */
+      if(pstr!=NULL)
+      {
+        pstr++;
+      }
+      else
+      {
+        if(thistask == 0)
+          printf("No enough lag priors.");
+        exit(0);
+      }
+    }
+    sscanf(pstr, "%lf", &lag_prior[j]);
+  }
+
   return 0;
 }
 
@@ -1654,6 +1684,11 @@ int mc_line_end()
   free(best_model_std_line);
   free(Smat_lc);
   free(Smat_ll);
+  
+  if(parset.type_lag_prior == 4)
+  {
+    free(lag_prior);
+  }
   return 0;
 }
 

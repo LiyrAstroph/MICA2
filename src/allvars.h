@@ -50,6 +50,7 @@ extern int nline_max;
 extern int type_lag_prior_pr;
 extern double *Smat_lc, *Smat_ll;
 extern double *logz_arr; /* evidence */
+extern double *lag_prior;
 
 // error exit
 extern char str_error_exit[200];
@@ -73,6 +74,8 @@ typedef struct
   int type_lag_prior;
   int type_tf;
   int flag_lag_posivity;
+
+  char str_lag_prior[MICA_MAX_STR_LENGTH];
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 

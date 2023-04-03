@@ -116,3 +116,43 @@ If you want to use only one core, just run as
 .. code-block:: bash
 
   python example.py 
+
+Photometric Reverberation Mapping
+---------------------------------
+
+MICA2 can also do reverberation mapping analysis between two photometric light curves, in which 
+the photometric bands may contain broad-line emissions or other components so that there may 
+exist multiple responses. For simplicity, MICA2 assumes that the driving photometric light curve 
+does not contain those contaminations and purely reflects continuum variations.
+
+.. code-block:: python
+
+  from mpi4py import MPI
+  import numpy as np
+  import pymica
+  import matplotlib.pyplot as plt
+  
+  # initiate MPI
+  comm = MPI.COMM_WORLD
+  rank = comm.Get_rank()
+  
+  # load data
+  data = np.loadtxt("./sim_data.txt")
+  band1 = data[:126, :]
+  band2 = data[126:, :]
+  
+  # make a data dict 
+  data_input = {"set1":[band1, band2]}
+  
+  model = pymica.pmap()
+  model.setup(data=data_input, type_tf='gaussian', max_num_saves=2000, lag_prior=[[-5, 5],[0, 50]], ratio_prior=[0.01, 0.5])
+  # if using tophats, set type_tf='tophat'
+    
+  #run mica
+  model.run()
+  
+  # plot results
+  if rank == 0:
+     
+    model.plot_results() # plot results
+    model.post_process()  # generate plots for the properties of MCMC sampling

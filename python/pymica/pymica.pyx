@@ -131,6 +131,7 @@ cdef class basis:
 
       fp.write("{:30}{}\n".format("FileDir", self.parset.file_dir.decode("UTF-8")))
       fp.write("{:30}{}\n".format("DataFile", self.parset.data_file.decode("UTF-8")))
+      fp.write("{:30}{}\n".format("TypeModel", self.parset.model))
       fp.write("{:30}{}\n".format("TypeTF", self.parset.type_tf))
       fp.write("{:30}{}\n".format("MaxNumberSaves", self.parset.max_num_saves))
       fp.write("{:30}{}\n".format("FlagUniformVarParams", self.parset.flag_uniform_var_params))
@@ -490,6 +491,7 @@ cdef class pmap(basis):
     self.parset.num_gaussian_upper = 2 
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper - self.parset.num_gaussian_low + 1
     
+    self.parset.model=1
     self.parset.type_lag_prior=4
     if lag_prior == None:
       raise ValueError("Please input lag_prior.\ne.g., lag_prior=[[-5, 5], [5, 500]]\n")

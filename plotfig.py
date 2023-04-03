@@ -14,7 +14,7 @@ import argparse
 
 __all__ = ["plot_results"]
 
-def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, resp_input):
+def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, resp_input):
   """
   reconstruct line lcs according to the time sapns of the continuum.
   """
@@ -209,26 +209,42 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       else:
         ax.set_xlabel("Time Lag (day)")
 
-      # centroid time lag
-      ax = fig.add_axes((0.22, 0.95-(j+1)*axheight, 0.16, axheight))
-
-      cent = np.zeros(sample.shape[0])
-      norm = np.zeros(sample.shape[0])
-      for k in range(ngau):
-        norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-        cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
-                * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
       
-      ax.hist(cent/norm, density=True, range=(tau1, tau2), bins=20)
-      ax.set_xlim((tau1, tau2))
-      ax.minorticks_on()
-      ax.yaxis.set_tick_params(labelleft=False)
-      if j == 1:
-        ax.set_title("Centroid")
-      if j != len(ns)-1:
-        ax.xaxis.set_tick_params(labelbottom=False)
-      else:
-        ax.set_xlabel("Time Lag (day)")
+      ax = fig.add_axes((0.22, 0.95-(j+1)*axheight, 0.16, axheight))
+      
+      if typemodel == 0: # centroid time lag
+        cent = np.zeros(sample.shape[0])
+        norm = np.zeros(sample.shape[0])
+        for k in range(ngau):
+          norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                  * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        
+        ax.hist(cent/norm, density=True, range=(tau1, tau2), bins=20)
+        ax.set_xlim((tau1, tau2))
+        ax.minorticks_on()
+        ax.yaxis.set_tick_params(labelleft=False)
+        if j == 1:
+          ax.set_title("Centroid")
+        if j != len(ns)-1:
+          ax.xaxis.set_tick_params(labelbottom=False)
+        else:
+          ax.set_xlabel("Time Lag (day)")
+
+      elif typemodel == 1: # ratio hist
+        for k in range(1, ngau):
+          ratio = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3]
+          ax.hist(ratio, density=True, bins=20, alpha=1)
+          ax.yaxis.set_tick_params(labelleft=False)
+          ax.minorticks_on()
+
+          if j != len(ns)-1:
+            ax.xaxis.set_tick_params(labelbottom=False)
+          else:
+            ax.set_xlabel("$\log R$")
+
+          if j == 1:
+            ax.set_title("Response Ratio")
 
       # transfer function
       ax = fig.add_axes((0.39, 0.95-(j+1)*axheight, 0.16, axheight))
@@ -333,7 +349,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   pdf.close()
   return
 
-def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, resp_input):
+def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, resp_input):
   """
   reconstruct line lcs according to their own time sapns.
   """
@@ -690,9 +706,14 @@ def plot_results_all(args, param):
     typetf = int(param["TypeTF"])
   except:
     typetf = 0
+  
+  try:
+    typemodel = int(param["TypeModel"])
+  except:
+    typemodel = 0
 
   for ngau in range(ngau_low, ngau_upp+1):
-    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, args.resp_input)
+    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, args.resp_input)
 
 def _param_parser(fname):
   """

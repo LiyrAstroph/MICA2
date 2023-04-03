@@ -10,6 +10,7 @@
 #define _DNEST_CON_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* functions */
 void from_prior_con(void *model);

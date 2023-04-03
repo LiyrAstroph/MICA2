@@ -339,7 +339,7 @@ void print_para_names_line()
     for(k=0; k<num_gaussian; k++)
     {
       i++;
-      sprintf(fstr, "%d-th Gaussian %s", k, "applitude");
+      sprintf(fstr, "%d-th Gaussian %s", k, "amplitude");
       fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
 

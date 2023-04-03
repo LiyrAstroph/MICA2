@@ -48,6 +48,7 @@ int read_parset()
     pardict = malloc(MAXTAGS * sizeof(PARDICT));
 
     nt = 0;
+    
     strcpy(pardict[nt].tag, "FileDir");
     pardict[nt].addr = &parset.file_dir;
     pardict[nt].isset = 0;
@@ -57,6 +58,11 @@ int read_parset()
     pardict[nt].addr = &parset.data_file;
     pardict[nt].isset = 0;
     pardict[nt++].id = STRING;
+    
+    strcpy(pardict[nt].tag, "TypeModel");
+    pardict[nt].addr = &parset.model;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
 
     strcpy(pardict[nt].tag, "MaxNumberSaves");
     pardict[nt].addr = &parset.max_num_saves;
@@ -129,6 +135,11 @@ int read_parset()
 
     strcpy(pardict[nt].tag, "StrLagPrior");
     pardict[nt].addr = &parset.str_lag_prior;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = STRING;
+
+    strcpy(pardict[nt].tag, "StrRatioPrior");
+    pardict[nt].addr = &parset.str_ratio_prior;
     pardict[nt].isset = 0;
     pardict[nt++].id = STRING;
 
@@ -206,6 +217,7 @@ int read_parset()
     parset.num_gaussian_low = 1;
     parset.num_gaussian_upper = 1;
     strcpy(parset.str_lag_prior,"");
+    strcpy(parset.str_ratio_prior,"");
     /*cdnest options */
     parset.num_particles = 2;
     parset.max_num_saves = 2000;
@@ -257,6 +269,22 @@ int read_parset()
       }
     }
     fclose(fparam);
+
+    if((parset.model<0) || (parset.model>2))
+    {
+      printf("TypeModel should be 0-1.\n");
+      exit(0);
+    }
+
+    /* pmap mode, num_gaussian >= 2 */
+    if(parset.model == pmap)
+    {
+      if(parset.num_gaussian_low < 2)
+        parset.num_gaussian_low = 2;
+
+      if(parset.num_gaussian_upper < 2)
+        parset.num_gaussian_upper = 2;
+    }
 
     if(parset.num_gaussian_low <= 0)
     {

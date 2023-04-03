@@ -34,14 +34,12 @@ data_input = {"set1":[con, line]}
 
 #2) the ohter way is through the setup function
 
-model = pymica.model()
+model = pymica.gmodel()
 # use Gaussians
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000，
-            lag_prior=[[0, 10], [10, 50]])
+model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
 
 # or use tophats
-#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000,
-            lag_prior=[[0, 10], [10, 50]])
+#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,
@@ -80,7 +78,7 @@ if rank == 0:
   # timelag[0] is for the case of number_component[0]
   # timelag[1] is for the case of number_component[1]
   # ...
-  timelag = model.get_posterior_sample_timelag(set=10, line=0) 
+  timelag = model.get_posterior_sample_timelag(set=0, line=0) 
   plt.plot(timelag[0][:, 0])
   plt.plot(timelag[0][:, 1])
   plt.show()

@@ -56,8 +56,9 @@ Edit a Python script named, e.g., example.py, as the following.
   # if a dataset has multiple lines, e.g.,
   #data_input = {"set1":[con, line1, line2]}
   
-  model = pymica.model()
+  model = pymica.gmodel()
   model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=200)
+  # if using tophats, set type_tf='tophat'
   
   #the full arguments are 
   #model.setup(data_file=None, data=None,

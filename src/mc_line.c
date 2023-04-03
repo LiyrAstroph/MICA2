@@ -19,9 +19,6 @@
 
 #include "proto.h"
 
-void *best_model_line;   /*!< best model */
-void *best_model_std_line;  /*!< standard deviation of the best model */
-
 void mc_line()
 {
   int i, j, argc=0, jzmax=0;
@@ -748,13 +745,15 @@ void postprocess_line()
   int num_ps, i, j;
   void *posterior_sample, *post_model;
   int size_of_modeltype = num_params * sizeof(double);
-  
-  best_model_line = malloc(size_of_modeltype);
-  best_model_std_line = malloc(size_of_modeltype);
-  
+    
   if(thistask == roottask)
   {
+    void *best_model_line;   /*!< best model */
+    void *best_model_std_line;  /*!< standard deviation of the best model */
     FILE *fp;
+
+    best_model_line = malloc(size_of_modeltype);
+    best_model_std_line = malloc(size_of_modeltype);
 
     /* get file name of posterior sample file */
     dnest_get_posterior_sample_file(posterior_sample_file);
@@ -831,6 +830,9 @@ void postprocess_line()
 
     free(post_model);
     free(posterior_sample);
+
+    free(best_model_line);
+    free(best_model_std_line);
   }
   return;
 }
@@ -1680,8 +1682,6 @@ int mc_line_end()
   }
   free(idx_line_pm);
 
-  free(best_model_line);
-  free(best_model_std_line);
   free(Smat_lc);
   free(Smat_ll);
   

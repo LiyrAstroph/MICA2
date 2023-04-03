@@ -22,47 +22,25 @@ from . import utility as ut
 
 import os
 
-__all__ = ["model"]
+__all__ = ["gmodel", "pmap"]
 
-cdef class model:
-  """
-  Model class
-  """
+cdef class basis:
+
   cdef PARSET parset
   cdef int rank, size
   cdef int nset, num_param_var 
   cdef list nlset
 
-  def __cinit__(self, param_file=None):
-    """
-    initialise with a parameter file.
-    """
-    
+  def __cinit__(self):
     set_mpi()  # setup MPI enviroment in C
     self._set_default_parset()
 
     self.size  = MPI.COMM_WORLD.Get_size()
     self.rank  = MPI.COMM_WORLD.Get_rank()
+
     self.nset = 0
     self.num_param_var = 0
 
-    if param_file != None:
-      if isinstance(param_file, str):
-        strcpy(self.parset.param_file, param_file.encode("UTF-8"))
-        set_param_file(self.parset.param_file)
-        read_parset()
-        get_parset(&self.parset)  # get parset from C
-
-        self._get_data_dimension()
-        # uniform variability parameters of mulitple datasets
-        if self.parset.flag_uniform_var_params == 0:
-          self.num_param_var = 3*self.nset
-        elif self.parset.flag_uniform_var_params == 1:
-          self.num_param_var = 3
-
-      else:
-        raise ValueError("param_file should be a string!")
-    
     if self.rank == 0:
       # check data folder
       if not os.path.exists("./data"):
@@ -72,153 +50,10 @@ cdef class model:
         os.mkdir("./param/")
 
     return
-  
+
   def __cdealloc__(self):
-    return
+    return  
   
-
-  def setup(self, data_file=None, data=None,
-                  type_tf='gaussian', max_num_saves=2000, 
-                  flag_uniform_var_params=False, flag_uniform_tranfuns=False,
-                  flag_trend=0, flag_lag_posivity=False,
-                  lag_limit=[0, 100], number_component=[1, 1],
-                  flag_con_sys_err=False, flag_line_sys_err=False,
-                  type_lag_prior=0, lag_prior=None):     
-    """
-    setup parameters
-    """
-    # data file
-    if data_file != None:
-      if isinstance(data_file, str):
-        strcpy(self.parset.data_file, data_file.encode("UTF-8"))
-        self._get_data_dimension()
-      else:
-        raise ValueError("data_file is unrecognized!")
-    elif data != None:
-      self.create_data_file(data=data)
-      # set data dimensions
-      self.nset = len(data)
-      self.nlset = []
-      for key in data.keys():
-        self.nlset.append(len(data[key])-1)
-
-    else:
-      raise ValueError("either data or data_file should not be None!")
-
-    # transfer function type
-    if type_tf == 'gaussian':
-      self.parset.type_tf = 0
-    elif type_tf == 'tophat':
-      self.parset.type_tf = 1
-    else:
-      raise ValueError("type_tf is unrecognized!")
-    
-    # maximum number of saves
-    self.parset.max_num_saves = max_num_saves
-
-    # uniform variability parameters of mulitple datasets
-    if flag_uniform_var_params == False:
-      self.parset.flag_uniform_var_params = 0
-      self.num_param_var = 3*self.nset
-    elif flag_uniform_var_params == True:
-      self.parset.flag_uniform_var_params = 1
-      self.num_param_var = 3
-    else:
-      raise ValueError("flag_uniform_var_params is unrecognized!")
-    
-    # uniform transfer function parameters of mulitple datasets
-    if flag_uniform_tranfuns == False:
-      self.parset.flag_uniform_tranfuns = 0
-    elif flag_uniform_tranfuns == True:
-      self.parset.flag_uniform_tranfuns = 1
-    else:
-      raise ValueError("flag_uniform_tranfuns is unrecognized!")
-    
-    # long-term trend
-    self.parset.flag_trend = flag_trend 
-
-    # lag posivitiy
-    if flag_lag_posivity == False:
-      self.parset.flag_lag_posivity = 0
-    elif flag_lag_posivity == True:
-      self.parset.flag_lag_posivity = 1
-    else:
-      raise ValueError("flag_lag_posivity is unrecognized!")
-
-    # lag limit
-    self.parset.lag_limit_low = lag_limit[0]
-    self.parset.lag_limit_upper = lag_limit[1]
-
-    # number of component
-    if isinstance(number_component, int):
-      self.parset.num_gaussian_low = number_component
-      self.parset.num_gaussian_upper = number_component
-    elif isinstance(number_component, list):
-      self.parset.num_gaussian_low = number_component[0]
-      self.parset.num_gaussian_upper = number_component[1]
-    self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
-
-    # continuum systematic error
-    if flag_con_sys_err == False:
-      self.parset.flag_con_sys_err = 0
-    elif flag_con_sys_err == True:
-      self.parset.flag_con_sys_err = 1
-    else:
-      raise ValueError("flag_lag_con_sys_err is unrecognized!")
-    
-    # line systematic error
-    if flag_line_sys_err == False:
-      self.parset.flag_line_sys_err = 0
-    elif flag_line_sys_err == True:
-      self.parset.flag_line_sys_err = 1
-    else:
-      raise ValueError("flag_lag_line_sys_err is unrecognized!")
-
-    
-    self.parset.type_lag_prior = type_lag_prior
-
-    # if lag_prior is input
-    if lag_prior != None:
-      if self.parset.num_gaussian_upper > 1:
-        self.parset.type_lag_prior=4
-        # write string of lag prior
-        sstr = "["
-        sstr += "%f:%f"%(lag_prior[0][0], lag_prior[0][1])
-        for i in range(1, self.parset.num_gaussian_upper):
-          sstr += ":%f:%f"%(lag_prior[i][0], lag_prior[i][1])
-        
-        sstr += "]"
-        strcpy(self.parset.str_lag_prior, sstr.encode("UTF-8"))
-      else:
-        self.parset.type_lag_prior=0
-
-    self.print_parset()
-
-    # finally set parameters in C.
-    set_parset(&self.parset)
-    return
-  
-  def _get_data_dimension(self):
-    """
-    get data dimensions
-    """
-    if self.rank == 0:
-      fp = open(self.parset.data_file.decode("UTF-8"), "r")
-      line = fp.readline()
-      self.nset = int(line[1:])
-      self.nlset = []
-      for i in range(self.nset):
-        line = fp.readline()
-        ls = line[1:].split(":")
-        self.nlset.append(len(ls)-1)
-      
-      fp.close()
-    
-    self.nset = MPI.COMM_WORLD.bcast(self.nset, root=0)
-    self.nlset = MPI.COMM_WORLD.bcast(self.nlset, root=0)
-    
-    return
-
   def _set_default_parset(self):
     """
     set the default parameters
@@ -309,7 +144,10 @@ cdef class model:
       fp.write("{:30}{}\n".format("FlagConSysErr", self.parset.flag_con_sys_err))
       fp.write("{:30}{}\n".format("FlagLineSysErr", self.parset.flag_line_sys_err))
       fp.write("{:30}{}\n".format("TypeLagPrior", self.parset.type_lag_prior))
-      fp.write("{:30}{}\n".format("StrLagPrior", self.parset.str_lag_prior.decode("UTF-8")))
+      if self.parset.type_lag_prior == 4:
+        fp.write("{:30}{}\n".format("StrLagPrior", self.parset.str_lag_prior.decode("UTF-8")))
+      if strlen(self.parset.str_ratio_prior)>0:
+        fp.write("{:30}{}\n".format("StrRatioPrior", self.parset.str_ratio_prior.decode("UTF-8")))
       fp.write("#==============================================================\n")
       fp.write("# options for cdnest sampling\n")
       fp.write("# use the default values or do not turn thme on IF NOT familiar with them\n\n")
@@ -324,28 +162,6 @@ cdef class model:
       fp.write("{:30}{:5}{}\n".format("# StrengthEqualPush",self.parset.beta, "# strength to force equal push (beta)"))
       fp.write("#==============================================================\n")
       fp.close()
-    return
-
-  def run(self):
-    """
-    run mica
-    """
-    read_data()
-    init()
-    mc_con()
-    mc_line()
-    end_run()
-    return
-  
-  def post_run(self):
-    """
-    do posterior running
-    """
-    set_argv(1, 0)
-    read_data()
-    init()
-    mc_line()
-    end_run()
     return
   
   def plot_results(self):
@@ -364,16 +180,37 @@ cdef class model:
 
     return
   
-  def decompose(self):
+  def get_posterior_sample_width(self, set=0, line=0):
     """
-    do decomposition
-    """
-    set_argv(1, 1)
-    read_data()
-    init()
-    mc_line()
-    end_run()
-    return
+    get the posterior sample of widths of the line in set  
+    """  
+
+    if set >= self.nset:
+      raise ValueError("there are only %d datasets!\n set exceeds this limit!"%self.nset)
+    elif set < 0:
+      raise ValueError("set should be non-negative!")
+    
+    if line >= self.nlset[set]:
+      raise ValueError("there are only %d lines!\n line exceeds this limit!"%self.nset)
+    elif line < 0:
+      raise ValueError("line should be non-negative!")
+
+    width = []
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+      sample = np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)
+      if self.parset.flag_uniform_tranfuns == 0:
+        idx_line = self.num_param_var
+        for j in range(0, set-1):
+          idx_line += (1+(i*3))*self.nlset[j]
+
+        idx_line += (1+(i*3))*line
+        width.append(sample[:, idx_line+3:idx_line+3+i*3:3])
+      else:
+        idx_line = self.num_param_var
+        idx_line += (1+(i*3))*line
+        width.append(sample[:, idx_line+3:idx_line+3+i*3:3])
+
+    return width
   
   def get_posterior_sample(self):
     """
@@ -416,34 +253,308 @@ cdef class model:
 
     return timelag
   
-  def get_posterior_sample_width(self, set=0, line=0):
+  def _get_data_dimension(self):
     """
-    get the posterior sample of widths of the line in set  
-    """  
-
-    if set >= self.nset:
-      raise ValueError("there are only %d datasets!\n set exceeds this limit!"%self.nset)
-    elif set < 0:
-      raise ValueError("set should be non-negative!")
+    get data dimensions
+    """
+    if self.rank == 0:
+      fp = open(self.parset.data_file.decode("UTF-8"), "r")
+      line = fp.readline()
+      self.nset = int(line[1:])
+      self.nlset = []
+      for i in range(self.nset):
+        line = fp.readline()
+        ls = line[1:].split(":")
+        self.nlset.append(len(ls)-1)
+      
+      fp.close()
     
-    if line >= self.nlset[set]:
-      raise ValueError("there are only %d lines!\n line exceeds this limit!"%self.nset)
-    elif line < 0:
-      raise ValueError("line should be non-negative!")
-
-    width = []
-    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
-      sample = np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)
-      if self.parset.flag_uniform_tranfuns == 0:
-        idx_line = self.num_param_var
-        for j in range(0, set-1):
-          idx_line += (1+(i*3))*self.nlset[j]
-
-        idx_line += (1+(i*3))*line
-        width.append(sample[:, idx_line+3:idx_line+3+i*3:3])
+    self.nset = MPI.COMM_WORLD.bcast(self.nset, root=0)
+    self.nlset = MPI.COMM_WORLD.bcast(self.nlset, root=0)
+    
+    return
+  
+  def setup(self, data_file=None, data=None,
+                  type_tf='gaussian', max_num_saves=2000):
+    # data file
+    if data_file != None:
+      if isinstance(data_file, str):
+        strcpy(self.parset.data_file, data_file.encode("UTF-8"))
+        self._get_data_dimension()
       else:
-        idx_line = self.num_param_var
-        idx_line += (1+(i*3))*line
-        width.append(sample[:, idx_line+3:idx_line+3+i*3:3])
+        raise ValueError("data_file is unrecognized!")
+    elif data != None:
+      self.create_data_file(data=data)
+      # set data dimensions
+      self.nset = len(data)
+      self.nlset = []
+      for key in data.keys():
+        self.nlset.append(len(data[key])-1)
 
-    return width
+    else:
+      raise ValueError("either data or data_file should not be None!")
+
+    # transfer function type
+    if type_tf == 'gaussian':
+      self.parset.type_tf = 0
+    elif type_tf == 'tophat':
+      self.parset.type_tf = 1
+    else:
+      raise ValueError("type_tf is unrecognized!")
+    
+    # maximum number of saves
+    self.parset.max_num_saves = max_num_saves
+
+    return
+
+
+#==========================================================================
+cdef class gmodel(basis):
+  """
+  Model class
+  """
+  def __cinit__(self, param_file=None):
+    """
+    initialise with a parameter file.
+    """
+    if param_file != None:
+      if isinstance(param_file, str):
+        strcpy(self.parset.param_file, param_file.encode("UTF-8"))
+        set_param_file(self.parset.param_file)
+        read_parset()
+        get_parset(&self.parset)  # get parset from C
+
+        self._get_data_dimension()
+        # uniform variability parameters of mulitple datasets
+        if self.parset.flag_uniform_var_params == 0:
+          self.num_param_var = 3*self.nset
+        elif self.parset.flag_uniform_var_params == 1:
+          self.num_param_var = 3
+
+      else:
+        raise ValueError("param_file should be a string!")
+
+    return
+  
+  def __cdealloc__(self):
+    return
+  
+
+  def setup(self, data_file=None, data=None,
+                  type_tf='gaussian', max_num_saves=2000, 
+                  flag_uniform_var_params=False, flag_uniform_tranfuns=False,
+                  flag_trend=0, flag_lag_posivity=False,
+                  lag_limit=[0, 100], number_component=[1, 1],
+                  flag_con_sys_err=False, flag_line_sys_err=False,
+                  type_lag_prior=0, lag_prior=None):     
+    """
+    setup parameters
+    """
+    
+    basis.setup(self, data_file, data, type_tf, max_num_saves)
+
+    # uniform variability parameters of mulitple datasets
+    if flag_uniform_var_params == False:
+      self.parset.flag_uniform_var_params = 0
+      self.num_param_var = 3*self.nset
+    elif flag_uniform_var_params == True:
+      self.parset.flag_uniform_var_params = 1
+      self.num_param_var = 3
+    else:
+      raise ValueError("flag_uniform_var_params is unrecognized!")
+    
+    # uniform transfer function parameters of mulitple datasets
+    if flag_uniform_tranfuns == False:
+      self.parset.flag_uniform_tranfuns = 0
+    elif flag_uniform_tranfuns == True:
+      self.parset.flag_uniform_tranfuns = 1
+    else:
+      raise ValueError("flag_uniform_tranfuns is unrecognized!")
+    
+    # long-term trend
+    self.parset.flag_trend = flag_trend 
+
+    # lag posivitiy
+    if flag_lag_posivity == False:
+      self.parset.flag_lag_posivity = 0
+    elif flag_lag_posivity == True:
+      self.parset.flag_lag_posivity = 1
+    else:
+      raise ValueError("flag_lag_posivity is unrecognized!")
+
+    # lag limit
+    self.parset.lag_limit_low = lag_limit[0]
+    self.parset.lag_limit_upper = lag_limit[1]
+
+    # number of component
+    if isinstance(number_component, int):
+      self.parset.num_gaussian_low = number_component
+      self.parset.num_gaussian_upper = number_component
+    elif isinstance(number_component, list):
+      self.parset.num_gaussian_low = number_component[0]
+      self.parset.num_gaussian_upper = number_component[1]
+    self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
+
+    # continuum systematic error
+    if flag_con_sys_err == False:
+      self.parset.flag_con_sys_err = 0
+    elif flag_con_sys_err == True:
+      self.parset.flag_con_sys_err = 1
+    else:
+      raise ValueError("flag_lag_con_sys_err is unrecognized!")
+    
+    # line systematic error
+    if flag_line_sys_err == False:
+      self.parset.flag_line_sys_err = 0
+    elif flag_line_sys_err == True:
+      self.parset.flag_line_sys_err = 1
+    else:
+      raise ValueError("flag_lag_line_sys_err is unrecognized!")
+
+    
+    self.parset.type_lag_prior = type_lag_prior
+
+    # if lag_prior is input
+    if lag_prior != None:
+      if self.parset.num_gaussian_upper > 1:
+        self.parset.type_lag_prior=4
+        # write string of lag prior
+        sstr = "["
+        sstr += "%f:%f"%(lag_prior[0][0], lag_prior[0][1])
+        for i in range(1, self.parset.num_gaussian_upper):
+          sstr += ":%f:%f"%(lag_prior[i][0], lag_prior[i][1])
+        
+        sstr += "]"
+        strcpy(self.parset.str_lag_prior, sstr.encode("UTF-8"))
+      else:
+        self.parset.type_lag_prior=0
+
+    self.print_parset()
+
+    # finally set parameters in C.
+    set_parset(&self.parset)
+    return
+  
+  def run(self):
+    """
+    run mica
+    """
+    read_data()
+    init()
+    mc_con()
+    mc_line()
+    end_run()
+    return
+  
+  def post_run(self):
+    """
+    do posterior running
+    """
+    set_argv(1, 0)
+    read_data()
+    init()
+    mc_line()
+    end_run()
+    return
+  
+  def decompose(self):
+    """
+    do decomposition
+    """
+    set_argv(1, 1)
+    read_data()
+    init()
+    mc_line()
+    end_run()
+    return
+
+
+#==========================================================================
+# photometric reverberation mapping
+#
+cdef class pmap(basis):
+
+  def __cinit__(self):
+    return 
+  
+  def __cdealloc__(self):
+    return
+  
+  def setup(self, data_file=None, data=None,
+                  type_tf='gaussian', max_num_saves=2000,
+                  lag_prior=None, ratio_prior=None):
+
+    basis.setup(self, data_file, data, type_tf, max_num_saves)
+    
+    self.parset.num_gaussian_low = 2
+    self.parset.num_gaussian_upper = 2 
+    self.parset.num_gaussian_diff = self.parset.num_gaussian_upper - self.parset.num_gaussian_low + 1
+    
+    self.parset.type_lag_prior=4
+    if lag_prior == None:
+      raise ValueError("Please input lag_prior.\ne.g., lag_prior=[[-5, 5], [5, 500]]\n")
+    else:
+      # write string of lag prior
+      sstr = "["
+      sstr += "%f:%f"%(lag_prior[0][0], lag_prior[0][1])
+      for i in range(1, self.parset.num_gaussian_upper):
+        sstr += ":%f:%f"%(lag_prior[i][0], lag_prior[i][1])
+      
+      sstr += "]"
+      strcpy(self.parset.str_lag_prior, sstr.encode("UTF-8"))
+   
+    # if lag_prior is input
+    if ratio_prior != None:
+      
+      if not isinstance(ratio_prior[0], list):
+        ratio_prior = [ratio_prior]
+
+      # write string of lag prior
+      sstr = "["
+      sstr += "%f:%f"%(ratio_prior[0][0], ratio_prior[0][1])
+      for i in range(1, len(ratio_prior)):
+        sstr += ":%f:%f"%(ratio_prior[i][0], ratio_prior[i][1])
+      
+      sstr += "]"
+      strcpy(self.parset.str_ratio_prior, sstr.encode("UTF-8"))
+
+
+    self.print_parset()
+
+    # finally set parameters in C.
+    set_parset(&self.parset)
+    
+    return
+  
+  def run(self):
+    """
+    run mica
+    """
+    read_data()
+    init()
+    mc_con()
+    mc_pmap()
+    end_run()
+    return
+  
+  def post_run(self):
+    """
+    do posterior running
+    """
+    set_argv(1, 0)
+    read_data()
+    init()
+    mc_pmap()
+    end_run()
+    return
+  
+  def decompose(self):
+    """
+    do decomposition
+    """
+    set_argv(1, 1)
+    read_data()
+    init()
+    mc_pmap()
+    end_run()
+    return

@@ -10,6 +10,7 @@
 #define _DNEST_LINE_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* functions */
 void from_prior_line(void *model);

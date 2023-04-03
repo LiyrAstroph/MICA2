@@ -18,6 +18,7 @@ cdef extern from "allvars.h":
     char file_dir[256]
     char data_file[256]
     char str_lag_prior[256]
+    char str_ratio_prior[256]
   
     int flag_uniform_var_params
     int flag_uniform_tranfuns
@@ -25,6 +26,7 @@ cdef extern from "allvars.h":
     int flag_con_sys_err, flag_line_sys_err
     int type_lag_prior
     int type_tf
+    int type_model
     int flag_lag_posivity
   
     int num_gaussian_low, num_gaussian_upper, num_gaussian_diff
@@ -48,6 +50,7 @@ cdef extern from "proto.h":
   void init()
   void mc_con()
   void mc_line()
+  void mc_pmap()
   void output_decompose_line()
   void begin_run()
   void end_run()

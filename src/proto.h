@@ -70,6 +70,13 @@ double prob_line_variability3(const void *model);
 double prob_line_variability4(const void *model);
 void postprocess_line();
 
+/* for pmap */
+double prob_line_variability4_pmap(const void *model);
+double dnest_pmap(int argc, char **argv);
+void set_par_range_pmap();
+int mc_pmap_init();
+int mc_pmap_end();
+
 double (*Sll)(double t1, double t2, const void *model, int nds, int nls);
 void (*Sll_array)(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 double (*Sll2)(double t1, double t2, const void *model, int nds, int nls1, int nls2);

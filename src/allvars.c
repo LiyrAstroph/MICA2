@@ -56,6 +56,10 @@ double *Smat_lc, *Smat_ll;
 double *logz_arr; /* evidence */
 double *lag_prior;
 
+/* pmap */
+void *model_trans;
+double *resp_ratio_prior;
+
 // mathematic functions
 int *workspace_ipiv;
 double *workspace_inv;

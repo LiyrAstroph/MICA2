@@ -15,11 +15,12 @@
 #define PI            (M_PI)
 #define MICA_MAX_STR_LENGTH  (256)
 
+enum model_type {gmodel=0, pmap};
+
 /* variables for MPICH */
 extern int thistask, totaltask, namelen;
 extern int roottask;
 extern char proc_name[MPI_MAX_PROCESSOR_NAME];
-
 
 /* for dnest */
 extern int which_level_update;
@@ -52,6 +53,10 @@ extern double *Smat_lc, *Smat_ll;
 extern double *logz_arr; /* evidence */
 extern double *lag_prior;
 
+/* pmap */
+extern void *model_trans;
+extern double *resp_ratio_prior;
+
 // error exit
 extern char str_error_exit[200];
 // mathematic functions
@@ -67,6 +72,7 @@ typedef struct
   char file_dir[MICA_MAX_STR_LENGTH];
   char data_file[MICA_MAX_STR_LENGTH];
 
+  enum model_type model;
   int flag_uniform_var_params;
   int flag_uniform_tranfuns;
   int flag_trend;
@@ -76,6 +82,7 @@ typedef struct
   int flag_lag_posivity;
 
   char str_lag_prior[MICA_MAX_STR_LENGTH];
+  char str_ratio_prior[MICA_MAX_STR_LENGTH];
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 

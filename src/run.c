@@ -26,8 +26,15 @@ void begin_run()
   {
     mc_con();
   }
-
-  mc_line();
+  
+  if(parset.model == gmodel)
+  {
+    mc_line();
+  }
+  else if (parset.model == pmap)
+  {
+    mc_pmap();
+  }
 }
 
 /*!

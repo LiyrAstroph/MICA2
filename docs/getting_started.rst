@@ -98,6 +98,9 @@ A typical parameter file looks like::
   FileDir                   ./
   DataFile                  data/sim_data.txt
   
+  TypeModel                 0                # 0: general model
+                                             # 1: pmap, photometric RM
+
   TypeTF                    0                # 0: Gaussian
                                              # 1: Top-hat
   
@@ -147,7 +150,12 @@ A typical parameter file looks like::
                                              #     dlag = (limit1 - limit0)/(num_comp-1)
                                              #     better to set a large  mumber of components
   
-  
+  StrLagPrior             [0:10:10:50]       # valid if TypeLagPrior==4
+                                             # format: [lag1_1:lag1_2:lag2_1:lag2_2...]
+                                             # "LagLimitLow" and "LagLimitUpp" no longer applicable
+
+  StrRatioPrior           [1.0e-3:1.0]       # valid if TypeModel == pmap
+                                             # format: [ratio_1:ratio_2]
   #==================================================================
   # options for cdnest sampling
   # use the default values or do not turn thme on IF NOT familiar with them

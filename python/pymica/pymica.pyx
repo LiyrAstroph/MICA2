@@ -276,7 +276,9 @@ cdef class basis:
     return
   
   def setup(self, data_file=None, data=None,
-                  type_tf='gaussian', max_num_saves=2000):
+                  type_tf='gaussian', max_num_saves=2000,
+                  flag_trend=0, flag_lag_posivity=False,
+                  flag_con_sys_err=False, flag_line_sys_err=False):
     # data file
     if data_file != None:
       if isinstance(data_file, str):
@@ -305,6 +307,33 @@ cdef class basis:
     
     # maximum number of saves
     self.parset.max_num_saves = max_num_saves
+
+    # long-term trend
+    self.parset.flag_trend = flag_trend 
+
+    # lag posivitiy
+    if flag_lag_posivity == False:
+      self.parset.flag_lag_posivity = 0
+    elif flag_lag_posivity == True:
+      self.parset.flag_lag_posivity = 1
+    else:
+      raise ValueError("flag_lag_posivity is unrecognized!")
+    
+    # continuum systematic error
+    if flag_con_sys_err == False:
+      self.parset.flag_con_sys_err = 0
+    elif flag_con_sys_err == True:
+      self.parset.flag_con_sys_err = 1
+    else:
+      raise ValueError("flag_lag_con_sys_err is unrecognized!")
+    
+    # line systematic error
+    if flag_line_sys_err == False:
+      self.parset.flag_line_sys_err = 0
+    elif flag_line_sys_err == True:
+      self.parset.flag_line_sys_err = 1
+    else:
+      raise ValueError("flag_lag_line_sys_err is unrecognized!")
 
     return
 
@@ -352,7 +381,8 @@ cdef class gmodel(basis):
     setup parameters
     """
     
-    basis.setup(self, data_file, data, type_tf, max_num_saves)
+    basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
+                      flag_con_sys_err, flag_line_sys_err)
 
     # uniform variability parameters of mulitple datasets
     if flag_uniform_var_params == False:
@@ -371,17 +401,6 @@ cdef class gmodel(basis):
       self.parset.flag_uniform_tranfuns = 1
     else:
       raise ValueError("flag_uniform_tranfuns is unrecognized!")
-    
-    # long-term trend
-    self.parset.flag_trend = flag_trend 
-
-    # lag posivitiy
-    if flag_lag_posivity == False:
-      self.parset.flag_lag_posivity = 0
-    elif flag_lag_posivity == True:
-      self.parset.flag_lag_posivity = 1
-    else:
-      raise ValueError("flag_lag_posivity is unrecognized!")
 
     # lag limit
     self.parset.lag_limit_low = lag_limit[0]
@@ -395,23 +414,6 @@ cdef class gmodel(basis):
       self.parset.num_gaussian_low = number_component[0]
       self.parset.num_gaussian_upper = number_component[1]
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
-
-    # continuum systematic error
-    if flag_con_sys_err == False:
-      self.parset.flag_con_sys_err = 0
-    elif flag_con_sys_err == True:
-      self.parset.flag_con_sys_err = 1
-    else:
-      raise ValueError("flag_lag_con_sys_err is unrecognized!")
-    
-    # line systematic error
-    if flag_line_sys_err == False:
-      self.parset.flag_line_sys_err = 0
-    elif flag_line_sys_err == True:
-      self.parset.flag_line_sys_err = 1
-    else:
-      raise ValueError("flag_lag_line_sys_err is unrecognized!")
-
     
     self.parset.type_lag_prior = type_lag_prior
 
@@ -483,9 +485,12 @@ cdef class pmap(basis):
   
   def setup(self, data_file=None, data=None,
                   type_tf='gaussian', max_num_saves=2000,
+                  flag_trend=0, flag_lag_posivity=False,
+                  flag_con_sys_err=False, flag_line_sys_err=False,
                   lag_prior=None, ratio_prior=None):
 
-    basis.setup(self, data_file, data, type_tf, max_num_saves)
+    basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
+                      flag_con_sys_err, flag_line_sys_err)
     
     self.parset.num_gaussian_low = 2
     self.parset.num_gaussian_upper = 2 

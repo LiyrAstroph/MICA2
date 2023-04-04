@@ -171,7 +171,7 @@ cdef class basis:
       ut.plot_results(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
                       self.parset.lag_limit_low, self.parset.lag_limit_upper, \
                       self.parset.flag_uniform_var_params, self.parset.flag_uniform_tranfuns, \
-                      self.parset.flag_trend, self.parset.type_tf, None)
+                      self.parset.flag_trend, self.parset.type_tf, self.parset.model, None)
     return
   
   def post_process(self, temperature=1.0):

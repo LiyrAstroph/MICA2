@@ -233,8 +233,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
 
       elif typemodel == 1: # ratio hist
         for k in range(1, ngau):
-          ratio = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3]
-          ax.hist(ratio, density=True, bins=20, alpha=1)
+          ratio = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3]/np.log(10.0)
+          if k == 1:
+            ax.hist(ratio, density=True, bins=20, alpha=1)
+          else:
+            ax.hist(ratio, density=True, bins=20, alpha=0.6)
+
           ax.yaxis.set_tick_params(labelleft=False)
           ax.minorticks_on()
 
@@ -541,23 +545,43 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       # centroid time lag
       ax = fig.add_axes((0.22, 0.95-(j+1)*axheight, 0.16, axheight))
 
-      cent = np.zeros(sample.shape[0])
-      norm = np.zeros(sample.shape[0])
-      for k in range(ngau):
-        norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-        cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
-                * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-      
-      ax.hist(cent/norm, density=True, range=(tau1, tau2), bins=20)
-      ax.set_xlim((tau1, tau2))
-      ax.minorticks_on()
-      ax.yaxis.set_tick_params(labelleft=False)
-      if j == 1:
-        ax.set_title("Centroid")
-      if j != len(ns)-1:
-        ax.xaxis.set_tick_params(labelbottom=False)
-      else:
-        ax.set_xlabel("Time Lag (day)")
+      if typemodel == 0: # centroid time lag
+        cent = np.zeros(sample.shape[0])
+        norm = np.zeros(sample.shape[0])
+        for k in range(ngau):
+          norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                  * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        
+        ax.hist(cent/norm, density=True, range=(tau1, tau2), bins=20)
+        ax.set_xlim((tau1, tau2))
+        ax.minorticks_on()
+        ax.yaxis.set_tick_params(labelleft=False)
+        if j == 1:
+          ax.set_title("Centroid")
+        if j != len(ns)-1:
+          ax.xaxis.set_tick_params(labelbottom=False)
+        else:
+          ax.set_xlabel("Time Lag (day)")
+
+      elif typemodel == 1: # ratio hist
+        for k in range(1, ngau):
+          ratio = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3]/np.log(10.0)
+          if k == 1:
+            ax.hist(ratio, density=True, bins=20, alpha=1)
+          else:
+            ax.hist(ratio, density=True, bins=20, alpha=0.6)
+
+          ax.yaxis.set_tick_params(labelleft=False)
+          ax.minorticks_on()
+
+          if j != len(ns)-1:
+            ax.xaxis.set_tick_params(labelbottom=False)
+          else:
+            ax.set_xlabel("$\log R$")
+
+          if j == 1:
+            ax.set_title("Response Ratio")
 
       # transfer function
       ax = fig.add_axes((0.39, 0.95-(j+1)*axheight, 0.16, axheight))

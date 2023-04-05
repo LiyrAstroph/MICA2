@@ -175,6 +175,10 @@ if __name__ == "__main__":
 
   fparam = args.param
   param = _param_parser(fparam)
+
+  # default option
+  if "TypeModel" not in param:
+    param["TypeModel"] = 0
   
   try:
     fdir = param["FileDir"]+"/"

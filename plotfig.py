@@ -711,15 +711,16 @@ def plot_results_all(args, param):
   except:
     raise IOError("NumCompUpp is not set!")
   
-  try:
-    tau_low = float(param["LagLimitLow"])
-  except:
-    raise IOError("LagLimitLow is not set!")
-  
-  try:
-    tau_upp = float(param["LagLimitUpp"])
-  except:
-    raise IOError("LagLimitUpp is not set!")
+  if param["TypeModel"] == 0:
+    try:
+      tau_low = float(param["LagLimitLow"])
+    except:
+      raise IOError("LagLimitLow is not set!")
+    
+    try:
+      tau_upp = float(param["LagLimitUpp"])
+    except:
+      raise IOError("LagLimitUpp is not set!")
   
   try:
     fname = param["DataFile"]
@@ -767,5 +768,8 @@ if __name__ == "__main__":
 
   fparam = args.param
   param = _param_parser(fparam)
+  
+  if "TypeModel" not in param:
+    param["TypeModel"] = 0
 
   plot_results_all(args, param)

@@ -49,7 +49,7 @@ void init()
   line_range_model[2][0] = fmax(parset.lag_limit_low, -tspan_max/2.0); // center of Gaussian
   line_range_model[2][1] = fmin(parset.lag_limit_upper, tspan_max/2.0);
 
-  line_range_model[3][0] = log(tcadence_min/3.0); // sigma of Gaussian
+  line_range_model[3][0] = log(tcadence_min/10.0); // sigma of Gaussian
   line_range_model[3][1] = log(tspan_max/3.0); //3*sigma < time span
   if(parset.width_limit_low_isset == 1)
   {
@@ -58,7 +58,7 @@ void init()
   if(parset.width_limit_upper_isset == 1)
   {
     /* upper limit cannnot be too large */
-    line_range_model[3][1] = fmin(log(parset.width_limit_upper), log(tspan_max));
+    line_range_model[3][1] = fmin(log(parset.width_limit_upper), log(tspan_max/3.0));
   }
 
   nscale = 3;

@@ -5,9 +5,9 @@
  * Jun 22, 2018
  */
 
-#ifndef _DNEST_LINE_H
+#ifndef _DNEST_PMAP_H
 
-#define _DNEST_LINE_H
+#define _DNEST_PAMP_H
 
 #include <stdbool.h>
 #include <stdio.h>

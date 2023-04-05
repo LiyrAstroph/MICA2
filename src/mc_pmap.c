@@ -193,6 +193,12 @@ int mc_pmap_init()
     }
   }
 
+  /* cope with line width, set a lower limit to width of line TF */
+  for(i=1; i<parset.num_gaussian_upper; i++)
+  {
+    width_prior[i*2+0] = fmax(width_prior[i*2+0], log(1.0));
+  }
+
   return 0;
 }
 

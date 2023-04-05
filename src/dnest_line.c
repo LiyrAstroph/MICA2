@@ -622,11 +622,6 @@ int check_gauss_center(int which, int *igau)
   return 0;
 }
 
-inline int check_gauss_positivity(int which)
-{
-  return ((which - num_params_var)%(1+3*num_gaussian)-1)%3;
-}
-
 int get_num_params_line()
 {
   return num_params;

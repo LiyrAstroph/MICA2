@@ -175,8 +175,8 @@ void set_par_range_pmap()
       par_range_model[i++][1] = lag_prior[k*2+1];
 
       /* sigma of gaussian */
-      par_range_model[i][0] = line_range_model[3][0];
-      par_range_model[i++][1] = line_range_model[3][1];
+      par_range_model[i][0] = width_prior[k*2+0];
+      par_range_model[i++][1] = width_prior[k*2+1];
     }
   }
   
@@ -393,11 +393,6 @@ double perturb_pmap(void *model)
   }
   
   return logH;
-}
-
-inline int check_gauss_positivity(int which)
-{
-  return ((which - num_params_var)%(1+3*num_gaussian)-1)%3;
 }
 
 int get_num_params_pmap()

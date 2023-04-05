@@ -1640,6 +1640,14 @@ int mc_line_init()
   Smat_lc = malloc(ncon_max * nline_max * sizeof(double));
   Smat_ll = malloc(nline_max * nline_max * sizeof(double));
 
+  width_prior = malloc(parset.num_gaussian_upper * 2 * sizeof(double));
+  /* set default values */
+  for(i=0; i<parset.num_gaussian_upper; i++)
+  {
+    width_prior[i*2+0] = line_range_model[3][0];
+    width_prior[i*2+1] = line_range_model[3][1];
+  }
+  
   /* get lag prior from parset.str_lag_prior */
   if(parset.type_lag_prior == 4)
   {
@@ -1685,6 +1693,7 @@ int mc_line_end()
   free(Smat_lc);
   free(Smat_ll);
   
+  free(width_prior);
   if(parset.type_lag_prior == 4)
   {
     free(lag_prior);

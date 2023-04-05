@@ -35,6 +35,10 @@ LagLimitLow               0.0              # lower limit of the range of time la
 LagLimitUpp               300.0            # upper limit of the range of time lag to be explored
                                            # can be negative
 
+#WidthLimitLow            -1.0              # lower and upper limit of lag width
+#WidthLimitUpp            50.0             # by default, MICA determines the limits automatically.
+                                           # if unsatifactory, turn on these options.
+
 FlagLagPositivity         0                # whether force Gaussians overall located at non-negative lags
                                            # 0: no;  1: yes
                                            # default: 0

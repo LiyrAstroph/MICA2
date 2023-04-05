@@ -32,6 +32,7 @@ cdef class basis:
   cdef list nlset
 
   def __cinit__(self):
+    
     set_mpi()  # setup MPI enviroment in C
     self._set_default_parset()
 
@@ -65,6 +66,8 @@ cdef class basis:
     self.parset.flag_uniform_var_params = 0
     self.parset.lag_limit_low = 0.0
     self.parset.lag_limit_upper = -1.0
+    self.parset.width_limit_low_isset = 0
+    self.parset.width_limit_upper_isset = 0
     self.parset.type_lag_prior = 1
     self.parset.flag_trend = 0
     self.parset.type_tf = 0
@@ -137,8 +140,13 @@ cdef class basis:
       fp.write("{:30}{}\n".format("FlagUniformVarParams", self.parset.flag_uniform_var_params))
       fp.write("{:30}{}\n".format("FlagUniformTranFuns", self.parset.flag_uniform_tranfuns))
       fp.write("{:30}{}\n".format("FlagLongtermTrend", self.parset.flag_trend))
-      fp.write("{:30}{}\n".format("LagLimitLow", self.parset.lag_limit_low))
-      fp.write("{:30}{}\n".format("LagLimitUpp", self.parset.lag_limit_upper))
+      if self.parset.model == 0:
+        fp.write("{:30}{}\n".format("LagLimitLow", self.parset.lag_limit_low))
+        fp.write("{:30}{}\n".format("LagLimitUpp", self.parset.lag_limit_upper))
+      if self.parset.width_limit_low_isset == 1:
+        fp.write("{:30}{}\n".format("WidthLimitLow", self.parset.width_limit_low))
+      if self.parset.width_limit_upper_isset == 1:
+        fp.write("{:30}{}\n".format("WidthLimitUpp", self.parset.width_limit_upper))  
       fp.write("{:30}{}\n".format("FlagLagPositivity", self.parset.flag_lag_posivity))
       fp.write("{:30}{}\n".format("NumCompLow", self.parset.num_gaussian_low))
       fp.write("{:30}{}\n".format("NumCompUpp", self.parset.num_gaussian_upper))
@@ -375,6 +383,7 @@ cdef class gmodel(basis):
                   flag_uniform_var_params=False, flag_uniform_tranfuns=False,
                   flag_trend=0, flag_lag_posivity=False,
                   lag_limit=[0, 100], number_component=[1, 1],
+                  width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   type_lag_prior=0, lag_prior=None):     
     """
@@ -405,6 +414,13 @@ cdef class gmodel(basis):
     # lag limit
     self.parset.lag_limit_low = lag_limit[0]
     self.parset.lag_limit_upper = lag_limit[1]
+
+    # width limit
+    if width_limit != None:
+      self.parset.width_limit_low_isset = 1
+      self.parset.width_limit_low = width_limit[0]
+      self.parset.width_limit_upper_isset = 1
+      self.parset.width_limit_upper = width_limit[1]
 
     # number of component
     if isinstance(number_component, int):
@@ -487,7 +503,8 @@ cdef class pmap(basis):
                   type_tf='gaussian', max_num_saves=2000,
                   flag_trend=0, flag_lag_posivity=False,
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  lag_prior=None, ratio_prior=None):
+                  lag_prior=None, ratio_prior=None,
+                  width_limit=None):
 
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
                       flag_con_sys_err, flag_line_sys_err)
@@ -525,6 +542,12 @@ cdef class pmap(basis):
       sstr += "]"
       strcpy(self.parset.str_ratio_prior, sstr.encode("UTF-8"))
 
+    # width limit
+    if width_limit != None:
+      self.parset.width_limit_low_isset = 1
+      self.parset.width_limit_low = width_limit[0]
+      self.parset.width_limit_upper_isset = 1
+      self.parset.width_limit_upper = width_limit[1]
 
     self.print_parset()
 

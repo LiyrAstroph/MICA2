@@ -51,7 +51,7 @@ extern int nline_max;
 extern int type_lag_prior_pr;
 extern double *Smat_lc, *Smat_ll;
 extern double *logz_arr; /* evidence */
-extern double *lag_prior;
+extern double *lag_prior, *width_prior;
 
 /* pmap */
 extern void *model_trans;
@@ -87,6 +87,8 @@ typedef struct
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 
   double lag_limit_low, lag_limit_upper;
+  int width_limit_low_isset, width_limit_upper_isset;
+  double width_limit_low, width_limit_upper;
   
   /* otpions for cdnest */
   int max_num_saves;

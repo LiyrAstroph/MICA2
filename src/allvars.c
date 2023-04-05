@@ -54,7 +54,7 @@ int nline_max;
 int type_lag_prior_pr;
 double *Smat_lc, *Smat_ll;
 double *logz_arr; /* evidence */
-double *lag_prior;
+double *lag_prior, *width_prior;
 
 /* pmap */
 void *model_trans;

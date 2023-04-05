@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 
 #include "allvars.h"
 #include "proto.h"
@@ -91,6 +92,16 @@ int read_parset()
 
     strcpy(pardict[nt].tag, "LagLimitUpp");
     pardict[nt].addr = &parset.lag_limit_upper;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+
+    strcpy(pardict[nt].tag, "WidthLimitLow");
+    pardict[nt].addr = &parset.width_limit_low;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+
+    strcpy(pardict[nt].tag, "WidthLimitUpp");
+    pardict[nt].addr = &parset.width_limit_upper;
     pardict[nt].isset = 0;
     pardict[nt++].id = DOUBLE;
     
@@ -211,6 +222,8 @@ int read_parset()
     parset.lag_limit_low = 0.0;
     parset.lag_limit_upper = -1.0;
     parset.type_lag_prior = 1;
+    parset.width_limit_low = DBL_MAX;
+    parset.width_limit_upper = DBL_MAX;
     parset.flag_trend = 0;
     parset.type_tf = 0;
     parset.flag_lag_posivity = 0;
@@ -272,8 +285,48 @@ int read_parset()
 
     if((parset.model<0) || (parset.model>2))
     {
-      printf("TypeModel should be 0-1.\n");
+      printf("TypeModel should be 0-1.\n 0: general model; 1: pmap.\n");
       exit(0);
+    }
+
+    if(parset.lag_limit_upper <= parset.lag_limit_low)
+    {
+      printf("LagLimitUpp should be larger than LagLimitLow!\n");
+      exit(0);
+    }
+
+    if(parset.width_limit_low < DBL_MAX)
+    {
+      parset.width_limit_low_isset = 1;
+    }
+    if(parset.width_limit_upper < DBL_MAX)
+    {
+      parset.width_limit_upper_isset = 1;
+    }
+
+    if(parset.width_limit_low_isset == 1) /* is set */
+    {
+      if(parset.width_limit_low <= 0.0)
+      {
+        printf("WidthLimitLow soubld be positive!\n");
+        exit(0);
+      }
+    }
+    if(parset.width_limit_upper_isset == 1) /* is set */
+    {
+      if(parset.width_limit_upper <= 0.0)
+      {
+        printf("WidthLimitUpp soubld be positive!\n");
+        exit(0);
+      }
+    }
+    if(parset.width_limit_upper_isset == 1 && parset.width_limit_low_isset == 1)
+    {
+      if(parset.width_limit_upper <= parset.width_limit_low)
+      {
+        printf("WidthLimitUpp should be larger than WidthLimitLow!\n");
+        exit(0);
+      }
     }
 
     /* pmap mode, num_gaussian >= 2 */

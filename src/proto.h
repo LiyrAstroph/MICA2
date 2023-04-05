@@ -105,7 +105,7 @@ void set_covar_Amat_line(const void *model, int k, int *nall, double *tall);
 void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall);
 void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall);
 int check_gauss_center(int which, int *igau);
-inline int check_gauss_positivity(int which);
+inline int check_gauss_positivity(int which){return ((which - num_params_var)%(1+3*num_gaussian)-1)%3;}
 int write_options_line(char *fname);
 
 // error.c

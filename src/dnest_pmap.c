@@ -353,7 +353,7 @@ double perturb_pmap(void *model)
   which_level_update = dnest_get_which_level_update();
   size_levels = dnest_get_size_levels();
   
-  which_level = which_level_update > (size_levels - 10)?(size_levels-10):which_level_update;
+  which_level = which_level_update-5 > (size_levels - 15)?(size_levels-15):which_level_update-5;
   if( which_level > 0)
   {
     limit1 = limits[(which_level-1) * num_params *2 + which *2];

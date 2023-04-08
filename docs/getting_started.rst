@@ -92,6 +92,7 @@ A typical parameter file looks like::
   #
   # lines starting with "#" are regarded as comments and are neglected
   # if want to turn on the line, remove the beginning "#"
+  # note that some options are optinal
   
   #==============================================================
   

@@ -1,7 +1,7 @@
 ***********************************
 A List of References That Used MICA
 ***********************************
-Here is a list of references that used MICA in time lag analysis, retrieved from the NASA ADS (updated on Aug 10, 2022).
+Here is a list of references that used MICA in time lag analysis, retrieved from the NASA ADS (updated on Apr 8, 2023).
 
 - `Chelouche, D. et al. 2018, Nature Astronomy, 3, 251 <https://ui.adsabs.harvard.edu/abs/2019NatAs...3..251C/abstract>`_,
   *Direct evidence of non-disk optical continuum emission around an active black hole*
@@ -24,9 +24,16 @@ Here is a list of references that used MICA in time lag analysis, retrieved from
 - `González-Buitrago, D. H., et al., 2022, MNRAS, 515, 2890 <https://ui.adsabs.harvard.edu/abs/2022MNRAS.515.2890G/abstract>`_,
   *Revisiting the Continuum Reverberation Lags in the AGN PKS 0558-504*
 
-- `Bao, D.-W., et al., 2022, ApJ, in press <https://ui.adsabs.harvard.edu/abs/2022arXiv220700297B/abstract>`_,
+- `Bao, D.-W., et al., 2022, ApJS, 262, 14 <https://ui.adsabs.harvard.edu/abs/2022ApJS..262...14B/abstract>`_,
   *Monitoring AGNs with Hβ Asymmetry. III. Long-term Reverberation Mapping Results of 15 Palomar-Green Quasars*
 
-- `Li, S.-S. et al. 2022, ApJ, in press <https://ui.adsabs.harvard.edu/abs/2022arXiv220802966L/abstract>`_,
+- `Li, S.-S. et al. 2022, ApJ, 936, 75 <https://ui.adsabs.harvard.edu/abs/2022ApJ...936...75L/abstract>`_,
   *Velocity-resolved Reverberation Mapping of Changing-look Active Galactic Nucleus NGC~4151 During Outburst 
   Stage: Evidence for Kinematics Evolution of Broad-line Region*
+
+- `Fian, C. et al. 2023, A&A in press <https://ui.adsabs.harvard.edu/abs/2023arXiv230208402F/abstract>`_,
+  *Continuum reverberation mapping of MCG 08-11-011*
+
+- `Chen, Y.-J. et al. 2023, MNRAS, 520, 1807 <https://ui.adsabs.harvard.edu/abs/2023MNRAS.520.1807C/abstract>`_,
+  *Broad-line region in NGC 4151 monitored by two decades of reverberation mapping campaigns - I. 
+  Evolution of structure and kinematics*

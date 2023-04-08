@@ -45,6 +45,11 @@ Prior Types of Lags
 
   :math:`\Delta T = (T_1 - T_0)/(K-1)`, where :math:`K` is the number of Gaussians.
 
+* **Type 4**
+  
+  The lags ranges are specified in the option "StrLagPrior" with a format of [lag1_1:lag1_2:lag2_1:lag2_2...].
+  In this case, "LagLimitLow" and "LagLimitUpp" are no longer applicable.
+
 For Types 2 and 3, it is better to use a relatively large number of Gaussians.
 
 **Note that for top-hat transfer function, the above types are generally similar 

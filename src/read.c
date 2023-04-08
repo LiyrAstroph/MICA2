@@ -289,10 +289,13 @@ int read_parset()
       exit(0);
     }
 
-    if(parset.lag_limit_upper <= parset.lag_limit_low)
+    if(parset.model == 0)
     {
-      printf("LagLimitUpp should be larger than LagLimitLow!\n");
-      exit(0);
+      if(parset.lag_limit_upper <= parset.lag_limit_low)
+      {
+        printf("LagLimitUpp should be larger than LagLimitLow!\n");
+        exit(0);
+      }
     }
 
     if(parset.width_limit_low < DBL_MAX)

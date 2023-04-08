@@ -79,10 +79,10 @@ extern LikelihoodType *all_above;
 extern unsigned int count_saves, num_saves, num_saves_restart;
 extern unsigned long long int count_mcmc_steps;
 extern LikelihoodType *above;
-extern unsigned int size_above, size_all_above;
+extern unsigned int size_above, size_all_above, size_all_above_max;
 
 extern int dnest_flag_restart, dnest_flag_postprc, dnest_flag_sample_info, dnest_flag_limits;
-extern double dnest_post_temp;
+extern double dnest_post_temp, dnest_compression;
 extern char file_restart[STR_MAX_LENGTH], file_save_restart[STR_MAX_LENGTH];
 
 extern double post_logz;
@@ -137,6 +137,7 @@ extern void dnest_accept_action();
 extern void dnest_kill_action(int i, int i_copy);
 extern void dnest_from_prior(void *model);
 extern double dnest_perturb(void *model);
+extern double dnest_perturb_limit(void *model);
 extern void dnest_print_particle(FILE *fp, const void *model);
 extern void dnest_read_particle(FILE *fp, void *model);
 extern void dnest_check_directory(char *sample_dir);

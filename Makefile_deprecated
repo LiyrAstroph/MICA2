@@ -20,8 +20,8 @@ GSL_INCL    = $(shell pkg-config --cflags gsl)
 GSL_LIBS    = $(shell pkg-config --libs gsl) 
 LAPACK_INCL = -I/usr/include/lapacke
 LAPACK_LIBS = -L/usr/lib64 -llapacke -llapack -lblas
-DNEST_INCL  = -I /home/liyropt/Projects/GIT/CDNest/
-DNEST_LIBS  = -L /home/liyropt/Projects/GIT/CDNest -ldnest
+#DNEST_INCL  = -I /home/liyropt/Projects/GIT/CDNest/
+#DNEST_LIBS  = -L /home/liyropt/Projects/GIT/CDNest -ldnest
 
 MPICHINCL     = $(shell pkg-config --cflags mpich) 
 MPICHLIB    = $(shell pkg-config --libs mpich) 
@@ -35,8 +35,8 @@ MPIINCL  = -I/sharefs/mbh/user/liyanrong/soft/mpich3/include
 LAPACK_INCL = -I/sharefs/mbh/user/liyanrong/soft/lapack/include
 LAPACK_LIBS = -L/sharefs/mbh/user/liyanrong/soft/lapack/lib -llapacke -llapack -lblas -lgfortran
 
-DNEST_INCL  = -I /sharefs/mbh/user/liyanrong/GIT/DNest/
-DNEST_LIBS  = -L /sharefs/mbh/user/liyanrong/GIT/DNest -ldnest
+#DNEST_INCL  = -I /sharefs/mbh/user/liyanrong/GIT/DNest/
+#DNEST_LIBS  = -L /sharefs/mbh/user/liyanrong/GIT/DNest -ldnest
 endif
 
 ifeq ($(SYSTEM), "TianheII")
@@ -47,25 +47,29 @@ MPIINCL  =
 LAPACK_INCL = -I/HOME/ihep_yrli_1/BIGDATA/soft/lapack/include
 LAPACK_LIBS = -L/HOME/ihep_yrli_1/BIGDATA/soft/lapack/lib -llapacke -llapack -lblas -lgfortran
 
-DNEST_INCL  = -I /HOME/ihep_yrli_1/BIGDATA/soft/DNest/
-DNEST_LIBS  = -L /HOME/ihep_yrli_1/BIGDATA/soft/DNest -ldnest
+#DNEST_INCL  = -I /HOME/ihep_yrli_1/BIGDATA/soft/DNest/
+#DNEST_LIBS  = -L /HOME/ihep_yrli_1/BIGDATA/soft/DNest -ldnest
 endif
 #=======================================================
 
 EXEC     = mica2
 SRC      = ./src
+CDN      = ./cdnest
 OBJS     = $(SRC)/main.o $(SRC)/allvars.o $(SRC)/system.o $(SRC)/run.o        \
            $(SRC)/dnest_con.o  $(SRC)/dnest_line.o $(SRC)/read.o              \
            $(SRC)/mc_con.o $(SRC)/init.o $(SRC)/mathfun.o                     \
            $(SRC)/mc_line.o  $(SRC)/error.o  ${SRC}/version.o                 \
-           $(SRC)/line_decomp.o $(SRC)/dnest_pmap.o $(SRC)/mc_pmap.o
+           $(SRC)/line_decomp.o $(SRC)/dnest_pmap.o $(SRC)/mc_pmap.o          \
+	   $(CDN)/dnest.o  $(CDN)/dnestpostprocess.o            \
+	   $(CDN)/dnestvars.o
   
-INCL     = Makefile $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h \
-           $(SRC)/dnest_line.h $(SRC)/version.h $(SRC)/dnest_pmap.h
+INCL     = Makefile $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h      \
+           $(SRC)/dnest_line.h $(SRC)/version.h $(SRC)/dnest_pmap.h          \
+	   $(CDN)/dnest.h $(CDN)/dnestvars.h
 
 OPTIONS  = $(OPTIMIZE)
 CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL)
-LIBS     = $(GSL_LIBS) $(LAPACK_LIBS) $(MPICHLIB) $(DNEST_LIBS) $(FFTW_LIBS)
+LIBS     = $(GSL_LIBS) $(LAPACK_LIBS) $(MPICHLIB) $(FFTW_LIBS)
 
 $(EXEC):$(OBJS)
 	cd $(SRC)

@@ -43,18 +43,23 @@ Edit a Python script named, e.g., example.py, as the following.
   rank = comm.Get_rank()
   
   # load data
-  data = np.loadtxt("./sim_data.txt")
-  con = data[:126, :]
-  line= data[126:, :]
+  if rank == 0:
+    data = np.loadtxt("./sim_data.txt")
+    con = data[:126, :]
+    line= data[126:, :]
+    
+    # make a data dict 
+    data_input = {"set1":[con, line]}
   
-  # make a data dict 
-  data_input = {"set1":[con, line]}
-
-  # if multiple datasets, e.g., 
-  #data_input = {"set1":[con1, line1], "set2":[con2, line2]}
+    # if multiple datasets, e.g., 
+    #data_input = {"set1":[con1, line1], "set2":[con2, line2]}
+    
+    # if a dataset has multiple lines, e.g.,
+    #data_input = {"set1":[con, line1, line2]}
+  else:
+    data_input = None 
   
-  # if a dataset has multiple lines, e.g.,
-  #data_input = {"set1":[con, line1, line2]}
+  data_input = comm.bcast(data_input, root=0)
   
   model = pymica.gmodel()
   model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=200)
@@ -137,13 +142,18 @@ does not contain those contaminations and purely reflects continuum variations.
   rank = comm.Get_rank()
   
   # load data
-  data = np.loadtxt("./sim_data.txt")
-  band1 = data[:126, :]
-  band2 = data[126:, :]
+  if rank == 0:
+    data = np.loadtxt("./sim_data.txt")
+    band1 = data[:126, :]
+    band2 = data[126:, :]
+    
+    # make a data dict 
+    data_input = {"set1":[band1, band2]}
+  else:
+    data_input = None 
   
-  # make a data dict 
-  data_input = {"set1":[band1, band2]}
-  
+  data_input = comm.bcast(data_input, root=0)
+    
   model = pymica.pmap()
   model.setup(data=data_input, type_tf='gaussian', max_num_saves=2000, lag_prior=[[-5, 5],[0, 50]], ratio_prior=[0.01, 0.5])
   # if using tophats, set type_tf='tophat'

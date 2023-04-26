@@ -15,16 +15,23 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
 # load data
-data = np.loadtxt("./sim_data.txt")
-con = data[:126, :]
-line= data[126:, :]
+if rank == 0:
+  data = np.loadtxt("./sim_data.txt")
+  con = data[:126, :]
+  line= data[126:, :]
+  
+  # make a data dict 
+  data_input = {"set1":[con, line]}
 
-# make a data dict 
-data_input = {"set1":[con, line]}
-# if multiple datasets, e.g., 
-#data_input = {"set1":[con1, line1], "set2":[con2, line2]}
-# if a dataset has multiple lines, e.g.,
-#data_input = {"set1":[con, line1, line2]}
+  # if multiple datasets, e.g., 
+  #data_input = {"set1":[con1, line1], "set2":[con2, line2]}
+
+  # if a dataset has multiple lines, e.g.,
+  #data_input = {"set1":[con, line1, line2]}
+else:
+  data_input = None 
+
+data_input = comm.bcast(data_input, root=0)
 
 #create a model
 #there are two ways

@@ -46,6 +46,15 @@ After this step, compile the package with the command
 
 This creates an executable file ``mica2``.
 
+If your system does not have lastest CMake, you can use Makefile provided in the package to do compiling. 
+First edit the configurations in ``Makefile_old`` to be consistent with your system's setting, and then execute 
+the command 
+
+.. code:: bash
+
+   make -f Makefile_old
+
+
 Python Callable Version: ``pymica``
 -------------------------------
 

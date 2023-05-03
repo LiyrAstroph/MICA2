@@ -55,20 +55,21 @@ endif
 EXEC     = mica2
 SRC      = ./src
 CDN      = ./cdnest
+CDN_INCL = -I$(CDN)
 OBJS     = $(SRC)/main.o $(SRC)/allvars.o $(SRC)/system.o $(SRC)/run.o        \
            $(SRC)/dnest_con.o  $(SRC)/dnest_line.o $(SRC)/read.o              \
            $(SRC)/mc_con.o $(SRC)/init.o $(SRC)/mathfun.o                     \
            $(SRC)/mc_line.o  $(SRC)/error.o  ${SRC}/version.o                 \
            $(SRC)/line_decomp.o $(SRC)/dnest_pmap.o $(SRC)/mc_pmap.o          \
-	   $(CDN)/dnest.o  $(CDN)/dnestpostprocess.o            \
-	   $(CDN)/dnestvars.o
+	       $(CDN)/dnest.o  $(CDN)/dnestpostprocess.o                          \
+	       $(CDN)/dnestvars.o
   
 INCL     = Makefile $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h      \
            $(SRC)/dnest_line.h $(SRC)/version.h $(SRC)/dnest_pmap.h          \
-	   $(CDN)/dnest.h $(CDN)/dnestvars.h
+	       $(CDN)/dnest.h $(CDN)/dnestvars.h
 
 OPTIONS  = $(OPTIMIZE)
-CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL)
+CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL) $(CDN_INCL)
 LIBS     = $(GSL_LIBS) $(LAPACK_LIBS) $(MPICHLIB) $(FFTW_LIBS)
 
 $(EXEC):$(OBJS)

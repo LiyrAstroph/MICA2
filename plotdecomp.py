@@ -16,7 +16,7 @@ import argparse
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
-def plot_line_decomp(fdir, fname, ngau, typetf):
+def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
 
   data = np.loadtxt(fdir+fname)
   pall = np.loadtxt(fdir+"data/pall.txt_%d"%ngau)
@@ -52,27 +52,24 @@ def plot_line_decomp(fdir, fname, ngau, typetf):
     comps.append(np.loadtxt(fdir+"data/pline.txt_%d_comp%d"%(ngau, i)))
   
   # load posterior samples
-  sample = np.loadtxt(fdir+"data/posterior_sample1d.txt_2")
+  sample = np.loadtxt(fdir+"data/posterior_sample1d.txt_%d"%ngau)
   
   # determine the maximum and minimum delays
   tau_min =  1.0e10
   tau_max = -1.0e10
-  idx = nd*3
+  idx = nd*3  # variability parameters come first, each dataset has 3 parameters
   for i in range(nd):
-    tau_min = min(tau_min, np.min(sample[idx+1::3]))
-    tau_max = max(tau_max, np.max(sample[idx+1::3]))
+    didx = (len(nls_data[i])-1)*(ngau*3+1) # each line has (ngau*3+1) parameters
+    tau_min = min(tau_min, np.min(sample[:, idx+1+1:idx+didx:3]-np.exp(sample[:, idx+1+2:idx+didx:3])))
+    tau_max = max(tau_max, np.max(sample[:, idx+1+1:idx+didx:3]+np.exp(sample[:, idx+1+2:idx+didx:3])))
 
-    idx += len(nls[i])*(ngau*3+1) # each line has (ngau*3+1) parameters
+    idx += didx
   
-  dtau = tau_max - tau_min 
-  tau_min -= 0.2*dtau 
-  tau_max += 0.2*dtau
-  
-  tau = np.linspace(tau_min, tau_max, 500)
-  tran = np.zeros((sample.shape[0], 500))
+  tau = np.linspace(tau_min, tau_max, 1000)
+  tran = np.zeros((sample.shape[0], 1000))
   
   pdf = PdfPages(fdir+"data/fig_line_decomp_%d.pdf"%ngau)
-
+  
   for m in range(nd):
     nl_data = nls_data[m]
     nl = nls[m]
@@ -81,6 +78,8 @@ def plot_line_decomp(fdir, fname, ngau, typetf):
     
     idx_hb_data = nl_data[0]
     idx_hb = nl[0]
+
+    tran[:, :] = 0.0
     for j in range(1, len(nl_data)):
 
       hb_data = data[idx_hb_data:idx_hb_data+nl_data[j], :]
@@ -88,39 +87,70 @@ def plot_line_decomp(fdir, fname, ngau, typetf):
       if typetf == 0:
         for i in range(sample.shape[0]):
           # loop over gaussians
-          for k in range(ngau):
-            amp = np.exp(sample[i, 3 + (j-1)*(ngau*3+1) + 1+k*3+0])
-            cen =        sample[i, 3 + (j-1)*(ngau*3+1) + 1+k*3+1]
-            sig = np.exp(sample[i, 3 + (j-1)*(ngau*3+1) + 1+k*3+2])
+          if typemodel == 0:  # general model
+            for k in range(ngau):
+              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+
+          elif typemodel == 1:  # pmap model
+            k = 0
+            amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
             tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
       else:
         for i in range(sample.shape[0]):
-          # loop over gaussians
-          for k in range(ngau):
-            amp = np.exp(sample[i, 3 + (j-1)*(ngau*3+1) + 1+k*3+0])
-            cen =        sample[i, 3 + (j-1)*(ngau*3+1) + 1+k*3+1]
-            sig = np.exp(sample[i, 3 + (j-1)*(ngau*3+1) + 1+k*3+2])
+          # loop over tophats
+          if typemodel == 0:   # general model
+            for k in range(ngau):
+              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+
+          elif typemodel == 1: # pmap model
+            k = 0
+            amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
             tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
-            
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+     
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
       tran2 = np.percentile(tran, 100.0-(100.0-68.3)/2.0, axis=0)
 
-      fig = plt.figure(figsize=(8, 6))
-      ax = fig.add_axes((0.1, 0.8, 0.8, 0.2))
-      ax.plot(tau, tran_best*10, color='k')
-      ax.fill_between(tau, y1=tran1*10, y2=tran2*10, color='darkgrey')
+      fig = plt.figure(figsize=(12, 9))
+      ax = fig.add_axes((0.1, 0.8, 0.8, 0.19))
+      ax.plot(tau, tran_best, color='k')
+      ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
       ax.set_xlabel("Time Lag")
       ax.set_ylabel("Transfer Function")
+      ylim = ax.get_ylim()
+      ax.set_ylim(0.0, np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
 
-      ax = fig.add_axes((0.1, 0.51, 0.8, 0.2))
+      ax = fig.add_axes((0.1, 0.51, 0.8, 0.19))
       ax.errorbar(con_data[:, 0], con_data[:, 1], yerr=con_data[:, 2], ls='none', marker='o', markersize=3, color='k', markerfacecolor='C0', markeredgewidth=0.4, elinewidth=0.8)
       ax.plot(pall[:nl[0], 0], pall[:nl[0], 1], lw=1)
       ax.fill_between(pall[:nl[0],0], y1=pall[:nl[0], 1]-pall[:nl[0], 2], y2=pall[:nl[0], 1]+pall[:nl[0], 2], color='darkgrey', zorder=0)
       ax.set_ylabel(r"$F_\lambda$(cont)")
       #ax.set_xlim((-10.0, 260.0))
       ax.set_xticklabels([])
-      ax.yaxis.set_major_locator(MultipleLocator(0.2))
       
       line_error = 0
       ax = fig.add_axes((0.1, 0.1, 0.8, 0.40))
@@ -205,10 +235,15 @@ if __name__ == "__main__":
   except:
     typetf = 0
   
+  try:
+    typemodel = int(param["TypeModel"])
+  except:
+    typemodel = 0
+  
   if ngau_upp < 2:
     print("The number of Gaussian < 2, no need to show decomposition!")
     sys.exit()
 
   for ngau in range(2, ngau_upp+1):
-    plot_line_decomp(fdir, fname, ngau, typetf)
+    plot_line_decomp(fdir, fname, ngau, typetf, typemodel)
 

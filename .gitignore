@@ -34,6 +34,11 @@ Makefile
 tests/python/*
 !tests/python/example.py
 !tests/python/sim_data.txt
+!tests/pmap
+tests/pmap/*
+!tests/pmap/example.py
+!tests/pmap/mcg08_g.txt
+!tests/pmap/mcg08_r.txt
 cdnest/*
 !cdnest/*.[ch]
 !python/pymica/__init__.py

@@ -182,6 +182,16 @@ cdef class basis:
                       self.parset.flag_trend, self.parset.type_tf, self.parset.model, None)
     return
   
+  def plot_decomp(self):
+    """
+    plot line decomposition
+    """
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+      ut.plot_line_decomp(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
+                          self.parset.type_tf, self.parset.model)
+    
+    return
+  
   def post_process(self, temperature=1.0):
 
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):

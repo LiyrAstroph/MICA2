@@ -93,9 +93,18 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     for j in range(1, len(ns)):
       sample_lag[:] = 0.0
       weight_lag[:] = 0.0
-      for k in range(ngau):
+      if typemodel == 0:  # general model
+        for k in range(ngau):
+          sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+      elif typemodel == 1: # pmap model
+        k = 0
         sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
         weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        for k in range(1, ngau):
+          sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                                   sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
   
       lag, err1, err2 = np.quantile(sample_lag/weight_lag, q=(0.5, (1.0-0.683)/2.0, 1.0-(1.0-0.683)/2.0))
       err1 = lag-err1
@@ -255,23 +264,54 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       
       tau = np.linspace(tau1_tf, tau2_tf, ntau)
       tran[:, :] = 0.0
-      if typetf == 0:
+      if typetf == 0: # gaussian
         for i in range(sample.shape[0]):
           # loop over gaussians
-          for k in range(ngau):
+          if typemodel == 0:  # general model
+            for k in range(ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+
+          elif typemodel == 1: #pmap model 
+            k = 0
             amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
             cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
             sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
             tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
-      else:
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+
+      else:  # tophats
         for i in range(sample.shape[0]):
-          # loop over gaussians
-          for k in range(ngau):
+          # loop over tophats
+          if typemodel == 0: # general model
+            for k in range(ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              
+              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+
+          elif typemodel == 1: #pmap model 
+            k = 0
             amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
             cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
             sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-            
             tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
       
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
@@ -433,9 +473,18 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     for j in range(1, len(ns)):
       sample_lag[:] = 0.0
       weight_lag[:] = 0.0
-      for k in range(ngau):
+      if typemodel == 0:  # general model
+        for k in range(ngau):
+          sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+      elif typemodel == 1: # pmap model
+        k = 0
         sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
         weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        for k in range(1, ngau):
+          sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                                   sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
   
       lag, err1, err2 = np.quantile(sample_lag/weight_lag, q=(0.5, (1.0-0.683)/2.0, 1.0-(1.0-0.683)/2.0))
       err1 = lag-err1
@@ -591,20 +640,50 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       if typetf == 0:
         for i in range(sample.shape[0]):
           # loop over gaussians
-          for k in range(ngau):
+          if typemodel == 0:  # general model
+            for k in range(ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+
+          elif typemodel == 1: #pmap model 
+            k = 0
             amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
             cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
             sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
             tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
       else:
         for i in range(sample.shape[0]):
-          # loop over gaussians
-          for k in range(ngau):
+          # loop over tophats
+          if typemodel == 0: # general model
+            for k in range(ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              
+              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+
+          elif typemodel == 1: #pmap model 
+            k = 0
             amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
             cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
             sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-            
             tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
       
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
@@ -721,6 +800,9 @@ def plot_results_all(args, param):
       tau_upp = float(param["LagLimitUpp"])
     except:
       raise IOError("LagLimitUpp is not set!")
+  else:
+    tau_low = 0.0
+    tau_upp = 0.0
   
   try:
     fname = param["DataFile"]

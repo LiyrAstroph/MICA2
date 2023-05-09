@@ -3,6 +3,7 @@
 src/*
 !src/*.[ch]
 !docs/*.rst
+!docs/.readthedocs.yaml
 data/*
 mica2
 !postprocess.py

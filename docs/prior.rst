@@ -9,6 +9,8 @@ Prior Types of Lags
   The lags overall have a prior range of :math:`(T_0, T_1)`, which are specified by **LagLimitLow** and **LagLimitUpp** options. 
   They obey the restrict that :math:`T_0 < \tau_0 < \tau_1 < \tau_2 <... < T_1`.
 
+  |
+
 * **Type 1**
 
   The lags have prior ranges as:
@@ -20,6 +22,8 @@ Prior Types of Lags
   ...
   
   :math:`W = (T_1 - T_0)/K`, where :math:`K` is the number of Gaussians.
+
+  |
 
 * **Type 2**
   
@@ -33,6 +37,8 @@ Prior Types of Lags
 
   :math:`\Delta T = (T_1 - T_0)/(K-1)`, where :math:`K` is the number of Gaussians.
 
+  |
+
 * **Type 3**
 
   The lags are fixed at specific values and Gaussian sigma ranges at :math:`(\Delta T/2, \Delta T)`.
@@ -45,14 +51,17 @@ Prior Types of Lags
 
   :math:`\Delta T = (T_1 - T_0)/(K-1)`, where :math:`K` is the number of Gaussians.
 
+  |
+
 * **Type 4**
   
   The lags ranges are specified in the option "StrLagPrior" with a format of [lag1_1:lag1_2:lag2_1:lag2_2...].
   In this case, "LagLimitLow" and "LagLimitUpp" are no longer applicable.
 
+  |
+
 For Types 2 and 3, it is better to use a relatively large number of Gaussians.
 
 **Note that for top-hat transfer function, the above types are generally similar 
 (amplitude, center, and sigma of Gaussians correspond to amplitude, center, and width of top-hats, 
-respectively), except for type 3, in which 
-the top-hat widths are fixed to be** :math:`\Delta T/2`.
+respectively), except for type 3, in which the top-hat widths are fixed to be** :math:`\Delta T/2`.

@@ -50,7 +50,7 @@ model.setup(data=data_input, type_tf='gaussian', max_num_saves=2000, lag_prior=[
 # if using top-hats, set type_tf='tophat'
 
 #run mica
-#model.run()
+model.run()
 
 #posterior run, only re-generate posterior samples, do not run MCMC
 #model.post_run()

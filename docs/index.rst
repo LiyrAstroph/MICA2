@@ -24,6 +24,7 @@ Documentation
    cdnest.rst
    resume.rst
    delay.rst
+   tf.rst
    detrend.rst
    decomp.rst
    prm.rst

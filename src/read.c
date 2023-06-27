@@ -450,8 +450,17 @@ int read_data()
         dataset[i].nlset++;
         pstr = strchr(pstr, ':');
       }while(pstr!=NULL);
+
+      if(dataset[i].con.n >= 1000)
+      {
+        printf("The number of points in %d-th dataset is %d, a bit large!\n", i, dataset[i].con.n);
+        printf("Better to rebin the light curve to reduce the number of points.\n"
+               "This will improve the computational speed [~O(N^3)]!\n");
+        exit(-1);
+      }
     }
   }
+  MPI_Barrier(MPI_COMM_WORLD);
 
   /* allocate memory. */
   for(i=0; i<nset; i++)

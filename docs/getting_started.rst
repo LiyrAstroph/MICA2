@@ -10,7 +10,10 @@ Getting Started
 Third-party package dependence
 ===============================
 
-  * **MPICH** --- an MPI implementation library, available at http://www-unix.mcs.anl.gov/mpi/mpich
+  * **MPICH** --- an MPI implementation library, available at http://www-unix.mcs.anl.gov/mpi/mpich. 
+    
+    Note that in some cases, the package **hwloc** is not automatically installed when installing mpich. One needs to install it 
+    and its development package **hwloc-devel** to use mpi.
 
   * **GSL** --- the GNU Scientific Library, downloaded at http://www.gnu.org/software/gs
 

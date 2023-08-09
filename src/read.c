@@ -483,6 +483,7 @@ int read_data()
 
     for(i=0; i<nset; i++)
     {
+      printf("set %d, # of points\n", i);
       fgets(buf, 256, fp);
       sscanf(buf, "%s %s\n", str, str2);
       
@@ -655,13 +656,17 @@ int read_data()
     int n;
     for(i=0; i<nset; i++)
     {
+      printf("set %d, starting and ending points\n", i);
       printf("%f %f %f\n", dataset[i].con.t[0], dataset[i].con.f[0], dataset[i].con.fe[0]);
       printf("%f %f %f\n", dataset[i].con.t[dataset[i].con.n-1], dataset[i].con.f[dataset[i].con.n-1], dataset[i].con.fe[dataset[i].con.n-1]);
-
-      n = dataset[i].line[0].n;
-      printf("%f %f %f\n", dataset[i].line[0].t[0], dataset[i].line[0].f[0], dataset[i].line[0].fe[0]);
-      printf("%f %f %f\n", dataset[i].line[0].t[n-1], dataset[i].line[0].f[n-1], dataset[i].line[0].fe[n-1]);
       printf("\n");
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        n = dataset[i].line[j].n;
+        printf("%f %f %f\n", dataset[i].line[j].t[0], dataset[i].line[j].f[0], dataset[i].line[j].fe[0]);
+        printf("%f %f %f\n", dataset[i].line[j].t[n-1], dataset[i].line[j].f[n-1], dataset[i].line[j].fe[n-1]);
+        printf("\n");
+      }
     }
   }
 

@@ -81,46 +81,46 @@ double dnest(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
         case 'r':
           dnest_flag_restart = 1;
           strcpy(file_restart, optarg);
-          printf("# CDnest restarts.\n");
+          printf("# CDNest restarts.\n");
           break;
         case 's':
           strcpy(file_save_restart, optarg);
-          printf("# CDnest sets restart file %s.\n", file_save_restart);
+          printf("# CDNest sets restart file %s.\n", file_save_restart);
           break;
         case 'p':
           dnest_flag_postprc = 1;
           dnest_post_temp = 1.0;
-          printf("# CDnest does postprocess.\n");
+          printf("# CDNest does postprocess.\n");
           break;
         case 't':
           dnest_post_temp = atof(optarg);
-          printf("# CDnest sets a temperature %f.\n", dnest_post_temp);
+          printf("# CDNest sets a temperature %f.\n", dnest_post_temp);
           if(dnest_post_temp == 0.0)
           {
-            printf("# CDnest incorrect option -t %s.\n", optarg);
+            printf("# CDNest incorrect option -t %s.\n", optarg);
             exit(0);
           }
           if(dnest_post_temp < 1.0)
           {
-            printf("# CDnest temperature should >= 1.0\n");
+            printf("# CDNest temperature should >= 1.0\n");
             exit(0);
           }
           break;
         case 'c':
           dnest_flag_sample_info = 1;
-          printf("# CDnest recalculates sample information.\n");
+          printf("# CDNest recalculates sample information.\n");
           break;
         case 'l':
           dnest_flag_limits = 1;
-          printf("# CDnest level-dependent sampling.\n");
+          printf("# CDNest level-dependent sampling.\n");
           break;
         case 'x':
           strcpy(dnest_sample_postfix, optarg);
-          printf("# CDnest sets sample postfix %s.\n", dnest_sample_postfix);
+          printf("# CDNest sets sample postfix %s.\n", dnest_sample_postfix);
           break;
         case 'g':
           strcpy(dnest_sample_tag, optarg);
-          printf("# CDnest sets sample tag %s.\n", dnest_sample_tag);
+          printf("# CDNest sets sample tag %s.\n", dnest_sample_tag);
           break;
         case 'm':
           dnest_compression = atof(optarg);
@@ -129,10 +129,10 @@ double dnest(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
             printf("Too large compression, better to <exp(1.0).\n");
             exit(0);
           }
-          printf("# CDnest sets compression %f.\n", dnest_compression);
+          printf("# CDNest sets compression %f.\n", dnest_compression);
           break;
         case '?':
-          printf("# CDnest incorrect option -%c %s.\n", optopt, optarg);
+          printf("# CDNest incorrect option -%c %s.\n", optopt, optarg);
           exit(0);
           break;
         default:

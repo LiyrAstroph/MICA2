@@ -80,7 +80,8 @@ StrLagPrior             [0:10:10:50]       # valid if TypeLagPrior==4
                                            # format: [lag1_1:lag1_2:lag2_1:lag2_2...]
                                            # "LagLimitLow" and "LagLimitUpp" no longer applicable
 
-StrRatioPrior           [1.0e-3:1.0]       # valid if TypeModel == pmap
+StrRatioPrior           [1.0e-3:1.0]       # the response ratio of 2nd to 1st component
+                                           # valid if TypeModel == 1 (pmap)
                                            # format: [ratio_1:ratio_2]
 
 #==================================================================

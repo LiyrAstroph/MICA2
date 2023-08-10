@@ -159,7 +159,7 @@ cdef class basis:
         fp.write("{:30}{}\n".format("StrRatioPrior", self.parset.str_ratio_prior.decode("UTF-8")))
       fp.write("#==============================================================\n")
       fp.write("# options for cdnest sampling\n")
-      fp.write("# use the default values or do not turn thme on IF NOT familiar with them\n\n")
+      fp.write("# use the default values or do not turn them on IF NOT familiar with them\n\n")
 
       fp.write("{:30}{:5}{}\n".format("# PTol", self.parset.max_ptol,"# likelihood tolerance in loge"))
       fp.write("{:30}{:5}{}\n".format("# NumberParticles", self.parset.num_particles, "# number of particles"))
@@ -296,7 +296,15 @@ cdef class basis:
   def setup(self, data_file=None, data=None,
                   type_tf='gaussian', max_num_saves=2000,
                   flag_trend=0, flag_lag_posivity=False,
-                  flag_con_sys_err=False, flag_line_sys_err=False):
+                  flag_con_sys_err=False, flag_line_sys_err=False,
+                  # follows cdnest parameters
+                  num_particles=2, thread_steps_factor=2, 
+                  new_level_interval_factor=2, save_interval_factor=2,
+                  lam=10, beta=100, ptol=0.1, 
+                  max_num_levels=0):
+    """
+    setup parameters
+    """
     # data file
     if data_file != None:
       if isinstance(data_file, str):
@@ -352,6 +360,15 @@ cdef class basis:
       self.parset.flag_line_sys_err = 1
     else:
       raise ValueError("flag_lag_line_sys_err is unrecognized!")
+    
+    self.parset.num_particles = num_particles
+    self.parset.thread_steps_factor = thread_steps_factor
+    self.parset.new_level_interval_factor = new_level_interval_factor
+    self.parset.save_interval_factor = save_interval_factor
+    self.parset.max_num_levels = max_num_levels
+    self.parset.lam = lam
+    self.parset.beta = beta
+    self.parset.max_ptol = ptol
 
     return
 
@@ -395,13 +412,27 @@ cdef class gmodel(basis):
                   lag_limit=[0, 100], number_component=[1, 1],
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  type_lag_prior=0, lag_prior=None):     
+                  type_lag_prior=0, lag_prior=None,
+                  # follows cdnest parameters
+                  num_particles=2, thread_steps_factor=2, 
+                  new_level_interval_factor=2, save_interval_factor=2,
+                  lam=10, beta=100, ptol=0.1, 
+                  max_num_levels=0):     
     """
     setup parameters
     """
     
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
-                      flag_con_sys_err, flag_line_sys_err)
+                      flag_con_sys_err, flag_line_sys_err,
+                      # follows cdnest parameters
+                      num_particles = num_particles,
+                      thread_steps_factor = thread_steps_factor, 
+                      new_level_interval_factor = new_level_interval_factor,
+                      save_interval_factor = save_interval_factor,
+                      lam = lam,
+                      beta = beta, 
+                      ptol = ptol, 
+                      max_num_levels = max_num_levels)
 
     # uniform variability parameters of mulitple datasets
     if flag_uniform_var_params == False:
@@ -514,10 +545,24 @@ cdef class pmap(basis):
                   flag_trend=0, flag_lag_posivity=False,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   lag_prior=None, ratio_prior=None,
-                  width_limit=None):
+                  width_limit=None,
+                  # follows cdnest parameters
+                  num_particles=2, thread_steps_factor=2, 
+                  new_level_interval_factor=2, save_interval_factor=2,
+                  lam=10, beta=100, ptol=0.1, 
+                  max_num_levels=0):
 
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
-                      flag_con_sys_err, flag_line_sys_err)
+                      flag_con_sys_err, flag_line_sys_err,
+                      # follows cdnest parameters
+                      num_particles = num_particles,
+                      thread_steps_factor = thread_steps_factor, 
+                      new_level_interval_factor = new_level_interval_factor,
+                      save_interval_factor = save_interval_factor,
+                      lam = lam,
+                      beta = beta, 
+                      ptol = ptol, 
+                      max_num_levels = max_num_levels)
     
     self.parset.num_gaussian_low = 2
     self.parset.num_gaussian_upper = 2 

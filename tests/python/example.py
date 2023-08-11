@@ -54,9 +54,13 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #            flag_uniform_var_params=False, flag_uniform_tranfuns=False,
 #            flag_trend=0, flag_lag_posivity=False,
 #            lag_limit=[0, 100], number_component=[1, 1],
+#            width_limit=[0.1, 100],
 #            flag_con_sys_err=False, flag_line_sys_err=False,
-#            type_lag_prior=0, lag_prior=[[0, 50]])
-
+#            type_lag_prior=0, lag_prior=[[0, 50]],
+#            num_particles=2, thread_steps_factor=2, 
+#            new_level_interval_factor=2, save_interval_factor=2,
+#            lam=10, beta=100, ptol=0.1, 
+#            max_num_levels=0)
 
 #run mica
 model.run()

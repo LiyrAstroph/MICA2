@@ -171,7 +171,7 @@ A typical parameter file looks like::
                                              # format: [ratio_1:ratio_2]
   #==================================================================
   # options for cdnest sampling
-  # use the default values or do not turn thme on IF NOT familiar with them
+  # use the default values or do not turn them on IF NOT familiar with them
   
   # PTol                     0.1             # likelihood tolerance in loge
   # NumberParticles          1               # number of particles

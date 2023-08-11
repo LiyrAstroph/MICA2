@@ -86,7 +86,7 @@ StrRatioPrior           [1.0e-3:1.0]       # the response ratio of 2nd to 1st co
 
 #==================================================================
 # options for cdnest sampling
-# use the default values or do not turn thme on IF NOT familiar with them
+# use the default values or do not turn them on IF NOT familiar with them
 
 # PTol                     0.1             # likelihood tolerance in loge
 # NumberParticles          1               # number of particles

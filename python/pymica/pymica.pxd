@@ -53,6 +53,7 @@ cdef extern from "proto.h":
   void mc_con()
   void mc_line()
   void mc_pmap()
+  void mc_dmap()
   void output_decompose_line()
   void begin_run()
   void end_run()

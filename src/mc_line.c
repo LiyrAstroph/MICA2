@@ -145,7 +145,7 @@ void output_reconstrction()
     double tspan;
     
     int num_ps, size_of_modeltype;
-    void *post_model;
+    void *post_model, *post_model_trans; 
     char posterior_sample_file[MICA_MAX_STR_LENGTH];
 
     /* time span of reconstruction */
@@ -228,6 +228,16 @@ void output_reconstrction()
     post_model = malloc(size_of_modeltype);
     yq = malloc(nq*(1+nlset_max)*sizeof(double));
 
+    /* in pmap, response ratio is used, need to transform into normal values as in gmodel */
+    if(parset.model == pmap)
+    {
+      post_model_trans = malloc(size_of_modeltype);
+    }
+    else
+    {
+      post_model_trans = post_model;
+    }
+
     for(i=0; i<nset; i++)
     {
       tbeg = dataset[i].con.t[0];
@@ -301,10 +311,15 @@ void output_reconstrction()
       }
       fscanf(fp_sample, "\n");
       
+      if(parset.model == pmap)
+      {
+        transform_response_ratio(post_model, post_model_trans);
+      }
+
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        recostruct_line_from_varmodel(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -434,6 +449,10 @@ void output_reconstrction()
     free(nall);
     free(ntall);
     free(post_model);
+    if(parset.model == pmap)
+    {
+      free(post_model_trans);
+    }
     free(yq);
     free(yq_best);
     free(yq_std);
@@ -459,7 +478,7 @@ void output_reconstrction2()
     double tspan;
     
     int num_ps, size_of_modeltype;
-    void *post_model;
+    void *post_model, *post_model_trans;
     char posterior_sample_file[MICA_MAX_STR_LENGTH];
 
     size_of_modeltype = num_params * sizeof(double);
@@ -523,6 +542,16 @@ void output_reconstrction2()
     
     post_model = malloc(size_of_modeltype);
     yq = malloc(nq*(1+nlset_max)*sizeof(double));
+    
+    /* in pmap, response ratio is used, need to transform into normal values as in gmodel */
+    if(parset.model == pmap)
+    {
+      post_model_trans = malloc(size_of_modeltype);
+    }
+    else
+    {
+      post_model_trans = post_model;
+    }
 
     for(i=0; i<nset; i++)
     {
@@ -594,6 +623,11 @@ void output_reconstrction2()
       }
       fscanf(fp_sample, "\n");
       
+      if(parset.model == pmap)
+      {
+        transform_response_ratio(post_model, post_model_trans);
+      }
+
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
@@ -727,6 +761,10 @@ void output_reconstrction2()
     free(nall);
     free(ntall);
     free(post_model);
+    if(parset.model == pmap)
+    {
+      free(post_model_trans);
+    }
     free(yq);
     free(yq_best);
     free(yq_std);

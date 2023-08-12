@@ -13,32 +13,32 @@
 #include "allvars.h"
 #include "dnest.h"
 
-#include "dnest_pmap.h"
+#include "dnest_dmap.h"
 
 #include "proto.h"
 
 /* function set for DNest */
-DNestFptrSet *fptrset_pmap;
+DNestFptrSet *fptrset_dmap;
 
-double dnest_pmap(int argc, char **argv)
+double dnest_dmap(int argc, char **argv)
 {
-  int i, j, k, ic;
+  int i, j, k, ic, idx;
   double logz, dlag;
 
-  fptrset_pmap = dnest_malloc_fptrset();
+  fptrset_dmap = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
-  fptrset_pmap->from_prior = from_prior_pmap;
-  fptrset_pmap->perturb = perturb_pmap;
-  fptrset_pmap->print_particle = print_particle_pmap;
-  fptrset_pmap->restart_action = restart_action_pmap;
+  fptrset_dmap->from_prior = from_prior_dmap;
+  fptrset_dmap->perturb = perturb_dmap;
+  fptrset_dmap->print_particle = print_particle_dmap;
+  fptrset_dmap->restart_action = restart_action_dmap;
 
-  fptrset_pmap->log_likelihoods_cal = log_likelihoods_cal_pmap;
-  fptrset_pmap->log_likelihoods_cal_initial = log_likelihoods_cal_initial_pmap;
-  fptrset_pmap->log_likelihoods_cal_restart = log_likelihoods_cal_restart_pmap;
+  fptrset_dmap->log_likelihoods_cal = log_likelihoods_cal_dmap;
+  fptrset_dmap->log_likelihoods_cal_initial = log_likelihoods_cal_initial_dmap;
+  fptrset_dmap->log_likelihoods_cal_restart = log_likelihoods_cal_restart_dmap;
   
-  fptrset_pmap->accept_action = accept_action_pmap;
-  fptrset_pmap->kill_action = kill_action_pmap;
-  fptrset_pmap->read_particle = read_particle_pmap;
+  fptrset_dmap->accept_action = accept_action_dmap;
+  fptrset_dmap->kill_action = kill_action_dmap;
+  fptrset_dmap->read_particle = read_particle_dmap;
 
   /* number of parameters for line */
   if(parset.flag_uniform_tranfuns == 1)
@@ -63,9 +63,7 @@ double dnest_pmap(int argc, char **argv)
   par_fix = (int *) malloc(num_params * sizeof(int));
   par_fix_val = (double *) malloc(num_params * sizeof(double));
   
-  model_trans = (void *)malloc(num_params * sizeof(double));
-
-  set_par_range_pmap();
+  set_par_range_dmap();
   set_idx_line_pm();
 
   /* setup fixed parameters */
@@ -75,14 +73,26 @@ double dnest_pmap(int argc, char **argv)
     par_fix_val[i] = -DBL_MAX;
   }
 
-  /* fix systematic error of continuum */
-  if(parset.flag_con_sys_err == 0)
+  /* fix drw sigma to one */
+  for(i=1; i<num_params_var; i+=3)
   {
-    for(i=0; i<num_params_var; i+=3)
-    {
-      par_fix[i] = 1;
-      par_fix_val[i] = log(1.0);
-    }
+    par_fix[i] = 1;
+    par_fix_val[i] = log(0.1);
+  }
+
+  /* fix the first line lag of each dataset to zero */
+  for(i=0; i<nset; i++)
+  {
+    idx = idx_line_pm[i][0];
+    par_fix[idx+2] = 1;
+    par_fix_val[idx+2] = 0.0;
+  }
+
+  /* always fix systematic error of continuum */
+  for(i=0; i<num_params_var; i+=3)
+  {
+    par_fix[i] = 1;
+    par_fix_val[i] = log(1.0);
   }
 
   /* fix systematic error of line */
@@ -95,12 +105,12 @@ double dnest_pmap(int argc, char **argv)
     }
   }
   
-  print_para_names_pmap();
+  print_para_names_dmap();
 
-  logz = dnest(argc, argv, fptrset_pmap, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
+  logz = dnest(argc, argv, fptrset_dmap, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
 
   //free memory
-  dnest_free_fptrset(fptrset_pmap);
+  dnest_free_fptrset(fptrset_dmap);
   for(i=0; i<num_params; i++)
   {
     free(par_range_model[i]);
@@ -110,12 +120,10 @@ double dnest_pmap(int argc, char **argv)
   free(par_fix);
   free(par_fix_val);
 
-  free(model_trans);
-
   return logz;
 }
 
-void set_par_range_pmap()
+void set_par_range_dmap()
 {
   int i, j, k;
 
@@ -124,32 +132,21 @@ void set_par_range_pmap()
   for(j = 0; j<num_params_var; j+=3)
   {
     /* systematic error of continuum */
-    par_range_model[i][0] = var_param[j] - 5.0 * var_param_std[j];
-    par_range_model[i][1] = var_param[j] + 5.0 * var_param_std[j];
-
-    /* systematic error */
-    par_range_model[i][0] = fmax(par_range_model[i][0], var_range_model[0][0]);
-    par_range_model[i][1] = fmin(par_range_model[i][1], var_range_model[0][1]);
+    par_range_model[i][0] = var_range_model[0][0];
+    par_range_model[i][1] = var_range_model[0][1];
     i++;
 
-
     /* sigma */
-    par_range_model[i][0] = var_param[j+1] - 5.0 * var_param_std[j+1];
-    par_range_model[i][1] = var_param[j+1] + 5.0 * var_param_std[j+1];
-
-    par_range_model[i][0] = fmax(par_range_model[i][0], var_range_model[1][0]);
-    par_range_model[i][1] = fmin(par_range_model[i][1], var_range_model[1][1]);
+    par_range_model[i][0] = var_range_model[1][0];
+    par_range_model[i][1] = var_range_model[1][1];
     i++;
    
     /* tau */
-    par_range_model[i][0] = var_param[j+2] - 5.0 * var_param_std[j+2];
-    par_range_model[i][1] = var_param[j+2] + 5.0 * var_param_std[j+2];
-
-    par_range_model[i][0] = fmax(par_range_model[i][0], var_range_model[2][0]);
-    par_range_model[i][1] = fmin(par_range_model[i][1], var_range_model[2][1]);
+    par_range_model[i][0] = var_range_model[2][0];
+    par_range_model[i][1] = var_range_model[2][1];
     i++;
   }
-
+  
   for(j = 0; j < num_params_line; j+= (1+3*num_gaussian))
   {
     /* systematic error of line */
@@ -159,31 +156,44 @@ void set_par_range_pmap()
     for(k=0; k<num_gaussian; k++)
     {
       /* amplitude of gaussian */
-      if(k==0)
+      par_range_model[i][0] = line_range_model[1][0];
+      par_range_model[i++][1] = line_range_model[1][1];
+
+      /* center of gaussian */
+      if(parset.type_lag_prior == 4)
       {
-        par_range_model[i][0] = line_range_model[1][0];
-        par_range_model[i++][1] = line_range_model[1][1];
+        par_range_model[i][0] = lag_prior[k*2+0]; 
+        par_range_model[i++][1] = lag_prior[k*2+1];
+      }
+      else if(type_lag_prior_pr == 0)
+      {
+        par_range_model[i][0] = line_range_model[2][0]; 
+        par_range_model[i++][1] = line_range_model[2][1];
+      }
+      else
+      {
+        par_range_model[i][0] = line_range_model[2][0] + k*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
+        par_range_model[i++][1] =line_range_model[2][0] + (k+1)*(line_range_model[2][1] - line_range_model[2][0])/(num_gaussian);
+      }
+
+      /* sigma of gaussian */
+      if(parset.type_lag_prior == 3 && num_gaussian > 1) /* set the range of sigma to (width/2, width) */
+      {
+        par_range_model[i][0] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1)/2);
+        par_range_model[i++][1] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1));
       }
       else 
       {
-        par_range_model[i][0] = resp_ratio_prior[(k-1)*2+0];
-        par_range_model[i++][1] = resp_ratio_prior[(k-1)*2+1];
+        par_range_model[i][0] = line_range_model[3][0];
+        par_range_model[i++][1] = line_range_model[3][1];
       }
-
-      /* center of gaussian */
-      par_range_model[i][0] = lag_prior[k*2+0]; 
-      par_range_model[i++][1] = lag_prior[k*2+1];
-
-      /* sigma of gaussian */
-      par_range_model[i][0] = width_prior[k*2+0];
-      par_range_model[i++][1] = width_prior[k*2+1];
     }
   }
-  
   return;
 }
 
-void print_para_names_pmap()
+
+void print_para_names_dmap()
 {
   if(thistask != roottask)
     return;
@@ -255,7 +265,7 @@ void print_para_names_pmap()
   return;
 }
 
-void from_prior_pmap(void *model)
+void from_prior_dmap(void *model)
 {
   int i, j, ic;
   double *pm = (double *)model;
@@ -297,10 +307,11 @@ void from_prior_pmap(void *model)
     if(par_fix[i] == 1)
       pm[i] = par_fix_val[i];
   }
+  
   return;
 }
 
-void print_particle_pmap(FILE *fp, const void *model)
+void print_particle_dmap(FILE *fp, const void *model)
 {
   int i;
   double *pm = (double *)model;
@@ -313,30 +324,28 @@ void print_particle_pmap(FILE *fp, const void *model)
 }
 
 
-double log_likelihoods_cal_pmap(const void *model)
+double log_likelihoods_cal_dmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability4_pmap(model);
+  logL = prob_line_variability3_dmap(model);
   return logL;
 }
 
-
-double log_likelihoods_cal_initial_pmap(const void *model)
+double log_likelihoods_cal_initial_dmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability4_pmap(model);
+  logL = prob_line_variability3_dmap(model);
   return logL;
 }
 
-double log_likelihoods_cal_restart_pmap(const void *model)
+double log_likelihoods_cal_restart_dmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability4_pmap(model);
+  logL = prob_line_variability3_dmap(model);
   return logL;
 }
 
-
-double perturb_pmap(void *model)
+double perturb_dmap(void *model)
 {
   double *pm = (double *)model;
   double logH = 0.0, limit1, limit2, width;
@@ -395,17 +404,17 @@ double perturb_pmap(void *model)
   return logH;
 }
 
-int get_num_params_pmap()
+int get_num_params_dmap()
 {
   return num_params;
 }
 
-void restart_action_pmap(int iflag)
+void restart_action_dmap(int iflag)
 {
   return;
 }
 
-void read_particle_pmap(FILE *fp, void *model)
+void read_particle_dmap(FILE *fp, void *model)
 {
   int j;
   double *psample = (double *)model;
@@ -423,12 +432,12 @@ void read_particle_pmap(FILE *fp, void *model)
   return;
 }
 
-void kill_action_pmap(int i, int i_copy)
+void kill_action_dmap(int i, int i_copy)
 {
   return;
 }
 
-void accept_action_pmap()
+void accept_action_dmap()
 {
   return;
 }

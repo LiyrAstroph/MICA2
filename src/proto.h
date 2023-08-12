@@ -76,6 +76,20 @@ double dnest_pmap(int argc, char **argv);
 void set_par_range_pmap();
 int mc_pmap_init();
 int mc_pmap_end();
+void mc_pmap();
+
+/* for dmap */
+double prob_line_variability3_dmap(const void *model);
+double dnest_dmap(int argc, char **argv);
+void set_par_range_dmap();
+int mc_dmap_init();
+int mc_dmap_end();
+void mc_dmap();
+void postprocess_dmap();
+void set_covar_Pmat_data_line_dmap(const void *model, int k);
+void set_covar_Pmat_data_line_array_dmap(const void *model, int k);
+void set_covar_Umat_line_dmap(const void *model, int k, int *nall, double *tall);
+void set_covar_Amat_line_dmap(const void *model, int k, int *nall, double *tall);
 
 double (*Sll)(double t1, double t2, const void *model, int nds, int nls);
 void (*Sll_array)(double *tline, int nline, const void *model, int nds, int nls, double *Smat);

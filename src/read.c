@@ -407,7 +407,7 @@ int read_data()
   FILE *fp;
   char buf[256], str[256], str2[256], *pstr;
   int i, j, k, np;
-  double tcad;
+  double tcad, tspan;
 
   /* read number of data sets. */
   if(thistask == roottask)
@@ -624,8 +624,20 @@ int read_data()
   tspan_max = 0.0;
   for(i=0; i<nset; i++)
   {
-    if(tspan_max < dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])
-      tspan_max = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
+    /* note that continuum might be empty */
+    if(dataset[i].con.n > 0)
+    {
+      tspan = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
+      if(tspan_max < tspan)
+        tspan_max = tspan;
+    }
+    
+    for(j=0; j<dataset[i].nlset; j++)
+    {
+      tspan = dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0];
+      if(tspan_max < tspan)
+        tspan_max = tspan;
+    }
   }
   if(parset.lag_limit_upper < 0.0)
   {
@@ -636,10 +648,13 @@ int read_data()
   tcadence_line_min = tspan_max;
   for(i=0; i<nset; i++)
   {
-
-    tcad = (dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])/(dataset[i].con.n-1);
-    if(tcadence_con_min > tcad)
-      tcadence_con_min = tcad;
+    /* note that continuum might be empty */
+    if(dataset[i].con.n > 0)
+    {
+      tcad = (dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0])/(dataset[i].con.n-1);
+      if(tcadence_con_min > tcad)
+        tcadence_con_min = tcad;
+    }
 
     for(j=0; j<dataset[i].nlset; j++)
     {
@@ -681,13 +696,20 @@ void cal_mean_error()
   for(i=0; i<nset; i++)
   {
     /* continuum */
-    mean = 0.0;
-    for(j=0; j<dataset[i].con.n; j++)
+    if(parset.model != dmap)
     {
-      mean += dataset[i].con.fe[j];
+      mean = 0.0;
+      for(j=0; j<dataset[i].con.n; j++)
+      {
+        mean += dataset[i].con.fe[j];
+      }
+      mean /= dataset[i].con.n;
+      dataset[i].con.error_mean=mean;
     }
-    mean /= dataset[i].con.n;
-    dataset[i].con.error_mean=mean;
+    else 
+    {
+      dataset[i].con.error_mean=0.0;
+    }
 
     /* line */
     for(j=0; j<dataset[i].nlset; j++)
@@ -712,18 +734,25 @@ void scale_con_line()
 
   for(i=0; i<nset; i++)
   {
-    /* continuum */
-    mean = 0.0;
-    for(j=0; j<dataset[i].con.n; j++)
+    if(parset.model != dmap )
     {
-      mean += dataset[i].con.f[j];
+      /* continuum */
+      mean = 0.0;
+      for(j=0; j<dataset[i].con.n; j++)
+      {
+        mean += dataset[i].con.f[j];
+      }
+      mean /= dataset[i].con.n;
+      dataset[i].con.scale=mean;
+      for(j=0; j<dataset[i].con.n; j++)
+      {
+        dataset[i].con.f[j] /= mean;
+        dataset[i].con.fe[j] /= mean;
+      }
     }
-    mean /= dataset[i].con.n;
-    dataset[i].con.scale=mean;
-    for(j=0; j<dataset[i].con.n; j++)
+    else /* for dmap, no continuum data points */
     {
-      dataset[i].con.f[j] /= mean;
-      dataset[i].con.fe[j] /= mean;
+      dataset[i].con.scale = 1.0;
     }
 
     /* line */

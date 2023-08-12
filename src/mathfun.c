@@ -223,7 +223,7 @@ void inverse_symat_lndet_sign(double * a, int n, double *lndet, int *info, int *
   if(*info!=0)
   {
     strcpy(str_error_exit, "inverse_mat");
-    error_exit(9);
+    //error_exit(9);
   }
 
   *lndet = 0.0;
@@ -238,7 +238,7 @@ void inverse_symat_lndet_sign(double * a, int n, double *lndet, int *info, int *
   if(*info!=0)
   {
     strcpy(str_error_exit, "inverse_mat");
-    error_exit(9);
+    //error_exit(9);
   }
 
   /* fill up the lower triangle */
@@ -707,6 +707,10 @@ void inverse_symat_partition_inv(double *Pinv, double *S, double *Q, int n1,
   return;
 }
 
+/*
+ * calculate matrix inverse by partition
+ * ref: Numerical Recipes, Chapter 2, P70
+ */
 void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
                                  double *lndet, double *work, int *ipiv)

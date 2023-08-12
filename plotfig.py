@@ -93,7 +93,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     for j in range(1, len(ns)):
       sample_lag[:] = 0.0
       weight_lag[:] = 0.0
-      if typemodel == 0:  # general model
+      if typemodel == 0 or typemodel == 2:  # general, dmap model
         for k in range(ngau):
           sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
           weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
@@ -165,10 +165,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     #ax.set_xlabel('HJD - 2450000')
 
     # set ylim
-    ymin = np.min(con0[:, 1])
-    ymax = np.max(con0[:, 1])
-    dy = ymax - ymin
-    ax.set_ylim(ymin-0.1*dy, ymax+0.1*dy)
+    # note in dmap case, no continuum data
+    if con0.shape[0] > 0:
+      ymin = np.min(con0[:, 1])
+      ymax = np.max(con0[:, 1])
+      dy = ymax - ymin
+      ax.set_ylim(ymin-0.1*dy, ymax+0.1*dy)
     
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
@@ -182,18 +184,20 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       for k in range(ngau):
         tau1 = np.min((tau1, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
         tau2 = np.max((tau2, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
-    
+
     # set time lag range for transfer function 
     tau1_tf = 1.0e10
     tau2_tf = -1.0e10
     for j in range(1, len(ns)):   
       for k in range(ngau):
-        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m]+1+k*3+1]-np.exp(sample[:, indx_line[m]+1+k*3+2]))))
-        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m]+1+k*3+1]+np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                          -np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                          +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
       
     tau1_tf = np.min((tau_low, tau1_tf))
     tau2_tf = np.max((tau_upp, tau2_tf))
-
+        
     # now do plotting
     for j in range(1, len(ns)):
       hb = data[indx_con_data[m] + np.sum(ns[:j]):indx_con_data[m] + np.sum(ns[:j+1]), :] 
@@ -221,7 +225,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       
       ax = fig.add_axes((0.22, 0.95-(j+1)*axheight, 0.16, axheight))
       
-      if typemodel == 0: # centroid time lag
+      if typemodel == 0 or typemodel == 2: # centroid time lag
         cent = np.zeros(sample.shape[0])
         norm = np.zeros(sample.shape[0])
         for k in range(ngau):
@@ -267,7 +271,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       if typetf == 0: # gaussian
         for i in range(sample.shape[0]):
           # loop over gaussians
-          if typemodel == 0:  # general model
+          if typemodel == 0 or typemodel == 2:  # general model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
@@ -291,7 +295,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       else:  # tophats
         for i in range(sample.shape[0]):
           # loop over tophats
-          if typemodel == 0: # general model
+          if typemodel == 0 or typemodel == 2: # general model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
@@ -473,7 +477,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     for j in range(1, len(ns)):
       sample_lag[:] = 0.0
       weight_lag[:] = 0.0
-      if typemodel == 0:  # general model
+      if typemodel == 0 or typemodel == 2:  # general model
         for k in range(ngau):
           sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
           weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
@@ -561,8 +565,10 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     tau2_tf = -1.0e10
     for j in range(1, len(ns)):   
       for k in range(ngau):
-        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m]+1+k*3+1]-np.exp(sample[:, indx_line[m]+1+k*3+2]))))
-        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m]+1+k*3+1]+np.exp(sample[:, indx_line[m]+1+k*3+2]))))
+        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                          -np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                          +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
       
     tau1_tf = np.min((tau_low, tau1_tf))
     tau2_tf = np.max((tau_upp, tau2_tf))
@@ -594,7 +600,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       # centroid time lag
       ax = fig.add_axes((0.22, 0.95-(j+1)*axheight, 0.16, axheight))
 
-      if typemodel == 0: # centroid time lag
+      if typemodel == 0 or typemodel == 2: # centroid time lag
         cent = np.zeros(sample.shape[0])
         norm = np.zeros(sample.shape[0])
         for k in range(ngau):
@@ -640,7 +646,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       if typetf == 0:
         for i in range(sample.shape[0]):
           # loop over gaussians
-          if typemodel == 0:  # general model
+          if typemodel == 0 or typemodel == 2:  # general model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
@@ -663,7 +669,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       else:
         for i in range(sample.shape[0]):
           # loop over tophats
-          if typemodel == 0: # general model
+          if typemodel == 0 or typemodel == 2: # general model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]

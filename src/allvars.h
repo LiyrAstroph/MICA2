@@ -15,7 +15,7 @@
 #define PI            (M_PI)
 #define MICA_MAX_STR_LENGTH  (256)
 
-enum model_type {gmodel=0, pmap};
+enum model_type {gmodel=0, pmap, dmap};
 
 /* variables for MPICH */
 extern int thistask, totaltask, namelen;

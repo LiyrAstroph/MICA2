@@ -9,6 +9,7 @@ DataFile                  data/IRAS_year5.txt
 
 TypeModel                 0                # 0: general model
                                            # 1: pmap, photometric RM
+                                           # 2: dmap, disk RM
 
 TypeTF                    0                # 0: Gaussian
                                            # 1: Top-hat

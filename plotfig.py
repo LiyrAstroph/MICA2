@@ -858,6 +858,6 @@ if __name__ == "__main__":
   param = _param_parser(fparam)
   
   if "TypeModel" not in param:
-    param["TypeModel"] = 0
+    param["TypeModel"] = "0"
 
   plot_results_all(args, param)

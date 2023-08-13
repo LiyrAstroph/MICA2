@@ -208,7 +208,7 @@ if __name__ == "__main__":
 
   # default option
   if "TypeModel" not in param:
-    param["TypeModel"] = 0
+    param["TypeModel"] = "0"
   
   try:
     fdir = param["FileDir"]+"/"

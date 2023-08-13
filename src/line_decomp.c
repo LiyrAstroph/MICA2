@@ -37,8 +37,8 @@ void output_decompose_line()
     double tspan;
     
     int num_ps, size_of_modeltype;
-    void *post_model;
-    double *ps;
+    void *post_model, *post_model_trans, *post_sample;
+    double *ps, *ps_model, *ps_model_trans;
     char posterior_sample_file[MICA_MAX_STR_LENGTH];
 
     /* time span of reconstruction */
@@ -62,15 +62,21 @@ void output_decompose_line()
       exit(0);
     }
     /* note here read all posterior sample */
-    post_model = malloc(size_of_modeltype*num_ps);
-    ps = (double *)post_model;
+    post_sample = malloc(size_of_modeltype*num_ps);
+    ps = (double *)post_sample;
+    post_model = malloc(size_of_modeltype);
+    ps_model = (double *)post_model;
+    if(parset.model == pmap)
+    {
+      post_model_trans = malloc(size_of_modeltype);
+    }
 
     for(m=0; m<num_ps; m++)
     {      
       // read sample
       for(j=0; j<num_params; j++)
       {
-        if(fscanf(fp_sample, "%lf", ps + j) < 1)
+        if(fscanf(fp_sample, "%lf", ps_model + j) < 1)
         {
           fprintf(stderr, "# Error: Cannot read file %s.\n", posterior_sample_file);
           exit(0);
@@ -78,10 +84,15 @@ void output_decompose_line()
       }
       fscanf(fp_sample, "\n");
       
-      /* in pmap, response ratio is used, need to transform into normal values as in gmodel */
+      /* in pmap, need to transform response ratio into normal values as in gmodel */
       if(parset.model == pmap)
       {
-        transform_response_ratio((void *)ps, (void *)ps);
+        transform_response_ratio(post_model, post_model_trans);
+        memcpy((void *)ps, post_model_trans, size_of_modeltype);
+      }
+      else
+      {
+        memcpy((void *)ps, post_model, size_of_modeltype);
       }
       ps += num_params;
     }
@@ -186,7 +197,7 @@ void output_decompose_line()
         } 
       }
       
-      ps = (double *)post_model;
+      ps = (double *)post_sample;
       for(m=0; m<num_ps; m++)
       {
         printf("# sample %d of %d-th gaussian\n", m, kgau+1);      
@@ -282,6 +293,11 @@ void output_decompose_line()
     free(nall);
     free(ntall);
     free(post_model);
+    if(parset.model == pmap)
+    {
+      free(post_model_trans);
+    }
+    free(post_sample);
     free(yq);
 
     printf("end line decompose...\n");

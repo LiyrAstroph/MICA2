@@ -61,8 +61,10 @@ void output_decompose_line()
       fprintf(stderr, "# Error: Cannot read file %s.\n", posterior_sample_file);
       exit(0);
     }
+    /* note here read all posterior sample */
     post_model = malloc(size_of_modeltype*num_ps);
     ps = (double *)post_model;
+
     for(m=0; m<num_ps; m++)
     {      
       // read sample
@@ -75,6 +77,12 @@ void output_decompose_line()
         }
       }
       fscanf(fp_sample, "\n");
+      
+      /* in pmap, response ratio is used, need to transform into normal values as in gmodel */
+      if(parset.model == pmap)
+      {
+        transform_response_ratio((void *)ps, (void *)ps);
+      }
       ps += num_params;
     }
     fclose(fp_sample);

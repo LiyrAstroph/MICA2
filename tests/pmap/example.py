@@ -56,7 +56,7 @@ model.run()
 #model.post_run()
 
 #do decomposition of the light curve into separate light curves of the two responses.
-#model.decompose()
+model.decompose()
 
 # plot results
 if rank == 0:

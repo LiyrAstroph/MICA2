@@ -91,9 +91,9 @@ StrRatioPrior           [1.0e-3:1.0]       # the response ratio of 2nd to 1st co
 
 # PTol                     0.1             # likelihood tolerance in loge
 # NumberParticles          1               # number of particles
-# NewLevelIntervalFactor   2               # new level interval
-# SaveIntervalFactor       2               # particular saving interval
-# ThreadStepsFactor        10              # thread steps before communications between cores
+# NewLevelIntervalFactor   1               # new level interval
+# SaveIntervalFactor       1               # particular saving interval
+# ThreadStepsFactor        1               # thread steps before communications between cores
 # MaxNumberLevels          0               # maximum number of levels; unlimited for 0
 # BacktrackingLength       10.0            # backforward tracking length (lambda)
 # StrengthEqualPush        100.0           # strength to force equal push (beta)

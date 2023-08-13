@@ -214,6 +214,8 @@ int mc_pmap_end()
 
 /*!
  * cope with response ratios 
+ * 
+ * note that model_in and model_out can be same
  */
 void transform_response_ratio(const void *model_in, void *model_out)
 {

@@ -227,12 +227,12 @@ int write_options_con(char *fname)
   
 
   fprintf(fp, "# Full options and their default values (if not specified) are:\n"
-              "# MaxNumberSaves           10000 #maximum number of saves\n"
+              "# MaxNumberSaves           2000 #maximum number of saves\n"
               "# PTol                     0.1   #likelihood tolerance in loge\n"
-              "# NumberParticles          1  #number of particles\n"
-              "# NewLevelIntervalFactor   2  #new level interval\n"
-              "# SaveIntervalFactor       2  #particular saving interval\n"
-              "# ThreadStepsFactor        10 #thread steps before communications between cores\n"
+              "# NumberParticles          2  #number of particles\n"
+              "# NewLevelIntervalFactor   5  #new level interval\n"
+              "# SaveIntervalFactor       5  #particular saving interval\n"
+              "# ThreadStepsFactor        20 #thread steps before communications between cores\n"
               "# MaxNumberLevels          0  #maximum number of levels; unlimited for 0\n"
               "# BacktrackingLength       10.0  #backforward tracking length (lambda)\n"
               "# StrengthEqualPush        100.0 #strength to force equal push (beta)");
@@ -272,12 +272,12 @@ int write_options_line(char *fname)
   fprintf(fp, "StrengthEqualPush         %.2f\n\n\n", parset.beta);         
 
   fprintf(fp, "# Full options and their default values (if not specified) are:\n"
-              "# MaxNumberSaves           10000 #maximum number of saves\n"
+              "# MaxNumberSaves           2000 #maximum number of saves\n"
               "# PTol                     0.1   #likelihood tolerance in loge\n"
               "# NumberParticles          1  #number of particles\n"
-              "# NewLevelIntervalFactor   2  #new level interval\n"
-              "# SaveIntervalFactor       2  #particular saving interval\n"
-              "# ThreadStepsFactor        10 #thread steps before communications between cores\n"
+              "# NewLevelIntervalFactor   1  #new level interval\n"
+              "# SaveIntervalFactor       1  #particular saving interval\n"
+              "# ThreadStepsFactor        1 #thread steps before communications between cores\n"
               "# MaxNumberLevels          0  #maximum number of levels; unlimited for 0\n"
               "# BacktrackingLength       10.0  #backforward tracking length (lambda)\n"
               "# StrengthEqualPush        100.0 #strength to force equal push (beta)");

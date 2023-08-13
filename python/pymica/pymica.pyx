@@ -75,11 +75,11 @@ cdef class basis:
     self.parset.num_gaussian_low = 1
     self.parset.num_gaussian_upper = 1
     # cdnest options
-    self.parset.num_particles = 2
+    self.parset.num_particles = 1
     self.parset.max_num_saves = 2000
-    self.parset.new_level_interval_factor = 2
+    self.parset.new_level_interval_factor = 1
     self.parset.save_interval_factor = self.parset.new_level_interval_factor
-    self.parset.thread_steps_factor = 2
+    self.parset.thread_steps_factor = 1
     self.parset.lam = 10.0
     self.parset.beta = 100.0
     self.parset.max_num_levels = 0
@@ -298,8 +298,8 @@ cdef class basis:
                   flag_trend=0, flag_lag_posivity=False,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   # follows cdnest parameters
-                  num_particles=2, thread_steps_factor=2, 
-                  new_level_interval_factor=2, save_interval_factor=2,
+                  num_particles=1, thread_steps_factor=1, 
+                  new_level_interval_factor=1, save_interval_factor=1,
                   lam=10, beta=100, ptol=0.1, 
                   max_num_levels=0):
     """
@@ -415,8 +415,8 @@ cdef class gmodel(basis):
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   type_lag_prior=0, lag_prior=None,
                   # follows cdnest parameters
-                  num_particles=2, thread_steps_factor=2, 
-                  new_level_interval_factor=2, save_interval_factor=2,
+                  num_particles=1, thread_steps_factor=1, 
+                  new_level_interval_factor=1, save_interval_factor=1,
                   lam=10, beta=100, ptol=0.1, 
                   max_num_levels=0):     
     """
@@ -548,8 +548,8 @@ cdef class pmap(basis):
                   lag_prior=None, ratio_prior=None,
                   width_limit=None,
                   # follows cdnest parameters
-                  num_particles=2, thread_steps_factor=2, 
-                  new_level_interval_factor=2, save_interval_factor=2,
+                  num_particles=1, thread_steps_factor=1, 
+                  new_level_interval_factor=1, save_interval_factor=1,
                   lam=10, beta=100, ptol=0.1, 
                   max_num_levels=0):
 
@@ -689,8 +689,8 @@ cdef class dmap(basis):
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   type_lag_prior=0, lag_prior=None,
                   # follows cdnest parameters
-                  num_particles=2, thread_steps_factor=2, 
-                  new_level_interval_factor=2, save_interval_factor=2,
+                  num_particles=1, thread_steps_factor=1, 
+                  new_level_interval_factor=1, save_interval_factor=1,
                   lam=10, beta=100, ptol=0.1, 
                   max_num_levels=0):     
     """

@@ -232,11 +232,11 @@ int read_parset()
     strcpy(parset.str_lag_prior,"");
     strcpy(parset.str_ratio_prior,"");
     /*cdnest options */
-    parset.num_particles = 2;
+    parset.num_particles = 1;
     parset.max_num_saves = 2000;
-    parset.new_level_interval_factor = 2;
+    parset.new_level_interval_factor = 1;
     parset.save_interval_factor = parset.new_level_interval_factor;
-    parset.thread_steps_factor = 2;
+    parset.thread_steps_factor = 1;
     parset.lam = 10.0;
     parset.beta = 100.0;
     parset.max_num_levels = 0;

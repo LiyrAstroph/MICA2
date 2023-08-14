@@ -61,7 +61,7 @@ double logsumexp(double *x, int n)
 
 void postprocess(double temperature)
 {
-  printf("# Starts postprocess.\n");
+  printf("# Starts CDNest postprocess.\n");
   FILE *fp, *fp_sample;
   
   double **levels_orig, **sample_info, *logl;
@@ -462,7 +462,7 @@ void postprocess(double temperature)
 
   gsl_rng_free(dnest_post_gsl_r);
 
-  printf("# Ends dnest postprocess.\n");
+  printf("# Ends CDNest postprocess.\n");
 }
 
 int cmp_sample(const void *pa, const void *pb)

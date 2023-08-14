@@ -289,9 +289,10 @@ int write_options_line(char *fname)
   return 0;
 }
 
-void set_argv(int flag_pp, int flag_de)
+void set_argv(int flag_pp, int flag_de, int flag_re)
 {
   flag_postprc = flag_pp;
   flag_decomp = flag_de;
+  flag_restart = flag_re;
   return;
 }

@@ -511,7 +511,7 @@ cdef class gmodel(basis):
     """
     do posterior running
     """
-    set_argv(1, 0)
+    set_argv(1, 0, 0) # postprocess, decompose, restart
     read_data()
     init()
     mc_line()
@@ -522,7 +522,18 @@ cdef class gmodel(basis):
     """
     do decomposition
     """
-    set_argv(1, 1)
+    set_argv(1, 1, 0) # postprocess, decompose, restart
+    read_data()
+    init()
+    mc_line()
+    end_run()
+    return
+  
+  def restart(self): 
+    """
+    resume from a last run
+    """
+    set_argv(0, 0, 1)
     read_data()
     init()
     mc_line()
@@ -627,7 +638,7 @@ cdef class pmap(basis):
     """
     do posterior running
     """
-    set_argv(1, 0)
+    set_argv(1, 0, 0) # postprocess, decompose, restart
     read_data()
     init()
     mc_pmap()
@@ -638,7 +649,18 @@ cdef class pmap(basis):
     """
     do decomposition
     """
-    set_argv(1, 1)
+    set_argv(1, 1, 0)  # postprocess, decompose, restart
+    read_data()
+    init()
+    mc_pmap()
+    end_run()
+    return
+  
+  def restart(self): 
+    """
+    resume from a last run
+    """
+    set_argv(0, 0, 1)
     read_data()
     init()
     mc_pmap()
@@ -786,7 +808,7 @@ cdef class dmap(basis):
     """
     do posterior running
     """
-    set_argv(1, 0)
+    set_argv(1, 0, 0) # postprocess, decompose, restart
     read_data()
     init()
     mc_dmap()
@@ -797,7 +819,18 @@ cdef class dmap(basis):
     """
     do decomposition
     """
-    set_argv(1, 1)
+    set_argv(1, 1, 0) # postprocess, decompose, restart
+    read_data()
+    init()
+    mc_dmap()
+    end_run()
+    return
+  
+  def restart(self): 
+    """
+    resume from a last run
+    """
+    set_argv(0, 0, 1)
     read_data()
     init()
     mc_dmap()

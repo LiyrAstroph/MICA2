@@ -895,6 +895,8 @@ void recostruct_line_from_varmodel_dmap(const void *model, int nds, int *nall, d
   {
     for(j=0; j<nqall; j++)
       Larr_rec[i*nqall + j] = 0.0;
+    
+    Larr_rec[i*nqall + 0] = 0.0;
   }
   
   /* now for lines */
@@ -931,9 +933,9 @@ void recostruct_line_from_varmodel_dmap(const void *model, int nds, int *nall, d
   multiply_mat_MN_inverseA(PEmat1, PEmat2, nall_data, ntall, ipiv); // C^-1 x S; NdxN
   multiply_mat_MN(USmat, PEmat2, PEmat1, ntall, ntall, nall_data); // S x C^-1 x S; NxN
 
-  /* S x C^-1 x L */
-  multiply_mat_MN_transposeA(PEmat2, Larr, PEmat3, ntall, nqall, nall_data);
-  /* S x C^-1 x L - L */
+  /* S x C^-1 x L; NxNq */
+  multiply_mat_MN_transposeA(PEmat2, Larr, PEmat3, ntall, nqall, nall_data); 
+  /* S x C^-1 x L - L; NxNq */
   for(i=0; i<ntall*nqall; i++)PEmat3[i] -= Larr_rec[i];
   
   inverse_mat(Cq, nqall, &info, ipiv);
@@ -941,10 +943,15 @@ void recostruct_line_from_varmodel_dmap(const void *model, int nds, int *nall, d
   multiply_mat_MN(PEmat3, Cq, PEmat2, ntall, nqall, nqall);
   /* (S x C^-1 x L - L) x Cq x (S x C^-1 x L - L)^T */
   multiply_mat_MN_transposeB(PEmat2, PEmat3, PEmat4, ntall, ntall, nqall);
-  
-  for(i=0; i<ntall; i++)
+
+  /* continuum, no q involved */  
+  for(i=0; i<nall[0]; i++)
   {
-    feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat1[i*ntall+i] + PEmat4[i*ntall + i]);
+    feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat1[i*ntall+i]);
+  }
+  for(i=nall[0]; i<ntall; i++)
+  {
+    feall[i] = sigma * sqrt(ASmat[i*ntall + i] - PEmat1[i*ntall+i] + PEmat4[i*ntall+i]);
   }
 
   free(PEmat1);

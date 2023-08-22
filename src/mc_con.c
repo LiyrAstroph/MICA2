@@ -105,7 +105,7 @@ void mc_con()
 
       for(j=0; j<ncon; j++)
       {
-        fprintf(fp, "%f %f %f\n", tcon[j], fcon[j] * dataset[i].con.scale, fecon[j] * dataset[i].con.scale);
+        fprintf(fp, "%e %e %e\n", tcon[j], fcon[j] * dataset[i].con.scale, fecon[j] * dataset[i].con.scale);
       }
       fprintf(fp, "\n");
     }

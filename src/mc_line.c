@@ -87,7 +87,7 @@ void mc_line()
 
     postprocess_line();
 
-    output_reconstrction();
+    output_reconstruction();
     
     if(num_gaussian > 1 && flag_decomp == 1)
     {
@@ -131,7 +131,7 @@ void mc_line()
 /* 
  * reconstruct line lcs acording to the time span of the continuum.
  */
-void output_reconstrction()
+void output_reconstruction()
 {
   if(thistask == roottask)
   {
@@ -382,7 +382,7 @@ void output_reconstrction()
       
       /* output reconstructed continuum */
       for(k=0; k<nall[i][0]; k++)
-        fprintf(fp, "%f %f %f\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
+        fprintf(fp, "%e %e %e\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
       fprintf(fp, "\n");
 
       /* output reconstructed lines */
@@ -390,7 +390,7 @@ void output_reconstrction()
       for(j=0; j<dataset[i].nlset; j++)
       {
         for(k=0; k<nall[i][1+j]; k++)
-          fprintf(fp, "%f %f %f\n", tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
+          fprintf(fp, "%e %e %e\n", tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
         fprintf(fp, "\n");
         np += nall[i][1+j];
       }  
@@ -466,7 +466,7 @@ void output_reconstrction()
 /* 
  * reconstruct line lcs acording to their own time spans.
  */
-void output_reconstrction2()
+void output_reconstruction2()
 {
   if(thistask == roottask)
   {
@@ -694,7 +694,7 @@ void output_reconstrction2()
       
       /* output reconstructed continuum */
       for(k=0; k<nall[i][0]; k++)
-        fprintf(fp, "%f %f %f\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
+        fprintf(fp, "%e %e %e\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
       fprintf(fp, "\n");
 
       /* output reconstructed lines */
@@ -702,7 +702,7 @@ void output_reconstrction2()
       for(j=0; j<dataset[i].nlset; j++)
       {
         for(k=0; k<nall[i][1+j]; k++)
-          fprintf(fp, "%f %f %f\n", tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
+          fprintf(fp, "%e %e %e\n", tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
         fprintf(fp, "\n");
         np += nall[i][1+j];
       }  

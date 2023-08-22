@@ -81,7 +81,7 @@ void mc_pmap()
   
     postprocess_line();
 
-    output_reconstrction();
+    output_reconstruction();
     
     if(num_gaussian > 1 && flag_decomp == 1)
     {

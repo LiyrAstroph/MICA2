@@ -138,7 +138,7 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
 
   Larr = workspace;
   ybuf = Larr + ncon_data * nq;
-  y = ybuf + ncon_data;
+  y = ybuf + ncon_data * nq;
   Cq = y + ncon_data;
   yq = Cq + nq*nq;
   yuq = yq + nq; 
@@ -165,19 +165,19 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
   }
 
   /* L^T x C^-1 x L */
-  multiply_mat_MN(PCmat, Larr, ybuf, ncon_data, nq, ncon_data);
-  multiply_mat_MN_transposeA(Larr, ybuf, Cq, nq, nq, ncon_data);
+  multiply_mat_MN(PCmat, Larr, ybuf, ncon_data, nq, ncon_data); // ybuf: NdxNq
+  multiply_mat_MN_transposeA(Larr, ybuf, Cq, nq, nq, ncon_data);// Cq: NqxNq
 
   /* L^T x C^-1 x y */
-  multiply_matvec(PCmat, fcon_data, ncon_data, ybuf);
-  multiply_mat_MN_transposeA(Larr, ybuf, yuq, nq, 1, ncon_data);
+  multiply_matvec(PCmat, fcon_data, ncon_data, ybuf);   // ybuf: Ndx1
+  multiply_mat_MN_transposeA(Larr, ybuf, yuq, nq, 1, ncon_data); // yuq: Nqx1
 
   /* (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
   inverse_mat(Cq, nq, &info, ipiv);
-  multiply_mat_MN(Cq, yuq, yq, nq, 1, nq);
+  multiply_mat_MN(Cq, yuq, yq, nq, 1, nq);  //yq: Nqx1
 
   /*  L x q */
-  multiply_matvec_MN(Larr, ncon_data, nq, yq, ybuf);
+  multiply_matvec_MN(Larr, ncon_data, nq, yq, ybuf); // ybuf: Ndx1
   for(i=0; i<ncon_data; i++)
   {
     y[i] = fcon_data[i] - ybuf[i];

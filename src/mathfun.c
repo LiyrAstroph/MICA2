@@ -104,13 +104,13 @@ void inverse_mat(double * a, int n, int *info, int *ipiv)
   *info = LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_mat1");
     error_exit(9);
   }
   *info = LAPACKE_dgetri(LAPACK_ROW_MAJOR, n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_mat2");
     error_exit(9);
   }
   return;
@@ -126,7 +126,7 @@ void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, i
   *info = LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_mat_lndet1");
     error_exit(9);
   }
 
@@ -148,7 +148,7 @@ void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, i
   *info = LAPACKE_dgetri(LAPACK_ROW_MAJOR, n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_mat_lndet2");
     error_exit(9);
   }
 
@@ -176,14 +176,14 @@ void inverse_symat(double * a, int n, int *info, int *ipiv)
   *info = LAPACKE_dsytrf(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_sysmat1");
     error_exit(9);
   }
 
   *info = LAPACKE_dsytri(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_sysmat2");
     error_exit(9);
   }
 
@@ -222,7 +222,7 @@ void inverse_symat_lndet_sign(double * a, int n, double *lndet, int *info, int *
   *info = LAPACKE_dsytrf(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_sysmat_lndet_sign1");
     //error_exit(9);
   }
 
@@ -237,7 +237,7 @@ void inverse_symat_lndet_sign(double * a, int n, double *lndet, int *info, int *
   *info = LAPACKE_dsytri(LAPACK_ROW_MAJOR, 'U', n, a, n, ipiv);
   if(*info!=0)
   {
-    strcpy(str_error_exit, "inverse_mat");
+    strcpy(str_error_exit, "inverse_sysmat_lndet_sign2");
     //error_exit(9);
   }
 

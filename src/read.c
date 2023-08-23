@@ -743,6 +743,18 @@ void scale_con_line()
         mean += dataset[i].con.f[j];
       }
       mean /= dataset[i].con.n;
+      
+      /* check if the mean is positive*/
+      if(mean < 0.0)
+      {
+        if(thistask == 0)
+        {
+          printf("The mean of continuum of %d-th set is negative (=%f)!\n", i, mean);
+          printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
+          exit(0);
+        }
+      }
+
       dataset[i].con.scale=mean;
       for(j=0; j<dataset[i].con.n; j++)
       {
@@ -765,6 +777,18 @@ void scale_con_line()
         mean += dataset[i].line[j].f[k];
       }
       mean /= dataset[i].line[j].n;
+      
+      /* check if the mean is positive*/
+      if(mean < 0.0)
+      {
+        if(thistask == 0)
+        {
+          printf("The mean of %d-th line of %d-th set is negative (=%f)!\n", j, i, mean);
+          printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
+          exit(0);
+        }
+      }
+
       dataset[i].line[j].scale=mean;
 
       for(k=0; k<dataset[i].line[j].n; k++)

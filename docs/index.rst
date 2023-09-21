@@ -30,6 +30,7 @@ Documentation
    prm.rst
    tests.rst
    list.rst
+   faq.rst
 
 
 Attribution

@@ -93,7 +93,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     for j in range(1, len(ns)):
       sample_lag[:] = 0.0
       weight_lag[:] = 0.0
-      if typemodel == 0 or typemodel == 2:  # general, dmap model
+      if typemodel == 0 or typemodel == 2:  # general, vmap model
         for k in range(ngau):
           sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
           weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
@@ -165,7 +165,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     #ax.set_xlabel('HJD - 2450000')
 
     # set ylim
-    # note in dmap case, no continuum data
+    # note in vmap case, no continuum data
     if con0.shape[0] > 0:
       ymin = np.min(con0[:, 1])
       ymax = np.max(con0[:, 1])

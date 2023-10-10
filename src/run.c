@@ -22,7 +22,7 @@ void begin_run()
   init();
 
   /* do not need to run mc_con if only postprocessing */
-  if(flag_postprc!=1 && flag_decomp != 1 && parset.model != dmap)
+  if(flag_postprc!=1 && flag_decomp != 1 && parset.model != vmap)
   {
     mc_con();
   }
@@ -35,9 +35,9 @@ void begin_run()
   {
     mc_pmap();
   }
-  else if (parset.model == dmap)
+  else if (parset.model == vmap)
   {
-    mc_dmap();
+    mc_vmap();
   }
 }
 

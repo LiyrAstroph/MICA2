@@ -696,7 +696,7 @@ void cal_mean_error()
   for(i=0; i<nset; i++)
   {
     /* continuum */
-    if(parset.model != dmap)
+    if(parset.model != vmap)
     {
       mean = 0.0;
       for(j=0; j<dataset[i].con.n; j++)
@@ -734,7 +734,7 @@ void scale_con_line()
 
   for(i=0; i<nset; i++)
   {
-    if(parset.model != dmap )
+    if(parset.model != vmap )
     {
       /* continuum */
       mean = 0.0;
@@ -762,7 +762,7 @@ void scale_con_line()
         dataset[i].con.fe[j] /= mean;
       }
     }
-    else /* for dmap, no continuum data points */
+    else /* for vmap, no continuum data points */
     {
       dataset[i].con.scale = 1.0;
     }

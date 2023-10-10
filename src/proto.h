@@ -78,18 +78,18 @@ int mc_pmap_init();
 int mc_pmap_end();
 void mc_pmap();
 
-/* for dmap */
-double prob_line_variability3_dmap(const void *model);
-double dnest_dmap(int argc, char **argv);
-void set_par_range_dmap();
-int mc_dmap_init();
-int mc_dmap_end();
-void mc_dmap();
-void postprocess_dmap();
-void set_covar_Pmat_data_line_dmap(const void *model, int k);
-void set_covar_Pmat_data_line_array_dmap(const void *model, int k);
-void set_covar_Umat_line_dmap(const void *model, int k, int *nall, double *tall);
-void set_covar_Amat_line_dmap(const void *model, int k, int *nall, double *tall);
+/* for vmap */
+double prob_line_variability3_vmap(const void *model);
+double dnest_vmap(int argc, char **argv);
+void set_par_range_vmap();
+int mc_vmap_init();
+int mc_vmap_end();
+void mc_vmap();
+void postprocess_vmap();
+void set_covar_Pmat_data_line_vmap(const void *model, int k);
+void set_covar_Pmat_data_line_array_vmap(const void *model, int k);
+void set_covar_Umat_line_vmap(const void *model, int k, int *nall, double *tall);
+void set_covar_Amat_line_vmap(const void *model, int k, int *nall, double *tall);
 
 double (*Sll)(double t1, double t2, const void *model, int nds, int nls);
 void (*Sll_array)(double *tline, int nline, const void *model, int nds, int nls, double *Smat);

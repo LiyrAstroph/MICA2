@@ -14,12 +14,12 @@
 #include <gsl/gsl_cblas.h>
 #include <gsl/gsl_sf_erf.h>
 
-#include "dnest_dmap.h"
+#include "dnest_vmap.h"
 #include "allvars.h"
 
 #include "proto.h"
 
-void mc_dmap()
+void mc_vmap()
 {
   int i, j, argc=0, jzmax=0;
   double logz_max;
@@ -56,7 +56,7 @@ void mc_dmap()
   strcpy(argv[argc++], "-g");
   strcpy(argv[argc++], "1d");
 
-  mc_dmap_init();
+  mc_vmap_init();
 
   logz_max = -DBL_MAX;
   for(j=0; j<parset.num_gaussian_diff; j++)
@@ -72,16 +72,16 @@ void mc_dmap()
     strcpy(argv[argc], "-x");
     strcpy(argv[argc+1], postfix);
 
-    logz_arr[j] = dnest_dmap(argc+2, argv);
+    logz_arr[j] = dnest_vmap(argc+2, argv);
     if(logz_max < logz_arr[j])
     {
       logz_max = logz_arr[j];
       jzmax = j;
     }
 
-    postprocess_dmap();
+    postprocess_vmap();
 
-    output_reconstruction_dmap();
+    output_reconstruction_vmap();
   }
   
   if(thistask == roottask)
@@ -105,7 +105,7 @@ void mc_dmap()
     fclose(fp);
   } 
 
-  mc_dmap_end();
+  mc_vmap_end();
 
   /* clear up argv */
   for(i=0; i<11; i++)
@@ -122,7 +122,7 @@ void mc_dmap()
 /*!
  *  this function does postprocess. 
  */
-void postprocess_dmap()
+void postprocess_vmap()
 {
   char posterior_sample_file[MICA_MAX_STR_LENGTH];
   double *pm, *pmstd;
@@ -221,7 +221,7 @@ void postprocess_dmap()
   return;
 }
 
-int mc_dmap_init()
+int mc_vmap_init()
 {
   int i;
 
@@ -290,7 +290,7 @@ int mc_dmap_init()
   return 0;
 }
 
-int mc_dmap_end()
+int mc_vmap_end()
 {
   int i;
 
@@ -314,7 +314,7 @@ int mc_dmap_end()
 /*!
  * calulate inverse and lndet simultaneously.
  */
-double prob_line_variability3_dmap(const void *model)
+double prob_line_variability3_vmap(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau;
   int i, j, k, m, np, info, sign, *ipiv;
@@ -359,7 +359,7 @@ double prob_line_variability3_dmap(const void *model)
       np += dataset[k].line[j].n;
     }
     
-    set_covar_Pmat_data_line_array_dmap(model, k);
+    set_covar_Pmat_data_line_array_vmap(model, k);
 
     inverse_symat_lndet_sign(PCmat, nall, &lndet, &info, &sign, ipiv); /* calculate C^-1 */
     if(info!=0|| sign==-1)
@@ -414,10 +414,10 @@ double prob_line_variability3_dmap(const void *model)
 
 /*!
  * this function sets the covariance matrix at data time points for an array of times 
- * for dmap
+ * for vmap
  * k is the index of dataset
  */
-void set_covar_Pmat_data_line_array_dmap(const void *model, int k)
+void set_covar_Pmat_data_line_array_vmap(const void *model, int k)
 {
   double t1, t2;
   double sigma, tau, syserr_line, error;
@@ -483,7 +483,7 @@ void set_covar_Pmat_data_line_array_dmap(const void *model, int k)
 /* 
  * reconstruct line lcs acording to the time span of the continuum.
  */
-void output_reconstruction_dmap()
+void output_reconstruction_vmap()
 {
   if(thistask == roottask)
   {
@@ -662,7 +662,7 @@ void output_reconstruction_dmap()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel_dmap(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        recostruct_line_from_varmodel_vmap(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -807,7 +807,7 @@ void output_reconstruction_dmap()
  *    multiply_mat_MN_inverseA()
  * 
  */
-void recostruct_line_from_varmodel_dmap(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
+void recostruct_line_from_varmodel_vmap(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
   int i, j, k, m, info, idx, *ipiv;
@@ -847,11 +847,11 @@ void recostruct_line_from_varmodel_dmap(const void *model, int nds, int *nall, d
   PEmat3 = malloc(ntall_max * ntall_max * sizeof(double));
   PEmat4 = malloc(ntall_max * ntall_max * sizeof(double));
 
-  set_covar_Pmat_data_line_dmap(model, nds);
+  set_covar_Pmat_data_line_vmap(model, nds);
   
-  set_covar_Umat_line_dmap(model, nds, nall, tall);
+  set_covar_Umat_line_vmap(model, nds, nall, tall);
   
-  set_covar_Amat_line_dmap(model, nds, nall, tall);
+  set_covar_Amat_line_vmap(model, nds, nall, tall);
   
   /* no continuum data point */
   np = 0;
@@ -966,7 +966,7 @@ void recostruct_line_from_varmodel_dmap(const void *model, int nds, int *nall, d
  *
  * k is the index of dataset
  */
-void set_covar_Pmat_data_line_dmap(const void *model, int k)
+void set_covar_Pmat_data_line_vmap(const void *model, int k)
 {
   double t1, t2;
   double sigma, tau, syserr, syserr_line, error;
@@ -1030,7 +1030,7 @@ void set_covar_Pmat_data_line_dmap(const void *model, int k)
 /*!
  * this function sets the covariance matrix at time of data points and reconstruction points
  */
-void set_covar_Umat_line_dmap(const void *model, int nds, int *nall, double *tall)
+void set_covar_Umat_line_vmap(const void *model, int nds, int *nall, double *tall)
 {
   double taud, t1, t2;
   int i, j, k, m, ntall, nall_data, np, npline, idx;
@@ -1114,7 +1114,7 @@ void set_covar_Umat_line_dmap(const void *model, int nds, int *nall, double *tal
  *
  * exactly same with set_covar_Amat_line()
  */
-void set_covar_Amat_line_dmap(const void *model, int nds, int *nall, double *tall)
+void set_covar_Amat_line_vmap(const void *model, int nds, int *nall, double *tall)
 {
   double t1, t2, taud;
   int i, j, k, m, ntall, np, npline, idx;

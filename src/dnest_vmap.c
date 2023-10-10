@@ -13,32 +13,32 @@
 #include "allvars.h"
 #include "dnest.h"
 
-#include "dnest_dmap.h"
+#include "dnest_vmap.h"
 
 #include "proto.h"
 
 /* function set for DNest */
-DNestFptrSet *fptrset_dmap;
+DNestFptrSet *fptrset_vmap;
 
-double dnest_dmap(int argc, char **argv)
+double dnest_vmap(int argc, char **argv)
 {
   int i, j, k, ic, idx;
   double logz, dlag;
 
-  fptrset_dmap = dnest_malloc_fptrset();
+  fptrset_vmap = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
-  fptrset_dmap->from_prior = from_prior_dmap;
-  fptrset_dmap->perturb = perturb_dmap;
-  fptrset_dmap->print_particle = print_particle_dmap;
-  fptrset_dmap->restart_action = restart_action_dmap;
+  fptrset_vmap->from_prior = from_prior_vmap;
+  fptrset_vmap->perturb = perturb_vmap;
+  fptrset_vmap->print_particle = print_particle_vmap;
+  fptrset_vmap->restart_action = restart_action_vmap;
 
-  fptrset_dmap->log_likelihoods_cal = log_likelihoods_cal_dmap;
-  fptrset_dmap->log_likelihoods_cal_initial = log_likelihoods_cal_initial_dmap;
-  fptrset_dmap->log_likelihoods_cal_restart = log_likelihoods_cal_restart_dmap;
+  fptrset_vmap->log_likelihoods_cal = log_likelihoods_cal_vmap;
+  fptrset_vmap->log_likelihoods_cal_initial = log_likelihoods_cal_initial_vmap;
+  fptrset_vmap->log_likelihoods_cal_restart = log_likelihoods_cal_restart_vmap;
   
-  fptrset_dmap->accept_action = accept_action_dmap;
-  fptrset_dmap->kill_action = kill_action_dmap;
-  fptrset_dmap->read_particle = read_particle_dmap;
+  fptrset_vmap->accept_action = accept_action_vmap;
+  fptrset_vmap->kill_action = kill_action_vmap;
+  fptrset_vmap->read_particle = read_particle_vmap;
 
   /* number of parameters for line */
   if(parset.flag_uniform_tranfuns == 1)
@@ -63,7 +63,7 @@ double dnest_dmap(int argc, char **argv)
   par_fix = (int *) malloc(num_params * sizeof(int));
   par_fix_val = (double *) malloc(num_params * sizeof(double));
   
-  set_par_range_dmap();
+  set_par_range_vmap();
   set_idx_line_pm();
 
   /* setup fixed parameters */
@@ -105,12 +105,12 @@ double dnest_dmap(int argc, char **argv)
     }
   }
   
-  print_para_names_dmap();
+  print_para_names_vmap();
 
-  logz = dnest(argc, argv, fptrset_dmap, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
+  logz = dnest(argc, argv, fptrset_vmap, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
 
   //free memory
-  dnest_free_fptrset(fptrset_dmap);
+  dnest_free_fptrset(fptrset_vmap);
   for(i=0; i<num_params; i++)
   {
     free(par_range_model[i]);
@@ -123,7 +123,7 @@ double dnest_dmap(int argc, char **argv)
   return logz;
 }
 
-void set_par_range_dmap()
+void set_par_range_vmap()
 {
   int i, j, k;
 
@@ -193,7 +193,7 @@ void set_par_range_dmap()
 }
 
 
-void print_para_names_dmap()
+void print_para_names_vmap()
 {
   if(thistask != roottask)
     return;
@@ -265,7 +265,7 @@ void print_para_names_dmap()
   return;
 }
 
-void from_prior_dmap(void *model)
+void from_prior_vmap(void *model)
 {
   int i, j, ic;
   double *pm = (double *)model;
@@ -311,7 +311,7 @@ void from_prior_dmap(void *model)
   return;
 }
 
-void print_particle_dmap(FILE *fp, const void *model)
+void print_particle_vmap(FILE *fp, const void *model)
 {
   int i;
   double *pm = (double *)model;
@@ -324,28 +324,28 @@ void print_particle_dmap(FILE *fp, const void *model)
 }
 
 
-double log_likelihoods_cal_dmap(const void *model)
+double log_likelihoods_cal_vmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability3_dmap(model);
+  logL = prob_line_variability3_vmap(model);
   return logL;
 }
 
-double log_likelihoods_cal_initial_dmap(const void *model)
+double log_likelihoods_cal_initial_vmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability3_dmap(model);
+  logL = prob_line_variability3_vmap(model);
   return logL;
 }
 
-double log_likelihoods_cal_restart_dmap(const void *model)
+double log_likelihoods_cal_restart_vmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability3_dmap(model);
+  logL = prob_line_variability3_vmap(model);
   return logL;
 }
 
-double perturb_dmap(void *model)
+double perturb_vmap(void *model)
 {
   double *pm = (double *)model;
   double logH = 0.0, limit1, limit2, width;
@@ -404,17 +404,17 @@ double perturb_dmap(void *model)
   return logH;
 }
 
-int get_num_params_dmap()
+int get_num_params_vmap()
 {
   return num_params;
 }
 
-void restart_action_dmap(int iflag)
+void restart_action_vmap(int iflag)
 {
   return;
 }
 
-void read_particle_dmap(FILE *fp, void *model)
+void read_particle_vmap(FILE *fp, void *model)
 {
   int j;
   double *psample = (double *)model;
@@ -432,12 +432,12 @@ void read_particle_dmap(FILE *fp, void *model)
   return;
 }
 
-void kill_action_dmap(int i, int i_copy)
+void kill_action_vmap(int i, int i_copy)
 {
   return;
 }
 
-void accept_action_dmap()
+void accept_action_vmap()
 {
   return;
 }

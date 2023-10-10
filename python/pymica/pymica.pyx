@@ -22,7 +22,7 @@ from . import utility as ut
 
 import os
 
-__all__ = ["gmodel", "pmap", "dmap"]
+__all__ = ["gmodel", "pmap", "vmap"]
 
 cdef class basis:
 
@@ -669,9 +669,9 @@ cdef class pmap(basis):
 
 
 #==========================================================================
-# disk reverberation mapping 
-# the continuum data is empty
-cdef class dmap(basis):
+# virtual reverberation mapping 
+# tusing a virtual driving light curve
+cdef class vmap(basis):
   """
   Model class
   """
@@ -800,7 +800,7 @@ cdef class dmap(basis):
     """
     read_data()
     init()
-    mc_dmap()
+    mc_vmap()
     end_run()
     return
   
@@ -811,7 +811,7 @@ cdef class dmap(basis):
     set_argv(1, 0, 0) # postprocess, decompose, restart
     read_data()
     init()
-    mc_dmap()
+    mc_vmap()
     end_run()
     return
   
@@ -822,7 +822,7 @@ cdef class dmap(basis):
     set_argv(1, 1, 0) # postprocess, decompose, restart
     read_data()
     init()
-    mc_dmap()
+    mc_vmap()
     end_run()
     return
   
@@ -833,6 +833,6 @@ cdef class dmap(basis):
     set_argv(0, 0, 1)
     read_data()
     init()
-    mc_dmap()
+    mc_vmap()
     end_run()
     return

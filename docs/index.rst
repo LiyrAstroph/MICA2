@@ -28,6 +28,7 @@ Documentation
    detrend.rst
    decomp.rst
    prm.rst
+   vrm.rst
    tests.rst
    list.rst
    faq.rst

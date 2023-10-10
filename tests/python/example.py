@@ -37,13 +37,13 @@ data_input = comm.bcast(data_input, root=0)
 #there are two ways
 #1) one way from the param file
 
-#model = pymica.model(param_file="param/param_input")
+#model = pymica.gmodel(param_file="param/param_input")
 
 #2) the ohter way is through the setup function
 
 model = pymica.gmodel()
 # use Gaussians
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
+model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=500)
 
 # or use tophats
 #model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)

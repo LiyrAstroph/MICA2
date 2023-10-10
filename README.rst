@@ -166,3 +166,40 @@ does not contain those contaminations and purely reflects continuum variations.
      
     model.plot_results() # plot results
     model.post_process()  # generate plots for the properties of MCMC sampling
+
+
+Virtual Reverberation Mapping
+-----------------------------
+
+MICA2 also provides a ``vmap`` mode to do reverberation mapping analysis with a virtual driving light curve. This mode applies 
+in cases where the dirving light curve cannot be chosen or the driving light curve has a poor qaulity that is not suitable to act 
+as the dirving one.
+
+To this end, MICA2 assumes that the virtual drving light curve follows a DRW process with a variation amplitude (:math:`\sigma`) of 0.1 
+and has a time lag of zero with respect to the first light curve of the input data. The remaining analysis is trival and 
+similar to the normal modes.
+
+.. code-block:: python
+  
+  from mpi4py import MPI
+  import numpy as np
+  import pymica
+  import matplotlib.pyplot as plt
+  
+  # initiate MPI
+  comm = MPI.COMM_WORLD
+  rank = comm.Get_rank()
+  
+  model = pymica.vmap()
+  model.setup(data_file="test_vmap.dat", type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=1000)
+  # if using tophats, set type_tf='tophat'
+  # see the documentation for the format of vmap data.
+
+  #run mica
+  model.run()
+  
+  # plot results
+  if rank == 0:
+    
+    model.plot_results() # plot results
+    model.post_process()  # generate plots for the properties of MCMC sampling 

@@ -44,13 +44,13 @@ data_input = comm.bcast(data_input, root=0)
 #   using pmap module.
 
 model = pymica.pmap()
-model.setup(data=data_input, type_tf='gaussian', max_num_saves=2000, lag_prior=[[-5, 5],[0, 50]], \
+model.setup(data=data_input, type_tf='gaussian', max_num_saves=200, lag_prior=[[-5, 5],[0, 50]], \
             ratio_prior=[[0.05, 0.5]], flag_con_sys_err=True, flag_line_sys_err=True, width_limit=[0.01, 100])
 
 # if using top-hats, set type_tf='tophat'
 
 #run mica
-model.run()
+#model.run()
 
 #posterior run, only re-generate posterior samples, do not run MCMC
 #model.post_run()

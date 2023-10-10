@@ -83,7 +83,7 @@ For python version, ``mica`` provide a module ``pmap`` callable as follows.
   #create a model
   #there are two ways
   #1) one way from the param file
-  #model = pymica.model(param_file="param/param_input")
+  #model = pymica.gmodel(param_file="param/param_input")
   
   #2) the ohter way is through the setup function
   

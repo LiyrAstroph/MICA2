@@ -204,7 +204,7 @@ similar to the normal modes.
   data_input = comm.bcast(data_input, root=0)
   
   model = pymica.vmap()
-  model.setup(data=data_input, type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=1000)
+  model.setup(data=data_input, type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=2000)
   # if using tophats, set type_tf='tophat'
   # see the documentation for the format of vmap data.
 

@@ -121,7 +121,7 @@ For python version, ``mica`` provide a module ``vmap`` callable as follows.
   model = pymica.vmap()
   
   # use Gaussians
-  model.setup(data=data_input, type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=1000)
+  model.setup(data=data_input, type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=2000)
   
   # or use tophats
   #model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[1, 1], max_num_saves=2000)
@@ -154,4 +154,13 @@ For python version, ``mica`` provide a module ``vmap`` callable as follows.
     
     model.plot_results() # plot results
     model.post_process()  # generate plots for the properties of MCMC sampling 
-  
+
+Here is an example for vmap analysis. The data is extracted from Fausnaugh et al. 2018, ApJ, 854, 10 
+(see also Ma, Q., Wu, X.-B. et al. 2023, arXiv:2303.10362)
+
+.. figure:: _static/fig_vmap.jpg
+  :scale: 30 %
+  :align: center
+
+  An examplary result of MICA2 analysis with vmap mode. The right topmost panel shows the virtual driving 
+  light curve.

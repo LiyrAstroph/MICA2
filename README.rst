@@ -189,9 +189,22 @@ similar to the normal modes.
   # initiate MPI
   comm = MPI.COMM_WORLD
   rank = comm.Get_rank()
+
+  # load data
+  if rank == 0:
+    lc0 = np.empty(0)  # virtual light curve, empty
+    lc1 = np.loadtxt("g.txt")
+    lc2 = np.loadtxt("r.txt")
+    
+    # make a data dict 
+    data_input = {"set1":[lc0, lc1, lc2]}
+  else:
+    data_input = None 
+  
+  data_input = comm.bcast(data_input, root=0)
   
   model = pymica.vmap()
-  model.setup(data_file="test_vmap.dat", type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=1000)
+  model.setup(data=data_input, type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=1000)
   # if using tophats, set type_tf='tophat'
   # see the documentation for the format of vmap data.
 

@@ -118,8 +118,9 @@ cdef class basis:
         # write data
         for key in data.keys():
           for i in range(len(data[key])):
-            np.savetxt(fp, data[key][i], fmt="%f")
-            fp.write("\n")
+            if len(data[key][i]) > 0: # only write data with points
+              np.savetxt(fp, data[key][i], fmt="%f")
+              fp.write("\n")
 
         fp.close()
 

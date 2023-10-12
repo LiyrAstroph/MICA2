@@ -24,6 +24,7 @@ double dnest_vmap(int argc, char **argv)
 {
   int i, j, k, ic, idx;
   double logz, dlag;
+  char *dnest_data_dir[MICA_MAX_STR_LENGTH];
 
   fptrset_vmap = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
@@ -106,8 +107,10 @@ double dnest_vmap(int argc, char **argv)
   }
   
   print_para_names_vmap();
-
-  logz = dnest(argc, argv, fptrset_vmap, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
+  
+  strcpy(dnest_data_dir, parset.file_dir);
+  strcat(dnest_data_dir, "/data/");
+  logz = dnest(argc, argv, fptrset_vmap, num_params, NULL, NULL, NULL, dnest_data_dir, dnest_options_file, NULL, NULL);
 
   //free memory
   dnest_free_fptrset(fptrset_vmap);

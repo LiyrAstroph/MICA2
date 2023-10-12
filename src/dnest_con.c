@@ -21,6 +21,7 @@ double dnest_con(int argc, char **argv)
 {
   int i;
   double logz;
+  char *dnest_data_dir[MICA_MAX_STR_LENGTH];
 
   num_params = num_params_var;
 
@@ -60,8 +61,10 @@ double dnest_con(int argc, char **argv)
       par_fix_val[i] = log(1.0);
     }
   }
-
-  logz = dnest(argc, argv, fptrset_con, num_params, NULL, NULL, NULL, "data/", dnest_options_file, NULL, NULL);
+  
+  strcpy(dnest_data_dir, parset.file_dir);
+  strcat(dnest_data_dir, "/data/");
+  logz = dnest(argc, argv, fptrset_con, num_params, NULL, NULL, NULL, dnest_data_dir, dnest_options_file, NULL, NULL);
 
   //free memory
   dnest_free_fptrset(fptrset_con);

@@ -271,7 +271,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       if typetf == 0: # gaussian
         for i in range(sample.shape[0]):
           # loop over gaussians
-          if typemodel == 0 or typemodel == 2:  # general model
+          if typemodel == 0 or typemodel == 2:  # general, vmap model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
@@ -295,7 +295,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       else:  # tophats
         for i in range(sample.shape[0]):
           # loop over tophats
-          if typemodel == 0 or typemodel == 2: # general model
+          if typemodel == 0 or typemodel == 2: # general, vmap model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
@@ -477,7 +477,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
     for j in range(1, len(ns)):
       sample_lag[:] = 0.0
       weight_lag[:] = 0.0
-      if typemodel == 0 or typemodel == 2:  # general model
+      if typemodel == 0 or typemodel == 2:  # general, vmap model
         for k in range(ngau):
           sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
           weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
@@ -646,7 +646,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       if typetf == 0:
         for i in range(sample.shape[0]):
           # loop over gaussians
-          if typemodel == 0 or typemodel == 2:  # general model
+          if typemodel == 0 or typemodel == 2:  # general, vmap model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
@@ -669,7 +669,7 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       else:
         for i in range(sample.shape[0]):
           # loop over tophats
-          if typemodel == 0 or typemodel == 2: # general model
+          if typemodel == 0 or typemodel == 2: # general, vmap model
             for k in range(ngau):
               amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]

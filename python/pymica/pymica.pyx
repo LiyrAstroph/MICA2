@@ -217,7 +217,7 @@ cdef class basis:
 
     width = []
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
-      sample = np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)
+      sample = np.atleast_2d(np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i))
       if self.parset.flag_uniform_tranfuns == 0:
         idx_line = self.num_param_var
         for j in range(0, set-1):
@@ -238,7 +238,7 @@ cdef class basis:
     """
     sample=[]
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
-      sample.append(np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i))
+      sample.append(np.atleast_2d(np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)))
     
     return sample 
   
@@ -258,7 +258,7 @@ cdef class basis:
 
     timelag = []
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
-      sample = np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i)
+      sample = np.atleast_2d(np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i))
       if self.parset.flag_uniform_tranfuns == 0:
         idx_line = self.num_param_var
         for j in range(0, set-1):

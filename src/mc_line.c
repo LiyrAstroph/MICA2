@@ -97,6 +97,8 @@ void mc_line()
   
   if(thistask == roottask)
   {
+    char fname[200];
+
     printf("*****************************************************\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
@@ -107,7 +109,8 @@ void mc_line()
     printf("*****************************************************\n");
 
     FILE *fp;
-    fp = fopen("data/evidence.txt", "w");
+    sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
+    fp = fopen(fname, "w");
     fprintf(fp, "# number_of_gaussians/tophats     evidence\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {

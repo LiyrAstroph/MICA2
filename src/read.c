@@ -207,7 +207,7 @@ int read_parset()
     num_pardict = nt;
     
     char fname[200];
-    sprintf(fname, "%s", parset.param_file);
+    sprintf(fname, "%s/%s", parset.file_dir, parset.param_file);
     
     fparam = fopen(fname, "r");
     if(fparam == NULL)
@@ -730,7 +730,7 @@ void cal_mean_error()
 void scale_con_line()
 {
   int i, j, k;
-  double mean;
+  double mean, Rmax, fmax, fmin, scale;  /* mean flux, difference between max and min fluxes*/
 
   for(i=0; i<nset; i++)
   {
@@ -738,28 +738,51 @@ void scale_con_line()
     {
       /* continuum */
       mean = 0.0;
+      fmax = fmin = dataset[i].con.f[0]; 
       for(j=0; j<dataset[i].con.n; j++)
       {
         mean += dataset[i].con.f[j];
+
+        if(fmax<dataset[i].con.f[j]) fmax = dataset[i].con.f[j];
+        if(fmin>dataset[i].con.f[j]) fmin = dataset[i].con.f[j];
       }
       mean /= dataset[i].con.n;
-      
+      Rmax = (fmax-fmin)/2.0;
+
       /* check if the mean is positive*/
-      if(mean < 0.0)
+      if(Rmax == 0.0)
       {
         if(thistask == 0)
         {
-          printf("The mean of continuum of %d-th set is negative (=%f)!\n", i, mean);
-          printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
+          printf("Error: the continuum of %d-th set is constant, without variability. \n", i);
           exit(0);
         }
       }
+      else if(mean < Rmax/100.0)
+      {
+        scale = Rmax;
+        if(thistask == 0)
+        {
+          printf("The mean of continuum of %d-th set is negative or too small (=%f)!\n", i, mean);
+          printf("Using Rmax=fmax-fmin (=%f) to normalize the continuum light curve!\n", Rmax);
+          //printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
+          //exit(0);
+        }
+      }
+      else
+      {
+        scale = mean;
+        if(thistask == 0)
+        {
+          printf("Using the mean (=%f) to normalize the continuum of %d-th set !\n", mean, i);
+        }
+      }
 
-      dataset[i].con.scale=mean;
+      dataset[i].con.scale=scale;
       for(j=0; j<dataset[i].con.n; j++)
       {
-        dataset[i].con.f[j] /= mean;
-        dataset[i].con.fe[j] /= mean;
+        dataset[i].con.f[j] /= scale;
+        dataset[i].con.fe[j] /= scale;
       }
     }
     else /* for vmap, no continuum data points */
@@ -771,30 +794,52 @@ void scale_con_line()
     for(j=0; j<dataset[i].nlset; j++)
     {
       mean = 0.0;
-
+      fmax = fmin = dataset[i].line[j].f[0];
       for(k=0; k<dataset[i].line[j].n; k++)
       {
         mean += dataset[i].line[j].f[k];
+
+        if(fmax<dataset[i].line[j].f[k]) fmax = dataset[i].line[j].f[k];
+        if(fmin>dataset[i].line[j].f[k]) fmin = dataset[i].line[j].f[k];
       }
       mean /= dataset[i].line[j].n;
+      Rmax = (fmax-fmin)/2.0;
       
       /* check if the mean is positive*/
-      if(mean < 0.0)
+      if(Rmax == 0.0)
       {
         if(thistask == 0)
         {
-          printf("The mean of %d-th line of %d-th set is negative (=%f)!\n", j, i, mean);
-          printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
+          printf("Error: the %d-th line of %d-th set is constant, without variability. \n", j, i);
           exit(0);
         }
       }
+      else if(mean < Rmax/100.0)
+      {
+        scale = Rmax;
+        if(thistask == 0)
+        {
+          printf("The mean of %d-th line of %d-th set is negative or too small (=%f)!\n", j, i, mean);
+          printf("Use Rmax=fmax-fmin (=%f) to normalize the line light curve!\n", Rmax);
+          //printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
+          //exit(0);
+        }
+      }
+      else 
+      {
+        scale = mean;
+        if(thistask == 0)
+        {
+          printf("Using the mean (=%f) to normalize the %d-th line of %d-th set !\n", mean, j, i);
+        }
+      }
 
-      dataset[i].line[j].scale=mean;
+      dataset[i].line[j].scale=scale;
 
       for(k=0; k<dataset[i].line[j].n; k++)
       {
-        dataset[i].line[j].f[k] /= mean;
-        dataset[i].line[j].fe[k] /= mean;
+        dataset[i].line[j].f[k] /= scale;
+        dataset[i].line[j].fe[k] /= scale;
       }
     }
   }

@@ -19,7 +19,7 @@ if rank == 0:
   data = np.loadtxt("./sim_data.txt")
   con = data[:126, :]
   line= data[126:, :]
-  
+
   # make a data dict 
   data_input = {"set1":[con, line]}
 
@@ -74,7 +74,7 @@ model.run()
 # plot results
 if rank == 0:
   
-  model.plot_results() # plot results
+  model.plot_results(doshow=True) # plot results, doshow controls whether showing the results on screen
   model.post_process()  # generate plots for the properties of MCMC sampling 
 
   # get the full sample 
@@ -90,8 +90,8 @@ if rank == 0:
   # timelag[1] is for the case of number_component[1]
   # ...
   timelag = model.get_posterior_sample_timelag(set=0, line=0) 
-  plt.plot(timelag[0][:, 0])
-  plt.plot(timelag[0][:, 1])
+  plt.plot(timelag[1][:, 0])
+  plt.plot(timelag[1][:, 1])
   plt.show()
 
   # get the posterior sample of widths of the "line" in the dataset "set"
@@ -100,6 +100,6 @@ if rank == 0:
   # width[1] is for the case of number_component[1]
   # ...
   width = model.get_posterior_sample_width(set=0, line=0) 
-  plt.plot(width[0][:, 0])
-  plt.plot(width[0][:, 1])
+  plt.plot(width[1][:, 0])
+  plt.plot(width[1][:, 1])
   plt.show()

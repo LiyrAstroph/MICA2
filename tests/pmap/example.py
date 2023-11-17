@@ -61,7 +61,7 @@ model.run()
 # plot results
 if rank == 0:
   
-  model.plot_results() # plot results
+  model.plot_results(doshow=True) # plot results,doshow controls whether showing the results on screen
   model.post_process()  # generate plots for the properties of MCMC sampling 
 
   model.plot_decomp()

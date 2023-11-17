@@ -14,7 +14,7 @@ import argparse
 
 __all__ = ["plot_results"]
 
-def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, resp_input):
+def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, resp_input, doshow=True):
   """
   reconstruct line lcs according to the time sapns of the continuum.
   """
@@ -388,16 +388,20 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       xlim = ax.get_xlim()
       ylim = ax.get_ylim()
       ax.minorticks_on()
-
-    plt.show()
+    
     pdf.savefig(fig)
+    
+    if doshow:
+      plt.show()
+    else:
+      plt.close()
 
     idx_q += len(ns) * nq
   
   pdf.close()
   return
 
-def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, resp_input):
+def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, resp_input, doshow=True):
   """
   reconstruct line lcs according to their own time sapns.
   """
@@ -757,15 +761,19 @@ def plot_results2(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtr
       ylim = ax.get_ylim()
       ax.minorticks_on()
 
-    plt.show()
     pdf.savefig(fig)
+
+    if doshow:
+      plt.show()
+    else:
+      plt.close()
 
     idx_q += len(ns) * nq
   
   pdf.close()
   return
 
-def plot_results_all(args, param):
+def plot_results_all(args, param, doshow=True):
   try:
     fdir = param["FileDir"]+"/"
   except:
@@ -826,7 +834,7 @@ def plot_results_all(args, param):
     typemodel = 0
 
   for ngau in range(ngau_low, ngau_upp+1):
-    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, args.resp_input)
+    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, typetf, typemodel, args.resp_input, doshow=doshow)
 
 def _param_parser(fname):
   """

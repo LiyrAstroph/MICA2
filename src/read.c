@@ -207,7 +207,7 @@ int read_parset()
     num_pardict = nt;
     
     char fname[200];
-    sprintf(fname, "%s/%s", parset.file_dir, parset.param_file);
+    sprintf(fname, "%s", parset.param_file);
     
     fparam = fopen(fname, "r");
     if(fparam == NULL)
@@ -217,6 +217,7 @@ int read_parset()
     }
 
     /* default parset */
+    strcpy(parset.file_dir,"\0"); /* empty file dir */
     parset.num_gaussian_low = parset.num_gaussian_upper = 1;
     parset.flag_uniform_tranfuns = parset.flag_uniform_var_params = 0;
     parset.lag_limit_low = 0.0;

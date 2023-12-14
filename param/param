@@ -44,6 +44,10 @@ FlagLagPositivity         0                # whether force Gaussians overall loc
                                            # 0: no;  1: yes
                                            # default: 0
 
+FlagNegativeResp          1                # whether turn on negative response
+                                           # 0, no; 1, yes
+                                           # default: 0
+
 NumCompLow                2                # lower limit of number of Gaussians/tophats
 NumCompUpp                2                # upper limit of number of Gaussians/tophats
                                            # default: 1, 1
@@ -52,7 +56,7 @@ FlagConSysErr             0                # 0, not include systematic error of 
 FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
                                            # defaul: 0, 0
 
-TypeLagPrior              4                # type of lag prior for each Gaussians/tophats.
+TypeLagPrior              1                # type of lag prior for each Gaussians/tophats.
                                            # default: 0
                                            # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
                                            #

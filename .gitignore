@@ -45,6 +45,11 @@ tests/vmap/*
 !tests/vmap/example.py
 !tests/vmap/mcg08_g.txt
 !tests/vmap/mcg08_r.txt
+!tests/negative_resp
+tests/negative_resp/*
+!tests/negative_resp/example.py
+!tests/negative_resp/sim_data.txt
+!tests/negative_resp/resp_input.txt
 cdnest/*
 !cdnest/*.[ch]
 !python/pymica/__init__.py

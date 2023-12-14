@@ -17,8 +17,8 @@ rank = comm.Get_rank()
 # load data
 if rank == 0:
   data = np.loadtxt("./sim_data.txt")
-  con = data[:126, :]
-  line= data[126:, :]
+  con = data[:101, :]
+  line= data[101:, :]
 
   # make a data dict 
   data_input = {"set1":[con, line]}
@@ -43,16 +43,18 @@ data_input = comm.bcast(data_input, root=0)
 
 model = pymica.gmodel()
 # use Gaussians
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=500)
+model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=1000, 
+            flag_negative_resp=True)
 
 # or use tophats
-#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=2000)
+#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,
 #            type_tf='gaussian', max_num_saves=2000, 
 #            flag_uniform_var_params=False, flag_uniform_tranfuns=False,
 #            flag_trend=0, flag_lag_posivity=False,
+#            flag_negative_resp=False,
 #            lag_limit=[0, 100], number_component=[1, 1],
 #            width_limit=[0.1, 100],
 #            flag_con_sys_err=False, flag_line_sys_err=False,
@@ -90,8 +92,8 @@ if rank == 0:
   # timelag[1] is for the case of number_component[1]
   # ...
   timelag = model.get_posterior_sample_timelag(set=0, line=0) 
-  plt.plot(timelag[1][:, 0])
-  plt.plot(timelag[1][:, 1])
+  plt.plot(timelag[0][:, 0])
+  plt.plot(timelag[0][:, 1])
   plt.show()
 
   # get the posterior sample of widths of the "line" in the dataset "set"
@@ -100,6 +102,6 @@ if rank == 0:
   # width[1] is for the case of number_component[1]
   # ...
   width = model.get_posterior_sample_width(set=0, line=0) 
-  plt.plot(width[1][:, 0])
-  plt.plot(width[1][:, 1])
+  plt.plot(width[0][:, 0])
+  plt.plot(width[0][:, 1])
   plt.show()

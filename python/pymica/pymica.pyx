@@ -72,6 +72,7 @@ cdef class basis:
     self.parset.flag_trend = 0
     self.parset.type_tf = 0
     self.parset.flag_lag_posivity = 0
+    self.parset.flag_negative_resp = 0
     self.parset.num_gaussian_low = 1
     self.parset.num_gaussian_upper = 1
     # cdnest options
@@ -149,6 +150,7 @@ cdef class basis:
       if self.parset.width_limit_upper_isset == 1:
         fp.write("{:30}{}\n".format("WidthLimitUpp", self.parset.width_limit_upper))  
       fp.write("{:30}{}\n".format("FlagLagPositivity", self.parset.flag_lag_posivity))
+      fp.write("{:30}{}\n".format("FlagNegativeResp", self.parset.flag_negative_resp))
       fp.write("{:30}{}\n".format("NumCompLow", self.parset.num_gaussian_low))
       fp.write("{:30}{}\n".format("NumCompUpp", self.parset.num_gaussian_upper))
       fp.write("{:30}{}\n".format("FlagConSysErr", self.parset.flag_con_sys_err))
@@ -165,7 +167,7 @@ cdef class basis:
       fp.write("{:30}{:5}{}\n".format("# PTol", self.parset.max_ptol,"# likelihood tolerance in loge"))
       fp.write("{:30}{:5}{}\n".format("# NumberParticles", self.parset.num_particles, "# number of particles"))
       fp.write("{:30}{:5}{}\n".format("# NewLevelIntervalFactor", self.parset.new_level_interval_factor, "# new level interval"))
-      fp.write("{:30}{:5}{}\n".format("# SaveIntervalFactor",self.parset.save_interval_factor,"# particular saving interval"))
+      fp.write("{:30}{:5}{}\n".format("# SaveIntervalFactor",self.parset.save_interval_factor,"# particle saving interval"))
       fp.write("{:30}{:5}{}\n".format("# ThreadStepsFactor",self.parset.thread_steps_factor,"# thread steps before communications between cores"))
       fp.write("{:30}{:5}{}\n".format("# MaxNumberLevels",self.parset.max_num_levels,"# maximum number of levels; unlimited for 0"))
       fp.write("{:30}{:5}{}\n".format("# BacktrackingLength",self.parset.lam,"# backforward tracking length (lambda)"))
@@ -180,7 +182,8 @@ cdef class basis:
       ut.plot_results(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
                       self.parset.lag_limit_low, self.parset.lag_limit_upper, \
                       self.parset.flag_uniform_var_params, self.parset.flag_uniform_tranfuns, \
-                      self.parset.flag_trend, self.parset.type_tf, self.parset.model, None, doshow=doshow)
+                      self.parset.flag_trend, self.parset.flag_negative_resp, \
+                      self.parset.type_tf, self.parset.model, None, doshow=doshow)
     return
   
   def plot_decomp(self):
@@ -297,6 +300,7 @@ cdef class basis:
   def setup(self, data_file=None, data=None,
                   type_tf='gaussian', max_num_saves=2000,
                   flag_trend=0, flag_lag_posivity=False,
+                  flag_negative_resp=False,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
@@ -346,6 +350,14 @@ cdef class basis:
     else:
       raise ValueError("flag_lag_posivity is unrecognized!")
     
+    # negative respone
+    if flag_negative_resp == False:
+      self.parset.flag_negative_resp = 0
+    elif flag_negative_resp == True:
+      self.parset.flag_negative_resp = 1
+    else:
+      raise ValueError("flag_negative_resp is unrecognized!")
+
     # continuum systematic error
     if flag_con_sys_err == False:
       self.parset.flag_con_sys_err = 0
@@ -411,6 +423,7 @@ cdef class gmodel(basis):
                   type_tf='gaussian', max_num_saves=2000, 
                   flag_uniform_var_params=False, flag_uniform_tranfuns=False,
                   flag_trend=0, flag_lag_posivity=False,
+                  flag_negative_resp = False,
                   lag_limit=[0, 100], number_component=[1, 1],
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
@@ -425,6 +438,7 @@ cdef class gmodel(basis):
     """
     
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
+                      flag_negative_resp, \
                       flag_con_sys_err, flag_line_sys_err,
                       # follows cdnest parameters
                       num_particles = num_particles,
@@ -566,6 +580,7 @@ cdef class pmap(basis):
                   max_num_levels=0):
 
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
+                      False, \
                       flag_con_sys_err, flag_line_sys_err,
                       # follows cdnest parameters
                       num_particles = num_particles,
@@ -721,6 +736,7 @@ cdef class vmap(basis):
     """
     
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
+                      False, \
                       flag_con_sys_err, flag_line_sys_err,
                       # follows cdnest parameters
                       num_particles = num_particles,

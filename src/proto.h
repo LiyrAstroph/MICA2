@@ -105,12 +105,26 @@ void Sll2_array_gauss(double *tline1, int nline1, double *tline2, int nline2, co
 double Slc_gauss(double tcon, double tline, const void *model, int nds, int nls);
 void Slc_array_gauss(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 
+double Sll_gauss_linear(double t1, double t2, const void *model, int nds, int nls);
+void Sll_array_gauss_linear(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+double Sll2_gauss_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+void Sll2_array_gauss_linear(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
+double Slc_gauss_linear(double tcon, double tline, const void *model, int nds, int nls);
+void Slc_array_gauss_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+
 double Sll_tophat(double t1, double t2, const void *model, int nds, int nls);
 void Sll_array_tophat(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 double Sll2_tophat(double t1, double t2, const void *model, int nds, int nls1, int nls2);
 void Sll2_array_tophat(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
 double Slc_tophat(double tcon, double tline, const void *model, int nds, int nls);
 void Slc_array_tophat(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+
+double Sll_tophat_linear(double t1, double t2, const void *model, int nds, int nls);
+void Sll_array_tophat_linear(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+double Sll2_tophat_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+void Sll2_array_tophat_linear(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
+double Slc_tophat_linear(double tcon, double tline, const void *model, int nds, int nls);
+void Slc_array_tophat_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 
 void set_covar_Pmat_data_line(const void *model, int k);
 void set_covar_Pmat_data_line_array(const void *model, int k);

@@ -80,6 +80,7 @@ typedef struct
   int type_lag_prior;
   int type_tf;
   int flag_lag_posivity;
+  int flag_negative_resp;
 
   char str_lag_prior[MICA_MAX_STR_LENGTH];
   char str_ratio_prior[MICA_MAX_STR_LENGTH];

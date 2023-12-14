@@ -42,9 +42,17 @@ void init()
   /* set parameter range of line */
   line_range_model[0][0] = log(1.0); // systematic error in line
   line_range_model[0][1] = log(1.0+10.0);
-
-  line_range_model[1][0] = log(1.0e-5); // amplitude of Gaussian
-  line_range_model[1][1] = log(1.0e2);
+  
+  if(parset.flag_negative_resp == 0)
+  {
+    line_range_model[1][0] = log(1.0e-5); // amplitude of Gaussian
+    line_range_model[1][1] = log(1.0e1);
+  }
+  else
+  {
+    line_range_model[1][0] = -1.0e1; // amplitude of Gaussian
+    line_range_model[1][1] =  1.0e1;
+  }
 
   line_range_model[2][0] = fmax(parset.lag_limit_low, -tspan_max/2.0); // center of Gaussian
   line_range_model[2][1] = fmin(parset.lag_limit_upper, tspan_max/2.0);
@@ -66,12 +74,24 @@ void init()
 
   if(parset.type_tf == 0)
   {
-    Slc = Slc_gauss;
-    Sll = Sll_gauss;
-    Sll2 = Sll2_gauss;
-    Slc_array = Slc_array_gauss;
-    Sll_array = Sll_array_gauss;
-    Sll2_array = Sll2_array_gauss;
+    if(parset.flag_negative_resp == 0)
+    {
+      Slc = Slc_gauss;
+      Sll = Sll_gauss;
+      Sll2 = Sll2_gauss;
+      Slc_array = Slc_array_gauss;
+      Sll_array = Sll_array_gauss;
+      Sll2_array = Sll2_array_gauss;
+    }
+    else 
+    {
+      Slc = Slc_gauss_linear;
+      Sll = Sll_gauss_linear;
+      Sll2 = Sll2_gauss_linear;
+      Slc_array = Slc_array_gauss_linear;
+      Sll_array = Sll_array_gauss_linear;
+      Sll2_array = Sll2_array_gauss_linear;
+    }
 
     Slc_single = Slc_single_gauss;
     Sll_single = Sll_single_gauss;
@@ -82,12 +102,24 @@ void init()
   }
   else
   {
-    Slc = Slc_tophat;
-    Sll = Sll_tophat;
-    Sll2 = Sll2_tophat;
-    Slc_array = Slc_array_tophat;
-    Sll_array = Sll_array_tophat;
-    Sll2_array = Sll2_array_tophat; 
+    if(parset.flag_negative_resp == 0)
+    {
+      Slc = Slc_tophat;
+      Sll = Sll_tophat;
+      Sll2 = Sll2_tophat;
+      Slc_array = Slc_array_tophat;
+      Sll_array = Sll_array_tophat;
+      Sll2_array = Sll2_array_tophat; 
+    }
+    else
+    {
+      Slc = Slc_tophat_linear;
+      Sll = Sll_tophat_linear;
+      Sll2 = Sll2_tophat_linear;
+      Slc_array = Slc_array_tophat_linear;
+      Sll_array = Sll_array_tophat_linear;
+      Sll2_array = Sll2_array_tophat_linear; 
+    }
 
     Slc_single = Slc_single_tophat;
     Sll_single = Sll_single_tophat;

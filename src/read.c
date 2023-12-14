@@ -85,6 +85,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "FlagNegativeResp");
+    pardict[nt].addr = &parset.flag_negative_resp;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
     strcpy(pardict[nt].tag, "LagLimitLow");
     pardict[nt].addr = &parset.lag_limit_low;
     pardict[nt].isset = 0;
@@ -222,10 +227,11 @@ int read_parset()
     parset.flag_uniform_tranfuns = parset.flag_uniform_var_params = 0;
     parset.lag_limit_low = 0.0;
     parset.lag_limit_upper = -1.0;
-    parset.type_lag_prior = 1;
+    parset.type_lag_prior = 0;
     parset.width_limit_low = DBL_MAX;
     parset.width_limit_upper = DBL_MAX;
     parset.flag_trend = 0;
+    parset.flag_negative_resp = 0;
     parset.type_tf = 0;
     parset.flag_lag_posivity = 0;
     parset.num_gaussian_low = 1;
@@ -394,6 +400,21 @@ int read_parset()
     {
       printf("LagLimitLow shoule be >=0 when enabling FlagLagPositivity.\n");
       exit(0);
+    }
+    if(parset.flag_negative_resp < 0 && parset.flag_negative_resp > 1)
+    {
+      printf("FlagNegativeResp shoule be 0 or 1.\n");
+      exit(0);
+    }
+    if(parset.flag_negative_resp == 1 && parset.model != 0)
+    {
+      printf("FlagNegativeResp only works when TypeModel = 0.\n");
+      exit(0);
+    }
+    if(parset.flag_negative_resp == 1 && parset.type_lag_prior == 0)
+    {
+      /* make sure the lag prior type > 0 */
+      parset.type_lag_prior = 1;
     }
   }
 

@@ -28,6 +28,7 @@ cdef extern from "allvars.h":
     int type_tf
     int model
     int flag_lag_posivity
+    int flag_negative_resp
   
     int num_gaussian_low, num_gaussian_upper, num_gaussian_diff
   

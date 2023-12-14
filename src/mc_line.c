@@ -2186,6 +2186,64 @@ double Sll_gauss(double t1, double t2, const void *model, int nds, int nls)
   return Sttot;
 }
 
+double Sll_gauss_linear(double t1, double t2, const void *model, int nds, int nls)
+{
+  double Dt, DT, St, Sttot, A;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+      
+      DT = Dt - (tau1 - tau2);
+    
+     /* 
+      * for very large x 
+      * erfc(x) = exp(-x^2)/(x * pi^1/2) * ( 1 - 1/(2*x*x) + 3/(2*x*x)^2 ... )
+      * 
+      * (see https://en.wikipedia.org/wiki/Error_function)
+      *
+      * with this equation, the factor exp(wg*wg/taud/taud) will be canceled out.
+      */
+     /*
+      {
+        St = exp(wg*wg/taud/taud) * ( exp(-DT/taud) * erfc( -DT/2.0/wg + wg/taud )
+                                 +exp( DT/taud) * erfc(  DT/2.0/wg + wg/taud ) );
+      }
+     */
+
+      A = sqrt(wg1*wg1 + wg2*wg2);
+
+      St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud )
+          +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud ) ;
+
+      St *= 1.0/2.0 * fg1*fg2;
+
+      Sttot += St;
+    }
+  }
+  
+  return Sttot;
+}
 
 /*
  * auto-covariance of line for an array of times
@@ -2226,6 +2284,67 @@ void Sll_array_gauss(double *tline, int nline, const void *model, int nds, int n
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+      
+      A = sqrt(wg1*wg1 + wg2*wg2);
+      At = A/taud;
+      At2 = At*At/2.0;
+
+      fg12 = fg1*fg2/2.0;
+
+      for(i=0; i<nline; i++)
+      {
+        for(j=0; j<=i; j++)
+        {
+          Dt = tline[i] - tline[j];
+          DT = Dt - (tau1 - tau2);
+
+          St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - At) / sqrt(2.0) ) + At2 )
+              +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + At) / sqrt(2.0) ) + At2 ) ;
+
+          St *= fg12;
+
+          Smat[i*nline + j] += St;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+void Sll_array_gauss_linear(double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double Dt, DT, St, A, At, At2;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12;
+  double *pm = (double *)model;
+  int idx, k1, k2, i, j, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<nline; i++)
+  {
+    for(j=0; j<=i; j++)
+    {
+      Smat[i*nline + j] = 0.0;
+    }
+  }
+
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
       tau2 =    pm[idxk2 + 1] ;
       wg2 = exp(pm[idxk2 + 2]);
       
@@ -2309,6 +2428,53 @@ double Sll2_gauss(double t1, double t2, const void *model, int nds, int nls1, in
   return Sttot;
 }
 
+double Sll2_gauss_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, idxk1, idxk2;
+  double fg1, fg2, tau1, tau2, wg1, wg2, taud;
+  double Dt, DT, St, Sttot, A;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  Sttot = 0.0;
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+
+  
+      DT = Dt - (tau1-tau2);
+  
+      A = sqrt(wg1*wg1 + wg2*wg2);
+
+      St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud )
+          +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + A/taud) / sqrt(2.0) ) + A*A/2.0/taud/taud ) ;
+
+      St *= 1.0/2.0 * fg1*fg2;
+
+      Sttot += St;
+    }
+  }
+
+  return Sttot;
+}
+
+
 /*
  * covariance between different line for an array of times
  *
@@ -2379,6 +2545,68 @@ void Sll2_array_gauss(double *tline1, int nline1, double *tline2, int nline2, co
   return;
 }
 
+void Sll2_array_gauss_linear(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, i, j, idxk1, idxk2;
+  double fg1, fg2, fg12, tau1, tau2, wg1, wg2, taud;
+  double Dt, DT, St, A, At, At2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  for(i=0; i<nline1; i++)
+  {
+    for(j=0; j<nline2; j++)
+    {
+      Smat[i*nline2 + j] = 0.0;
+    }
+  }
+
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+      
+      A = sqrt(wg1*wg1 + wg2*wg2);
+      At = A/taud;
+      At2 = At*At/2.0;
+
+      fg12 = fg1*fg2/2.0;
+
+      for(i=0; i<nline1; i++)
+      {
+        for(j=0; j<nline2; j++)
+        {
+          Dt = tline1[i] - tline2[j];
+          DT = Dt - (tau1-tau2);
+
+          St = exp( -DT/taud + gsl_sf_log_erfc( -(DT/A - At) / sqrt(2.0) ) + At2 )
+              +exp(  DT/taud + gsl_sf_log_erfc(  (DT/A + At) / sqrt(2.0) ) + At2 ) ;
+
+          St *= fg12;
+
+          Smat[i*nline2 + j] += St;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
 /*
  * covariance between continuum and line 
  *
@@ -2403,6 +2631,55 @@ double Slc_gauss(double tcon, double tline, const void *model, int nds, int nls)
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
+    tau0 =   pm[idxk + 1] ;
+    wg = exp(pm[idxk + 2]);
+
+    DT = Dt - tau0;
+
+  /* 
+   * for very large x 
+   * erfc(x) = exp(-x^2)/(x * pi^1/2) * ( 1 - 1/(2*x*x) + 3/(2*x*x)^2 ... )
+   * 
+   * (see https://en.wikipedia.org/wiki/Error_function)
+   *
+   * with this equation, the factor exp(wg*wg/taud/taud/2) will be canceled out.
+   */
+  /*
+  {
+    St = exp(wg*wg/2.0/taud/taud) * ( exp(-DT/taud) * erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) 
+                                     +exp( DT/taud) * erfc(  (DT/wg + wg/taud)/sqrt(2.0) ));
+  }
+  */
+
+    St = exp(-DT/taud + gsl_sf_log_erfc( -(DT/wg - wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud )
+        +exp( DT/taud + gsl_sf_log_erfc(  (DT/wg + wg/taud)/sqrt(2.0) ) +  wg*wg/2.0/taud/taud );
+
+    St *= 1.0/2.0 * fg;
+
+    Sttot += St;
+  }
+
+  return Sttot;
+}
+
+double Slc_gauss_linear(double tcon, double tline, const void *model, int nds, int nls)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, wg, tau0, St, Sttot;
+  int idx, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  Dt = tline - tcon;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg =     pm[idxk + 0];
     tau0 =   pm[idxk + 1] ;
     wg = exp(pm[idxk + 2]);
 
@@ -2490,6 +2767,56 @@ void Slc_array_gauss(double *tcon, int ncon, double *tline, int nline, const voi
   return;
 }
 
+void Slc_array_gauss_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, wg, tau0, St, wt, wt2;
+  int idx, i, j, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<ncon; i++)
+  {
+    for(j=0; j<nline; j++)
+    {
+      Smat[i*nline+j] = 0.0;
+    }
+  }
+
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg =     pm[idxk + 0];
+    tau0 =   pm[idxk + 1] ;
+    wg = exp(pm[idxk + 2]);
+    
+    wt = wg/taud;
+    wt2 = wt*wt/2.0;
+    
+    for(i=0; i<ncon; i++)
+    {
+      for(j=0; j<nline; j++)
+      {
+        Dt = tline[j] - tcon[i];
+
+        DT = Dt - tau0;
+
+        St = exp(-DT/taud + gsl_sf_log_erfc( -(DT/wg - wt)/sqrt(2.0) ) +  wt2 )
+            +exp( DT/taud + gsl_sf_log_erfc(  (DT/wg + wt)/sqrt(2.0) ) +  wt2 );
+
+        St *= 1.0/2.0 * fg;
+
+        Smat[i*nline + j] += St;
+      }
+    }
+  }
+
+  return;
+}
+
 /*===============================================================================
  * tophat transfer function 
  *===============================================================================
@@ -2518,6 +2845,50 @@ double Slc_tophat(double tcon, double tline, const void *model, int nds, int nls
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
+    tau0 =   pm[idxk + 1] ;
+    wg = exp(pm[idxk + 2]);
+    
+    fg *= taud/2.0/wg;
+
+    DT = Dt - tau0;
+
+    if(DT < -wg)
+    {
+      St = exp( (DT + wg) / taud ) - exp( (DT - wg)/taud);
+    }
+    else if(DT < wg)
+    {
+      St = 2.0 - exp(- (DT + wg) / taud) - exp( (DT - wg)/taud);
+    }
+    else 
+    {
+      St = exp( - (DT - wg)/taud) - exp ( - (DT + wg)/taud);
+    }
+
+    Sttot += St * fg;
+  }
+
+  return Sttot;
+}
+
+double Slc_tophat_linear(double tcon, double tline, const void *model, int nds, int nls)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, wg, tau0, St, Sttot;
+  int idx, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  Dt = tline - tcon;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg =     pm[idxk + 0];
     tau0 =   pm[idxk + 1] ;
     wg = exp(pm[idxk + 2]);
     
@@ -2607,6 +2978,63 @@ void Slc_array_tophat(double *tcon, int ncon, double *tline, int nline, const vo
   return;
 }
 
+void Slc_array_tophat_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, wg, tau0, St;
+  int idx, i, j, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<ncon; i++)
+  {
+    for(j=0; j<nline; j++)
+    {
+      Smat[i*nline+j] = 0.0;
+    }
+  }
+
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg =     pm[idxk + 0];
+    tau0 =   pm[idxk + 1] ;
+    wg = exp(pm[idxk + 2]);
+    
+    fg *= taud/2.0/wg;
+
+    for(i=0; i<ncon; i++)
+    {
+      for(j=0; j<nline; j++)
+      {
+        Dt = tline[j] - tcon[i];
+
+        DT = Dt - tau0;
+
+        if(DT < -wg)
+        {
+          St = exp( (DT + wg) / taud ) - exp( (DT - wg)/taud);
+        }
+        else if(DT < wg)
+        {
+          St = 2.0 - exp(- (DT + wg) / taud) - exp( (DT - wg)/taud);
+        }
+        else 
+        {
+          St = exp( - (DT - wg)/taud) - exp ( - (DT + wg)/taud);
+        }
+
+        Smat[i*nline + j] += St * fg;
+      }
+    }
+  }
+
+  return;
+}
+
 /*
  * auto-covariance between a line for an array of times
  *
@@ -2639,6 +3067,85 @@ double Sll_tophat(double t1, double t2, const void *model, int nds, int nls)
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+      
+      fg12 = fg1/wg1*fg2/wg2/4.0 * taud*taud;
+
+      if(wg1>=wg2)
+      {
+        wh = wg1;
+        wl = wg2;
+      }
+      else
+      {
+        wh = wg2;
+        wl = wg1;
+      }
+
+      DT = Dt - (tau1 - tau2);
+    
+      if(DT < -wh-wl)
+      {
+        St = exp((DT+wh+wl)/taud) + exp((DT-wh-wl)/taud)
+            -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud);
+      }
+      else if(DT < -wh+wl)
+      {        
+        St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+            -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud) 
+            +2.0*(DT+wh+wl)/taud;
+      }
+      else if(DT <  wh-wl)
+      {
+        St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+            -exp((DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud) 
+            +4.0*wl/taud;
+      }
+      else if(DT <  wh+wl)
+      {
+        St = exp(-(DT+wh+wl)/taud) + exp((DT-wh-wl)/taud)
+            -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud)
+            -2.0*(DT-wh-wl)/taud;
+      }
+      else 
+      {
+        St = exp(-(DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+            -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud);
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+  
+  return Sttot;
+}
+
+double Sll_tophat_linear(double t1, double t2, const void *model, int nds, int nls)
+{
+  double Dt, DT, St, Sttot;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, wh, wl, fg12;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
       tau2 =    pm[idxk2 + 1] ;
       wg2 = exp(pm[idxk2 + 2]);
       
@@ -2792,6 +3299,98 @@ void Sll_array_tophat(double *tline, int nline, const void *model, int nds, int 
   return;
 }
 
+void Sll_array_tophat_linear(double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12, wh, wl;
+  double *pm = (double *)model;
+  int idx, k1, k2, i, j, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<nline; i++)
+  {
+    for(j=0; j<=i; j++)
+    {
+      Smat[i*nline + j] = 0.0;
+    }
+  }
+
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/wg1*fg2/wg2/4.0 *taud*taud;
+
+      if(wg1>=wg2)
+      {
+        wh = wg1;
+        wl = wg2;
+      }
+      else
+      {
+        wh = wg2;
+        wl = wg1;
+      }
+  
+      for(i=0; i<nline; i++)
+      {
+        for(j=0; j<=i; j++)
+        {
+          Dt = tline[i] - tline[j];
+          DT = Dt - (tau1 - tau2);
+
+          if(DT < -wh-wl)
+          {
+            St = exp((DT+wh+wl)/taud) + exp((DT-wh-wl)/taud)
+                -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud);
+          }
+          else if(DT < -wh+wl)
+          {            
+            St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+                -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud) 
+                +2.0*(DT+wh+wl)/taud;
+          }
+          else if(DT <  wh-wl)
+          {
+            St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+                -exp((DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud) 
+                +4.0*wl/taud;
+          }
+          else if(DT <  wh+wl)
+          {   
+            St = exp(-(DT+wh+wl)/taud) + exp((DT-wh-wl)/taud) 
+                -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud) 
+                -2.0*(DT-wh-wl)/taud;
+          }
+          else 
+          {
+            St = exp(-(DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+                -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud);
+          }
+
+          Smat[i*nline + j] += St * fg12;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
 /*
  * covariance between different lines
  *
@@ -2825,6 +3424,86 @@ double Sll2_tophat(double t1, double t2, const void *model, int nds, int nls1, i
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/wg1*fg2/wg2/4.0 * taud*taud;
+
+      if(wg1>=wg2)
+      {
+        wh = wg1;
+        wl = wg2;
+      }
+      else
+      {
+        wh = wg2;
+        wl = wg1;
+      }
+  
+      DT = Dt - (tau1-tau2);
+  
+      if(DT < -wh-wl)
+      {
+        St = exp((DT+wh+wl)/taud) + exp((DT-wh-wl)/taud)
+            -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud);
+      }
+      else if(DT < -wh+wl)
+      {        
+        St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+            -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud) 
+            +2.0*(DT+wh+wl)/taud;
+      }
+      else if(DT <  wh-wl)
+      {
+        St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+            -exp((DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud) 
+            +4.0*wl/taud;
+      }
+      else if(DT <  wh+wl)
+      {
+        St = exp(-(DT+wh+wl)/taud) + exp((DT-wh-wl)/taud)
+            -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud)
+            -2.0*(DT-wh-wl)/taud;
+      }
+      else 
+      {
+        St = exp(-(DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+            -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud);
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+
+  return Sttot;
+}
+
+double Sll2_tophat_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, idxk1, idxk2;
+  double fg1, fg2, tau1, tau2, wg1, wg2, taud, wh, wl, fg12;
+  double Dt, DT, St, Sttot;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  Sttot = 0.0;
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
       tau2 =    pm[idxk2 + 1] ;
       wg2 = exp(pm[idxk2 + 2]);
 
@@ -2918,6 +3597,99 @@ void Sll2_array_tophat(double *tline1, int nline1, double *tline2, int nline2, c
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
+      tau2 =    pm[idxk2 + 1] ;
+      wg2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/wg1*fg2/wg2/4.0 * taud*taud;
+
+      if(wg1>=wg2)
+      {
+        wh = wg1;
+        wl = wg2;
+      }
+      else
+      {
+        wh = wg2;
+        wl = wg1;
+      }
+
+      for(i=0; i<nline1; i++)
+      {
+        for(j=0; j<nline2; j++)
+        {
+          Dt = tline1[i] - tline2[j];
+          DT = Dt - (tau1-tau2);
+
+          if(DT < -wh-wl)
+          {
+            St = exp((DT+wh+wl)/taud) + exp((DT-wh-wl)/taud)
+                -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud);
+          }
+          else if(DT < -wh+wl)
+          {            
+            St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+                -exp((DT+wh-wl)/taud) - exp((DT-wh+wl)/taud) 
+                +2.0*(DT+wh+wl)/taud;
+          }
+          else if(DT <  wh-wl)
+          {
+            St = exp((DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+                -exp((DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud) 
+                +4.0*wl/taud;
+          }
+          else if(DT <  wh+wl)
+          {   
+            St = exp(-(DT+wh+wl)/taud) + exp((DT-wh-wl)/taud) 
+                -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud) 
+                -2.0*(DT-wh-wl)/taud;
+          }
+          else 
+          {
+            St = exp(-(DT-wh-wl)/taud) + exp(-(DT+wh+wl)/taud)
+                -exp(-(DT-wh+wl)/taud) - exp(-(DT+wh-wl)/taud);
+          }
+
+          Smat[i*nline2 + j] += St*fg12;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+void Sll2_array_tophat_linear(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, i, j, idxk1, idxk2;
+  double fg1, fg2, fg12, tau1, tau2, wg1, wg2, taud, wh, wl;
+  double Dt, DT, St;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  for(i=0; i<nline1; i++)
+  {
+    for(j=0; j<nline2; j++)
+    {
+      Smat[i*nline2 + j] = 0.0;
+    }
+  }
+
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau1 =    pm[idxk1 + 1] ;
+    wg1 = exp(pm[idxk1 + 2]);
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
       tau2 =    pm[idxk2 + 1] ;
       wg2 = exp(pm[idxk2 + 2]);
 

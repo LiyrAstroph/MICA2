@@ -363,7 +363,11 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
 
       #plot input response function
       if resp_input != None:
-        tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
+        if flagnegresp == False:
+          tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
+        else:
+          tran_scale = (np.max(tran_best)-np.min(tran_best))/(np.max(tran_input[:, 1])-np.min(tran_input[:, 1]))
+
         tran_input[:, 1] *= tran_scale
         ax.plot(tran_input[:, 0], tran_input[:, 1], label='input', lw=1)
         ax.legend()

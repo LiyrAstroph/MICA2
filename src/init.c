@@ -82,6 +82,11 @@ void init()
       Slc_array = Slc_array_gauss;
       Sll_array = Sll_array_gauss;
       Sll2_array = Sll2_array_gauss;
+
+      Slc_single = Slc_single_gauss;
+      Sll_single = Sll_single_gauss;
+      Sll2_single = Sll2_single_gauss;
+      Sll_single2 = Sll_single2_gauss;
     }
     else 
     {
@@ -91,12 +96,12 @@ void init()
       Slc_array = Slc_array_gauss_linear;
       Sll_array = Sll_array_gauss_linear;
       Sll2_array = Sll2_array_gauss_linear;
-    }
 
-    Slc_single = Slc_single_gauss;
-    Sll_single = Sll_single_gauss;
-    Sll2_single = Sll2_single_gauss;
-    Sll_single2 = Sll_single2_gauss;
+      Slc_single = Slc_single_gauss_linear;
+      Sll_single = Sll_single_gauss_linear;
+      Sll2_single = Sll2_single_gauss_linear;
+      Sll_single2 = Sll_single2_gauss_linear;
+    }
 
     width_factor = 3.0;
   }
@@ -110,6 +115,11 @@ void init()
       Slc_array = Slc_array_tophat;
       Sll_array = Sll_array_tophat;
       Sll2_array = Sll2_array_tophat; 
+
+      Slc_single = Slc_single_tophat;
+      Sll_single = Sll_single_tophat;
+      Sll2_single = Sll2_single_tophat;
+      Sll_single2 = Sll_single2_tophat;
     }
     else
     {
@@ -119,12 +129,12 @@ void init()
       Slc_array = Slc_array_tophat_linear;
       Sll_array = Sll_array_tophat_linear;
       Sll2_array = Sll2_array_tophat_linear; 
-    }
 
-    Slc_single = Slc_single_tophat;
-    Sll_single = Sll_single_tophat;
-    Sll2_single = Sll2_single_tophat;
-    Sll_single2 = Sll_single2_tophat;
+      Slc_single = Slc_single_tophat_linear;
+      Sll_single = Sll_single_tophat_linear;
+      Sll2_single = Sll2_single_tophat_linear;
+      Sll_single2 = Sll_single2_tophat_linear;
+    }
 
     width_factor = 1.0;
   }

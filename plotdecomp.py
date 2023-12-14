@@ -16,7 +16,7 @@ import argparse
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
-def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
+def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_input, doshow=True):
 
   data = np.loadtxt(fdir+fname)
   pall = np.loadtxt(fdir+"data/pall.txt_%d"%ngau)
@@ -54,6 +54,10 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
   # load posterior samples
   sample = np.loadtxt(fdir+"data/posterior_sample1d.txt_%d"%ngau)
   
+  # load input respon function
+  if resp_input != None:
+    tran_input = np.loadtxt(resp_input)
+
   # determine the maximum and minimum delays
   tau_min =  1.0e10
   tau_max = -1.0e10
@@ -89,7 +93,12 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
           # loop over gaussians
           if typemodel == 0:  # general model
             for k in range(ngau):
-              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+
+              if flagnegresp == False:
+                amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+              else:
+                amp =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0]
+
               cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
               sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
               tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
@@ -112,7 +121,12 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
           # loop over tophats
           if typemodel == 0:   # general model
             for k in range(ngau):
-              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+
+              if flagnegresp == False:
+                amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+              else:
+                amp =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0]
+
               cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
               sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
               tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
@@ -139,11 +153,24 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
       ax = fig.add_axes((0.1, 0.8, 0.8, 0.19))
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
+
+      #plot input response function
+      if resp_input != None:
+        if flagnegresp == False:
+          tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
+        else:
+          tran_scale = (np.max(tran_best)-np.min(tran_best))/(np.max(tran_input[:, 1])-np.min(tran_input[:, 1]))
+
+        tran_input[:, 1] *= tran_scale
+        ax.plot(tran_input[:, 0], tran_input[:, 1], label='input', lw=1)
+        ax.legend()
+
       ax.set_xlabel("Time Lag")
       ax.set_ylabel("Transfer Function")
       ylim = ax.get_ylim()
-      ax.set_ylim(0.0, np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
-
+      ax.set_ylim(ylim[0], np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
+      
+      # plot light curves
       ax = fig.add_axes((0.1, 0.51, 0.8, 0.19))
       ax.errorbar(con_data[:, 0], con_data[:, 1], yerr=con_data[:, 2], ls='none', marker='o', markersize=3, color='k', markerfacecolor='C0', markeredgewidth=0.4, elinewidth=0.8)
       ax.plot(pall[:nl[0], 0], pall[:nl[0], 1], lw=1)
@@ -158,7 +185,7 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
       
       for i in range(ngau):
         l0 = comps[i][idx_hb:idx_hb+nl[j], :]
-        lg0,=ax.plot(l0[:, 0], l0[:, 1], lw=1, label='1st')
+        lg0,=ax.plot(l0[:, 0], l0[:, 1], lw=1, label='%d'%(i+1))
         ax.fill_between(l0[:, 0], y1=l0[:, 1]-l0[:, 2], y2=l0[:, 1]+l0[:, 2], color='darkgrey', zorder=0)
 
       lgt,=ax.plot(hb_rec[:, 0], hb_rec[:, 1], lw=1, label='total')
@@ -168,8 +195,13 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel):
       ax.set_ylabel(r"$F(\rm line$)")
       #ax.set_xlim((-10.0, 260.0))
       ylim = ax.get_ylim()
+      ax.legend()
 
-      plt.show()
+      if doshow==True:
+        plt.show()
+      else:
+        plt.close()
+
       pdf.savefig(fig)
 
       idx_hb_data += nl_data[j]
@@ -240,10 +272,15 @@ if __name__ == "__main__":
   except:
     typemodel = 0
   
+  try:
+    flagnegresp = int(param["FlagNegativeResp"])
+  except:
+    flagnegresp = 0
+  
   if ngau_upp < 2:
     print("The number of Gaussian < 2, no need to show decomposition!")
     sys.exit()
 
   for ngau in range(2, ngau_upp+1):
-    plot_line_decomp(fdir, fname, ngau, typetf, typemodel)
+    plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp)
 

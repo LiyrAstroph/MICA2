@@ -219,14 +219,19 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       
       # histogram of time lags 
       ax = fig.add_axes((figlc_center, 0.95-(j+1)*axheight, 0.16, axheight))
+
       for k in range(ngau):
         cen = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        cen_min = np.min(cen)
+        cen_max = np.max(cen)
+        bins = np.max((5, int((cen_max-cen_min)/(tau2-tau1 + 1.0e-100) * 20)))
         if k == 0:
-          ax.hist(cen, density=True, range=(tau1, tau2), bins=20, alpha=1)
+          ax.hist(cen, density=True, bins=bins, alpha=1)
         else:
-          ax.hist(cen, density=True, range=(tau1, tau2), bins=20, alpha=0.6)
+          ax.hist(cen, density=True, bins=bins, alpha=0.6)
 
-      ax.set_xlim((tau1, tau2))
+      ax.set_xlim((tau1-(tau2-tau1)*0.1, tau2+(tau2-tau1)*0.1))
+
       if flagnegresp == False:
         ax.yaxis.set_tick_params(labelleft=False)
 
@@ -360,7 +365,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       if resp_input != None:
         tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
         tran_input[:, 1] *= tran_scale
-        ax.plot(tran_input[:, 0], tran_input[:, 1], label='input')
+        ax.plot(tran_input[:, 0], tran_input[:, 1], label='input', lw=1)
         ax.legend()
 
       ylim = ax.get_ylim()

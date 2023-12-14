@@ -43,7 +43,7 @@ data_input = comm.bcast(data_input, root=0)
 
 model = pymica.gmodel()
 # use Gaussians
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=1000, 
+model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 80], number_component=[2, 2], max_num_saves=2000, 
             flag_negative_resp=True)
 
 # or use tophats
@@ -76,7 +76,7 @@ model.run()
 # plot results
 if rank == 0:
   
-  model.plot_results(doshow=True) # plot results, doshow controls whether showing the results on screen
+  model.plot_results(doshow=True, resp_input="resp_input.txt") # plot results, doshow controls whether showing the results on screen
   model.post_process()  # generate plots for the properties of MCMC sampling 
 
   # get the full sample 

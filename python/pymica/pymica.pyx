@@ -176,14 +176,14 @@ cdef class basis:
       fp.close()
     return
   
-  def plot_results(self, doshow=True):
+  def plot_results(self, doshow=True, resp_input=None):
 
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
       ut.plot_results(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
                       self.parset.lag_limit_low, self.parset.lag_limit_upper, \
                       self.parset.flag_uniform_var_params, self.parset.flag_uniform_tranfuns, \
                       self.parset.flag_trend, self.parset.flag_negative_resp, \
-                      self.parset.type_tf, self.parset.model, None, doshow=doshow)
+                      self.parset.type_tf, self.parset.model, resp_input, doshow=doshow)
     return
   
   def plot_decomp(self):

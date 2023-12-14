@@ -109,39 +109,59 @@ A typical parameter file looks like::
   #==============================================================
   
   FileDir                   ./
-  DataFile                  data/sim_data.txt
-  
+  DataFile                  data/IRAS_year5.txt
+
   TypeModel                 0                # 0: general model
                                              # 1: pmap, photometric RM
+                                             # 2: vmap, use a virtual driving light curve.
 
   TypeTF                    0                # 0: Gaussian
                                              # 1: Top-hat
-  
-  MaxNumberSaves            2000             # number of MCMC sampling steps
-  
+                                             # default: 0
+
+  MaxNumberSaves            1000             # number of MCMC sampling steps
+                                             # default: 2000
+
   FlagUniformVarParams      0                # whether each dataset has the same variability parameters
-  
+                                             # default: 0
+
   FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
                                              # note that different lines have different parameters.
-  
+                                             # default: 0
+
   FlagLongtermTrend         0                # Longterm trend in light curves, use a polynomial to fit 
                                              # input the order of the polynomial, e.g.,
                                              # 0, constant  (default)
                                              # 1, linear line 
                                              # 2, conic line
                                              # Use the default if you do not know this.
-  
+
   LagLimitLow               0.0              # lower limit of the range of time lag to be explored
-  LagLimitUpp               100.0              # upper limit of the range of time lag to be explored
+  LagLimitUpp               300.0            # upper limit of the range of time lag to be explored
                                              # can be negative
-  
+
+  #WidthLimitLow            1.0              # lower and upper limit of lag width
+  #WidthLimitUpp            50.0             # by default, MICA determines the limits automatically.
+                                             # if unsatifactory, turn on these options.
+
+  FlagLagPositivity         0                # whether force Gaussians overall located at non-negative lags
+                                             # 0: no;  1: yes
+                                             # default: 0
+
+  FlagNegativeResp          1                # whether turn on negative response
+                                             # 0, no; 1, yes
+                                             # default: 0
+
   NumCompLow                2                # lower limit of number of Gaussians/tophats
   NumCompUpp                2                # upper limit of number of Gaussians/tophats
-  
+                                             # default: 1, 1
+
   FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
-  FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
-  
-  TypeLagPrior              0                # type of lag prior for each Gaussians/tophats.
+  FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
+                                             # defaul: 0, 0
+
+  TypeLagPrior              1                # type of lag prior for each Gaussians/tophats.
+                                             # default: 0
                                              # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
                                              #
                                              # 1,  limit0 + 0*width < lag0 < limit0 + 1*width
@@ -162,13 +182,18 @@ A typical parameter file looks like::
                                              #     ...
                                              #     dlag = (limit1 - limit0)/(num_comp-1)
                                              #     better to set a large  mumber of components
-  
+                                             #
+                                             # 4,  user specified with "StrLagPrior"
+
   StrLagPrior             [0:10:10:50]       # valid if TypeLagPrior==4
                                              # format: [lag1_1:lag1_2:lag2_1:lag2_2...]
                                              # "LagLimitLow" and "LagLimitUpp" no longer applicable
 
-  StrRatioPrior           [1.0e-3:1.0]       # valid if TypeModel == pmap
+  StrRatioPrior           [1.0e-3:1.0]       # the response ratio of 2nd to 1st component
+                                             # valid if TypeModel == 1 (pmap)
                                              # format: [ratio_1:ratio_2]
+                                             # default: [1.0e-3:1.0]
+
   #==================================================================
   # options for cdnest sampling
   # use the default values or do not turn them on IF NOT familiar with them

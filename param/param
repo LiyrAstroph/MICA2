@@ -36,7 +36,7 @@ LagLimitLow               0.0              # lower limit of the range of time la
 LagLimitUpp               300.0            # upper limit of the range of time lag to be explored
                                            # can be negative
 
-#WidthLimitLow            -1.0              # lower and upper limit of lag width
+#WidthLimitLow            1.0              # lower and upper limit of lag width
 #WidthLimitUpp            50.0             # by default, MICA determines the limits automatically.
                                            # if unsatifactory, turn on these options.
 
@@ -88,6 +88,7 @@ StrLagPrior             [0:10:10:50]       # valid if TypeLagPrior==4
 StrRatioPrior           [1.0e-3:1.0]       # the response ratio of 2nd to 1st component
                                            # valid if TypeModel == 1 (pmap)
                                            # format: [ratio_1:ratio_2]
+                                           # default: [1.0e-3:1.0]
 
 #==================================================================
 # options for cdnest sampling

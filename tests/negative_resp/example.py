@@ -68,16 +68,17 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 80], number_compo
 model.run()
 
 #posterior run, only re-generate posterior samples, do not run MCMC
-#model.post_run()
+# model.post_run()
 
 #do decomposition for the cases of multiple components 
-#model.decompose()
+model.decompose()
 
 # plot results
 if rank == 0:
   
   model.plot_results(doshow=True, resp_input="resp_input.txt") # plot results, doshow controls whether showing the results on screen
   model.post_process()  # generate plots for the properties of MCMC sampling 
+  model.plot_decomp(doshow=True, resp_input="resp_input.txt")
 
   # get the full sample 
   # sample is a list, each element contains an array of posterior samples

@@ -16,7 +16,7 @@ import argparse
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
-def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_input, doshow=True):
+def plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, flagnegresp, resp_input, doshow=True):
 
   data = np.loadtxt(fdir+fname)
   pall = np.loadtxt(fdir+"data/pall.txt_%d"%ngau)
@@ -57,6 +57,9 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_inp
   # load input respon function
   if resp_input != None:
     tran_input = np.loadtxt(resp_input)
+  
+  if flagnegresp==True:
+    fq = np.loadtxt(fdir+"data/trend.txt_%d"%ngau)
 
   # determine the maximum and minimum delays
   tau_min =  1.0e10
@@ -69,11 +72,16 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_inp
 
     idx += didx
   
+  tau_min = np.min((tau_low, tau_min))
+  tau_max = np.max((tau_max, tau_upp))
+
   tau = np.linspace(tau_min, tau_max, 1000)
   tran = np.zeros((sample.shape[0], 1000))
   
   pdf = PdfPages(fdir+"data/fig_line_decomp_%d.pdf"%ngau)
   
+  nq = 1
+  idx_q = 0 # index for long-term trend parameters
   for m in range(nd):
     nl_data = nls_data[m]
     nl = nls[m]
@@ -153,6 +161,7 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_inp
       ax = fig.add_axes((0.1, 0.8, 0.8, 0.19))
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
+      ax.minorticks_on()
 
       #plot input response function
       if resp_input != None:
@@ -178,10 +187,16 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_inp
       ax.set_ylabel(r"$F_\lambda$(cont)")
       #ax.set_xlim((-10.0, 260.0))
       ax.set_xticklabels([])
+      ax.minorticks_on()
       
       line_error = 0
       ax = fig.add_axes((0.1, 0.1, 0.8, 0.40))
       ax.errorbar(hb_data[:, 0], hb_data[:, 1], yerr=np.sqrt(hb_data[:, 2]**2+line_error**2), ls='none', marker='o', markersize=3, color='k', markerfacecolor='C0', markeredgewidth=0.4, elinewidth=0.8)
+      
+      # plot mean of line
+      if flagnegresp == True:
+        mean = fq[idx_q+1, 0]
+        ax.axhline(y=mean, ls='--', lw=1, color='grey')
       
       for i in range(ngau):
         l0 = comps[i][idx_hb:idx_hb+nl[j], :]
@@ -196,6 +211,7 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_inp
       #ax.set_xlim((-10.0, 260.0))
       ylim = ax.get_ylim()
       ax.legend()
+      ax.minorticks_on()
 
       if doshow==True:
         plt.show()
@@ -206,6 +222,8 @@ def plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp, resp_inp
 
       idx_hb_data += nl_data[j]
       idx_hb += nl[j]
+    
+    idx_q = len(nl_data) * nq
 
   pdf.close()
 
@@ -261,6 +279,20 @@ if __name__ == "__main__":
     ngau_upp = int(param["NumCompUpp"])
   except:
     raise IOError("NumCompUpp is not set!")
+  
+  if param["TypeModel"] == 0:
+    try:
+      tau_low = float(param["LagLimitLow"])
+    except:
+      raise IOError("LagLimitLow is not set!")
+    
+    try:
+      tau_upp = float(param["LagLimitUpp"])
+    except:
+      raise IOError("LagLimitUpp is not set!")
+  else:
+    tau_low = 0.0
+    tau_upp = 0.0
 
   try:
     typetf = int(param["TypeTF"])
@@ -282,5 +314,5 @@ if __name__ == "__main__":
     sys.exit()
 
   for ngau in range(2, ngau_upp+1):
-    plot_line_decomp(fdir, fname, ngau, typetf, typemodel, flagnegresp)
+    plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, flagnegresp)
 

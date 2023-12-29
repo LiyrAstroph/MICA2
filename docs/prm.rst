@@ -1,6 +1,6 @@
-*********************************
-Photometric Reverberation Mapping
-*********************************
+***************
+Photometric RM
+***************
 
 ``mica2`` provides a ``pmap`` mode to do photometric reverberation mapping analysis, which aims at singling out 
 the reverberation of broad emission lines in photometric light curves that are generally dominated by the continuum 

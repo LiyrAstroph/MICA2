@@ -1,6 +1,6 @@
-*********************************
-Virtual Reverberation Mapping
-*********************************
+************
+Virtual RM
+************
 ``mica2`` provides a ``vmap`` mode to do reverberation mapping analysis with a virtual driving light curve. This mode applies 
 in cases where the dirving light curve cannot be chosen or the driving light curve has a poor qaulity that is not suitable to act 
 as the dirving one.

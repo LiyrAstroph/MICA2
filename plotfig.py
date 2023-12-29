@@ -231,11 +231,15 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           ax.hist(cen, density=True, bins=bins, alpha=0.6)
 
       ax.set_xlim((tau1-(tau2-tau1)*0.1, tau2+(tau2-tau1)*0.1))
-
+      
+      # vmap model, no need to plot for the first lc, which has a zero lag wrt the driving lc. 
+      if typemodel == 2 and j == 1:
+        ax.set_visible(False)
+      
       if flagnegresp == False:
         ax.yaxis.set_tick_params(labelleft=False)
 
-      if j == 1:
+      if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2):
         ax.set_title("Centers")
       ax.minorticks_on()
       if j != len(ns)-1:
@@ -264,8 +268,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           ax.set_xlim((tau1, tau2))
           ax.minorticks_on()
           ax.yaxis.set_tick_params(labelleft=False)
-          if j == 1:
+
+          if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2):
             ax.set_title("Centroid")
+            
           if j != len(ns)-1:
             ax.xaxis.set_tick_params(labelbottom=False)
           else:
@@ -289,6 +295,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
 
             if j == 1:
               ax.set_title("Response Ratio")
+        
+        # vmap model, no need to plot for the first lc, which has a zero lag wrt the driving lc. 
+        if typemodel == 2 and j == 1:
+          ax.set_visible(False)
 
       # transfer function
       ax = fig.add_axes((0.39, 0.95-(j+1)*axheight, 0.16, axheight))

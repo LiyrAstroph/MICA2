@@ -30,6 +30,7 @@ Documentation
    prm.rst
    vrm.rst
    tests.rst
+   negresp.rst
    list.rst
    faq.rst
 

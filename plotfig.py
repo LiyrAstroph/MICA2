@@ -155,7 +155,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     
     ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10, marker='o', markersize=1.5, elinewidth=0.5)
     
-    ax.plot(sall_con0[:, 0]-shift, sall_con0[:, 1], color='k', lw=1)
+    ax.plot(sall_con0[:, 0]-shift, sall_con0[:, 1], color='k')
     ax.fill_between(sall_con0[:, 0]-shift, y1=sall_con0[:, 1]-sall_con0[:, 2], y2=sall_con0[:, 1]+sall_con0[:, 2], color='darkgrey')
     
     # plot long-term trend

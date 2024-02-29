@@ -65,11 +65,14 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #run mica
 model.run()
 
+#resume from last run
+# model.restart()
+
 #posterior run, only re-generate posterior samples, do not run MCMC
-#model.post_run()
+# model.post_run()
 
 #do decomposition for the cases of multiple components 
-#model.decompose()
+# model.decompose()
 
 # plot results
 if rank == 0:

@@ -52,6 +52,9 @@ model.setup(data=data_input, type_tf='gaussian', max_num_saves=5000, lag_prior=[
 #run mica
 model.run()
 
+#resume from last run
+# model.restart()
+
 #posterior run, only re-generate posterior samples, do not run MCMC
 #model.post_run()
 

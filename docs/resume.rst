@@ -27,3 +27,6 @@ Then change the step numbers in the option files (e.g., param/OPTIONS1D) and res
   mpiexec -n np ./mica2 para/param param/OPTIONS1D -r 
 
 where "np" is the number of cores. It must be the same as the number of cores used in last run.
+
+In the Python verson `pymica`, a function `restart()` is provided to do resuming from last run. See 
+the Python script `example.py` in the subfolder `tests/python` in the source package.

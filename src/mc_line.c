@@ -21,7 +21,7 @@
 
 void mc_line()
 {
-  int i, j, argc=0, jzmax=0;
+  int i, j, argc=0, jzmax=0, narg, narg0;
   double logz_max;
   char **argv;
 
@@ -30,34 +30,39 @@ void mc_line()
   {
     argv[i] = malloc(MICA_MAX_STR_LENGTH*sizeof(char));
   }
-  /* setup argc and argv */
+  /* setup argc and argv 
+   * 0: dnest
+   * 1: -s
+   * 2: file name 
+   */
   strcpy(argv[argc++], "dnest");
   strcpy(argv[argc++], "-s");
-  strcpy(argv[argc], parset.file_dir);
-  strcat(argv[argc++], "/data/restart_dnest1d.txt");
+  //strcpy(argv[argc], parset.file_dir);
+  //strcat(argv[argc++], "/data/restart_dnest1d.txt");
+  argc++;
+  narg=3;
+  
 
   /* level-dependent sampling */
   {
     strcpy(argv[argc++], "-l");
-  }
-
-  if(flag_restart == 1)
-  {
-    strcpy(argv[argc++], "-r");
-    strcpy(argv[argc], parset.file_dir);
-    strcat(argv[argc], "/");
-    strcat(argv[argc++], "data/restart_dnest1d.txt");
+    narg++;
   }
 
   if(flag_postprc == 1)
+  {
     strcpy(argv[argc++], "-p");
+    narg++;
+  }
   
   // sample tag 
   strcpy(argv[argc++], "-g");
   strcpy(argv[argc++], "1d");
+  narg+=2;
 
   mc_line_init();
-
+  
+  narg0 = narg;
   logz_max = -DBL_MAX;
   for(j=0; j<parset.num_gaussian_diff; j++)
   {
@@ -77,8 +82,25 @@ void mc_line()
     sprintf(postfix, "_%d", num_gaussian);
     strcpy(argv[argc], "-x");
     strcpy(argv[argc+1], postfix);
+    narg=narg0+2;
+    
+    /* restart save file name */
+    strcpy(argv[2], parset.file_dir);
+    strcat(argv[2], "/data/restart_dnest1d.txt");
+    strcat(argv[2], postfix);
 
-    logz_arr[j] = dnest_line(argc+2, argv);
+    if(flag_restart == 1)
+    {
+      /* restart file name */
+      strcpy(argv[argc+2], "-r");
+      strcpy(argv[argc+3], parset.file_dir);
+      strcat(argv[argc+3], "/");
+      strcat(argv[argc+3], "data/restart_dnest1d.txt");
+      strcat(argv[argc+3], postfix);
+      narg+=2;
+    }
+
+    logz_arr[j] = dnest_line(narg, argv);
     if(logz_max < logz_arr[j])
     {
       logz_max = logz_arr[j];

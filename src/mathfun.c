@@ -799,8 +799,8 @@ void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, 
   multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
 
   /* S - Q^T x P^-1 x Q */
-  multiply_mat_MN_transposeA_alpha_beta(Q, work, S, n2, n2, n1, -1.0, 1.0);
   memcpy(SN, S, n2*n2*sizeof(double));
+  multiply_mat_MN_transposeA_alpha_beta(Q, work, SN, n2, n2, n1, -1.0, 1.0);
 
   /* note that lndet = lndet(SN^-1) */
   inverse_symat_lndet(SN, n2, lndet, &info, ipiv); 
@@ -809,8 +809,8 @@ void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, 
   multiply_mat_MN_alpha(work, SN, QN, n1, n2, n2, -1.0);
 
   /* P^-1 + (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
-  multiply_mat_MN_transposeB_alpha_beta(QN, work, Pinv, n1, n1, n2, -1.0, 1.0);
   memcpy(PN, Pinv, n1*n1*sizeof(double));
+  multiply_mat_MN_transposeB_alpha_beta(QN, work, PN, n1, n1, n2, -1.0, 1.0);
 
   return;
 }
@@ -926,42 +926,24 @@ void inverse_symat_lndet_partition_inv_semiseparable(double *Pinv, double *W, do
                                  double *lndet, double *work, int *ipiv)
 {
   int i, j, info;
-  double *pwork;
 
   /* P^-1 x Q */
   multiply_mat_semiseparable_drw(Q, W, D, phi, n1, n2, a1, work);
   //multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
 
-  /* Q^T x P^-1 x Q */
-  multiply_mat_MN_transposeA(Q, work, SN, n2, n2, n1);
+  /* S - Q^T x P^-1 x Q */
+  memcpy(SN, S, n2*n2*sizeof(double));
+  multiply_mat_MN_transposeA_alpha_beta(Q, work, SN, n2, n2, n1, -1.0, 1.0);
 
-  /* (S - Q^T x P^-1 x Q)^-1; only upper triangle*/
-  for(i=0; i<n2; i++)
-  {
-    for(j=i; j<n2; j++)
-    {
-      SN[i*n2 + j] = S[i*n2 + j] - SN[i*n2 + j];
-    }
-  }
   /* note that lndet = lndet(SN^-1) */
   inverse_symat_lndet(SN, n2, lndet, &info, ipiv); 
 
-  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
-  multiply_mat_MN(work, SN, QN, n1, n2, n2);
+  /* -(P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
+  multiply_mat_MN_alpha(work, SN, QN, n1, n2, n2, -1.0);
 
-  /* (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
-  pwork = work+n1*n2;
-  multiply_mat_MN_transposeB(QN, work, pwork, n1, n1, n2);
-
-  for(i=0; i<n1*n2; i++)
-  {
-    QN[i] = -QN[i];
-  }
-
-  for(i=0; i<n1*n1; i++)
-  {
-    PN[i] = Pinv[i] + pwork[i];
-  }
+  /* P^-1 + (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
+  memcpy(PN, Pinv, n1*n1*sizeof(double));
+  multiply_mat_MN_transposeB_alpha_beta(QN, work, PN, n1, n1, n2, -1.0, 1.0);
 
   return;
 }
@@ -1053,8 +1035,18 @@ void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *
         Si[i*nq+j] = A[(ni+i)*nt+(ni+j)];
       }
     }
-  
-    inverse_symat_lndet_partition_inv(Ai, Si, Qi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
+    
+    /* for k=1, use fast calculations of semiseparable matrice */
+    if(k==1)
+    {
+      inverse_symat_lndet_partition_inv_semiseparable(Ai, W, D, phi, a1, Si, Qi, ni, nq, 
+                                                      ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
+    }
+    else
+    {
+      inverse_symat_lndet_partition_inv_fast(Ai, Si, Qi, ni, nq, 
+                                             ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
+    }
     *lndet += lndet_SN; /* lndet_SN = -lndet(SN) */
 
     /* new Ai */

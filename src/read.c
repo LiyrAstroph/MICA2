@@ -478,7 +478,7 @@ int read_data()
         printf("The number of points in %d-th dataset is %d, a bit large!\n", i, dataset[i].con.n);
         printf("Better to rebin the light curve to reduce the number of points.\n"
                "This will improve the computational speed [~O(N^3)]!\n");
-        exit(-1);
+        // exit(-1);
       }
     }
   }

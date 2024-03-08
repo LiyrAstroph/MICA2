@@ -80,6 +80,7 @@ void mc_pmap();
 
 /* for vmap */
 double prob_line_variability3_vmap(const void *model);
+double prob_line_variability4_vmap(const void *model);
 double dnest_vmap(int argc, char **argv);
 void set_par_range_vmap();
 int mc_vmap_init();

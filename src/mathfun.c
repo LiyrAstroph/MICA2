@@ -842,7 +842,7 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
                                   double *work_inv, int *ipiv)
 {
   int i, j, k, ni, nq, info;
-  double *Ai, *Qi, *Si, *ANi, *QNi, *SNi, *pwork, lndet_SN;
+  double *Ai, *ANi, *QNi, *SNi, *pwork, lndet_SN;
 
   ni = narr[0];
   Ai = work_inv;
@@ -860,11 +860,8 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
   for(k=1; k<=np; k++)
   {
     nq = narr[k];
-    
-    Qi = Ai + nt*nt;
-    Si = Qi + ni*nq;
   
-    ANi = Si + nq*nq;
+    ANi = Ai + nt*nt;
     QNi = ANi + ni*ni;
     SNi = QNi + ni*nq;
 
@@ -874,7 +871,7 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
     {
       for(j=0; j<nq; j++)
       {
-        Qi[i*nq+j] = A[i*nt + (ni+j)];
+        QNi[i*nq+j] = A[i*nt + (ni+j)];
       }
     }
   
@@ -882,11 +879,11 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
     {
       for(j=0; j<nq; j++)
       {
-        Si[i*nq+j] = A[(ni+i)*nt+(ni+j)];
+        SNi[i*nq+j] = A[(ni+i)*nt+(ni+j)];
       }
     }
   
-    inverse_symat_lndet_partition_inv_fast(Ai, Si, Qi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
+    inverse_symat_lndet_partition_inv_fast(Ai, SNi, QNi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
     *lndet += lndet_SN; /* lndet_SN = -lndet(SN) */
     
     /* last run, directly save to A */

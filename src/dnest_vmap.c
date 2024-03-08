@@ -330,21 +330,21 @@ void print_particle_vmap(FILE *fp, const void *model)
 double log_likelihoods_cal_vmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability3_vmap(model);
+  logL = prob_line_variability4_vmap(model);
   return logL;
 }
 
 double log_likelihoods_cal_initial_vmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability3_vmap(model);
+  logL = prob_line_variability4_vmap(model);
   return logL;
 }
 
 double log_likelihoods_cal_restart_vmap(const void *model)
 {
   double logL;
-  logL = prob_line_variability3_vmap(model);
+  logL = prob_line_variability4_vmap(model);
   return logL;
 }
 

@@ -314,7 +314,7 @@ int mc_vmap_end()
 }
 
 /*!
- * calulate inverse and lndet simultaneously.
+ * calulate inverse and lndet simultaneously using direct matrix inverse
  */
 double prob_line_variability3_vmap(const void *model)
 {
@@ -413,6 +413,116 @@ double prob_line_variability3_vmap(const void *model)
   return prob;
 }
 
+/*!
+ * calulate inverse and lndet simultaneously using matrix partition
+ */
+double prob_line_variability4_vmap(const void *model)
+{
+  double prob = 0.0, prob1, sigma, tau;
+  int i, j, k, m, np, info, sign, *ipiv;
+  double lndet, lndet_ICq;
+  double *Larr, *ybuf, *y, *yq, *Cq;
+  double *fall;
+  int nall, nqall, idx;
+  double *pm = (double *)model;
+  double *work;
+  int *narr, nd;
+
+  Larr = workspace;
+  ybuf = Larr + nall_max * ((1+nlset_max)*nq);
+  y = ybuf + nall_max* ((1+nlset_max)*nq);
+  yq = y + nall_max;
+  Cq = yq + (1+nlset_max)*nq;
+
+  narr = (int *)(Cq + (1+nlset_max)*nq*(1+nlset_max)*nq);
+
+  ipiv = workspace_ipiv;
+  work = workspace_inv;
+
+  /* iterate over all datasets */
+  for(k=0; k<nset; k++)
+  {
+    idx = idx_con_pm[k];
+    tau = exp(pm[idx+2]);
+    sigma = exp(pm[idx+1]); //* sqrt(tau);
+
+    nall = alldata[k].n;
+    fall = alldata[k].f;
+    nqall = nq * (dataset[k].nlset);
+
+    /* no continuum data points */
+    np = 0;
+    for(j=0; j<dataset[k].nlset; j++)
+    {
+      for(m=0; m<dataset[k].line[j].n; m++)
+      {
+        for(i=0; i<nqall; i++)
+          Larr[(np+m)*nqall + i ]  = 0.0;
+        
+        Larr[(np+m)*nqall + j*nq + 0] = 1.0;
+        for(i=1; i<nq; i++)
+          Larr[(np+m)*nqall + j*nq + i] = pow(dataset[k].line[j].t[m], i);
+      }
+      np += dataset[k].line[j].n;
+    }
+    
+    nd = dataset[k].nlset - 1;
+    narr[0] = dataset[k].line[0].n;
+    for(i=1; i<=nd; i++)
+      narr[i] = dataset[k].line[i].n;
+
+    set_covar_Pmat_data_line_array_vmap(model, k);
+
+    /* C^-1 */
+    inverse_symat_partition_iter(PCmat, nall, narr, nd, &lndet, work, ipiv); 
+    lndet += 2.0*nall*log(sigma);
+
+    /* calculate L^T*C^-1*L */
+    multiply_mat_MN(PCmat, Larr, ybuf, nall, nqall, nall);
+    multiply_mat_MN_transposeA(Larr, ybuf, Cq, nqall, nqall, nall);
+
+    /* calculate L^T*C^-1*y */
+    // multiply_matvec(PCmat, fall, nall, ybuf);
+    // multiply_mat_MN_transposeA(Larr, ybuf, yq, nqall, 1, nall);
+    
+    /* L^T*C^-1*y = (C^-1xL)^T x y = ybuf^T x y */
+    multiply_matvec_MN_transposeA(ybuf, nall, nqall, fall, yq);
+    
+    /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
+    inverse_symat_lndet_sign(Cq, nqall, &lndet_ICq, &info, &sign, ipiv);
+    if(info!=0 || sign==-1 )
+    {
+      prob = -DBL_MAX;
+      printf("lndet_ICq %f %d!\n", lndet_ICq, sign);
+      return prob;
+    }
+    lndet_ICq += - 2.0*nqall*log(sigma);
+    multiply_mat_MN(Cq, yq, ybuf, nqall, 1, nqall);
+    
+    /* y = y - L x q = -1 * (L x q) + 1 * y */
+    // multiply_matvec_MN(Larr, nall, nqall, ybuf, y);
+    // for(i=0; i<nall; i++)
+    // {
+    //   y[i] = fall[i] - y[i];
+    // }
+    memcpy(y, fall, nall*sizeof(double));
+    multiply_matvec_MN_alpha_beta(Larr, nall, nqall, ybuf, y, -1.0, 1.0);
+
+    /* y^T x C^-1 x y */
+    multiply_matvec(PCmat, y, nall, ybuf);
+    prob1 = -0.5 * cblas_ddot(nall, y, 1, ybuf, 1)/(sigma*sigma);
+    
+    if(prob1 > 0.0 )  // check if prob is positive
+    { 
+      prob = -DBL_MAX;
+      printf("prob >0!\n");
+      return prob;
+    }
+    
+    prob += prob1 -0.5*lndet - 0.5*lndet_ICq;
+  }
+  return prob;
+}
 
 /*!
  * this function sets the covariance matrix at data time points for an array of times 

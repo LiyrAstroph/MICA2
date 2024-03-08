@@ -337,8 +337,11 @@ double prob_line_variability4_pmap(const void *model)
     multiply_mat_MN_transposeA(Larr, ybuf, Cq, nqall, nqall, nall);
 
     /* calculate L^T*C^-1*y */
-    multiply_matvec(PCmat, fall, nall, ybuf);
-    multiply_mat_MN_transposeA(Larr, ybuf, yq, nqall, 1, nall);
+    // multiply_matvec(PCmat, fall, nall, ybuf);
+    // multiply_mat_MN_transposeA(Larr, ybuf, yq, nqall, 1, nall);
+    
+    /* L^T*C^-1*y = (C^-1xL)^T x y = ybuf^T x y */
+    multiply_matvec_MN_transposeA(ybuf, nall, nqall, fall, yq);
 
     /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
     inverse_symat_lndet_sign(Cq, nqall, &lndet_ICq, &info, &sign, ipiv);
@@ -350,12 +353,15 @@ double prob_line_variability4_pmap(const void *model)
     }
     lndet_ICq += - 2.0*nqall*log(sigma);
     multiply_mat_MN(Cq, yq, ybuf, nqall, 1, nqall);
-  
-    multiply_matvec_MN(Larr, nall, nqall, ybuf, y);
-    for(i=0; i<nall; i++)
-    {
-      y[i] = fall[i] - y[i];
-    }
+    
+    /* y = y - L x q = -1 * (L x q) + 1 * y */
+    // multiply_matvec_MN(Larr, nall, nqall, ybuf, y);
+    // for(i=0; i<nall; i++)
+    // {
+    //   y[i] = fall[i] - y[i];
+    // }
+    memcpy(y, fall, nall*sizeof(double));
+    multiply_matvec_MN_alpha_beta(Larr, nall, nqall, ybuf, y, -1.0, 1.0);
 
     /* y^T x C^-1 x y */
     multiply_matvec(PCmat, y, nall, ybuf);

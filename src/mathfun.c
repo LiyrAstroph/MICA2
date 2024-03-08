@@ -799,7 +799,7 @@ void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, 
   multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
 
   /* S - Q^T x P^-1 x Q */
-  memcpy(SN, S, n2*n2*sizeof(double));
+  // memcpy(SN, S, n2*n2*sizeof(double)); /* note no need to copy S, since SN=S */
   multiply_mat_MN_transposeA_alpha_beta(Q, work, SN, n2, n2, n1, -1.0, 1.0);
 
   /* note that lndet = lndet(SN^-1) */
@@ -888,7 +888,10 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
   
     inverse_symat_lndet_partition_inv_fast(Ai, Si, Qi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
     *lndet += lndet_SN; /* lndet_SN = -lndet(SN) */
-
+    
+    /* last run, directly save to A */
+    if(k==np) Ai = A;
+    
     /* new Ai */
     for(i=0; i<ni; i++)
     {
@@ -915,7 +918,7 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
     ni += nq;
   }
   
-  memcpy(A, Ai, ni*ni*sizeof(double));
+  //memcpy(A, Ai, ni*ni*sizeof(double));
   return;
 }
 
@@ -932,7 +935,7 @@ void inverse_symat_lndet_partition_inv_semiseparable(double *Pinv, double *W, do
   //multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
 
   /* S - Q^T x P^-1 x Q */
-  memcpy(SN, S, n2*n2*sizeof(double));
+  // memcpy(SN, S, n2*n2*sizeof(double));  /* note no need to copy S, since SN=S */
   multiply_mat_MN_transposeA_alpha_beta(Q, work, SN, n2, n2, n1, -1.0, 1.0);
 
   /* note that lndet = lndet(SN^-1) */
@@ -1000,7 +1003,7 @@ void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *
                            double *work_inv, int *ipiv)
 {
   int i, j, k, ni, nq;
-  double *Ai, *Qi, *Si, *ANi, *QNi, *SNi, *pwork, lndet_SN;
+  double *Ai, *ANi, *QNi, *SNi, *pwork, lndet_SN;
  
   ni = narr[0];
   Ai = work_inv;
@@ -1011,10 +1014,7 @@ void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *
   {
     nq = narr[k];
     
-    Qi = Ai + nt*nt;
-    Si = Qi + ni*nq;
-  
-    ANi = Si + nq*nq;
+    ANi = Ai + nt*nt;
     QNi = ANi + ni*ni;
     SNi = QNi + ni*nq;
 
@@ -1024,7 +1024,7 @@ void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *
     {
       for(j=0; j<nq; j++)
       {
-        Qi[i*nq+j] = A[i*nt + (ni+j)];
+        QNi[i*nq+j] = A[i*nt + (ni+j)];
       }
     }
   
@@ -1032,22 +1032,25 @@ void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *
     {
       for(j=0; j<nq; j++)
       {
-        Si[i*nq+j] = A[(ni+i)*nt+(ni+j)];
+        SNi[i*nq+j] = A[(ni+i)*nt+(ni+j)];
       }
     }
     
     /* for k=1, use fast calculations of semiseparable matrice */
     if(k==1)
     {
-      inverse_symat_lndet_partition_inv_semiseparable(Ai, W, D, phi, a1, Si, Qi, ni, nq, 
+      inverse_symat_lndet_partition_inv_semiseparable(Ai, W, D, phi, a1, SNi, QNi, ni, nq, 
                                                       ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
     }
     else
     {
-      inverse_symat_lndet_partition_inv_fast(Ai, Si, Qi, ni, nq, 
+      inverse_symat_lndet_partition_inv_fast(Ai, SNi, QNi, ni, nq, 
                                              ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
     }
     *lndet += lndet_SN; /* lndet_SN = -lndet(SN) */
+    
+    /* last run, directly save to A */
+    if(k==np) Ai = A;
 
     /* new Ai */
     for(i=0; i<ni; i++)
@@ -1075,6 +1078,6 @@ void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *
     ni += nq;
   }
   
-  memcpy(A, Ai, ni*ni*sizeof(double));
+  //memcpy(A, Ai, ni*ni*sizeof(double));
   return;
 }

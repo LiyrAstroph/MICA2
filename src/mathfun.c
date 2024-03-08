@@ -42,17 +42,37 @@ void multiply_mat_MN(double * a, double *b, double *c, int m, int n, int k)
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, 1.0f
                              , a, k, b, n, 0.0f, c, n);
 }
+/* C(m*n) = - A(m*k) * B(k*n) */
+void multiply_mat_MN_alpha(double * a, double *b, double *c, int m, int n, int k, double alpha)
+{
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha
+                             , a, k, b, n, 0.0f, c, n);
+}
 /* C(m*n) = A^T(m*k) * B(k*n) */
 void multiply_mat_MN_transposeA(double * a, double *b, double *c, int m, int n, int k)
 {
   cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, m, n, k, 1.0f
                              , a, m, b, n, 0.0f, c, n);
 }
+/* C(m*n) = A^T(m*k) * B(k*n) */
+void multiply_mat_MN_transposeA_alpha_beta(double * a, double *b, double *c, int m, int n, int k
+                                          ,double alpha, double beta)
+{
+  cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, m, n, k, alpha
+                             , a, m, b, n, beta, c, n);
+}
 /* C(m*n) = A(m*k) * B^T(k*n) */
 void multiply_mat_MN_transposeB(double * a, double *b, double *c, int m, int n, int k)
 {
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, n, k, 1.0f
                              , a, k, b, k, 0.0f, c, n);
+}
+/* C(m*n) = alpha * A(m*k) * B^T(k*n) + beta * C(m*n) */
+void multiply_mat_MN_transposeB_alpha_beta(double * a, double *b, double *c, int m, int n, int k, 
+                                           double alpha, double beta)
+{
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, n, k, alpha
+                             , a, k, b, k, beta, c, n);
 }
 /* y(n) = A(nxn)* x(n) */
 void multiply_matvec(double *a, double *x, int n, double *y)
@@ -68,6 +88,16 @@ void multiply_matvec_transposeA(double *a, double *x, int n, double *y)
 void multiply_matvec_MN(double * a, int m, int n, double *x, double *y)
 {
   cblas_dgemv(CblasRowMajor, CblasNoTrans, m, n, 1.0f, a, n, x, 1, 0.0f, y, 1);
+}
+/* y(m) = alpha * A(m, n) * x(n) + beta * y(m) */
+void multiply_matvec_MN_alpha_beta(double * a, int m, int n, double *x, double *y, double alpha, double beta)
+{
+  cblas_dgemv(CblasRowMajor, CblasNoTrans, m, n, alpha, a, n, x, 1, beta, y, 1);
+}
+/* y(m) = A^T(m, n) * x(n) */
+void multiply_matvec_MN_transposeA(double * a, int m, int n, double *x, double *y)
+{
+  cblas_dgemv(CblasRowMajor, CblasTrans, m, n, 1.0f, a, n, x, 1, 0.0f, y, 1);
 }
 /* A(mxm)^-1 * B(mxn), store the output in B
  * note that A will be changed on exit. */
@@ -754,6 +784,36 @@ void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n
 
   return;
 }
+/*
+ * calculate matrix inverse by partition
+ * ref: Numerical Recipes, Chapter 2, P70
+ * use the functionality such as C = a * AxB + b * C in Lapack.
+ */
+void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, int n1, 
+                                 int n2, double *PN, double *SN, double *QN, 
+                                 double *lndet, double *work, int *ipiv)
+{
+  int info;
+
+  /* P^-1 x Q */
+  multiply_mat_MN(Pinv, Q, work, n1, n2, n1);
+
+  /* S - Q^T x P^-1 x Q */
+  multiply_mat_MN_transposeA_alpha_beta(Q, work, S, n2, n2, n1, -1.0, 1.0);
+  memcpy(SN, S, n2*n2*sizeof(double));
+
+  /* note that lndet = lndet(SN^-1) */
+  inverse_symat_lndet(SN, n2, lndet, &info, ipiv); 
+
+  /* -(P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
+  multiply_mat_MN_alpha(work, SN, QN, n1, n2, n2, -1.0);
+
+  /* P^-1 + (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
+  multiply_mat_MN_transposeB_alpha_beta(QN, work, Pinv, n1, n1, n2, -1.0, 1.0);
+  memcpy(PN, Pinv, n1*n1*sizeof(double));
+
+  return;
+}
 
 /*!
  * This function calculates A^-1 by iterative partitioning,
@@ -826,7 +886,7 @@ void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *
       }
     }
   
-    inverse_symat_lndet_partition_inv(Ai, Si, Qi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
+    inverse_symat_lndet_partition_inv_fast(Ai, Si, Qi, ni, nq, ANi, SNi, QNi, &lndet_SN, pwork, ipiv);
     *lndet += lndet_SN; /* lndet_SN = -lndet(SN) */
 
     /* new Ai */
@@ -932,8 +992,10 @@ void inverse_semiseparable(double *t, int n, double a1, double c1, double *sigma
 
     *lndet += log(D[i]);
   }
+  /* inverse of a real upper or lower triangular matrix */
   LAPACKE_dtrtri(LAPACK_ROW_MAJOR, 'L', 'N', n, A, n);
-
+  
+  /* L^T x L */
   LAPACKE_dlauum(LAPACK_ROW_MAJOR, 'L', n, A, n);
 
   /* fill up upper triangle */

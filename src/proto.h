@@ -185,12 +185,17 @@ void multiply_mat(double * a, double *b, double *c, int n);
 void multiply_mat_transposeA(double * a, double *b, double *c, int n);
 void multiply_mat_transposeB(double * a, double *b, double *c, int n);
 void multiply_mat_MN(double * a, double *b, double *c, int m, int n, int k);
+void multiply_mat_MN_alpha(double * a, double *b, double *c, int m, int n, int k, double alpha);
 void multiply_mat_MN_transposeA(double * a, double *b, double *c, int m, int n, int k);
+void multiply_mat_MN_transposeA_alpha_beta(double * a, double *b, double *c, int m, int n, int k, double alpha, double beta);
 void multiply_mat_MN_transposeB(double * a, double *b, double *c, int m, int n, int k);
+void multiply_mat_MN_transposeB_alpha_beta(double * a, double *b, double *c, int m, int n, int k, double alpha, double beta);
 int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, int *ipiv);
 void multiply_matvec(double *a, double *x, int n, double *y);
 void multiply_matvec_transposeA(double *a, double *x, int n, double *y);
 void multiply_matvec_MN(double * a, int m, int n, double *x, double *y);
+void multiply_matvec_MN_alpha_beta(double * a, int m, int n, double *x, double *y, double alpha, double beta);
+void multiply_matvec_MN_transposeA(double * a, int m, int n, double *x, double *y);
 void multiply_vec2mat(double * x, double * a, int n);
 void eigen_sym_mat(double *a, int n, double *val, int *info);
 void Chol_decomp_U(double *a, int n, int *info);
@@ -208,6 +213,10 @@ void inverse_symat_partition_inv(double *Pinv, double *S, double *Q, int n1, int
 
 
 void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n1, 
+                                 int n2, double *PN, double *SN, double *QN, 
+                                 double *lndet, double *work, int *ipiv);
+
+void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
                                  double *lndet, double *work, int *ipiv);
 

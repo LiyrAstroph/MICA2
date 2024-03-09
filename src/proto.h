@@ -53,6 +53,8 @@ void output_reconstruction();
 void output_reconstruction2();
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
   int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
+void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double alpha, double syserr, 
+  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
 int write_options_con(char *fname);
 
 
@@ -186,7 +188,7 @@ void multiply_mat(double * a, double *b, double *c, int n);
 void multiply_mat_transposeA(double * a, double *b, double *c, int n);
 void multiply_mat_transposeB(double * a, double *b, double *c, int n);
 void multiply_mat_MN(double * a, double *b, double *c, int m, int n, int k);
-void multiply_mat_MN_alpha(double * a, double *b, double *c, int m, int n, int k, double alpha);
+void multiply_mat_MN_alpha_beta(double * a, double *b, double *c, int m, int n, int k, double alpha, double beta);
 void multiply_mat_MN_transposeA(double * a, double *b, double *c, int m, int n, int k);
 void multiply_mat_MN_transposeA_alpha_beta(double * a, double *b, double *c, int m, int n, int k, double alpha, double beta);
 void multiply_mat_MN_transposeB(double * a, double *b, double *c, int m, int n, int k);
@@ -197,6 +199,7 @@ void multiply_matvec_transposeA(double *a, double *x, int n, double *y);
 void multiply_matvec_MN(double * a, int m, int n, double *x, double *y);
 void multiply_matvec_MN_alpha_beta(double * a, int m, int n, double *x, double *y, double alpha, double beta);
 void multiply_matvec_MN_transposeA(double * a, int m, int n, double *x, double *y);
+void multiply_matvec_MN_transposeA_alpha_beta(double * a, int m, int n, double *x, double *y, double alpha, double beta);
 void multiply_vec2mat(double * x, double * a, int n);
 void eigen_sym_mat(double *a, int n, double *val, int *info);
 void Chol_decomp_U(double *a, int n, int *info);

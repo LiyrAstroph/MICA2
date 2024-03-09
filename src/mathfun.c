@@ -43,10 +43,10 @@ void multiply_mat_MN(double * a, double *b, double *c, int m, int n, int k)
                              , a, k, b, n, 0.0f, c, n);
 }
 /* C(m*n) = - A(m*k) * B(k*n) */
-void multiply_mat_MN_alpha(double * a, double *b, double *c, int m, int n, int k, double alpha)
+void multiply_mat_MN_alpha_beta(double * a, double *b, double *c, int m, int n, int k, double alpha, double beta)
 {
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha
-                             , a, k, b, n, 0.0f, c, n);
+                             , a, k, b, n, beta, c, n);
 }
 /* C(m*n) = A^T(m*k) * B(k*n) */
 void multiply_mat_MN_transposeA(double * a, double *b, double *c, int m, int n, int k)
@@ -98,6 +98,11 @@ void multiply_matvec_MN_alpha_beta(double * a, int m, int n, double *x, double *
 void multiply_matvec_MN_transposeA(double * a, int m, int n, double *x, double *y)
 {
   cblas_dgemv(CblasRowMajor, CblasTrans, m, n, 1.0f, a, n, x, 1, 0.0f, y, 1);
+}
+/* y(m) = alapha * A^T(m, n) * x(n) + beta * y(m) */
+void multiply_matvec_MN_transposeA_alpha_beta(double * a, int m, int n, double *x, double *y, double alpha, double beta)
+{
+  cblas_dgemv(CblasRowMajor, CblasTrans, m, n, alpha, a, n, x, 1, beta, y, 1);
 }
 /* A(mxm)^-1 * B(mxn), store the output in B
  * note that A will be changed on exit. */
@@ -806,7 +811,7 @@ void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, 
   inverse_symat_lndet(SN, n2, lndet, &info, ipiv); 
 
   /* -(P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
-  multiply_mat_MN_alpha(work, SN, QN, n1, n2, n2, -1.0);
+  multiply_mat_MN_alpha_beta(work, SN, QN, n1, n2, n2, -1.0, 0.0);
 
   /* P^-1 + (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
   memcpy(PN, Pinv, n1*n1*sizeof(double));
@@ -939,7 +944,7 @@ void inverse_symat_lndet_partition_inv_semiseparable(double *Pinv, double *W, do
   inverse_symat_lndet(SN, n2, lndet, &info, ipiv); 
 
   /* -(P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 */
-  multiply_mat_MN_alpha(work, SN, QN, n1, n2, n2, -1.0);
+  multiply_mat_MN_alpha_beta(work, SN, QN, n1, n2, n2, -1.0, 0.0);
 
   /* P^-1 + (P^-1 x Q) x (S - Q^T x P^-1 x Q)^-1 x (P^-1 x Q)^T */
   memcpy(PN, Pinv, n1*n1*sizeof(double));

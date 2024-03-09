@@ -101,7 +101,7 @@ void mc_con()
       for(j=0; j<ncon; j++)
         tcon[j] = (tspan + 0.1*tspan)/(ncon-1.0) * j + tcon_data[0]-0.05*tspan;
 
-      recostruct_con_from_varmodel(sigma, tau, alpha, syserr, ncon_data, tcon_data, fcon_data, fecon_data, ncon, tcon, fcon, fecon);
+      recostruct_con_from_varmodel_semiseparable(sigma, tau, alpha, syserr, ncon_data, tcon_data, fcon_data, fecon_data, ncon, tcon, fcon, fecon);
 
       for(j=0; j<ncon; j++)
       {
@@ -220,6 +220,95 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
   free(PEmat2);
   free(PEmat3);
   free(PEmat4);
+  return;
+}
+
+void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double alpha, double syserr, 
+  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon)
+{
+  double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
+  int i, j, info, *ipiv;
+  double *PEmat1, *PEmat2;
+  double sigma2, *W, *D, *phi;
+
+  Larr = workspace;
+  ybuf = Larr + ncon_data * nq;
+  y = ybuf + ncon_data * nq;
+  Cq = y + ncon_data;
+  yq = Cq + nq*nq;
+  yuq = yq + nq; 
+  Larr_rec = yuq + ncon;
+  W = Larr_rec + ncon*nq;
+  D = W + ncon_data;
+  phi = D + ncon_data;
+
+  ipiv = workspace_ipiv;
+
+  PEmat1 = malloc(ncon * ncon_data * sizeof(double));
+  PEmat2 = malloc(ncon * ncon * sizeof(double));
+
+  set_covar_Umat(sigma, tau, alpha, ncon_data, tcon_data, ncon, tcon);
+
+  for(i=0;i<ncon_data;i++)
+  {
+    Larr[i*nq + 0]=1.0;
+    for(j=1; j<nq; j++)
+      Larr[i*nq + j] = pow(tcon_data[i], j);
+  }
+
+  /* note that here semiseparable cal includes sigma, where set_covar do not */
+  sigma2 = sigma*sigma;
+  compute_semiseparable_drw(tcon_data, ncon_data, sigma2, 1.0/tau, fecon_data, syserr, W, D, phi);
+  
+  /* Cq^-1 = L^TxC^-1xL */
+  multiply_mat_semiseparable_drw(Larr, W, D, phi, ncon_data, nq, sigma2, ybuf);
+  multiply_mat_MN_transposeA(Larr, ybuf, Cq, nq, nq, ncon_data);
+
+  /* yuq = L^T x C^-1 x y */
+  /* note that ybuf = C^-1xL */
+  multiply_matvec_MN_transposeA(ybuf, ncon_data, nq, fcon_data, yuq);
+
+  /* yq = (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
+  inverse_mat(Cq, nq, &info, ipiv);
+  multiply_mat_MN(Cq, yuq, yq, nq, 1, nq);  //yq: Nqx1
+
+  /* y = -1.0 * L x q + 1.0 * y */
+  memcpy(y, fcon_data, ncon_data*sizeof(double));
+  multiply_matvec_MN_alpha_beta(Larr, ncon_data, nq, yq, y, -1.0, 1.0);
+
+  /* PEmat1 = C^-1 x S^T, dimension: ndxn */
+  multiply_mat_transposeB_semiseparable_drw(USmat, W, D, phi, ncon_data, ncon, sigma2, PEmat1);
+  /* fcon = S x C^-1 x (y - Lq), note the factor sigma */
+  multiply_matvec_MN_transposeA_alpha_beta(PEmat1, ncon_data, ncon, y, fcon, sigma2, 0.0);
+
+  for(i=0;i<ncon;i++)
+  {
+    Larr_rec[i*nq + 0]=1.0;
+    for(j=1; j<nq; j++)
+      Larr_rec[i*nq + j] = pow(tcon[i], j);
+  }
+  
+  /* fcon = 1.0 * L x q + 1.0 * fcon */
+  multiply_matvec_MN_alpha_beta(Larr_rec, ncon, nq, yq, fcon, 1.0, 1.0);
+  
+  /* S x C^-1 x S */
+  multiply_mat_MN_alpha_beta(USmat, PEmat1, PEmat2, ncon, ncon, ncon_data, sigma2, 0.0);
+
+  /* S x C^-1 x L - L */
+  multiply_mat_MN_transposeA_alpha_beta(PEmat1, Larr, Larr_rec, ncon, nq, ncon_data, sigma2, -1.0);
+
+  /* (S x C^-1 x L - L) x Cq, note the factor sigma2 */
+  multiply_mat_MN_alpha_beta(Larr_rec, Cq, PEmat1, ncon, nq, nq, 1.0/sigma2, 0.0);
+  /* -S + (S x C^-1 x L - L) x Cq x (S x C^-1 x L - L)^T */
+  multiply_mat_MN_transposeB_alpha_beta(PEmat1, Larr_rec, PEmat2, ncon, ncon, nq, 1.0, -1.0);
+
+  for(i=0; i<ncon; i++)
+  {
+    fecon[i] = sigma * sqrt(1.0 + PEmat2[i*ncon+i]);
+  }
+
+  free(PEmat1);
+  free(PEmat2);
   return;
 }
 
@@ -477,18 +566,24 @@ double prob_con_variability_semiseparable(const void *model)
     multiply_mat_MN_transposeA(Larr, ybuf, Cq, nq, nq, ncon);
     
     // L^TxC^-1xy
-    multiply_matvec_semiseparable_drw(fcon, W, D, phi, ncon, sigma2, ybuf);
-    multiply_mat_MN_transposeA(Larr, ybuf, yq, nq, 1, ncon);
+    // multiply_matvec_semiseparable_drw(fcon, W, D, phi, ncon, sigma2, ybuf);
+    // multiply_mat_MN_transposeA(Larr, ybuf, yq, nq, 1, ncon);
+
+    /* note that ybuf = C^-1xL */
+    multiply_matvec_MN_transposeA(ybuf, ncon, nq, fcon, yq);
 
     /* calculate (L^T*C^-1*L)^-1 * L^T*C^-1*y */
     inverse_symat_lndet(Cq, nq, &lndet_ICq, &info, ipiv);
     multiply_mat_MN(Cq, yq, ybuf, nq, 1, nq);
   
-    multiply_matvec_MN(Larr, ncon, nq, ybuf, y);
-    for(i=0; i<ncon; i++)
-    {
-      y[i] = fcon[i] - y[i];
-    }
+    // multiply_matvec_MN(Larr, ncon, nq, ybuf, y);
+    // for(i=0; i<ncon; i++)
+    // {
+    //   y[i] = fcon[i] - y[i];
+    // }
+    /* y = -1.0 * Lxq + 1.0 * y */
+    memcpy(y, fcon, ncon*sizeof(double));
+    multiply_matvec_MN_alpha_beta(Larr, ncon, nq, ybuf, y, -1.0, 1.0);
   
     /* y^T x C^-1 y */
     multiply_matvec_semiseparable_drw(y, W, D, phi, ncon, sigma2, ybuf);

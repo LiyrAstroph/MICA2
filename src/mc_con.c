@@ -299,7 +299,7 @@ void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double
 
   /* (S x C^-1 x L - L) x Cq, note the factor sigma2 */
   multiply_mat_MN_alpha_beta(Larr_rec, Cq, PEmat1, ncon, nq, nq, 1.0/sigma2, 0.0);
-  /* -S + (S x C^-1 x L - L) x Cq x (S x C^-1 x L - L)^T */
+  /* -S x C^-1 x S + (S x C^-1 x L - L) x Cq x (S x C^-1 x L - L)^T */
   multiply_mat_MN_transposeB_alpha_beta(PEmat1, Larr_rec, PEmat2, ncon, ncon, nq, 1.0, -1.0);
 
   for(i=0; i<ncon; i++)

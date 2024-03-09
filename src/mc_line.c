@@ -344,7 +344,7 @@ void output_reconstruction()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        recostruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -656,7 +656,7 @@ void output_reconstruction2()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        recostruct_line_from_varmodel3(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -1215,6 +1215,174 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
   free(PEmat2);
   free(PEmat3);
   free(PEmat4);
+  return;
+}
+
+/*!
+ * calculate inverse using matrix partition 
+ * 
+ */
+void recostruct_line_from_varmodel3(const void *model, int nds, int *nall, double *tall, 
+                                    double *fall, double *feall, double *yqall)
+{
+  double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *W, *D, *phi, *fe;
+  int i, j, k, m, info, idx, *ipiv;
+  double *PEmat1, *PEmat2;
+  int nall_data, nqall, ntall, np;
+  double *fall_data;
+  double sigma, tau, *pm=(double *)model;
+  double *work, syserr, lndet, sigma2;
+  int *narr, nd;
+
+  ipiv = workspace_ipiv;
+  work = workspace_inv;
+  
+  idx = idx_con_pm[nds];
+  tau = exp(pm[idx+2]);
+  sigma = exp(pm[idx+1]) * sqrt(tau);
+  /* note here divided by sigma */
+  syserr = (exp(pm[idx+0])-1.0)*dataset[nds].con.error_mean/sigma;
+  sigma2 = sigma * sigma;
+
+  ntall = nall[0];
+  for(i=0; i<dataset[nds].nlset; i++)
+    ntall += nall[i+1];
+
+  nqall = nq * (1  + dataset[nds].nlset);
+  nall_data = alldata[nds].n;
+  fall_data = alldata[nds].f;
+
+  Larr = workspace;
+  ybuf = Larr + nall_data * nqall;
+  y = ybuf + nall_data * nqall;
+  Cq = y + nall_data;
+  yq = Cq + nqall*nqall;
+  yuq = yq + nqall; 
+  Larr_rec = yuq + ntall;
+
+  W = Larr_rec + ntall * nqall;
+  D = W + nall_data;
+  phi = D + nall_data;
+  fe = phi + nall_data;
+  narr = (int *)(fe + ntall);
+
+  PEmat1 = malloc(ntall * nall_data * sizeof(double));
+  PEmat2 = malloc(ntall * ntall * sizeof(double));
+
+  set_covar_Pmat_data_line(model, nds);
+  
+  set_covar_Umat_line(model, nds, nall, tall);
+  
+  set_covar_Amat_line(model, nds, nall, tall);
+
+  for(i=0;i<dataset[nds].con.n;i++)
+  {
+    Larr[i*nqall] = 1.0; 
+    for(j=1; j<nq; j++)
+      Larr[i*nqall+j] = pow(dataset[nds].con.t[i], j);
+
+    for(j=nq; j<nqall; j++)
+      Larr[i*nqall + j] = 0.0;
+  }
+  np = dataset[nds].con.n;
+  for(j=0; j<dataset[nds].nlset; j++)
+  {
+    for(m=0; m<dataset[nds].line[j].n; m++)
+    {
+      for(i=0; i<nqall; i++)
+        Larr[(np+m)*nqall + i ]  = 0.0;
+        
+      Larr[(np+m)*nqall + nq + j*nq + 0] = 1.0;
+      for(i=1; i<nq; i++)
+        Larr[(np+m)*nqall + nq + j*nq + i] = pow(dataset[nds].line[j].t[m], i);
+    }
+    np += dataset[nds].line[j].n;
+  }
+  
+  nd = dataset[nds].nlset;
+  narr[0] = dataset[nds].con.n;
+  for(i=1; i<=nd; i++)
+    narr[i] = dataset[nds].line[i-1].n;
+  
+  for(i=0; i<dataset[nds].con.n; i++)
+    fe[i] = dataset[nds].con.fe[i]/sigma;
+
+  /* note here set sigma = 1 */
+  inverse_semiseparable_iter(dataset[nds].con.t, dataset[nds].con.n, 1.0, 1.0/tau, 
+                          fe, syserr, W, D, phi, PCmat, nall_data, narr, nd,
+                          &lndet, work, ipiv);
+
+  /* L^T x C^-1 x L */
+  multiply_mat_MN(PCmat, Larr, ybuf, nall_data, nqall, nall_data);
+  multiply_mat_MN_transposeA(Larr, ybuf, Cq, nqall, nqall, nall_data);
+
+  /* L^T x C^-1 x y, note ybuf = C^-1 x L */
+  multiply_matvec_MN_transposeA(ybuf, nall_data, nqall, fall_data, yuq);
+
+  /* (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
+  inverse_symat(Cq, nqall, &info, ipiv);
+  multiply_mat_MN(Cq, yuq, yq, nqall, 1, nqall);
+  for(i=0; i<nqall; i++)
+  {
+    yqall[i] = yq[i];
+  }
+
+  /*  y = -1.0 * L x q + 1.0 * y */
+  memcpy(y, fall_data, nall_data*sizeof(double));
+  multiply_matvec_MN_alpha_beta(Larr, nall_data, nqall, yq, y, -1.0, 1.0);
+
+  /* S x C^-1 x (y - Lq) */  
+  /* PEmat1 = S x C^-1, dimension: n*nd */
+  multiply_mat_MN(USmat, PCmat, PEmat1, ntall, nall_data, nall_data);
+  multiply_matvec_MN(PEmat1, ntall, nall_data, y, fall);
+
+  for(i=0;i<nall[0];i++)
+  {
+    Larr_rec[i*nqall + 0]=1.0;
+    for(j=1; j<nq; j++)
+      Larr_rec[i*nqall + j]=pow(tall[i], j);
+
+    for(j=nq; j<nqall; j++)
+      Larr_rec[i*nqall + j] = 0.0;
+  }
+
+  np = nall[0];
+  for(k=0; k<dataset[nds].nlset; k++)
+  {
+    for(i=0; i<nall[1+k]; i++)
+    {
+      for(j=0; j<nqall; j++)
+      {
+        Larr_rec[(np+i)*nqall + j] = 0.0;
+      }
+      
+      Larr_rec[(np+i)*nqall + nq + k*nq + 0] = 1.0;
+      for(j=1; j<nq; j++)
+        Larr_rec[(np+i)*nqall + nq + k*nq + j] = pow(tall[np+i], j);
+    }
+    np += nall[1+k];
+  }
+  
+  /* fall + L x q */
+  multiply_matvec_MN_alpha_beta(Larr_rec, ntall, nqall, yq, fall, 1.0, 1.0);
+
+  /* S x C^-1 x S */
+  multiply_mat_MN_transposeB(PEmat1, USmat, PEmat2, ntall, ntall, nall_data);
+  /* S x C^-1 x L - L */
+  multiply_mat_MN_alpha_beta(PEmat1, Larr, Larr_rec, ntall, nqall, nall_data, 1.0, -1.0);
+  /* (S x C^-1 x L - L) x Cq */
+  multiply_mat_MN(Larr_rec, Cq, PEmat1, ntall, nqall, nqall);
+  /* -S x C^-1 x S + (S x C^-1 x L - L) x Cq x (S x C^-1 x L - L)^T */
+  multiply_mat_MN_transposeB_alpha_beta(PEmat1, Larr_rec, PEmat2, ntall, ntall, nqall, 1.0, -1.0);
+
+  for(i=0; i<ntall; i++)
+  {
+    feall[i] = sigma * sqrt(ASmat[i*ntall + i] + PEmat2[i*ntall+i]);
+    //printf("%d %f %f %f\n", i, ASmat[i*ntall + i],  PEmat2[i*ntall+i], PEmat4[i*ntall + i]);
+  }
+
+  free(PEmat1);
+  free(PEmat2);
   return;
 }
 

@@ -3946,3 +3946,770 @@ void Sll2_array_tophat_linear(double *tline1, int nline1, double *tline2, int nl
 
   return;
 }
+
+/*===============================================================================
+ * Gamma transfer function with k=2
+ * Gamma(x) = A/T^2 * (x-t0) * exp[-(x-t0)/T]
+ * parameters: A, t0, T
+ * constraints: x>t0, T>0
+ *===============================================================================
+ */
+/*
+ * covaraince between continuum and line
+ *
+ */
+double Slc_gamma(double tcon, double tline, const void *model, int nds, int nls)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, tau1, tau0, St, Sttot, p1, p2;
+  int idx, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  Dt = tline - tcon;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg = exp(pm[idxk + 0]);
+    tau0 =   pm[idxk + 1] ;
+    tau1 = exp(pm[idxk + 2]);
+
+    fg /= tau1*tau1;
+    p1 = (taud + tau1)/taud/tau1;
+    p2 = (taud - tau1)/taud/tau1;
+
+    DT = Dt - tau0;
+
+    if(DT<=0)
+    {
+      St = exp(DT/taud)/p1/p1;
+    }
+    else 
+    {
+      St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
+    }
+    
+    Sttot += St * fg;
+  }
+
+  return Sttot;
+}
+
+/*
+ * covaraince between continuum and line with linear amplitude
+ *
+ */
+double Slc_gamma_linear(double tcon, double tline, const void *model, int nds, int nls)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, tau1, tau0, St, Sttot, p1, p2;
+  int idx, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  Dt = tline - tcon;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg =     pm[idxk + 0];
+    tau0 =   pm[idxk + 1] ;
+    tau1 = exp(pm[idxk + 2]);
+
+    fg /= tau1*tau1;
+    p1 = (taud + tau1)/taud/tau1;
+    p2 = (taud - tau1)/taud/tau1;
+
+    DT = Dt - tau0;
+
+    if(DT<=0)
+    {
+      St = exp(DT/taud)/p1/p1;
+    }
+    else 
+    {
+      St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
+    }
+    
+    Sttot += St * fg;
+  }
+
+  return Sttot;
+}
+
+/*
+ * covariance between continuum and line for an array of time
+ *
+ * nds: dataset index
+ * nls: line set index
+ */
+void Slc_array_gamma(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, tau1, tau0, St, p1, p2;
+  int idx, i, j, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<ncon; i++)
+  {
+    for(j=0; j<nline; j++)
+    {
+      Smat[i*nline+j] = 0.0;
+    }
+  }
+
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg = exp(pm[idxk + 0]);
+    tau0 =   pm[idxk + 1] ;
+    tau1 = exp(pm[idxk + 2]);
+    
+    fg /= tau1*tau1;
+
+    p1 = (taud + tau1)/taud/tau1;
+    p2 = (taud - tau1)/taud/tau1;
+
+    for(i=0; i<ncon; i++)
+    {
+      for(j=0; j<nline; j++)
+      {
+        Dt = tline[j] - tcon[i];
+
+        DT = Dt - tau0;
+
+        if(DT<=0)
+        {
+          St = exp(DT/taud)/p1/p1;
+        }
+        else 
+        {
+          St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
+        }
+
+        Smat[i*nline + j] += St * fg;
+      }
+    }
+  }
+
+  return;
+}
+
+/*
+ * covariance between continuum and line for an array of time with linear amplitude
+ *
+ * nds: dataset index
+ * nls: line set index
+ */
+void Slc_array_gamma_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, tau1, tau0, St, p1, p2;
+  int idx, i, j, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<ncon; i++)
+  {
+    for(j=0; j<nline; j++)
+    {
+      Smat[i*nline+j] = 0.0;
+    }
+  }
+
+  for(k=0; k<num_gaussian; k++)
+  {
+    idxk = idx + 1 + 3*k;
+    fg =     pm[idxk + 0];
+    tau0 =   pm[idxk + 1] ;
+    tau1 = exp(pm[idxk + 2]);
+    
+    fg /= tau1*tau1;
+
+    p1 = (taud + tau1)/taud/tau1;
+    p2 = (taud - tau1)/taud/tau1;
+
+    for(i=0; i<ncon; i++)
+    {
+      for(j=0; j<nline; j++)
+      {
+        Dt = tline[j] - tcon[i];
+
+        DT = Dt - tau0;
+
+        if(DT<=0)
+        {
+          St = exp(DT/taud)/p1/p1;
+        }
+        else 
+        {
+          St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
+        }
+
+        Smat[i*nline + j] += St * fg;
+      }
+    }
+  }
+
+  return;
+}
+
+/*
+ * auto-covariance of a line for an array of time
+ *
+ * nds: index of dataset
+ * nls: indexes of line
+ *
+ */
+double Sll_gamma(double t1, double t2, const void *model, int nds, int nls)
+{
+  double Dt, DT, St, Sttot;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+    
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+      
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      DT = Dt - (tau01 - tau02);
+    
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+  
+  return Sttot;
+}
+
+/*
+ * auto-covariance of a line for an array of time with linear amplitude
+ *
+ * nds: index of dataset
+ * nls: indexes of line
+ *
+ */
+double Sll_gamma_linear(double t1, double t2, const void *model, int nds, int nls)
+{
+  double Dt, DT, St, Sttot;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =      pm[idxk1 + 0];
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+    
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =      pm[idxk2 + 0];
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+      
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      DT = Dt - (tau01 - tau02);
+    
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+  
+  return Sttot;
+}
+
+/*
+ * auto-covariance of a line for an array of times
+ *
+ * nds: index of dataset
+ * nls: indexes of line
+ *
+ */
+void Sll_array_gamma(double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, i, j, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<nline; i++)
+  {
+    for(j=0; j<=i; j++)
+    {
+      Smat[i*nline + j] = 0.0;
+    }
+  }
+
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+    
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+  
+      for(i=0; i<nline; i++)
+      {
+        for(j=0; j<=i; j++)
+        {
+          Dt = tline[i] - tline[j];
+          DT = Dt - (tau01 - tau02);
+
+          if(DT<=0)
+          {
+            St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+          }
+          else 
+          {
+            St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+          }
+
+          Smat[i*nline + j] += St * fg12;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+/*
+ * auto-covariance of a line for an array of times with linear amplitude
+ *
+ * nds: index of dataset
+ * nls: indexes of line
+ *
+ */
+void Sll_array_gamma_linear(double *tline, int nline, const void *model, int nds, int nls, double *Smat)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, i, j, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  for(i=0; i<nline; i++)
+  {
+    for(j=0; j<=i; j++)
+    {
+      Smat[i*nline + j] = 0.0;
+    }
+  }
+
+  for(k1=0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =      pm[idxk1 + 0];
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+    
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =      pm[idxk2 + 0];
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+  
+      for(i=0; i<nline; i++)
+      {
+        for(j=0; j<=i; j++)
+        {
+          Dt = tline[i] - tline[j];
+          DT = Dt - (tau01 - tau02);
+
+          if(DT<=0)
+          {
+            St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+          }
+          else 
+          {
+            St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+          }
+
+          Smat[i*nline + j] += St * fg12;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+/*
+ * covariance between different lines
+ *
+ * nds: index of dataset
+ * nls1, nls2: indexes of line1 and line2
+ *
+ */
+double Sll2_gamma(double t1, double t2, const void *model, int nds, int nls1, int nls2)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, idxk1, idxk2;
+  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5;
+  double Dt, DT, St, Sttot;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  Sttot = 0.0;
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+  
+      DT = Dt - (tau01-tau02);
+  
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+
+  return Sttot;
+}
+
+/*
+ * covariance between different lines with linear amplitude
+ *
+ * nds: index of dataset
+ * nls1, nls2: indexes of line1 and line2
+ *
+ */
+double Sll2_gamma_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, idxk1, idxk2;
+  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5;
+  double Dt, DT, St, Sttot;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  Sttot = 0.0;
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      DT = Dt - (tau01-tau02);
+  
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+
+  return Sttot;
+}
+
+/*
+ * covariance between different lines for an array of times
+ *
+ * nds: index of dataset
+ * nls1, nls2: indexes of line1 and line2
+ *
+ */
+void Sll2_array_gamma(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, i, j, idxk1, idxk2;
+  double fg1, fg2, fg12, tau01, tau02, tau1, tau2, taud, p1, p2, p3, p4, p5;
+  double Dt, DT, St;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  for(i=0; i<nline1; i++)
+  {
+    for(j=0; j<nline2; j++)
+    {
+      Smat[i*nline2 + j] = 0.0;
+    }
+  }
+
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      for(i=0; i<nline1; i++)
+      {
+        for(j=0; j<nline2; j++)
+        {
+          Dt = tline1[i] - tline2[j];
+          DT = Dt - (tau01-tau02);
+
+          if(DT<=0)
+          {
+            St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+          }
+          else 
+          {
+            St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+          }
+
+          Smat[i*nline2 + j] += St*fg12;
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+/*
+ * covariance between different lines for an array of times with linear amplitude
+ *
+ * nds: index of dataset
+ * nls1, nls2: indexes of line1 and line2
+ *
+ */
+void Sll2_array_gamma_linear(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, i, j, idxk1, idxk2;
+  double fg1, fg2, fg12, tau01, tau02, tau1, tau2, taud, p1, p2, p3, p4, p5;
+  double Dt, DT, St;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  for(i=0; i<nline1; i++)
+  {
+    for(j=0; j<nline2; j++)
+    {
+      Smat[i*nline2 + j] = 0.0;
+    }
+  }
+
+  for(k1 = 0; k1<num_gaussian; k1++)
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 =      pm[idxk1 + 0] ;
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+    
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 =      pm[idxk2 + 0] ;
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      for(i=0; i<nline1; i++)
+      {
+        for(j=0; j<nline2; j++)
+        {
+          Dt = tline1[i] - tline2[j];
+          DT = Dt - (tau01-tau02);
+
+          if(DT<=0)
+          {
+            St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+          }
+          else 
+          {
+            St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+          }
+          
+          Smat[i*nline2 + j] += St*fg12;
+        }
+      }
+    }
+  }
+
+  return;
+}

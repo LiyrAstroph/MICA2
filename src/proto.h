@@ -129,6 +129,20 @@ void Sll2_array_tophat_linear(double *tline1, int nline1, double *tline2, int nl
 double Slc_tophat_linear(double tcon, double tline, const void *model, int nds, int nls);
 void Slc_array_tophat_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 
+double Sll_gamma(double t1, double t2, const void *model, int nds, int nls);
+void Sll_array_gamma(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+double Sll2_gamma(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+void Sll2_array_gamma(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
+double Slc_gamma(double tcon, double tline, const void *model, int nds, int nls);
+void Slc_array_gamma(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+
+double Sll_gamma_linear(double t1, double t2, const void *model, int nds, int nls);
+void Sll_array_gamma_linear(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+double Sll2_gamma_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+void Sll2_array_gamma_linear(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
+double Slc_gamma_linear(double tcon, double tline, const void *model, int nds, int nls);
+void Slc_array_gamma_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+
 void set_covar_Pmat_data_line(const void *model, int k);
 void set_covar_Pmat_data_line_array(const void *model, int k);
 void set_covar_Umat_line(const void *model, int k, int *nall, double *tall);
@@ -173,6 +187,16 @@ double Slc_single_tophat_linear(double tcon, double tline, const void *model, in
 double Sll2_single_tophat_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
 double Sll_single_tophat_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
 double Sll_single2_tophat_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
+
+double Slc_single_gamma(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double Sll2_single_gamma(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double Sll_single_gamma(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double Sll_single2_gamma(double t1, double t2, const void *model, int nds, int nls, int kgau);
+
+double Slc_single_gamma_linear(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info, int *ipiv);

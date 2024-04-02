@@ -334,6 +334,8 @@ cdef class basis:
       self.parset.type_tf = 0
     elif type_tf == 'tophat':
       self.parset.type_tf = 1
+    elif type_tf == 'gamma':
+      self.parset.type_tf = 2
     else:
       raise ValueError("type_tf is unrecognized!")
     

@@ -105,7 +105,7 @@ void init()
 
     width_factor = 3.0;
   }
-  else
+  else if(parset.type_tf == 1)
   {
     if(parset.flag_negative_resp == 0)
     {
@@ -134,6 +134,39 @@ void init()
       Sll_single = Sll_single_tophat_linear;
       Sll2_single = Sll2_single_tophat_linear;
       Sll_single2 = Sll_single2_tophat_linear;
+    }
+
+    width_factor = 1.0;
+  }
+  else 
+  {
+    if(parset.flag_negative_resp == 0)
+    {
+      Slc = Slc_gamma;
+      Sll = Sll_gamma;
+      Sll2 = Sll2_gamma;
+      Slc_array = Slc_array_gamma;
+      Sll_array = Sll_array_gamma;
+      Sll2_array = Sll2_array_gamma; 
+
+      Slc_single = Slc_single_gamma;
+      Sll_single = Sll_single_gamma;
+      Sll2_single = Sll2_single_gamma;
+      Sll_single2 = Sll_single2_gamma;
+    }
+    else
+    {
+      Slc = Slc_gamma_linear;
+      Sll = Sll_gamma_linear;
+      Sll2 = Sll2_gamma_linear;
+      Slc_array = Slc_array_gamma_linear;
+      Sll_array = Sll_array_gamma_linear;
+      Sll2_array = Sll2_array_gamma_linear; 
+
+      Slc_single = Slc_single_gamma_linear;
+      Sll_single = Sll_single_gamma_linear;
+      Sll2_single = Sll2_single_gamma_linear;
+      Sll_single2 = Sll_single2_gamma_linear;
     }
 
     width_factor = 1.0;

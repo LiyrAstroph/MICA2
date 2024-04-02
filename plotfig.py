@@ -202,13 +202,26 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     # set time lag range for transfer function 
     tau1_tf = 1.0e10
     tau2_tf = -1.0e10
-    for j in range(1, len(ns)):   
-      for k in range(ngau):
-        tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                          -np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-        tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                          +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-      
+    for j in range(1, len(ns)): 
+      if typetf == 0:  # gaussian  
+        for k in range(ngau):
+          tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            -3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+          tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            +3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+      elif typetf == 1: # tophats
+        for k in range(ngau):
+          tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            -1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+          tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            +1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+      else:  # gamma
+        for k in range(ngau):
+          tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            -0.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+          tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            +3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+
     tau1_tf = np.min((tau_low, tau1_tf))
     tau2_tf = np.max((tau_upp, tau2_tf))
         
@@ -334,7 +347,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
               sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
               tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
 
-      else:  # tophats
+      elif typetf == 1:  # tophats
         for i in range(sample.shape[0]):
           # loop over tophats
           if typemodel == 0 or typemodel == 2: # general, vmap model
@@ -363,6 +376,37 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
               cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
               sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
               tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+      else:  # gamma
+        for i in range(sample.shape[0]):
+          # loop over tophats
+          if typemodel == 0 or typemodel == 2: # general, vmap model
+            for k in range(ngau):
+
+              if flagnegresp == 0:
+                amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+              else:
+                amp =      sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
+
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              
+              idx_tau = np.where(tau >= cen)[0]
+              tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+
+          elif typemodel == 1: #pmap model 
+            k = 0
+            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+            idx_tau = np.where(tau >= cen)[0]
+            tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
       
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)

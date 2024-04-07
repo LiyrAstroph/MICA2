@@ -50,6 +50,11 @@ tests/negative_resp/*
 !tests/negative_resp/example.py
 !tests/negative_resp/sim_data.txt
 !tests/negative_resp/resp_input.txt
+!tests/gamma
+tests/gamma/*
+!tests/gamma/example.py
+!tests/gamma/sim_data.txt
+!tests/gamma/resp_input.txt
 cdnest/*
 !cdnest/*.[ch]
 !python/pymica/__init__.py

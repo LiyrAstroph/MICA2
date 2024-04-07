@@ -5,14 +5,16 @@
 #==============================================================
 
 FileDir                   ./
-DataFile                  data/IRAS_year5.txt
+DataFile                  data/mrk509_data.txt
 
 TypeModel                 0                # 0: general model
                                            # 1: pmap, photometric RM
                                            # 2: vmap, use a virtual driving light curve.
+                                           # default: 0
 
 TypeTF                    0                # 0: Gaussian
                                            # 1: Top-hat
+                                           # 2: Gamma (with k=2)
                                            # default: 0
 
 MaxNumberSaves            1000             # number of MCMC sampling steps
@@ -27,9 +29,10 @@ FlagUniformTranFuns       0                # whether each dataset has the same l
 
 FlagLongtermTrend         0                # Longterm trend in light curves, use a polynomial to fit 
                                            # input the order of the polynomial, e.g.,
-                                           # 0, constant  (default)
+                                           # 0, constant
                                            # 1, linear line 
                                            # 2, conic line
+                                           # default: 0
                                            # Use the default if you do not know this.
 
 LagLimitLow               0.0              # lower limit of the range of time lag to be explored
@@ -44,12 +47,12 @@ FlagLagPositivity         0                # whether force Gaussians overall loc
                                            # 0: no;  1: yes
                                            # default: 0
 
-FlagNegativeResp          1                # whether turn on negative response
+FlagNegativeResp          0                # whether turn on negative response
                                            # 0, no; 1, yes
                                            # default: 0
 
-NumCompLow                2                # lower limit of number of Gaussians/tophats
-NumCompUpp                2                # upper limit of number of Gaussians/tophats
+NumCompLow                1                # lower limit of number of Gaussians/tophats
+NumCompUpp                1                # upper limit of number of Gaussians/tophats
                                            # default: 1, 1
 
 FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include

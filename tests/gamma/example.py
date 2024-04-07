@@ -16,9 +16,16 @@ rank = comm.Get_rank()
 
 # load data
 if rank == 0:
-  data = np.loadtxt("./sim_data.txt")
-  con = data[:126, :]
-  line= data[126:, :]
+  fname = "./sim_data.txt"
+  data = np.loadtxt(fname)
+  fp = open(fname)
+  line = fp.readline()
+  line = fp.readline()
+  lsp = line[1:].split(":")
+  
+  nc = int(lsp[0])
+  con = data[:nc, :]
+  line= data[nc:, :]
 
   # make a data dict 
   data_input = {"set1":[con, line]}
@@ -42,13 +49,13 @@ data_input = comm.bcast(data_input, root=0)
 #2) the ohter way is through the setup function
 
 model = pymica.gmodel()
-# use Gaussians
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=500)
+# use gamma
+model.setup(data=data_input, type_tf='gamma', lag_limit=[10, 30], number_component=[1, 1], max_num_saves=10000)
+# for gamma tf, lag_limit mean the time shift of the gamma function
+# gaussians: type_tf = "gaussian"
+# tophats: type_tf = "tophat"
 
-# or use tophats
-#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=2000)
-# or use gammas
-#model.setup(data=data_input, type_tf='gamma', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=2000)
+
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,
@@ -71,7 +78,7 @@ model.run()
 # model.restart()
 
 #posterior run, only re-generate posterior samples, do not run MCMC
-# model.post_run()
+#model.post_run()
 
 #do decomposition for the cases of multiple components 
 # model.decompose()
@@ -79,7 +86,7 @@ model.run()
 # plot results
 if rank == 0:
   
-  model.plot_results(doshow=True) # plot results, doshow controls whether showing the results on screen
+  model.plot_results(doshow=True, resp_input="resp_input.txt") # plot results, doshow controls whether showing the results on screen
   model.post_process()  # generate plots for the properties of MCMC sampling 
 
   # get the full sample 
@@ -87,24 +94,22 @@ if rank == 0:
   # sample[0] is for the case of number_component[0]
   # sample[1] is for the case of number_component[1] 
   # ...
-  sample = model.get_posterior_sample()
+  #sample = model.get_posterior_sample()
 
   # get the posterior sample of time lags of the "line" in the dataset "set"
   # timelag is a list, each element contains an array of posterior samples
   # timelag[0] is for the case of number_component[0]
   # timelag[1] is for the case of number_component[1]
   # ...
-  timelag = model.get_posterior_sample_timelag(set=0, line=0) 
-  plt.plot(timelag[1][:, 0])
-  plt.plot(timelag[1][:, 1])
-  plt.show()
+  #timelag = model.get_posterior_sample_timelag(set=0, line=0) 
+  #plt.plot(timelag[0][:, 0])
+  #plt.show()
 
   # get the posterior sample of widths of the "line" in the dataset "set"
   # width is a list, each element contains an array of posterior samples
   # width[0] is for the case of number_component[0]
   # width[1] is for the case of number_component[1]
   # ...
-  width = model.get_posterior_sample_width(set=0, line=0) 
-  plt.plot(width[1][:, 0])
-  plt.plot(width[1][:, 1])
-  plt.show()
+  #width = model.get_posterior_sample_width(set=0, line=0) 
+  #plt.plot(width[0][:, 0])
+  #plt.show()

@@ -194,10 +194,29 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     # set time lag range for Gaussian centers and centriods
     tau1 = 1.0e10
     tau2 = -1.0e10
-    for j in range(1, len(ns)):      
-      for k in range(ngau):
-        tau1 = np.min((tau1, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
-        tau2 = np.max((tau2, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
+    tau1_cent = 1.0e10
+    tau2_cent =-1.0e10
+    if typetf in [0, 1]: 
+      for j in range(1, len(ns)):    
+        for k in range(ngau):
+          tau1 = np.min((tau1, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
+          tau2 = np.max((tau2, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
+      
+      tau1_cent = tau1
+      tau2_cent = tau2 
+    else:
+      for j in range(1, len(ns)):  
+        for k in range(ngau): # gamma use peak
+          tau1 = np.min((tau1, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                                     +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
+          tau2 = np.max((tau2, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                     +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
+
+          tau1_cent = np.min((tau1_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+            + 2.0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
+          tau2_cent = np.max((tau2_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+            + 2.0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
+
 
     # set time lag range for transfer function 
     tau1_tf = 1.0e10
@@ -217,10 +236,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
                                             +1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
       else:  # gamma
         for k in range(ngau):
-          tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            -0.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-          tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            +3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+          tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            -0.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
+          tau2_tf = np.max((tau2_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                            +6*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
 
     tau1_tf = np.min((tau_low, tau1_tf))
     tau2_tf = np.max((tau_upp, tau2_tf))
@@ -234,7 +253,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax = fig.add_axes((figlc_center, 0.95-(j+1)*axheight, 0.16, axheight))
 
       for k in range(ngau):
-        cen = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        if typetf in [0, 1]: # gaussian or tophat
+          cen = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        else:  # gamma, use peaks
+          cen =  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+
         cen_min = np.min(cen)
         cen_max = np.max(cen)
         bins = np.max((5, int((cen_max-cen_min)/(tau2-tau1 + 1.0e-100) * 20)))
@@ -253,7 +277,11 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         ax.yaxis.set_tick_params(labelleft=False)
 
       if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2):
-        ax.set_title("Centers")
+        if typetf in [0, 1]:
+          ax.set_title("Centers")
+        else:
+          ax.set_title("Peaks")
+
       ax.minorticks_on()
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)
@@ -270,15 +298,21 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           for k in range(ngau):
 
             if flagnegresp == 0: # no negative responses
-              norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-              cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
-                      * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              if typetf in [0, 1]:
+                norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+                cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                        * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              else:
+                norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+                cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                      * (sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                        +2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
             else:
               norm += 1.0
               cent += sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           
-          ax.hist(cent/norm, density=True, range=(tau1, tau2), bins=20)
-          ax.set_xlim((tau1, tau2))
+          ax.hist(cent/norm, density=True, range=(tau1_cent, tau2_cent), bins=20)
+          ax.set_xlim((tau1_cent-0.1*(tau2_cent-tau1_cent), tau2_cent+0.1*(tau2_cent-tau1_cent)))
           ax.minorticks_on()
           ax.yaxis.set_tick_params(labelleft=False)
 
@@ -417,17 +451,34 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
 
       #plot input response function
       if resp_input != None:
-        if flagnegresp == False:
-          tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
-        else:
-          tran_scale = (np.max(tran_best)-np.min(tran_best))/(np.max(tran_input[:, 1])-np.min(tran_input[:, 1]))
+        tau_min = np.max((tau[0], tran_input[0, 0]))
+        tau_max = np.min((tau[-1], tran_input[-1, 0]))
+        
+        # normalize with the same tau range
+        idx_tran = np.where((tau>=tau_min)&(tau<=tau_max))[0]
+        idx_tran_input = np.where((tran_input[:, 0]>=tau_min)&(tran_input[:, 0]<=tau_max))[0]
 
+        if flagnegresp == False:
+          tran_scale = np.sum(tran_best[idx_tran])*(tau[1]-tau[0])  \
+            /(np.sum(tran_input[idx_tran_input, 1])*(tran_input[1, 0]-tran_input[0, 0]))
+        else:
+          tran_scale = (np.max(tran_best[idx_tran])-np.min(tran_best[idx_tran])) \
+            /(np.max(tran_input[idx_tran_input, 1])-np.min(tran_input[idx_tran_input, 1]))
+        
         tran_input[:, 1] *= tran_scale
         ax.plot(tran_input[:, 0], tran_input[:, 1], label='input', lw=1)
         ax.legend()
+      
+      # determine the best range of time lag for gamma tf
+      if typetf == 2:
+        idx_best_max = np.argmax(tran_best)
+        idx_best_upp = np.where(tran_best[idx_best_max:]<tran_best[idx_best_max]*0.01)[0]
+        tau_best_upp = tau[idx_best_max + idx_best_upp[0]]
+        ax.set_xlim(tau[0], tau_best_upp)
+      else:
+        ax.set_xlim((tau[0], tau[-1]))
 
       ylim = ax.get_ylim()
-      ax.set_xlim((tau[0], tau[-1]))
       if resp_input == None:
         ax.set_ylim(ylim[0], np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
       else:

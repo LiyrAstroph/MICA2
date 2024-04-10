@@ -473,7 +473,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       if typetf == 2:
         idx_best_max = np.argmax(tran_best)
         idx_best_upp = np.where(tran_best[idx_best_max:]<tran_best[idx_best_max]*0.01)[0]
-        tau_best_upp = tau[idx_best_max + idx_best_upp[0]]
+        if len(idx_best_upp) == 0:
+          tau_best_upp = tau[-1]
+        else:
+          tau_best_upp = tau[idx_best_max + idx_best_upp[0]]
         ax.set_xlim(tau[0], tau_best_upp)
       else:
         ax.set_xlim((tau[0], tau[-1]))

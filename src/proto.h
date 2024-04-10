@@ -198,6 +198,12 @@ double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds
 double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
 double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
 
+// testing functions
+void test_covariance();
+void test_gamma();
+void test_gauss();
+void test_tophat();
+
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info, int *ipiv);
 void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, int *ipiv);

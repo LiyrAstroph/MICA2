@@ -1862,11 +1862,11 @@ double Sll2_single_gamma(double t1, double t2, const void *model, int nds, int n
       
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St * fg12;
@@ -1917,11 +1917,11 @@ double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds
       
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St * fg12;
@@ -1978,11 +1978,11 @@ double Sll_single_gamma(double t1, double t2, const void *model, int nds, int nl
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;
@@ -2032,11 +2032,11 @@ double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds,
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;
@@ -2093,11 +2093,11 @@ double Sll_single2_gamma(double t1, double t2, const void *model, int nds, int n
       
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;
@@ -2147,11 +2147,11 @@ double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+p4/p5) + (1-p3*DT+p3/p5)*(p4*p4)/(p3*p3) );
+        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+p1/p5) + (1+p2*DT+p2/p5)*(p1*p1)/(p2*p2) );
+        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;

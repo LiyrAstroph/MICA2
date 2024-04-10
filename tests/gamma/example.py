@@ -50,7 +50,7 @@ data_input = comm.bcast(data_input, root=0)
 
 model = pymica.gmodel()
 # use gamma
-model.setup(data=data_input, type_tf='gamma', lag_limit=[10, 30], number_component=[1, 1], max_num_saves=10000)
+model.setup(data=data_input, type_tf='gamma', lag_limit=[10, 30], number_component=[1, 1], max_num_saves=2000)
 # for gamma tf, lag_limit mean the time shift of the gamma function
 # gaussians: type_tf = "gaussian"
 # tophats: type_tf = "tophat"

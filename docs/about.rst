@@ -25,19 +25,29 @@ A transfer function or delay map relates a time series  to its driving time seri
   
   Schematic of the transfer function for a system that consists of discrete clouds.
 
-As an alternative option, ``mica2`` also supports top-hat transfer functions as 
+As an alternative option, ``mica2`` also supports several types of transfer functions 
 
-.. math::
+- Top-hat transfer function.
 
-  \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{2\omega_k} H(\tau, \tau_k, \omega_k),
+  .. math::
 
-where :math:`H(\tau, \tau_k, \omega_k)` is the top-hat function
+    \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{2\omega_k} H(\tau, \tau_k, \omega_k),
 
-.. math:: 
+  where :math:`H(\tau, \tau_k, \omega_k)` is the top-hat function
 
-  H(\tau, \tau_k, \omega_k) =~1~{if}~\tau_k-\omega_k \leqslant \tau \leqslant \tau_k + \omega_k
+  .. math:: 
 
-                            =~0~else~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    H(\tau, \tau_k, \omega_k) =~1~{if}~\tau_k-\omega_k \leqslant \tau \leqslant \tau_k + \omega_k
+
+                              =~0~else~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Gamma transfer function.
+  
+  .. math::
+
+    \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{\tau_k^2} (\tau-\tau_{0,k}) \exp\left[-\frac{(\tau-\tau_{0,k})}{\tau_k}\right].
+  
+  For each component, the transfer function is zero if :math:`\tau < \tau_{0, k}`.
 
 Here is an example for reverberation mapping analysis of the light curves from Hu et al. (2020) using **MICA**,
 

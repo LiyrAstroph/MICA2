@@ -14,6 +14,14 @@ If you make use of this code, please cite our paper `Li, Y.-R., Wang, J.-M., & B
 A Quick Tutorial
 +++++++++++++++++
 
+Types of Transfer Functions
+---------------------------
+MICA2 supports serveral types of tranfer functions:
+
+- Gaussian 
+- Tophat 
+- Gamma distribution (k=2)
+
 Exectuable Binary Version: mica2
 --------------------------------
 

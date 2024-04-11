@@ -14,7 +14,8 @@ import argparse
 
 __all__ = ["plot_results"]
 
-def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, resp_input, doshow=True):
+def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, resp_input, 
+                 doshow=True, tf_lag_range=None, hist_lag_range=None):
   """
   reconstruct line lcs according to the time sapns of the continuum.
   """
@@ -192,57 +193,68 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   
     # plot line
     # set time lag range for Gaussian centers and centriods
-    tau1 = 1.0e10
-    tau2 = -1.0e10
-    tau1_cent = 1.0e10
-    tau2_cent =-1.0e10
-    if typetf in [0, 1]: 
-      for j in range(1, len(ns)):    
-        for k in range(ngau):
-          tau1 = np.min((tau1, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
-          tau2 = np.max((tau2, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
-      
-      tau1_cent = tau1
-      tau2_cent = tau2 
+    if hist_lag_range is None:
+      tau1 = 1.0e10
+      tau2 = -1.0e10
+      tau1_cent = 1.0e10
+      tau2_cent =-1.0e10
+      if typetf in [0, 1]: 
+        for j in range(1, len(ns)):    
+          for k in range(ngau):
+            tau1 = np.min((tau1, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
+            tau2 = np.max((tau2, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1])))
+        
+        tau1_cent = tau1
+        tau2_cent = tau2 
+      else:
+        for j in range(1, len(ns)):  
+          for k in range(ngau): # gamma use peak
+            tau1 = np.min((tau1, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                                      +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
+            tau2 = np.max((tau2, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                      +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
+
+            tau1_cent = np.min((tau1_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+              + 2.0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
+            tau2_cent = np.max((tau2_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+              + 2.0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
     else:
-      for j in range(1, len(ns)):  
-        for k in range(ngau): # gamma use peak
-          tau1 = np.min((tau1, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
-                                     +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
-          tau2 = np.max((tau2, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                     +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
+      tau1 = hist_lag_range[0]
+      tau2 = hist_lag_range[1]
 
-          tau1_cent = np.min((tau1_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
-            + 2.0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
-          tau2_cent = np.max((tau2_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
-            + 2.0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
+      tau1_cent = hist_lag_range[0]
+      tau2_cent = hist_lag_range[1]
 
 
-    # set time lag range for transfer function 
-    tau1_tf = 1.0e10
-    tau2_tf = -1.0e10
-    for j in range(1, len(ns)): 
-      if typetf == 0:  # gaussian  
-        for k in range(ngau):
-          tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            -3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-          tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            +3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-      elif typetf == 1: # tophats
-        for k in range(ngau):
-          tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            -1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-          tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            +1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-      else:  # gamma
-        for k in range(ngau):
-          tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            -0.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
-          tau2_tf = np.max((tau2_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                            +6*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
+    # set time lag range for transfer function
+    if tf_lag_range is None: 
+      tau1_tf = 1.0e10
+      tau2_tf = -1.0e10
+      for j in range(1, len(ns)): 
+        if typetf == 0:  # gaussian  
+          for k in range(ngau):
+            tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              -3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+            tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              +3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+        elif typetf == 1: # tophats
+          for k in range(ngau):
+            tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              -1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+            tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              +1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+        else:  # gamma
+          for k in range(ngau):
+            tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              -0.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
+            tau2_tf = np.max((tau2_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              +6*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
 
-    tau1_tf = np.min((tau_low, tau1_tf))
-    tau2_tf = np.max((tau_upp, tau2_tf))
+      tau1_tf = np.min((tau_low, tau1_tf))
+      tau2_tf = np.max((tau_upp, tau2_tf))
+    else:
+      tau1_tf = float(tf_lag_range[0])
+      tau2_tf = float(tf_lag_range[1])
         
     # now do plotting
     for j in range(1, len(ns)):
@@ -470,16 +482,19 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         ax.legend()
       
       # determine the best range of time lag for gamma tf
-      if typetf == 2:
-        idx_best_max = np.argmax(tran_best)
-        idx_best_upp = np.where(tran_best[idx_best_max:]<tran_best[idx_best_max]*0.01)[0]
-        if len(idx_best_upp) == 0:
-          tau_best_upp = tau[-1]
+      if tf_lag_range is None:
+        if typetf == 2:
+          idx_best_max = np.argmax(tran_best)
+          idx_best_upp = np.where(tran_best[idx_best_max:]<tran_best[idx_best_max]*0.01)[0]
+          if len(idx_best_upp) == 0:
+            tau_best_upp = tau[-1]
+          else:
+            tau_best_upp = tau[idx_best_max + idx_best_upp[-1]]
+          ax.set_xlim(tau[0], tau_best_upp)
         else:
-          tau_best_upp = tau[idx_best_max + idx_best_upp[0]]
-        ax.set_xlim(tau[0], tau_best_upp)
+          ax.set_xlim((tau[0], tau[-1]))
       else:
-        ax.set_xlim((tau[0], tau[-1]))
+        ax.set_xlim(tau1_tf, tau2_tf)
 
       ylim = ax.get_ylim()
       if resp_input == None:
@@ -551,7 +566,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   pdf.close()
   return
 
-def plot_results_all(args, param, doshow=True):
+def plot_results_all(args, param, doshow=True, tf_lag_range=None, hist_lag_range=None):
   try:
     fdir = param["FileDir"]+"/"
   except:
@@ -617,7 +632,8 @@ def plot_results_all(args, param, doshow=True):
     flagnegresp = 0
 
   for ngau in range(ngau_low, ngau_upp+1):
-    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, args.resp_input, doshow=doshow)
+    plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, args.resp_input, 
+                 doshow=doshow, tf_lag_range=args.tf_lag_range, hist_lag_range=args.hist_lag_range)
 
 def _param_parser(fname):
   """
@@ -637,7 +653,9 @@ if __name__ == "__main__":
   #
   parser = argparse.ArgumentParser(usage="python plotfig.py [options]")
   parser.add_argument('--param', type=str, help="parameter file")
-  parser.add_argument('--resp_input', type=str, help="a file storing input response function")
+  parser.add_argument('--resp_input', type=str, help="str, a file storing input response function")
+  parser.add_argument('--tf_lag_range', type=float, nargs='+', help="time lag range for the transfer function, e.g., --tf_lag_range 0 100")
+  parser.add_argument('--hist_lag_range', type=float, nargs='+', help="time lag range for the histograms, e.g., --hist_lag_range 0 100")
   args = parser.parse_args()
 
   if args.param == None:

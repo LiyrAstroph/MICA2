@@ -83,22 +83,22 @@ void postprocess(double temperature)
   fclose(fp);
   
   // allocate memory for levels
-  levels_orig = malloc(num_levels * sizeof(double *));
+  levels_orig = (double **)malloc(num_levels * sizeof(double *));
   for(i=0; i< num_levels; i++)
   {
-    levels_orig[i] = malloc(3 * sizeof(double));
+    levels_orig[i] = (double *)malloc(3 * sizeof(double));
   }
   
   // allocate memory for sample_info
-  sample_info = malloc(num_samples * sizeof(double *));
+  sample_info = (double **)malloc(num_samples * sizeof(double *));
   for(i=0; i< num_samples; i++)
   {
-    sample_info[i] = malloc(3 * sizeof(double));
+    sample_info[i] = (double *)malloc(3 * sizeof(double));
   }
   
   // allocate memory for samples
-  logl = (void *)malloc(num_samples * sizeof(double));
-  sandwhich = malloc(num_samples * sizeof(int));
+  logl = (double *)malloc(num_samples * sizeof(double));
+  sandwhich = (int *)malloc(num_samples * sizeof(int));
   psample = (double *)malloc(dnest_size_of_modeltype);
   
   // read levels
@@ -197,8 +197,15 @@ void postprocess(double temperature)
       {
         j--;
       }*/
-
-      sample_info[i][0] = (double)dnest_rand_int(j); // randomly assign a level [0, j-1]
+      
+      if(j==0)
+      {
+        sample_info[i][0] = 0.0;
+      }
+      else
+      {
+        sample_info[i][0] = (double)dnest_rand_int(j); // randomly assign a level [0, j-1]
+      }
 
       fprintf(fp, "%d %e %f %d\n", (int)sample_info[i][0], sample_info[i][1], sample_info[i][2], 1);
     }
@@ -230,12 +237,12 @@ void postprocess(double temperature)
   
   double left, right;
   
-  logx_samples = malloc(num_samples * sizeof(double));
-  logp_samples = malloc(num_samples * sizeof(double));
-  logP_samples = malloc(num_samples * sizeof(double));
+  logx_samples = (double *)malloc(num_samples * sizeof(double));
+  logp_samples = (double *)malloc(num_samples * sizeof(double));
+  logP_samples = (double *)malloc(num_samples * sizeof(double));
   
-  logx_samples_thisLevel = malloc(num_samples * sizeof(double));
-  logl_samples_thisLevel = malloc(num_samples * sizeof(SampleType));
+  logx_samples_thisLevel = (double *)malloc(num_samples * sizeof(double));
+  logl_samples_thisLevel = (SampleType *)malloc(num_samples * sizeof(SampleType));
   
   for(i=0; i<num_levels; i++)
   {
@@ -347,9 +354,9 @@ void postprocess(double temperature)
   printf("# debugging, random seed %d\n", 8888 + dnest_thistask);
 #endif  
 
-  posterior_sample = malloc(num_ps * dnest_size_of_modeltype);
-  posterior_sample_info = malloc(num_ps * sizeof(double));
-  posterior_sample_idx = malloc(num_ps * sizeof(int)); // flag for which particle to save
+  posterior_sample = (void *)malloc(num_ps * dnest_size_of_modeltype);
+  posterior_sample_info = (double *)malloc(num_ps * sizeof(double));
+  posterior_sample_idx = (int *)malloc(num_ps * sizeof(int)); // flag for which particle to save
 
   max = logP_samples[0];
   for(j=0; j<num_samples; j++)

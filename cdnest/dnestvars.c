@@ -44,7 +44,7 @@ int size_levels, size_levels_combine;
 Level *levels;
 Level *copies_of_levels, *levels_combine;
 LikelihoodType *all_above;
-unsigned int count_saves, num_saves, num_saves_restart;
+unsigned int count_saves, count_start, num_saves, num_saves_restart;
 int dnest_which_particle_update; // which particle to be updated
 int dnest_which_level_update;    // which level to be updated;
 unsigned long long int count_mcmc_steps;
@@ -65,7 +65,7 @@ int *dnest_perturb_accept;
 int dnest_root;
 
 int dnest_flag_restart=0, dnest_flag_postprc=0, dnest_flag_sample_info=0, dnest_flag_limits=0;
-double dnest_post_temp=1.0, dnest_compression=exp(1.0);
+double dnest_post_temp=1.0, dnest_compression=2.7182818;/*exp(1.0)*/
 char file_restart[STR_MAX_LENGTH], file_save_restart[STR_MAX_LENGTH];
 
 //***********************************************

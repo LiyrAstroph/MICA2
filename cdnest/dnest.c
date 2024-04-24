@@ -199,8 +199,8 @@ void dnest_run()
   // used to gather levels' information
   if(dnest_thistask == dnest_root)
   {
-    buf_size_above = malloc(dnest_totaltask * sizeof(int));  
-    buf_displs = malloc(dnest_totaltask * sizeof(int));
+    buf_size_above = (int *)malloc(dnest_totaltask * sizeof(int));  
+    buf_displs = (int *)malloc(dnest_totaltask * sizeof(int));
   }
 
   if(dnest_thistask == dnest_root)
@@ -275,7 +275,7 @@ void dnest_run()
     if(dnest_thistask == dnest_root)
     {
       //backup levels_combine
-      levels_orig = malloc(size_levels_combine * sizeof(Level));
+      levels_orig = (Level *)malloc(size_levels_combine * sizeof(Level));
       memcpy(levels_orig, levels_combine, size_levels_combine*sizeof(Level));
 
       //scan over all copies of levels
@@ -348,7 +348,7 @@ void dnest_run()
       if(dnest_thistask == dnest_root )
       {
         // save levels, limits, sync samples when running a number of steps
-        if( count_saves % num_saves == 0 )
+        if( (count_saves - count_start) % num_saves == 0 )
         {
           save_levels();
           if(dnest_flag_limits == 1)
@@ -361,7 +361,7 @@ void dnest_run()
         }
       }
 
-      if( count_saves % num_saves_restart == 0 )
+      if( (count_saves - count_start) % num_saves_restart == 0 )
       {
         dnest_save_restart();
       }
@@ -369,6 +369,16 @@ void dnest_run()
   }
   
   //dnest_save_restart();
+  /* make sure save restart at the last step */
+  if((count_saves - count_start) % num_saves_restart != 0)
+  {
+    if(dnest_thistask == dnest_root)
+    {
+      printf("save restart file at the last step.\n");
+    }
+    
+    dnest_save_restart();
+  }
 
   if(dnest_thistask == dnest_root)
   {
@@ -940,17 +950,17 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
 
   if(param_range != NULL)
   {
-    dnest_param_range = malloc(num_params*2*sizeof(double));
+    dnest_param_range = (double *)malloc(num_params*2*sizeof(double));
     memcpy(dnest_param_range, param_range, num_params*2*sizeof(double));
   }
   if(prior_type != NULL)
   {
-    dnest_prior_type = malloc(num_params*sizeof(int));
+    dnest_prior_type = (int *)malloc(num_params*sizeof(int));
     memcpy(dnest_prior_type, prior_type, num_params*sizeof(int));
   }
   if(prior_info != NULL)
   {
-    dnest_prior_info = malloc(num_params*2*sizeof(double));
+    dnest_prior_info = (double *)malloc(num_params*2*sizeof(double));
     memcpy(dnest_prior_info, prior_info, num_params*2*sizeof(double));
   }
   if(args != NULL)
@@ -1006,7 +1016,7 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
 
     if(dnest_flag_limits == 1)
     {
-      limits = malloc(options.max_num_levels * particle_offset_double * 2 * sizeof(double));
+      limits = (double *)malloc(options.max_num_levels * particle_offset_double * 2 * sizeof(double));
       if(limits == NULL)
       {
         printf("Cannot allocate memory for limits.\n"
@@ -1025,7 +1035,7 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
 
       if(dnest_thistask == dnest_root)
       {
-        copies_of_limits = malloc( dnest_totaltask * options.max_num_levels * particle_offset_double * 2 * sizeof(double));
+        copies_of_limits = (double *)malloc( dnest_totaltask * options.max_num_levels * particle_offset_double * 2 * sizeof(double));
         if(copies_of_limits == NULL)
         {
           printf("Cannot allocate memory for limits.\n"
@@ -1047,7 +1057,7 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
 
     if(dnest_flag_limits == 1)
     {
-      limits = malloc(LEVEL_NUM_MAX * particle_offset_double * 2 * sizeof(double));
+      limits = (double *)malloc(LEVEL_NUM_MAX * particle_offset_double * 2 * sizeof(double));
       if(limits == NULL)
       {
         printf("Cannot allocate memory for limits.\n"
@@ -1066,7 +1076,7 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
 
       if(dnest_thistask == dnest_root)
       {
-        copies_of_limits = malloc(dnest_totaltask * LEVEL_NUM_MAX * particle_offset_double * 2 * sizeof(double));
+        copies_of_limits = (double *)malloc(dnest_totaltask * LEVEL_NUM_MAX * particle_offset_double * 2 * sizeof(double));
         if(copies_of_limits == NULL)
         {
           printf("Cannot allocate memory for limits.\n"
@@ -1078,7 +1088,7 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
     }
   }
   
-  dnest_perturb_accept = malloc(options.num_particles * sizeof(int));
+  dnest_perturb_accept = (int *)malloc(options.num_particles * sizeof(int));
   for(i=0; i<options.num_particles; i++)
   {
     dnest_perturb_accept[i] = 0;
@@ -1086,6 +1096,7 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
 
   count_mcmc_steps = 0;
   count_saves = 0;
+  count_start = 0;
   num_saves = (int)fmax(0.02*options.max_num_saves, 1.0);
   num_saves_restart = (int)fmax(0.2 * options.max_num_saves, 1.0);
 
@@ -1334,6 +1345,11 @@ void options_load(char *optfile, DNestOptions *opts)
   strcat(options.sample_file, dnest_sample_tag);
   strcat(options.sample_file, ".txt");
   strcat(options.sample_file, dnest_sample_postfix);
+  if(strlen(options.sample_file)>=STR_MAX_LENGTH)
+  {
+    fprintf(stderr, "# Error: filename of sample exceeds allowed size (256). Shorten path length!\n");
+    exit(0);
+  }
   
   //fgets(buf, BUF_MAX_LENGTH, fp);
   //sscanf(buf, "%s", options.sample_info_file);
@@ -1342,6 +1358,11 @@ void options_load(char *optfile, DNestOptions *opts)
   strcat(options.sample_info_file, dnest_sample_tag);
   strcat(options.sample_info_file, ".txt");
   strcat(options.sample_info_file, dnest_sample_postfix);
+  if(strlen(options.sample_info_file)>=STR_MAX_LENGTH)
+  {
+    fprintf(stderr, "# Error: filename of sample_info exceeds allowed size (256). Shorten path length!\n");
+    exit(0);
+  }
   
   //fgets(buf, BUF_MAX_LENGTH, fp);
   //sscanf(buf, "%s", options.levels_file);
@@ -1350,6 +1371,11 @@ void options_load(char *optfile, DNestOptions *opts)
   strcat(options.levels_file, dnest_sample_tag);
   strcat(options.levels_file, ".txt");
   strcat(options.levels_file, dnest_sample_postfix);
+  if(strlen(options.levels_file)>=STR_MAX_LENGTH)
+  {
+    fprintf(stderr, "# Error: filename of levels exceeds allowed size (256). Shorten path length!\n");
+    exit(0);
+  }
   
   //fgets(buf, BUF_MAX_LENGTH, fp);
   //sscanf(buf, "%s", options.sampler_state_file);
@@ -1358,6 +1384,11 @@ void options_load(char *optfile, DNestOptions *opts)
   strcat(options.sampler_state_file, dnest_sample_tag);
   strcat(options.sampler_state_file, ".txt");
   strcat(options.sampler_state_file, dnest_sample_postfix);
+  if(strlen(options.sampler_state_file)>=STR_MAX_LENGTH)
+  {
+    fprintf(stderr, "# Error: filename of sampler state exceeds allowed size (256). Shorten path length!\n");
+    exit(0);
+  }
   
   //fgets(buf, BUF_MAX_LENGTH, fp);
   //sscanf(buf, "%s", options.posterior_sample_file);
@@ -1366,6 +1397,11 @@ void options_load(char *optfile, DNestOptions *opts)
   strcat(options.posterior_sample_file, dnest_sample_tag);
   strcat(options.posterior_sample_file, ".txt");
   strcat(options.posterior_sample_file, dnest_sample_postfix);
+  if(strlen(options.posterior_sample_file)>=STR_MAX_LENGTH)
+  {
+    fprintf(stderr, "# Error: filename of posterior sample exceeds allowed size (256). Shorten path length!\n");
+    exit(0);
+  }
 
   //fgets(buf, BUF_MAX_LENGTH, fp);
   //sscanf(buf, "%s", options.posterior_sample_info_file);
@@ -1374,6 +1410,11 @@ void options_load(char *optfile, DNestOptions *opts)
   strcat(options.posterior_sample_info_file, dnest_sample_tag);
   strcat(options.posterior_sample_info_file, ".txt");
   strcat(options.posterior_sample_info_file, dnest_sample_postfix);
+  if(strlen(options.posterior_sample_info_file)>=STR_MAX_LENGTH)
+  {
+    fprintf(stderr, "# Error: filename of posterior sample info exceeds allowed size (256). Shorten path length!\n");
+    exit(0);
+  }
 
   //fgets(buf, BUF_MAX_LENGTH, fp);
   //sscanf(buf, "%s", options.limits_file);
@@ -1382,6 +1423,11 @@ void options_load(char *optfile, DNestOptions *opts)
   strcat(options.limits_file, dnest_sample_tag);
   strcat(options.limits_file, ".txt");
   strcat(options.limits_file, dnest_sample_postfix);
+  if(strlen(options.limits_file)>=STR_MAX_LENGTH)
+  {
+    fprintf(stderr, "# Error: filename of limits exceeds allowed size (256). Shorten path length!\n");
+    exit(0);
+  }
 
   // check options.
   
@@ -1939,6 +1985,7 @@ void dnest_restart()
   }
   size_levels_combine = size_levels; /* reset szie_levels_combine */
   
+  count_start = count_saves;
   num_saves = (int)fmax(0.02*(options.max_num_saves-count_saves), 1.0); /* reset num_saves */
   num_saves_restart = (int)fmax(0.2 * (options.max_num_saves-count_saves), 1.0); /* reset num_saves_restart */
 

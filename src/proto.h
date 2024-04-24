@@ -143,6 +143,20 @@ void Sll2_array_gamma_linear(double *tline1, int nline1, double *tline2, int nli
 double Slc_gamma_linear(double tcon, double tline, const void *model, int nds, int nls);
 void Slc_array_gamma_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 
+double Sll_exp(double t1, double t2, const void *model, int nds, int nls);
+void Sll_array_exp(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+double Sll2_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+void Sll2_array_exp(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
+double Slc_exp(double tcon, double tline, const void *model, int nds, int nls);
+void Slc_array_exp(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+
+double Sll_exp_linear(double t1, double t2, const void *model, int nds, int nls);
+void Sll_array_exp_linear(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+double Sll2_exp_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+void Sll2_array_exp_linear(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
+double Slc_exp_linear(double tcon, double tline, const void *model, int nds, int nls);
+void Slc_array_exp_linear(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+
 void set_covar_Pmat_data_line(const void *model, int k);
 void set_covar_Pmat_data_line_array(const void *model, int k);
 void set_covar_Umat_line(const void *model, int k, int *nall, double *tall);
@@ -197,6 +211,16 @@ double Slc_single_gamma_linear(double tcon, double tline, const void *model, int
 double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
 double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
 double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
+
+double Slc_single_exp(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double Sll2_single_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double Sll_single_exp(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double Sll_single2_exp(double t1, double t2, const void *model, int nds, int nls, int kgau);
+
+double Slc_single_exp_linear(double tcon, double tline, const void *model, int nds, int nls, int kgau);
+double Sll2_single_exp_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
+double Sll_single_exp_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
+double Sll_single2_exp_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
 
 // testing functions
 void test_covariance();

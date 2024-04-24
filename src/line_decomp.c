@@ -200,7 +200,7 @@ void output_decompose_line()
       ps = (double *)post_sample;
       for(m=0; m<num_ps; m++)
       {
-        printf("# sample %d of %d-th gaussian\n", m, kgau+1);      
+        printf("# sample %d of %d-th component\n", m, kgau+1);      
         for(i=0; i<nset; i++)
         {
           /* reconstuct all the light curves */
@@ -2152,6 +2152,446 @@ double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds
       else 
       {
         St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+  
+  return Sttot;
+}
+
+/*=========================================================================================
+ * gamma transfer function with k=1, or exponential transfer function
+ */
+/*
+ * covariance between continuum and a Gaussian component of line
+ *
+ * nds: dataset index
+ * nls: line set index
+ */
+double Slc_single_exp(double tcon, double tline, const void *model, int nds, int nls, int kgau)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, tau0, tau1, St, Sttot, p1, p2;
+  int idx, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  Dt = tline - tcon;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  k = kgau;
+  {
+    idxk = idx + 1 + 3*k;
+    fg = exp(pm[idxk + 0]);
+    tau0 =   pm[idxk + 1] ;
+    tau1 = exp(pm[idxk + 2]);
+    
+    fg /= (tau1);
+    p1 = (taud + tau1)/taud/tau1;
+    p2 = (taud - tau1)/taud/tau1;
+
+    DT = Dt - tau0;
+
+    if(DT<=0)
+    {
+      St = exp(DT/taud)/p1;
+    }
+    else 
+    {
+      St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
+    }
+
+    Sttot += St * fg;
+  }
+
+  return Sttot;
+}
+
+double Slc_single_exp_linear(double tcon, double tline, const void *model, int nds, int nls, int kgau)
+{
+  double *pm = (double *)model;
+  double Dt, DT, taud, fg, tau0, tau1, St, Sttot, p1, p2;
+  int idx, k, idxk;
+  
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  Dt = tline - tcon;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  k = kgau;
+  {
+    idxk = idx + 1 + 3*k;
+    fg =     pm[idxk + 0];
+    tau0 =   pm[idxk + 1] ;
+    tau1 = exp(pm[idxk + 2]);
+    
+    fg /= (tau1);
+    p1 = (taud + tau1)/taud/tau1;
+    p2 = (taud - tau1)/taud/tau1;
+
+    DT = Dt - tau0;
+
+    if(DT<=0)
+    {
+      St = exp(DT/taud)/p1;
+    }
+    else 
+    {
+      St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
+    }
+
+    Sttot += St * fg;
+  }
+
+  return Sttot;
+}
+
+/*
+ * covariance between a Gaussian component of line and other line
+ *
+ * nds: index of dataset
+ * nls1, nls2: indexes of line1 and line2
+ *
+ */
+double Sll2_single_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, idxk1, idxk2;
+  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5;
+  double Dt, DT, St, Sttot;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  Sttot = 0.0;
+  k1 = kgau;
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1 * fg2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      DT = Dt - (tau01-tau02);
+      
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2 * p4) + exp( DT/tau2)/(p4 * p5) * ( -1.0 + p4/p3 );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1 * p3) + exp(-DT/tau1)/(p1 * p5) * ( -1.0 + p1/p2 );
+      }
+
+      Sttot += St * fg12;
+    }
+  }
+
+  return Sttot;
+}
+
+double Sll2_single_exp_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau)
+{
+  double *pm=(double *)model;
+  int idx1, idx2, idx, k1, k2, idxk1, idxk2;
+  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5;
+  double Dt, DT, St, Sttot;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  Sttot = 0.0;
+  k1 = kgau;
+  {
+    idxk1 = idx1 + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2 = 0; k2 < num_gaussian; k2++)
+    {
+      idxk2 = idx2 + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1 * fg2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      DT = Dt - (tau01-tau02);
+      
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2 * p4) + exp( DT/tau2)/(p4 * p5) * ( -1.0 + p4/p3 );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1 * p3) + exp(-DT/tau1)/(p1 * p5) * ( -1.0 + p1/p2 );
+      }
+
+      Sttot += St * fg12;
+    }
+  }
+
+  return Sttot;
+}
+
+/*
+ * covariance between a Gaussian component of line and the line
+ *
+ * nds: index of dataset
+ * nls: index of line
+ *
+ */
+double Sll_single_exp(double t1, double t2, const void *model, int nds, int nls, int kgau)
+{
+  double Dt, DT, St, Sttot;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  k1 = kgau;
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1 * fg2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+      
+      DT = Dt - (tau01 - tau02);
+    
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2 * p4) + exp( DT/tau2)/(p4 * p5) * ( -1.0 + p4/p3 );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1 * p3) + exp(-DT/tau1)/(p1 * p5) * ( -1.0 + p1/p2 );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+  
+  return Sttot;
+}
+
+double Sll_single_exp_linear(double t1, double t2, const void *model, int nds, int nls, int kgau)
+{
+  double Dt, DT, St, Sttot;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  k1 = kgau;
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+    
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    for(k2=0; k2<num_gaussian; k2++)
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1 * fg2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+      
+      DT = Dt - (tau01 - tau02);
+    
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2 * p4) + exp( DT/tau2)/(p4 * p5) * ( -1.0 + p4/p3 );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1 * p3) + exp(-DT/tau1)/(p1 * p5) * ( -1.0 + p1/p2 );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+  
+  return Sttot;
+}
+
+/*
+ * auto-covariance of a Gaussian component of line
+ *
+ * nds: index of dataset
+ * nls: index of line
+ *
+ */
+double Sll_single2_exp(double t1, double t2, const void *model, int nds, int nls, int kgau)
+{
+  double Dt, DT, St, Sttot;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  k1 = kgau;
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 = exp(pm[idxk1 + 0]);
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+    
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    k2 = kgau;
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 = exp(pm[idxk2 + 0]);
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1 * fg2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+      
+      DT = Dt - (tau01 - tau02);
+      
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2 * p4) + exp( DT/tau2)/(p4 * p5) * ( -1.0 + p4/p3 );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1 * p3) + exp(-DT/tau1)/(p1 * p5) * ( -1.0 + p1/p2 );
+      }
+
+      Sttot += St*fg12;
+    }
+  }
+  
+  return Sttot;
+}
+
+double Sll_single2_exp_linear(double t1, double t2, const void *model, int nds, int nls, int kgau)
+{
+  double Dt, DT, St, Sttot;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double *pm = (double *)model;
+  int idx, k1, k2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+  Dt = t1 - t2;
+
+  idx = idx_line_pm[nds][nls];
+
+  Sttot = 0.0;
+  k1 = kgau;
+  {
+    idxk1 = idx + 1 + k1*3;
+    fg1 =     pm[idxk1 + 0];
+    tau01 =    pm[idxk1 + 1] ;
+    tau1 = exp(pm[idxk1 + 2]);
+
+    p1 = (taud-tau1)/taud/tau1;
+    p2 = (taud+tau1)/taud/tau1;
+
+    k2 = kgau;
+    {
+      idxk2 = idx + 1 + k2*3;
+      fg2 =     pm[idxk2 + 0];
+      tau02 =    pm[idxk2 + 1] ;
+      tau2 = exp(pm[idxk2 + 2]);
+
+      fg12 = fg1/tau1 * fg2/tau2;
+      p3 = (taud+tau2)/taud/tau2;
+      p4 = (taud-tau2)/taud/tau2;
+      p5 = (p1+p3);
+
+      DT = Dt - (tau01 - tau02);
+    
+      if(DT<=0)
+      {
+        St = exp( DT/taud)/(p2 * p4) + exp( DT/tau2)/(p4 * p5) * ( -1.0 + p4/p3 );
+      }
+      else 
+      {
+        St = exp(-DT/taud)/(p1 * p3) + exp(-DT/tau1)/(p1 * p5) * ( -1.0 + p1/p2 );
       }
 
       Sttot += St*fg12;

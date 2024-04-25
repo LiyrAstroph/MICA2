@@ -109,7 +109,7 @@ void mc_line()
 
     postprocess_line();
 
-    output_reconstruction();
+    output_reconstruction_parallel();
     
     if(num_gaussian > 1 && flag_decomp == 1)
     {
@@ -149,6 +149,402 @@ void mc_line()
     free(argv[i]);
   }
   free(argv);
+
+  return;
+}
+
+/*
+ * do reconstrunction in parallel
+ */
+void output_reconstruction_parallel()
+{
+  int i, j, k, m;
+  int num_ps, size_of_modeltype;
+  int num_ps_task, num_ps_task_average;
+  void *posterior_sample_task, *posterior_sample_all;
+  double *post_model, *ps;
+
+  double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq, **yq_best, **yq_std;
+  double **fall_best_buf, **fall_std_buf, **feall_max_buf, **yq_best_buf, **yq_std_buf;
+  int **nall, *ntall, np;
+  double tspan, tbeg, tend;
+
+  char fname[200];
+  FILE *fp, *fp_sample, *fpq;
+  
+  size_of_modeltype = num_params * sizeof(double);
+
+  if(thistask == roottask)
+  {
+    printf("start reconstruction...\n");
+    
+    char posterior_sample_file[MICA_MAX_STR_LENGTH];
+
+    /* get file name of posterior sample file */
+    dnest_get_posterior_sample_file(posterior_sample_file);
+    
+    /* open file for posterior sample */
+    fp_sample = fopen(posterior_sample_file, "r");
+    if(fp_sample == NULL)
+    {
+      fprintf(stderr, "# Error: Cannot open file %s.\n", posterior_sample_file);
+      exit(0);
+    }
+    /* read number of points in posterior sample */
+    if(fscanf(fp_sample, "# %d", &num_ps) < 1)
+    {
+      fprintf(stderr, "# Error: Cannot read file %s.\n", posterior_sample_file);
+      exit(0);
+    }
+
+    posterior_sample_all = (void *)malloc(num_ps * size_of_modeltype);
+  
+    /* start to read in the posterior sample */
+    post_model = (double *)posterior_sample_all;
+    for(i=0; i<num_ps; i++)
+    {
+      for(j=0; j<num_params; j++)
+      {
+        if(fscanf(fp_sample, "%lf", post_model + j) < 1)
+        {
+          fprintf(stderr, "# Error: Cannot read file %s.\n", posterior_sample_file);
+          exit(0);
+        }
+      }
+      fscanf(fp_sample, "\n");
+
+      post_model += num_params;
+    }
+    fclose(fp_sample);
+
+    sprintf(fname, "%s/%s%s", parset.file_dir, "data/pall.txt", postfix);
+    fp = fopen(fname, "w");
+    if(fp == NULL)
+    {
+      fprintf(stderr, "# Error: Cannot open file %s\n", fname);
+      exit(-1);
+    }
+    fprintf(fp, "# %d\n", nset);
+
+    sprintf(fname, "%s/%s%s", parset.file_dir, "data/trend.txt", postfix);
+    fpq = fopen(fname, "w");
+    if(fpq == NULL)
+    {
+      fprintf(stderr, "# Error: Cannot open file %s\n", fname);
+      exit(-1);
+    }
+  }
+  
+  MPI_Bcast(&num_ps, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+  
+  num_ps_task_average  = num_ps/totaltask;
+  if(thistask == roottask)
+    num_ps_task = num_ps - num_ps_task_average * (totaltask -1);
+  else
+    num_ps_task = num_ps_task_average;
+  
+  posterior_sample_task = (void *)malloc(num_ps_task * size_of_modeltype);
+  
+  if(thistask == roottask)
+  {
+    /* offset the point of roottask */
+    post_model = (double *)posterior_sample_all;
+    post_model += (num_ps_task - num_ps_task_average)*num_params;
+  }
+  /* scatter the posterior sample */
+  MPI_Scatter(post_model, num_ps_task_average*num_params, MPI_DOUBLE, 
+              posterior_sample_task, num_ps_task_average*num_params, MPI_DOUBLE, roottask, MPI_COMM_WORLD);
+  
+  /* cope with the roottask */
+  if(thistask == roottask)
+  {
+    ps = (double *)posterior_sample_task;
+    ps += num_ps_task_average * num_params;
+    post_model = (double *)posterior_sample_all;
+    memcpy((void *)ps, (void *)post_model, (num_ps_task - num_ps_task_average) * size_of_modeltype);
+  }
+  
+  /* now start to reconstruction */
+  nall = malloc(nset*sizeof(int *));
+  tall = malloc(nset*sizeof(double *));
+  fall = malloc(nset*sizeof(double *));
+  feall = malloc(nset*sizeof(double *));
+  feall_max = malloc(nset*sizeof(double *));
+  fall_best = malloc(nset*sizeof(double *));
+  fall_std = malloc(nset*sizeof(double *));
+  ntall = malloc(nset*sizeof(int));
+  yq_best = malloc(nset*sizeof(double *));
+  yq_std = malloc(nset*sizeof(double *));
+  
+  yq = malloc(nq*(1+nlset_max)*sizeof(double));
+
+  /* first set the number of reconstruction points */
+  for(i=0; i<nset; i++)
+  {
+    nall[i] = (int *)malloc((1+nlset_max) * sizeof(int));
+
+    nall[i][0] = (int) fmin(dataset[i].con.n*nscale, 500);
+    for(j=0; j<dataset[i].nlset; j++)
+      nall[i][1+j] = nall[i][0];
+    
+    /* compute total number of points */
+    ntall[i] = nall[i][0];
+    for(j=0; j<dataset[i].nlset; j++)
+      ntall[i] += nall[i][1+j];
+  }
+
+  for(i=0; i<nset; i++)
+  { 
+    tall[i] = (double *)malloc(ntall[i] * sizeof(double));
+    fall[i] = (double *)malloc(ntall[i] * sizeof(double));
+    feall[i] = (double *)malloc(ntall[i] * sizeof(double));
+    feall_max[i] = (double *)malloc(ntall[i] * sizeof(double));
+    fall_best[i] = (double *)malloc(ntall[i] * sizeof(double));
+    fall_std[i] = (double *)malloc(ntall[i] * sizeof(double));
+
+    yq_best[i] = (double *)malloc(nq*(1+nlset_max)*sizeof(double));
+    yq_std[i] = (double *)malloc(nq*(1+nlset_max)*sizeof(double));
+  }
+
+  /* bufs for reduce */
+  feall_max_buf = (double **)malloc(nset*sizeof(double *));
+  fall_best_buf = (double **)malloc(nset*sizeof(double *));
+  fall_std_buf = (double **)malloc(nset*sizeof(double *));
+  yq_best_buf = (double **)malloc(nset*sizeof(double *));
+  yq_std_buf = (double **)malloc(nset*sizeof(double *));
+
+  for(i=0; i<nset; i++)
+  {
+    feall_max_buf[i] = (double *)malloc(ntall[i] * sizeof(double));
+    fall_best_buf[i] = (double *)malloc(ntall[i] * sizeof(double));
+    fall_std_buf[i] = (double *)malloc(ntall[i] * sizeof(double));
+    yq_best_buf[i] = (double *)malloc(nq*(1+nlset_max)*sizeof(double));
+    yq_std_buf[i] = (double *)malloc(nq*(1+nlset_max)*sizeof(double));
+  }
+  
+  /* initialize */
+  for(i=0; i<nset; i++)
+  {
+    tbeg = dataset[i].con.t[0];
+    tend = dataset[i].con.t[dataset[i].con.n-1];
+    for(j=0; j<dataset[i].nlset; j++)
+    {
+      tbeg = fmin(tbeg, dataset[i].line[j].t[0]);
+      tend = fmax(tend, dataset[i].line[j].t[dataset[i].line[j].n-1]);
+    }
+    tspan = tend - tbeg;
+    tbeg -= 0.05*tspan;
+    tend += 0.05*tspan;
+    tspan = tend - tbeg;
+
+    /* time nodes of continuum */
+    for(j=0; j<nall[i][0]; j++)
+      tall[i][j] = tspan/(nall[i][0]-1.0) * j + tbeg;
+
+    /* time nodes of lines */
+    np = nall[i][0];
+    for(j=0; j<dataset[i].nlset; j++)
+    {
+      for(k=0; k<nall[i][1+j]; k++)
+      {
+        tall[i][np+k] = tspan/(nall[i][1+j]-1.0) * k + tbeg;
+      }
+      np += nall[i][1+j];
+    }
+  }
+
+  for(i=0; i<nset; i++)
+  { 
+    for(k=0; k<nall[i][0]; k++)
+    {
+      fall_best[i][k] = 0.0;
+      fall_std[i][k] = 0.0;
+      feall_max[i][k] = 0.0;
+    }
+      
+    np = nall[i][0];
+    for(j=0; j<dataset[i].nlset; j++)
+    {
+      for(k=0; k<nall[i][1+j]; k++)
+      {
+        fall_best[i][np+k] = 0.0;
+        fall_std[i][np+k] = 0.0;
+        feall_max[i][np+k] = 0.0;
+      }          
+      np += nall[i][1+j];
+    } 
+
+    for(k=0; k<(1+nlset_max)*nq; k++)
+    {
+      yq_best[i][k] = 0.0;
+      yq_std[i][k] = 0.0;
+    } 
+  }
+  
+  post_model = (double *)posterior_sample_task;
+  for(m=0; m<num_ps_task; m++)
+  {
+    printf("# sample %d on task %d\n", m, thistask);
+    if(parset.model == pmap)
+    {
+      transform_response_ratio_inplace((void *)post_model);
+    }
+    
+    for(i=0; i<nset; i++)
+    {
+      /* reconstuct all the light curves */
+      recostruct_line_from_varmodel3((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+      
+      for(k=0; k<nall[i][0]; k++)
+      {
+        fall_best[i][k] += fall[i][k];
+        fall_std[i][k] += fall[i][k]*fall[i][k];
+        feall_max[i][k] = fmax(feall_max[i][k], feall[i][k]);
+      }
+      /* reconstructed lines */
+      np = nall[i][0];
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        for(k=0; k<nall[i][1+j]; k++)
+        {
+          fall_best[i][np+k] += fall[i][np+k];
+          fall_std[i][np+k] += fall[i][np+k]*fall[i][np+k];
+          feall_max[i][np+k] = fmax(feall_max[i][np+k], feall[i][np+k]);
+        }          
+        np += nall[i][1+j];
+      }  
+      
+      for(k=0; k<nq*(1+dataset[i].nlset); k++)
+      {
+        yq_best[i][k] += yq[k];
+        yq_std[i][k] += yq[k]*yq[k];
+      }
+    }
+
+    post_model += num_params;
+  }
+
+  /* now gather the reconstruction */
+  for(i=0; i<nset; i++)
+  {
+    MPI_Reduce(fall_best[i], fall_best_buf[i], ntall[i], MPI_DOUBLE, MPI_SUM, roottask, MPI_COMM_WORLD);
+    MPI_Reduce(fall_std[i], fall_std_buf[i], ntall[i], MPI_DOUBLE, MPI_SUM, roottask, MPI_COMM_WORLD);
+    MPI_Reduce(feall_max[i], feall_max_buf[i], ntall[i], MPI_DOUBLE, MPI_MAX, roottask, MPI_COMM_WORLD);
+    MPI_Reduce(yq_best[i], yq_best_buf[i], nq*(1+dataset[i].nlset), MPI_DOUBLE, MPI_SUM, roottask, MPI_COMM_WORLD);
+    MPI_Reduce(yq_std[i], yq_std_buf[i], nq*(1+dataset[i].nlset), MPI_DOUBLE, MPI_SUM, roottask, MPI_COMM_WORLD);
+  }
+
+  if(thistask == roottask)
+  {
+    /* write headers */
+    for(i=0; i<nset; i++)
+    {
+      fprintf(fp, "# %d",nall[i][0]);
+      for(j=0;  j < dataset[i].nlset; j++)
+        fprintf(fp, ":%d", nall[i][1+j]);
+      fprintf(fp, "\n");
+    }
+
+    for(i=0; i<nset; i++)
+    {
+      for(k=0; k<ntall[i]; k++)
+      {
+        fall_best_buf[i][k] /= num_ps;
+        fall_std_buf[i][k] /= num_ps;
+        fall_std_buf[i][k] = sqrt(fall_std_buf[i][k] - fall_best_buf[i][k]*fall_best_buf[i][k]);
+        fall_std_buf[i][k] = fmax(fall_std_buf[i][k], feall_max_buf[i][k]);
+      }
+
+      /* output reconstructed continuum */
+      for(k=0; k<nall[i][0]; k++)
+        fprintf(fp, "%e %e %e\n", tall[i][k], fall_best_buf[i][k] * dataset[i].con.scale, fall_std_buf[i][k] * dataset[i].con.scale);
+      fprintf(fp, "\n");
+
+      /* output reconstructed lines */
+      np = nall[i][0];
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        for(k=0; k<nall[i][1+j]; k++)
+          fprintf(fp, "%e %e %e\n", tall[i][np+k], fall_best_buf[i][np+k] * dataset[i].line[j].scale, fall_std_buf[i][np+k] * dataset[i].line[j].scale);
+        fprintf(fp, "\n");
+        np += nall[i][1+j];
+      }  
+
+      /* output long-term trend yq */
+      for(j=0; j<(1+dataset[i].nlset)*nq; j++)
+      {
+        yq_best_buf[i][j] /= num_ps;
+        yq_std_buf[i][j] /= num_ps;
+        yq_std_buf[i][j] = sqrt(yq_std_buf[i][j] - yq_best_buf[i][j]*yq_best_buf[i][j]);
+      }
+      for(j=0; j<1*nq; j++)
+        fprintf(fpq, "%e %e\n", yq_best_buf[i][j]* dataset[i].con.scale, yq_std_buf[i][j]* dataset[i].con.scale);
+      for(j=0; j<dataset[i].nlset; j++)
+        for(k=0; k<nq; k++)
+          fprintf(fpq, "%e %e\n", yq_best_buf[i][(1+j)*nq+k]* dataset[i].line[j].scale, yq_std_buf[i][(1+j)*nq+k]* dataset[i].line[j].scale);
+      fprintf(fpq, "\n");
+      
+      if(parset.flag_trend > 0)
+      {
+        printf("Longterm q of dataset %d: Val and Err\n", i);
+        for(j=0; j<1*nq; j++)
+        {
+          printf("%e %e\n", yq_best_buf[i][j]*dataset[i].con.scale, yq_std_buf[i][j]* dataset[i].con.scale);
+        }
+        for(j=0; j<dataset[i].nlset; j++)
+        {
+          for(k=0; k<nq; k++)
+            printf("%e %e\n", yq_best_buf[i][(1+j)*nq+k] * dataset[i].line[j].scale, yq_std_buf[i][(1+j)*nq+k]* dataset[i].line[j].scale);
+        }
+      }
+    }
+
+    fclose(fp);
+    fclose(fpq);
+  }
+
+  free(posterior_sample_task);
+  if(thistask == roottask)
+  {
+    free(posterior_sample_all);
+
+    for(i=0; i<nset; i++)
+    {
+      free(fall_best_buf[i]);
+      free(fall_std_buf[i]);
+
+      free(yq_best_buf[i]);
+      free(yq_std_buf[i]);
+    }
+    free(feall_max_buf);
+    free(fall_best_buf);
+    free(fall_std_buf);
+  }
+
+  for(i=0; i<nset; i++)
+  {
+    free(tall[i]);
+    free(fall[i]);
+    free(feall[i]);
+    free(nall[i]);
+    free(feall_max[i]);
+    free(fall_best[i]);
+    free(fall_std[i]);
+
+    free(yq_best[i]);
+    free(yq_std[i]);
+  }
+  free(tall);
+  free(fall);
+  free(feall);
+  free(feall_max);
+  free(fall_best);
+  free(fall_std);
+  free(nall);
+  free(ntall);
+  free(yq);
+  free(yq_best);
+  free(yq_std);
 
   return;
 }
@@ -479,6 +875,7 @@ void output_reconstruction()
       free(fall[i]);
       free(feall[i]);
       free(nall[i]);
+      free(feall_max[i]);
       free(fall_best[i]);
       free(fall_std[i]);
 
@@ -791,6 +1188,7 @@ void output_reconstruction2()
       free(fall[i]);
       free(feall[i]);
       free(nall[i]);
+      free(feall_max[i]);
       free(fall_best[i]);
       free(fall_std[i]);
 

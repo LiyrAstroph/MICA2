@@ -81,7 +81,7 @@ void mc_pmap()
   
     postprocess_line();
 
-    output_reconstruction();
+    output_reconstruction_parallel();
     
     if(num_gaussian > 1 && flag_decomp == 1)
     {
@@ -235,6 +235,24 @@ void transform_response_ratio(const void *model_in, void *model_out)
     {
       /* note in log */
       pm_out[idx + j + 1 + k*3] += pm_in[idx + j + 1 + 0*3];
+    }
+  }
+
+  return;
+}
+void transform_response_ratio_inplace(const void *model_in)
+{
+  int j, k, idx;
+  double *pm_in = (double *)model_in;
+    
+  idx = num_params_var;
+  /* each line has (1+3*num_gaussian) parameters */
+  for(j = 0; j < num_params_line; j+= (1+3*num_gaussian))
+  {
+    for(k=1; k<num_gaussian; k++)
+    {
+      /* note in log */
+      pm_in[idx + j + 1 + k*3] += pm_in[idx + j + 1 + 0*3];
     }
   }
 

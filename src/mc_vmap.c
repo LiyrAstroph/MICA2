@@ -889,6 +889,7 @@ void output_reconstruction_vmap()
       free(fall[i]);
       free(feall[i]);
       free(nall[i]);
+      free(feall_max[i]);
       free(fall_best[i]);
       free(fall_std[i]);
 

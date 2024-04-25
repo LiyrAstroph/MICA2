@@ -51,6 +51,7 @@ void set_covar_Umat(double sigma, double tau, double alpha, int ncon_data, doubl
 void postprocess_con();
 void output_reconstruction();
 void output_reconstruction2();
+void output_reconstruction_parallel();
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
   int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
 void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double alpha, double syserr, 
@@ -79,6 +80,8 @@ void set_par_range_pmap();
 int mc_pmap_init();
 int mc_pmap_end();
 void mc_pmap();
+void transform_response_ratio_inplace(const void *model_in);
+void transform_response_ratio(const void *model_in, void *model_out);
 
 /* for vmap */
 double prob_line_variability3_vmap(const void *model);

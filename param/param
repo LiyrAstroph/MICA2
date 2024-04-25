@@ -58,7 +58,12 @@ NumCompUpp                1                # upper limit of number of Gaussians/
 
 FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
 FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
-                                           # defaul: 0, 0
+                                           # default: 0, 0
+
+#StrWidthPrior           [1:10:5:20]        # width priors if the default priors not good enough
+                                           # format: [width1_1:width1_2:width2_1:width2_2...]
+                                           # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 
+                                           # default: None
 
 TypeLagPrior              1                # type of lag prior for each Gaussians/tophats.
                                            # default: 0

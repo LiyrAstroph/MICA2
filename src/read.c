@@ -154,6 +154,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = STRING;
 
+    strcpy(pardict[nt].tag, "StrWidthPrior");
+    pardict[nt].addr = &parset.str_width_prior;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = STRING;
+
     strcpy(pardict[nt].tag, "StrRatioPrior");
     pardict[nt].addr = &parset.str_ratio_prior;
     pardict[nt].isset = 0;
@@ -238,6 +243,7 @@ int read_parset()
     parset.num_gaussian_upper = 1;
     strcpy(parset.str_lag_prior,"");
     strcpy(parset.str_ratio_prior,"");
+    strcpy(parset.str_width_prior,"");
     /*cdnest options */
     parset.num_particles = 1;
     parset.max_num_saves = 2000;
@@ -292,7 +298,7 @@ int read_parset()
 
     if((parset.model<0) || (parset.model>2))
     {
-      printf("TypeModel should be 0-1.\n 0: general model; 1: pmap.\n");
+      printf("TypeModel should be 0-2.\n 0: general model; 1: pmap; 2: vmap.\n");
       exit(0);
     }
 

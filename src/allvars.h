@@ -84,6 +84,7 @@ typedef struct
 
   char str_lag_prior[MICA_MAX_STR_LENGTH];
   char str_ratio_prior[MICA_MAX_STR_LENGTH];
+  char str_width_prior[MICA_MAX_STR_LENGTH];
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 

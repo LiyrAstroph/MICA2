@@ -155,6 +155,8 @@ cdef class basis:
       fp.write("{:30}{}\n".format("NumCompUpp", self.parset.num_gaussian_upper))
       fp.write("{:30}{}\n".format("FlagConSysErr", self.parset.flag_con_sys_err))
       fp.write("{:30}{}\n".format("FlagLineSysErr", self.parset.flag_line_sys_err))
+      if strlen(self.parset.str_width_prior) > 0 :
+        fp.write("{:30}{}\n".format("StrWidthPrior", self.parset.str_width_prior.decode("UTF-8")))
       fp.write("{:30}{}\n".format("TypeLagPrior", self.parset.type_lag_prior))
       if self.parset.type_lag_prior == 4:
         fp.write("{:30}{}\n".format("StrLagPrior", self.parset.str_lag_prior.decode("UTF-8")))
@@ -434,6 +436,7 @@ cdef class gmodel(basis):
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   type_lag_prior=0, lag_prior=None,
+                  width_prior=None,
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
                   new_level_interval_factor=1, save_interval_factor=1,
@@ -510,6 +513,19 @@ cdef class gmodel(basis):
         strcpy(self.parset.str_lag_prior, sstr.encode("UTF-8"))
       else:
         self.parset.type_lag_prior=0
+    
+    # if width_prior is input
+    if width_prior != None:
+      # write string of lag prior
+      sstr = "["
+      sstr += "%f:%f"%(width_prior[0][0], width_prior[0][1])
+      for i in range(1, self.parset.num_gaussian_upper):
+        sstr += ":%f:%f"%(width_prior[i][0], width_prior[i][1])
+      
+      sstr += "]"
+      strcpy(self.parset.str_width_prior, sstr.encode("UTF-8"))
+    else:
+      strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
 
     self.print_parset()
 
@@ -579,6 +595,7 @@ cdef class pmap(basis):
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   lag_prior=None, ratio_prior=None,
                   width_limit=None,
+                  width_prior=None,
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
                   new_level_interval_factor=1, save_interval_factor=1,
@@ -637,6 +654,19 @@ cdef class pmap(basis):
       self.parset.width_limit_low = width_limit[0]
       self.parset.width_limit_upper_isset = 1
       self.parset.width_limit_upper = width_limit[1]
+    
+    # if width_prior is input
+    if width_prior != None:
+      # write string of lag prior
+      sstr = "["
+      sstr += "%f:%f"%(width_prior[0][0], width_prior[0][1])
+      for i in range(1, self.parset.num_gaussian_upper):
+        sstr += ":%f:%f"%(width_prior[i][0], width_prior[i][1])
+      
+      sstr += "]"
+      strcpy(self.parset.str_width_prior, sstr.encode("UTF-8"))
+    else:
+      strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
 
     self.print_parset()
 
@@ -732,6 +762,7 @@ cdef class vmap(basis):
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   type_lag_prior=0, lag_prior=None,
+                  width_prior=None,
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
                   new_level_interval_factor=1, save_interval_factor=1,
@@ -810,6 +841,19 @@ cdef class vmap(basis):
         strcpy(self.parset.str_lag_prior, sstr.encode("UTF-8"))
       else:
         self.parset.type_lag_prior=0
+    
+     # if width_prior is input
+    if width_prior != None:
+      # write string of lag prior
+      sstr = "["
+      sstr += "%f:%f"%(width_prior[0][0], width_prior[0][1])
+      for i in range(1, self.parset.num_gaussian_upper):
+        sstr += ":%f:%f"%(width_prior[i][0], width_prior[i][1])
+      
+      sstr += "]"
+      strcpy(self.parset.str_width_prior, sstr.encode("UTF-8"))
+    else:
+      strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
 
     self.print_parset()
 

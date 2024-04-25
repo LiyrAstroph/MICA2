@@ -19,6 +19,7 @@ cdef extern from "allvars.h":
     char data_file[256]
     char str_lag_prior[256]
     char str_ratio_prior[256]
+    char str_width_prior[256]
   
     int flag_uniform_var_params
     int flag_uniform_tranfuns

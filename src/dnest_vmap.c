@@ -180,15 +180,23 @@ void set_par_range_vmap()
       }
 
       /* sigma of gaussian */
-      if(parset.type_lag_prior == 3 && num_gaussian > 1) /* set the range of sigma to (width/2, width) */
-      {
-        par_range_model[i][0] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1)/2);
-        par_range_model[i++][1] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1));
+      if(strlen(parset.str_width_prior) == 0)
+      {  
+        if(parset.type_lag_prior == 3 && num_gaussian > 1) /* set the range of sigma to (width/2, width) */
+        {
+          par_range_model[i][0] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1)/2);
+          par_range_model[i++][1] = log((line_range_model[2][1] - line_range_model[2][0])/(num_gaussian-1));
+        }
+        else 
+        {
+          par_range_model[i][0] = line_range_model[3][0];
+          par_range_model[i++][1] = line_range_model[3][1];
+        }
       }
-      else 
+      else /* use the input width prior */
       {
-        par_range_model[i][0] = line_range_model[3][0];
-        par_range_model[i++][1] = line_range_model[3][1];
+        par_range_model[i][0]   = width_prior[k*2+0];
+        par_range_model[i++][1] = width_prior[k*2+1];
       }
     }
   }

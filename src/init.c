@@ -16,6 +16,8 @@
 
 void init()
 {
+  int i;
+
   // order of long-term trend in light curve
   nq = parset.flag_trend+1;
 
@@ -67,6 +69,59 @@ void init()
   {
     /* upper limit cannnot be too large */
     line_range_model[3][1] = fmin(log(parset.width_limit_upper), log(tspan_max/3.0));
+  }
+
+  /* cope with str_width_prior */
+  width_prior = malloc(parset.num_gaussian_upper * 2 * sizeof(double));
+  if(strlen(parset.str_width_prior) > 0)
+  {
+    char *pstr = parset.str_width_prior;
+    int j;
+
+    pstr += 1;
+    j = 0;
+    for(i=0; i<parset.num_gaussian_upper*2-1; i++)
+    {
+      sscanf(pstr, "%lf", &width_prior[j]);
+      j++;
+
+      pstr = strchr(pstr, ':'); /* values are separated by ":" */
+      if(pstr!=NULL)
+      {
+        pstr++;
+      }
+      else
+      {
+        if(thistask == 0)
+          printf("No enough width priors.\n");
+        exit(0);
+      }
+    }
+    sscanf(pstr, "%lf", &width_prior[j]);
+    
+    /* convert to log scale */
+    for(j=0; j<parset.num_gaussian_upper * 2; j++)
+    {
+      if(width_prior[j] <= 0)
+      {
+        if(thistask == 0)
+          printf("# Error of %d-th value in str_width_prior!\n", j);
+        exit(0);
+      }
+      else 
+      {
+        width_prior[j] = log(width_prior[j]);
+      }
+    }
+  }
+  else 
+  {
+    /* set default values */
+    for(i=0; i<parset.num_gaussian_upper; i++)
+    {
+      width_prior[i*2+0] = line_range_model[3][0];
+      width_prior[i*2+1] = line_range_model[3][1];
+    }
   }
 
   nscale = 3;
@@ -301,6 +356,8 @@ void free_memory()
   
   free(Tmat1);
   free(Tmat2);
+
+  free(width_prior);
 
   free(workspace);
   free(workspace_ipiv);

@@ -92,6 +92,8 @@ int mc_vmap_init();
 int mc_vmap_end();
 void mc_vmap();
 void postprocess_vmap();
+void output_reconstruction_vmap();
+void output_reconstruction_vmap_parallel();
 void set_covar_Pmat_data_line_vmap(const void *model, int k);
 void set_covar_Pmat_data_line_array_vmap(const void *model, int k);
 void set_covar_Umat_line_vmap(const void *model, int k, int *nall, double *tall);

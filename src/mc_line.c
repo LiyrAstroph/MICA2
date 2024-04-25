@@ -510,6 +510,7 @@ void output_reconstruction_parallel()
 
     for(i=0; i<nset; i++)
     {
+      free(feall_max_buf[i]);
       free(fall_best_buf[i]);
       free(fall_std_buf[i]);
 
@@ -519,6 +520,9 @@ void output_reconstruction_parallel()
     free(feall_max_buf);
     free(fall_best_buf);
     free(fall_std_buf);
+
+    free(yq_best_buf);
+    free(yq_std_buf);
   }
 
   for(i=0; i<nset; i++)

@@ -1073,7 +1073,7 @@ void output_reconstruction2()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel3(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        recostruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {

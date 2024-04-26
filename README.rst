@@ -21,6 +21,7 @@ MICA2 supports serveral types of tranfer functions:
 - Gaussian 
 - Tophat 
 - Gamma distribution (k=2)
+- Expenential
 
 Exectuable Binary Version: mica2
 --------------------------------

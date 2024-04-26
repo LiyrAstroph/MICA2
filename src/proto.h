@@ -186,6 +186,7 @@ double (*Sll_single2)(double t1, double t2, const void *model, int nds, int nls,
 void set_covar_Umat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
 void set_covar_Amat_line_single(const void *model, int nds, int *nall, double *tall, int kgau);
 void output_decompose_line();
+void output_decompose_line_parallel();
 
 double Slc_single_gauss(double tcon, double tline, const void *model, int nds, int nls, int kgau);
 double Sll2_single_gauss(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);

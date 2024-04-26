@@ -85,7 +85,7 @@ void mc_pmap()
     
     if(num_gaussian > 1 && flag_decomp == 1)
     {
-      output_decompose_line();
+      output_decompose_line_parallel();
     }
   }
   

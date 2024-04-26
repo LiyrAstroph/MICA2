@@ -507,22 +507,6 @@ void output_reconstruction_parallel()
   if(thistask == roottask)
   {
     free(posterior_sample_all);
-
-    for(i=0; i<nset; i++)
-    {
-      free(feall_max_buf[i]);
-      free(fall_best_buf[i]);
-      free(fall_std_buf[i]);
-
-      free(yq_best_buf[i]);
-      free(yq_std_buf[i]);
-    }
-    free(feall_max_buf);
-    free(fall_best_buf);
-    free(fall_std_buf);
-
-    free(yq_best_buf);
-    free(yq_std_buf);
   }
 
   for(i=0; i<nset; i++)
@@ -537,6 +521,13 @@ void output_reconstruction_parallel()
 
     free(yq_best[i]);
     free(yq_std[i]);
+
+    free(feall_max_buf[i]);
+    free(fall_best_buf[i]);
+    free(fall_std_buf[i]);
+
+    free(yq_best_buf[i]);
+    free(yq_std_buf[i]);
   }
   free(tall);
   free(fall);
@@ -549,6 +540,13 @@ void output_reconstruction_parallel()
   free(yq);
   free(yq_best);
   free(yq_std);
+  
+  free(feall_max_buf);
+  free(fall_best_buf);
+  free(fall_std_buf);
+
+  free(yq_best_buf);
+  free(yq_std_buf);
 
   return;
 }

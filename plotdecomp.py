@@ -246,6 +246,9 @@ if __name__ == "__main__":
   #
   parser = argparse.ArgumentParser(usage="python plotdecomp.py [options]")
   parser.add_argument('--param', type=str, help="parameter file")
+  parser.add_argument('--resp_input', type=str, help="str, a file storing input response function")
+  parser.add_argument('--tf_lag_range', type=float, nargs='+', help="time lag range for the transfer function, e.g., --tf_lag_range 0 100")
+  parser.add_argument('--hist_lag_range', type=float, nargs='+', help="time lag range for the histograms, e.g., --hist_lag_range 0 100")
   args = parser.parse_args()
 
   if args.param == None:
@@ -314,5 +317,5 @@ if __name__ == "__main__":
     sys.exit()
 
   for ngau in range(2, ngau_upp+1):
-    plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, flagnegresp)
+    plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, flagnegresp, args.resp_input)
 

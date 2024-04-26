@@ -55,6 +55,11 @@ tests/gamma/*
 !tests/gamma/example.py
 !tests/gamma/sim_data.txt
 !tests/gamma/resp_input.txt
+!tests/exp
+tests/exp/*
+!tests/exp/example.py
+!tests/exp/sim_data.txt
+!tests/exp/resp_input.txt
 cdnest/*
 !cdnest/*.[ch]
 !python/pymica/__init__.py

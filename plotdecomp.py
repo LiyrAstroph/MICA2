@@ -75,6 +75,10 @@ def plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, fla
   tau_min = np.min((tau_low, tau_min))
   tau_max = np.max((tau_max, tau_upp))
 
+  if resp_input is not None:
+    tau_min = np.min((tau_min, tran_input[0, 0]))
+    tau_max = np.max((tau_max, tran_input[-1, 0]))
+
   tau = np.linspace(tau_min, tau_max, 1000)
   tran = np.zeros((sample.shape[0], 1000))
   
@@ -124,7 +128,7 @@ def plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, fla
               cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
               sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
               tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
-      else:
+      elif typetf == 1:
         for i in range(sample.shape[0]):
           # loop over tophats
           if typemodel == 0:   # general model
@@ -152,6 +156,69 @@ def plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, fla
               cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
               sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
               tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+      elif typetf == 2:
+        for i in range(sample.shape[0]):
+          # loop over tophats
+          if typemodel == 0 or typemodel == 2: # general, vmap model
+            for k in range(ngau):
+
+              if flagnegresp == 0:
+                amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+              else:
+                amp =      sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0]
+
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              
+              idx_tau = np.where(tau >= cen)[0]
+              tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+
+          elif typemodel == 1: #pmap model 
+            k = 0
+            amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+            idx_tau = np.where(tau >= cen)[0]
+            tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+      else:  # gamma
+        for i in range(sample.shape[0]):
+          # loop over tophats
+          if typemodel == 0 or typemodel == 2: # general, vmap model
+            for k in range(ngau):
+
+              if flagnegresp == 0:
+                amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+              else:
+                amp =      sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0]
+
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              
+              idx_tau = np.where(tau >= cen)[0]
+              tran[i, idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
+
+          elif typemodel == 1: #pmap model 
+            k = 0
+            amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0])
+            cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+            sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+            idx_tau = np.where(tau >= cen)[0]
+            tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+            for k in range(1, ngau):
+              amp = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                           sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+0*3+0])
+              
+              cen =        sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sig = np.exp(sample[i, 3*nd + (j-1)*(ngau*3+1) + 1+k*3+2])
+              tran[i, idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
+
      
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
@@ -165,11 +232,20 @@ def plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, fla
 
       #plot input response function
       if resp_input != None:
-        if flagnegresp == False:
-          tran_scale = np.sum(tran_best)*(tau[1]-tau[0])/(np.sum(tran_input[:, 1])*(tran_input[1, 0]-tran_input[0, 0]))
-        else:
-          tran_scale = (np.max(tran_best)-np.min(tran_best))/(np.max(tran_input[:, 1])-np.min(tran_input[:, 1]))
+        tau_min = np.max((tau[0], tran_input[0, 0]))
+        tau_max = np.min((tau[-1], tran_input[-1, 0]))
+        
+        # normalize with the same tau range
+        idx_tran = np.where((tau>=tau_min)&(tau<=tau_max))[0]
+        idx_tran_input = np.where((tran_input[:, 0]>=tau_min)&(tran_input[:, 0]<=tau_max))[0]
 
+        if flagnegresp == False:
+          tran_scale = np.sum(tran_best[idx_tran])*(tau[1]-tau[0])  \
+            /(np.sum(tran_input[idx_tran_input, 1])*(tran_input[1, 0]-tran_input[0, 0]))
+        else:
+          tran_scale = (np.max(tran_best[idx_tran])-np.min(tran_best[idx_tran])) \
+            /(np.max(tran_input[idx_tran_input, 1])-np.min(tran_input[idx_tran_input, 1]))
+        
         tran_input[:, 1] *= tran_scale
         ax.plot(tran_input[:, 0], tran_input[:, 1], label='input', lw=1)
         ax.legend()
@@ -200,8 +276,8 @@ def plot_line_decomp(fdir, fname, ngau, tau_low, tau_upp, typetf, typemodel, fla
       
       for i in range(ngau):
         l0 = comps[i][idx_hb:idx_hb+nl[j], :]
-        lg0,=ax.plot(l0[:, 0], l0[:, 1], lw=1, label='%d'%(i+1))
-        ax.fill_between(l0[:, 0], y1=l0[:, 1]-l0[:, 2], y2=l0[:, 1]+l0[:, 2], color='darkgrey', zorder=0)
+        lg0,=ax.plot(l0[:, 0], l0[:, 1], lw=1, label='%d'%(i+1), color="C%d"%i)
+        ax.fill_between(l0[:, 0], y1=l0[:, 1]-l0[:, 2], y2=l0[:, 1]+l0[:, 2], color="C%d"%i, alpha=0.5, zorder=0)
 
       lgt,=ax.plot(hb_rec[:, 0], hb_rec[:, 1], lw=1, label='total')
       ax.fill_between(hb_rec[:, 0], y1=hb_rec[:, 1]-hb_rec[:, 2], y2=hb_rec[:, 1]+hb_rec[:, 2], color='darkgrey', zorder=0)

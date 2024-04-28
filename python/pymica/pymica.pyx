@@ -75,6 +75,9 @@ cdef class basis:
     self.parset.flag_negative_resp = 0
     self.parset.num_gaussian_low = 1
     self.parset.num_gaussian_upper = 1
+    strcpy(self.parset.str_lag_prior, "".encode("UTF-8"))
+    strcpy(self.parset.str_ratio_prior,"".encode("UTF-8"))
+    strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
     # cdnest options
     self.parset.num_particles = 1
     self.parset.max_num_saves = 2000

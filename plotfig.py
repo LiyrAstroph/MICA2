@@ -21,6 +21,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   """
   plt.rc('text', usetex=True)
   plt.rc('font', family='serif', size=15)
+  
+  gapshow=True
 
   sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
   data = np.loadtxt(fdir+fname)
@@ -80,6 +82,22 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       indx_line.append(num_params_var)
     else:
       indx_line.append(indx_line[i-1] + (len(nl[i-1])-1)*(1+ngau*3))
+  
+  # data sampling
+  if gapshow == True:
+    DT_gap = []
+    for i in range(nd):
+      ns = nl[i]
+      print(ns)
+      t_con = data[indx_con_data[i]:indx_con_data[i]+ns[0], 0]
+      dt = t_con[1:] - t_con[:-1]
+      span = t_con[-1] - t_con[0]
+      ny = int(np.ceil(span/365.0))
+      dt = np.sort(dt)
+      idx_dt = np.where(dt<365)[0]
+      dt = dt[idx_dt]
+      gap = np.mean(dt[-ny:])
+      DT_gap.append(gap)
 
   # print time lags, median, and 68.3% confidence limits
   if flagnegresp == False:
@@ -123,7 +141,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     tran_input = np.loadtxt(resp_input)
 
   dtau = tau_upp - tau_low 
-  ntau = 500
+  ntau = 1000
   tran = np.zeros((sample.shape[0], ntau))
   
   shift = 0.0
@@ -537,7 +555,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         tran_input[:, 1] *= tran_scale
         ax.plot(tran_input[:, 0], tran_input[:, 1], label='input', lw=1)
         ax.legend()
-      
+
       # determine the best range of time lag for gamma tf
       if tf_lag_range is None:
         if typetf == 2:
@@ -572,6 +590,16 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.minorticks_on()
       #if(tau[0]<0.0):
       #  ax.axvline(x=0.0, ls='--', color='red')
+      
+      if gapshow == True:
+        gap = DT_gap[m]
+        offset = 0
+        while gap + offset > tau[0] and gap + offset < tau[-1]:
+          ylim = ax.get_ylim()
+          ax.fill_between(x=[offset+365/2-gap/2, offset+365/2+gap/2], y1=[ylim[1], ylim[1]], y2=[ylim[0], ylim[0]], color='darkgrey', alpha=0.5)
+          ax.set_ylim(ylim[0], ylim[1])
+          ax.text(offset+365/2, ylim[1]-0.1*(ylim[1]-ylim[0]), "gap", ha='center', fontsize=10)
+          offset += 365
       
       # then line light curve
       ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))

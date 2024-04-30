@@ -181,7 +181,7 @@ cdef class basis:
       fp.close()
     return
   
-  def plot_results(self, doshow=True, resp_input=None, tf_lag_range=None, hist_lag_range=None):
+  def plot_results(self, doshow=True, resp_input=None, tf_lag_range=None, hist_lag_range=None, show_pmax=False, show_gap=False):
 
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
       ut.plot_results(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
@@ -189,7 +189,8 @@ cdef class basis:
                       self.parset.flag_uniform_var_params, self.parset.flag_uniform_tranfuns, \
                       self.parset.flag_trend, self.parset.flag_negative_resp, \
                       self.parset.type_tf, self.parset.model, resp_input, doshow=doshow, \
-                      tf_lag_range=tf_lag_range, hist_lag_range=hist_lag_range)
+                      tf_lag_range=tf_lag_range, hist_lag_range=hist_lag_range, show_pmax=show_pmax, \
+                      show_gap=show_gap)
     return
   
   def plot_decomp(self, doshow=True, resp_input=None):

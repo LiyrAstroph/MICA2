@@ -14,17 +14,145 @@ import argparse
 
 __all__ = ["plot_results"]
 
+def calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line, id, il):
+  """
+  calculate transfer function given a set of parameters
+  """
+
+  tran = np.zeros(len(tau))
+  m = id  # dataset index
+  j = il   # line index
+  if typetf == 0: # gaussian
+    # loop over gaussians
+    if typemodel == 0 or typemodel == 2:  # general, vmap model
+      for k in range(ngau):
+
+        if flagnegresp == 0:
+          amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        else:
+          amp =      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
+
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+
+    elif typemodel == 1: #pmap model 
+      k = 0
+      amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+      cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+      sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+      tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+      for k in range(1, ngau):
+        amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+        
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+
+  elif typetf == 1:  # tophats
+    # loop over tophats
+    if typemodel == 0 or typemodel == 2: # general, vmap model
+      for k in range(ngau):
+
+        if flagnegresp == 0:
+          amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        else:
+          amp =      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
+
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        
+        tran[:] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+
+    elif typemodel == 1: #pmap model 
+      k = 0
+      amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+      cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+      sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+      tran[:] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+      for k in range(1, ngau):
+        amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+        
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        tran[:] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
+
+  elif typetf == 2:  # gamma
+    # loop over tophats
+    if typemodel == 0 or typemodel == 2: # general, vmap model
+      for k in range(ngau):
+
+        if flagnegresp == 0:
+          amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        else:
+          amp =      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
+
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        
+        idx_tau = np.where(tau >= cen)[0]
+        tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+
+    elif typemodel == 1: #pmap model 
+      k = 0
+      amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+      cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+      sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+      idx_tau = np.where(tau >= cen)[0]
+      tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+      for k in range(1, ngau):
+        amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+        
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+
+  else:  # gamma
+    # loop over tophats
+    if typemodel == 0 or typemodel == 2: # general, vmap model
+      for k in range(ngau):
+
+        if flagnegresp == 0:
+          amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+        else:
+          amp =      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
+
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        
+        idx_tau = np.where(tau >= cen)[0]
+        tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
+
+    elif typemodel == 1: #pmap model 
+      k = 0
+      amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+      cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+      sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+      idx_tau = np.where(tau >= cen)[0]
+      tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+      for k in range(1, ngau):
+        amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
+                      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+        
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
+
+  return tran 
+
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, resp_input, 
-                 doshow=True, tf_lag_range=None, hist_lag_range=None):
+                 doshow=True, tf_lag_range=None, hist_lag_range=None, show_pmax=False, show_gap=False):
   """
   reconstruct line lcs according to the time sapns of the continuum.
   """
   plt.rc('text', usetex=True)
   plt.rc('font', family='serif', size=15)
   
-  gapshow=True
-
   sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
+  sample_info = np.loadtxt(fdir+"/data/posterior_sample_info1d.txt_%d"%ngau)
   data = np.loadtxt(fdir+fname)
   sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
 
@@ -84,19 +212,23 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       indx_line.append(indx_line[i-1] + (len(nl[i-1])-1)*(1+ngau*3))
   
   # data sampling
-  if gapshow == True:
+  if show_gap == True:
     DT_gap = []
     for i in range(nd):
       ns = nl[i]
-      print(ns)
       t_con = data[indx_con_data[i]:indx_con_data[i]+ns[0], 0]
       dt = t_con[1:] - t_con[:-1]
       span = t_con[-1] - t_con[0]
       ny = int(np.ceil(span/365.0))
-      dt = np.sort(dt)
-      idx_dt = np.where(dt<365)[0]
-      dt = dt[idx_dt]
-      gap = np.mean(dt[-ny:])
+
+      if ny > 1:
+        dt = np.sort(dt)
+        idx_dt = np.where(dt<365)[0]
+        dt = dt[idx_dt]
+        gap = np.mean(dt[-ny:])
+      else:
+        gap = None
+
       DT_gap.append(gap)
 
   # print time lags, median, and 68.3% confidence limits
@@ -405,126 +537,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       
       tau = np.linspace(tau1_tf, tau2_tf, ntau)
       tran[:, :] = 0.0
-      if typetf == 0: # gaussian
-        for i in range(sample.shape[0]):
-          # loop over gaussians
-          if typemodel == 0 or typemodel == 2:  # general, vmap model
-            for k in range(ngau):
-
-              if flagnegresp == 0:
-                amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-              else:
-                amp =      sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
-
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
-
-          elif typemodel == 1: #pmap model 
-            k = 0
-            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-            tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
-            for k in range(1, ngau):
-              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
-                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
-              
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              tran[i, :] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
-
-      elif typetf == 1:  # tophats
-        for i in range(sample.shape[0]):
-          # loop over tophats
-          if typemodel == 0 or typemodel == 2: # general, vmap model
-            for k in range(ngau):
-
-              if flagnegresp == 0:
-                amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-              else:
-                amp =      sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
-
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              
-              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
-
-          elif typemodel == 1: #pmap model 
-            k = 0
-            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-            tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
-            for k in range(1, ngau):
-              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
-                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
-              
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              tran[i, :] += amp/sig/2.0 *(np.heaviside(sig-np.abs(tau-cen), 1.0))
-      elif typetf == 2:  # gamma
-        for i in range(sample.shape[0]):
-          # loop over tophats
-          if typemodel == 0 or typemodel == 2: # general, vmap model
-            for k in range(ngau):
-
-              if flagnegresp == 0:
-                amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-              else:
-                amp =      sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
-
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              
-              idx_tau = np.where(tau >= cen)[0]
-              tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
-
-          elif typemodel == 1: #pmap model 
-            k = 0
-            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-            idx_tau = np.where(tau >= cen)[0]
-            tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
-            for k in range(1, ngau):
-              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
-                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
-              
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
-      else:  # gamma
-        for i in range(sample.shape[0]):
-          # loop over tophats
-          if typemodel == 0 or typemodel == 2: # general, vmap model
-            for k in range(ngau):
-
-              if flagnegresp == 0:
-                amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-              else:
-                amp =      sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
-
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              
-              idx_tau = np.where(tau >= cen)[0]
-              tran[i, idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
-
-          elif typemodel == 1: #pmap model 
-            k = 0
-            amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-            cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-            sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-            idx_tau = np.where(tau >= cen)[0]
-            tran[i, idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
-            for k in range(1, ngau):
-              amp = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
-                           sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
-              
-              cen =        sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-              sig = np.exp(sample[i, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-              tran[i, idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
+      for i in range(sample.shape[0]):
+        tran[i, :] = calculate_tran(tau, sample[i, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
       
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
@@ -535,6 +549,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
+      
+      if show_pmax == True:
+        argmax = np.argmax(sample_info)
+        tran_pmax = calculate_tran(tau, sample[argmax, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
+        ax.plot(tau, tran_pmax)
+        
 
       #plot input response function
       if resp_input != None:
@@ -591,15 +611,16 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       #if(tau[0]<0.0):
       #  ax.axvline(x=0.0, ls='--', color='red')
       
-      if gapshow == True:
+      if show_gap == True:
         gap = DT_gap[m]
         offset = 0
-        while gap + offset > tau[0] and gap + offset < tau[-1]:
-          ylim = ax.get_ylim()
-          ax.fill_between(x=[offset+365/2-gap/2, offset+365/2+gap/2], y1=[ylim[1], ylim[1]], y2=[ylim[0], ylim[0]], color='darkgrey', alpha=0.5)
-          ax.set_ylim(ylim[0], ylim[1])
-          ax.text(offset+365/2, ylim[1]-0.1*(ylim[1]-ylim[0]), "gap", ha='center', fontsize=10)
-          offset += 365
+        if gap is not None:
+          while gap + offset > tau[0] and gap + offset < tau[-1]:
+            ylim = ax.get_ylim()
+            ax.fill_between(x=[offset+365/2-gap/2, offset+365/2+gap/2], y1=[ylim[1], ylim[1]], y2=[ylim[0], ylim[0]], color='darkgrey', alpha=0.5)
+            ax.set_ylim(ylim[0], ylim[1])
+            ax.text(offset+365/2, ylim[1]-0.1*(ylim[1]-ylim[0]), "gap", ha='center', fontsize=10)
+            offset += 365
       
       # then line light curve
       ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))
@@ -718,7 +739,8 @@ def plot_results_all(args, param, doshow=True, tf_lag_range=None, hist_lag_range
 
   for ngau in range(ngau_low, ngau_upp+1):
     plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, args.resp_input, 
-                 doshow=doshow, tf_lag_range=args.tf_lag_range, hist_lag_range=args.hist_lag_range)
+                 doshow=doshow, tf_lag_range=args.tf_lag_range, hist_lag_range=args.hist_lag_range, show_pmax=args.show_pmax, 
+                 show_gap=args.show_gap)
 
 def _param_parser(fname):
   """
@@ -741,6 +763,8 @@ if __name__ == "__main__":
   parser.add_argument('--resp_input', type=str, help="str, a file storing input response function")
   parser.add_argument('--tf_lag_range', type=float, nargs='+', help="time lag range for the transfer function, e.g., --tf_lag_range 0 100")
   parser.add_argument('--hist_lag_range', type=float, nargs='+', help="time lag range for the histograms, e.g., --hist_lag_range 0 100")
+  parser.add_argument('--show_gap', action='store_true', default=False, help="whether show seasonal gaps, e.g., --show_gap")
+  parser.add_argument('--show_pmax', action='store_true', default=False, help="whether show the results of the maximum posterior ppint, e.g., --show_pmax")
   args = parser.parse_args()
 
   if args.param == None:

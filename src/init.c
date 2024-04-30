@@ -283,7 +283,7 @@ void allocate_memory()
   Tmat2 = malloc(nall_max*nall_max*sizeof(double));
   
   ns = ((1+nlset_max)*nq);
-  n = 3*nall_max + (nall_max + 2*nrec_max + 1 + ns) * ns;
+  n = 5*nall_max + (2*nall_max + 2*nrec_max + 1 + ns) * ns;
   workspace = malloc((n)*sizeof(double));
   workspace_ipiv = malloc(n_max*sizeof(int));
   workspace_inv = malloc(3*nall_max*nall_max*sizeof(double));

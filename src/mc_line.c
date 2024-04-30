@@ -1684,7 +1684,7 @@ void recostruct_line_from_varmodel3(const void *model, int nds, int *nall, doubl
   D = W + nall_data;
   phi = D + nall_data;
   fe = phi + nall_data;
-  narr = (int *)(fe + ntall);
+  narr = (int *)(fe + dataset[nds].con.n);
 
   PEmat1 = malloc(ntall * nall_data * sizeof(double));
   PEmat2 = malloc(ntall * ntall * sizeof(double));

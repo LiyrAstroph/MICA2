@@ -612,15 +612,17 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       #  ax.axvline(x=0.0, ls='--', color='red')
       
       if show_gap == True:
+        xlim = ax.get_xlim()
         gap = DT_gap[m]
         offset = 0
         if gap is not None:
-          while gap + offset > tau[0] and gap + offset < tau[-1]:
+          while gap + offset > xlim[0] and gap + offset < xlim[1]:
             ylim = ax.get_ylim()
             ax.fill_between(x=[offset+365/2-gap/2, offset+365/2+gap/2], y1=[ylim[1], ylim[1]], y2=[ylim[0], ylim[0]], color='darkgrey', alpha=0.5)
             ax.set_ylim(ylim[0], ylim[1])
             ax.text(offset+365/2, ylim[1]-0.1*(ylim[1]-ylim[0]), "gap", ha='center', fontsize=10)
             offset += 365
+        ax.set_xlim(xlim[0], xlim[1])
       
       # then line light curve
       ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))

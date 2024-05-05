@@ -265,8 +265,9 @@ void init()
   }
 
   allocate_memory();
-
-  get_seasonal_gap_allset();
+  
+  if(parset.flag_gap == 1)
+    get_seasonal_gap_allset();
 }
 
 void allocate_memory()

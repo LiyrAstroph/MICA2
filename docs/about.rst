@@ -47,7 +47,8 @@ As an alternative option, ``mica2`` also supports several types of transfer func
 
     \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{\omega_k^2} (\tau-\tau_{k}) \exp\left[-\frac{(\tau-\tau_{k})}{\omega_k}\right].
   
-  For :math:`k`-th component, the transfer function is zero if :math:`\tau < \tau_{k}`.
+  For :math:`k`-th component, the transfer function is zero if :math:`\tau < \tau_{k}`, the peak location 
+  is :math:`\tau_k+\omega_k` and the centroid lag is :math:`\tau_k+2\omega_k`.
 
 - Exponential transfer function.
 
@@ -55,7 +56,8 @@ As an alternative option, ``mica2`` also supports several types of transfer func
 
     \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{\omega_k} \exp\left[-\frac{(\tau-\tau_{k})}{\omega_k}\right].
   
-  For :math:`k`-th component, the transfer function is zero if :math:`\tau < \tau_{k}`.
+  For :math:`k`-th component, the transfer function is zero if :math:`\tau < \tau_{k}`, the peak location is :math:`\tau_k`,
+  and the centriod lag is :math:`\tau_k+\omega_k`.
 
 Here is an example for reverberation mapping analysis of the light curves from Hu et al. (2020) using **MICA**,
 

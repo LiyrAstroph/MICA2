@@ -23,7 +23,7 @@ Third-party package dependence
 
 Note that in Linux system, there are package managers that can install the above libraries convienently. 
 If so, use them. In this case, the libraries usually are installed in standard environment path. Otherwise, any of the above 
-libraries is not installed in standard locations on your system, the compiling configurations below may need slight adjustments.
+libraries is not installed in standard locations in your system, the compiling configurations below may need slight adjustments.
 
 Compiling
 =============================
@@ -117,6 +117,8 @@ A typical parameter file looks like::
 
   TypeTF                    0                # 0: Gaussian
                                              # 1: Top-hat
+                                             # 2: Gamma function (k=2)
+                                             # 3: Exponential
                                              # default: 0
 
   MaxNumberSaves            1000             # number of MCMC sampling steps
@@ -159,6 +161,11 @@ A typical parameter file looks like::
   FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
   FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
                                              # defaul: 0, 0
+  
+  #StrWidthPrior           [1:10:5:20]       # width priors if the default priors not good enough
+                                             # format: [width1_1:width1_2:width2_1:width2_2...]
+                                             # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 
+                                             # default: None
 
   TypeLagPrior              1                # type of lag prior for each Gaussians/tophats.
                                              # default: 0
@@ -193,7 +200,17 @@ A typical parameter file looks like::
                                              # valid if TypeModel == 1 (pmap)
                                              # format: [ratio_1:ratio_2]
                                              # default: [1.0e-3:1.0]
+  
+  FlagGap                 0                  # whether include seasonal gap
+                                             # 0: no; 1: yes.
+                                             # default: 0
 
+  #StrGapPrior            [182.6:140.0]      # gap priors if the default priors are not good enough
+                                             # valid when FlagGap == 1
+                                             # format: [gap_center_set1:gap_width_set1:gap_center_set2:gap_width_set2...]
+                                             # gap_center_set1: gap center for 1st dataset (+n*year will also be included)
+                                             # gap_width_set1:  gap width for 1st dataset
+                                             # default: None
   #==================================================================
   # options for cdnest sampling
   # use the default values or do not turn them on IF NOT familiar with them
@@ -323,5 +340,5 @@ to print help information about this script.
 
 Testing
 ========================
-To test ``mica2``, change to the subdirectory ``tests/`` and there are two suites of tests. One is for two Gaussians
-and the other is for two tophats. See :ref:`tests_label` for more details.
+To test ``mica2``, change to the subdirectory ``tests/`` and there are several suites of tests to guide the useage of ``mica2``. 
+See :ref:`tests_label` for more details.

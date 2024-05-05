@@ -29,6 +29,7 @@ Documentation
    decomp.rst
    prm.rst
    vrm.rst
+   gap.rst
    tests.rst
    negresp.rst
    list.rst

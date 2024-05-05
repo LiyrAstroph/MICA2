@@ -155,8 +155,7 @@ For python version, ``mica`` provide a module ``vmap`` callable as follows.
     model.plot_results() # plot results
     model.post_process()  # generate plots for the properties of MCMC sampling 
 
-Here is an example for vmap analysis. The data is extracted from Fausnaugh et al. 2018, ApJ, 854, 10 
-(see also Ma, Q., Wu, X.-B. et al. 2023, arXiv:2303.10362)
+Here is an example for vmap analysis. The data is extracted from Fausnaugh et al. 2018, ApJ, 854, 10.
 
 .. figure:: _static/fig_vmap.jpg
   :scale: 30 %

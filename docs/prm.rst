@@ -16,7 +16,7 @@ or for tophats,
 .. math::
 
     \Psi(\tau) = \frac{f_1}{2\omega_1} H(\tau, \tau_2, \omega_2)
-    +\frac{f_1 R}{\omega_2} H(\tau, \tau_2, \omega_2),
+    +\frac{f_1 R}{2\omega_2} H(\tau, \tau_2, \omega_2),
 
 where :math:`f_1, \tau_1, \omega_1` are for continuum reverberation and :math:`R, \tau_2, \omega_2` are reverberation
 of the broad emission line. Here :math:`R` represents the fraction of responses relative the continuum component.

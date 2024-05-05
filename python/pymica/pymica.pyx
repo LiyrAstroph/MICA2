@@ -43,7 +43,7 @@ cdef class basis:
     self.nset = 0
     self.num_param_var = 0
 
-    self.gap_prior = []
+    self.gap_prior = None
 
     if self.rank == 0:
       # check data folder

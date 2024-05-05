@@ -221,10 +221,12 @@ void set_idx_line_pm()
 int get_idx_set(const int which)
 {
   int i;
-  for(i=0; i<nset; i++)
+  for(i=nset-1; i>=0; i--)
   {
     if(which >= idx_line_pm[i][0])
+    {
       return i;
+    }
   }
   return 0;
 }

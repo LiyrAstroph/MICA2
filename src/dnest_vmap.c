@@ -246,27 +246,18 @@ void print_para_names_vmap()
 
     for(k=0; k<num_gaussian; k++)
     {
-      i++;
-      if(k == 0)
-      {
-        sprintf(fstr, "%d-th Gaussian %s", k, "amplitude");
-        fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
-                par_fix[i], par_fix_val[i]);
-      }
-      else 
-      {
-        sprintf(fstr, "%d-th Gaussian %s", k, "resp ratio");
-        fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
-                par_fix[i], par_fix_val[i]);
-      }
+      i++;      
+      sprintf(fstr, "%d-th component %s", k, "amplitude");
+      fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
+              par_fix[i], par_fix_val[i]);
 
       i++;
-      sprintf(fstr, "%d-th Gaussian %s", k, "center");
+      sprintf(fstr, "%d-th component %s", k, "center");
       fprintf(fp, "%2d %-25s UNI    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
 
       i++;
-      sprintf(fstr, "%d-th Gaussian %s", k, "sigma");
+      sprintf(fstr, "%d-th component %s", k, "sigma");
       fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
     }
@@ -399,16 +390,11 @@ double perturb_vmap(void *model)
 
     if(parset.flag_lag_posivity)
     {
-      int idx;
-      idx = check_gauss_positivity(which);
-      if(idx == 1 && (pm[which] - width_factor*exp(pm[which+1]) < 0.0))
-      {
-        logH = -DBL_MAX; /* give a huge penalty */
-      }
-      else if(idx == 2 && (pm[which-1] - width_factor*exp(pm[which]) < 0.0))
-      {
-        logH = -DBL_MAX; /* give a huge penalty */
-      }
+      logH += check_positivity(model, which);
+    }
+    if(parset.flag_gap == 1)
+    {
+      logH += check_gap(model, which);
     }
   }
   

@@ -45,17 +45,17 @@ As an alternative option, ``mica2`` also supports several types of transfer func
   
   .. math::
 
-    \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{\tau_k^2} (\tau-\tau_{0,k}) \exp\left[-\frac{(\tau-\tau_{0,k})}{\tau_k}\right].
+    \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{\omega_k^2} (\tau-\tau_{k}) \exp\left[-\frac{(\tau-\tau_{k})}{\omega_k}\right].
   
-  For each component, the transfer function is zero if :math:`\tau < \tau_{0, k}`.
+  For :math:`k`-th component, the transfer function is zero if :math:`\tau < \tau_{k}`.
 
 - Exponential transfer function.
 
   .. math::
 
-    \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{\tau_k} \exp\left[-\frac{(\tau-\tau_{0,k})}{\tau_k}\right].
+    \Psi(\tau) = \sum_{k=1}^{K} \frac{f_k}{\omega_k} \exp\left[-\frac{(\tau-\tau_{k})}{\omega_k}\right].
   
-  For each component, the transfer function is zero if :math:`\tau < \tau_{0, k}`.
+  For :math:`k`-th component, the transfer function is zero if :math:`\tau < \tau_{k}`.
 
 Here is an example for reverberation mapping analysis of the light curves from Hu et al. (2020) using **MICA**,
 

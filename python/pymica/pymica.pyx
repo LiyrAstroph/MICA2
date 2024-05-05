@@ -30,6 +30,7 @@ cdef class basis:
   cdef int rank, size
   cdef int nset, num_param_var 
   cdef list nlset
+  cdef list gap_prior
 
   def __cinit__(self):
     
@@ -41,6 +42,8 @@ cdef class basis:
 
     self.nset = 0
     self.num_param_var = 0
+
+    self.gap_prior = []
 
     if self.rank == 0:
       # check data folder
@@ -75,9 +78,11 @@ cdef class basis:
     self.parset.flag_negative_resp = 0
     self.parset.num_gaussian_low = 1
     self.parset.num_gaussian_upper = 1
+    self.parset.flag_gap = 0
     strcpy(self.parset.str_lag_prior, "".encode("UTF-8"))
     strcpy(self.parset.str_ratio_prior,"".encode("UTF-8"))
     strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
+    strcpy(self.parset.str_gap_prior, "".encode("UTF-8"))
     # cdnest options
     self.parset.num_particles = 1
     self.parset.max_num_saves = 2000
@@ -165,6 +170,9 @@ cdef class basis:
         fp.write("{:30}{}\n".format("StrLagPrior", self.parset.str_lag_prior.decode("UTF-8")))
       if strlen(self.parset.str_ratio_prior)>0:
         fp.write("{:30}{}\n".format("StrRatioPrior", self.parset.str_ratio_prior.decode("UTF-8")))
+      fp.write("{:30}{}\n".format("FlagGap", self.parset.flag_gap))
+      if strlen(self.parset.str_gap_prior)>0:
+        fp.write("{:30}{}\n".format("StrGapPrior", self.parset.str_gap_prior.decode("UTF-8")))
       fp.write("#==============================================================\n")
       fp.write("# options for cdnest sampling\n")
       fp.write("# use the default values or do not turn them on IF NOT familiar with them\n\n")
@@ -182,6 +190,14 @@ cdef class basis:
     return
   
   def plot_results(self, doshow=True, resp_input=None, tf_lag_range=None, hist_lag_range=None, show_pmax=False, show_gap=False):
+    
+    if show_gap == True:
+      if self.gap_prior is not None:
+        flag_gap = np.ravel(self.gap_prior) # flatten
+      else:
+        flag_gap = True
+    else:
+      flag_gap = False
 
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
       ut.plot_results(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
@@ -190,7 +206,7 @@ cdef class basis:
                       self.parset.flag_trend, self.parset.flag_negative_resp, \
                       self.parset.type_tf, self.parset.model, resp_input, doshow=doshow, \
                       tf_lag_range=tf_lag_range, hist_lag_range=hist_lag_range, show_pmax=show_pmax, \
-                      show_gap=show_gap)
+                      show_gap=flag_gap)
     return
   
   def plot_decomp(self, doshow=True, resp_input=None):
@@ -440,7 +456,7 @@ cdef class gmodel(basis):
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   type_lag_prior=0, lag_prior=None,
-                  width_prior=None,
+                  width_prior=None, flag_gap=False, gap_prior=None,
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
                   new_level_interval_factor=1, save_interval_factor=1,
@@ -487,10 +503,12 @@ cdef class gmodel(basis):
 
     # width limit
     if width_limit != None:
-      self.parset.width_limit_low_isset = 1
-      self.parset.width_limit_low = width_limit[0]
-      self.parset.width_limit_upper_isset = 1
-      self.parset.width_limit_upper = width_limit[1]
+      if width_limit[0] != None:
+        self.parset.width_limit_low_isset = 1
+        self.parset.width_limit_low = width_limit[0]
+      if width_limit[1] != None:
+        self.parset.width_limit_upper_isset = 1
+        self.parset.width_limit_upper = width_limit[1]
 
     # number of component
     if isinstance(number_component, int):
@@ -530,6 +548,20 @@ cdef class gmodel(basis):
       strcpy(self.parset.str_width_prior, sstr.encode("UTF-8"))
     else:
       strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
+    
+    if flag_gap == True:
+      self.parset.flag_gap = 1
+      if gap_prior is not None:
+        self.gap_prior = gap_prior
+        sstr = "["
+        sstr += "%f:%f"%(gap_prior[0][0], gap_prior[0][1])
+        for i in range(1, len(gap_prior)):
+          sstr += "%f:%f"%(gap_prior[i][0], gap_prior[i][1])
+        sstr += "]"
+        strcpy(self.parset.str_gap_prior, sstr.encode("UTF-8"))
+    else:
+      self.parset.flag_gap = 0
+      strcpy(self.parset.str_gap_prior, "".encode("UTF-8"))
 
     self.print_parset()
 
@@ -599,7 +631,7 @@ cdef class pmap(basis):
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   lag_prior=None, ratio_prior=None,
                   width_limit=None,
-                  width_prior=None,
+                  width_prior=None, flag_gap=False, gap_prior=None,
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
                   new_level_interval_factor=1, save_interval_factor=1,
@@ -654,10 +686,12 @@ cdef class pmap(basis):
 
     # width limit
     if width_limit != None:
-      self.parset.width_limit_low_isset = 1
-      self.parset.width_limit_low = width_limit[0]
-      self.parset.width_limit_upper_isset = 1
-      self.parset.width_limit_upper = width_limit[1]
+      if width_limit[0] != None:
+        self.parset.width_limit_low_isset = 1
+        self.parset.width_limit_low = width_limit[0]
+      if width_limit[1] != None:
+        self.parset.width_limit_upper_isset = 1
+        self.parset.width_limit_upper = width_limit[1]
     
     # if width_prior is input
     if width_prior != None:
@@ -671,6 +705,20 @@ cdef class pmap(basis):
       strcpy(self.parset.str_width_prior, sstr.encode("UTF-8"))
     else:
       strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
+    
+    if flag_gap == True:
+      self.parset.flag_gap = 1
+      if gap_prior is not None:
+        self.gap_prior = gap_prior
+        sstr = "["
+        sstr += "%f:%f"%(gap_prior[0][0], gap_prior[0][1])
+        for i in range(1, len(gap_prior)):
+          sstr += "%f:%f"%(gap_prior[i][0], gap_prior[i][1])
+        sstr += "]"
+        strcpy(self.parset.str_gap_prior, sstr.encode("UTF-8"))
+    else:
+      self.parset.flag_gap = 0
+      strcpy(self.parset.str_gap_prior, "".encode("UTF-8"))
 
     self.print_parset()
 
@@ -766,7 +814,7 @@ cdef class vmap(basis):
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
                   type_lag_prior=0, lag_prior=None,
-                  width_prior=None,
+                  width_prior=None, flag_gap=None, gap_prior=None,
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
                   new_level_interval_factor=1, save_interval_factor=1,
@@ -815,10 +863,12 @@ cdef class vmap(basis):
 
     # width limit
     if width_limit != None:
-      self.parset.width_limit_low_isset = 1
-      self.parset.width_limit_low = width_limit[0]
-      self.parset.width_limit_upper_isset = 1
-      self.parset.width_limit_upper = width_limit[1]
+      if width_limit[0] != None:
+        self.parset.width_limit_low_isset = 1
+        self.parset.width_limit_low = width_limit[0]
+      if width_limit[1] != None:
+        self.parset.width_limit_upper_isset = 1
+        self.parset.width_limit_upper = width_limit[1]
 
     # number of component
     if isinstance(number_component, int):
@@ -858,6 +908,20 @@ cdef class vmap(basis):
       strcpy(self.parset.str_width_prior, sstr.encode("UTF-8"))
     else:
       strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
+    
+    if flag_gap == True:
+      self.parset.flag_gap = 1
+      if gap_prior is not None:
+        self.gap_prior = gap_prior
+        sstr = "["
+        sstr += "%f:%f"%(gap_prior[0][0], gap_prior[0][1])
+        for i in range(1, len(gap_prior)):
+          sstr += "%f:%f"%(gap_prior[i][0], gap_prior[i][1])
+        sstr += "]"
+        strcpy(self.parset.str_gap_prior, sstr.encode("UTF-8"))
+    else:
+      self.parset.flag_gap = 0
+      strcpy(self.parset.str_gap_prior, "".encode("UTF-8"))
 
     self.print_parset()
 

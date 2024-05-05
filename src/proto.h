@@ -170,7 +170,8 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
 void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall);
 void recostruct_line_from_varmodel3(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall);
 int check_gauss_center(int which, int *igau);
-inline int check_gauss_positivity(int which){return ((which - num_params_var)%(1+3*num_gaussian)-1)%3;}
+inline int get_idx_param(int which){return ((which - num_params_var)%(1+3*num_gaussian)-1)%3;}
+double check_positivity(const void *model, const int which);
 int write_options_line(char *fname);
 
 // error.c
@@ -227,6 +228,12 @@ double Slc_single_exp_linear(double tcon, double tline, const void *model, int n
 double Sll2_single_exp_linear(double t1, double t2, const void *model, int nds, int nls1, int nls2, int kgau);
 double Sll_single_exp_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
 double Sll_single2_exp_linear(double t1, double t2, const void *model, int nds, int nls, int kgau);
+
+/* seasonal gap */
+double get_seasonal_gap(const double *tcon, int ncon);
+void get_seasonal_gap_allset();
+int get_idx_set(const int which);
+double check_gap(const void *model, const int which);
 
 // testing functions
 void test_covariance();

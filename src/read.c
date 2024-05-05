@@ -174,6 +174,16 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "FlagGap");
+    pardict[nt].addr = &parset.flag_gap;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
+    strcpy(pardict[nt].tag, "StrGapPrior");
+    pardict[nt].addr = &parset.str_gap_prior;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = STRING;
+
     strcpy(pardict[nt].tag, "NumberParticles");
     pardict[nt].addr = &parset.num_particles;
     pardict[nt].isset = 0;
@@ -241,9 +251,11 @@ int read_parset()
     parset.flag_lag_posivity = 0;
     parset.num_gaussian_low = 1;
     parset.num_gaussian_upper = 1;
+    parset.flag_gap = 0;
     strcpy(parset.str_lag_prior,"");
     strcpy(parset.str_ratio_prior,"");
     strcpy(parset.str_width_prior,"");
+    strcpy(parset.str_gap_prior,"");
     /*cdnest options */
     parset.num_particles = 1;
     parset.max_num_saves = 2000;
@@ -421,6 +433,11 @@ int read_parset()
     {
       /* make sure the lag prior type > 0 */
       parset.type_lag_prior = 1;
+    }
+    if(parset.flag_lag_posivity == 1 && (parset.type_tf > 1) && (parset.type_tf <= 3))
+    {
+      printf("For gamma and exp tf, no need to use FlagLagPositivity, instead, set LagLimitLow > 0.\n");
+      exit(0);
     }
   }
 
@@ -913,4 +930,119 @@ void get_num_particles(char *fname)
   }
 
   fclose(fp);
+}
+
+int cmpfunc(const void * a, const void * b) 
+{
+  if( *(double*)a > *(double*)b ) return 1;
+  if( *(double*)a < *(double*)b ) return -1;
+  return 0;
+}
+
+/*!
+ * get seasonal gap from continuum light curve data
+ *
+ * note that tcon must be monotonically increasing
+ */
+double get_seasonal_gap(const double *tcon, int ncon)
+{
+  int i, ny;
+  double *dt;
+  double span, gap;
+  
+  /* number of years */
+  span = tcon[ncon-1] - tcon[0];
+  ny = (int)ceil(span/YEAR_DAY);
+  //printf("%d\n", ny);
+  
+  gap = 0.0;
+  if(ny > 1)
+  {
+    dt = malloc((ncon-1)*sizeof(double));
+
+    /* sampling interval */
+    for(i=0; i<ncon-1; i++)
+    {
+      dt[i] = tcon[i+1] - tcon[i];
+    }
+
+    qsort(dt, ncon-1, sizeof(double), cmpfunc);
+
+    /* for ny years, so there must be (ny-1) gaps */
+    for(i=ncon-2; i>ncon-2-(ny-1); i--)
+    {
+      gap += dt[i];
+    }
+    gap /= (ny-1);
+
+    free(dt);
+  }
+  else
+  {
+    gap = tcadence_con_min; 
+  }
+
+  return gap;
+}
+
+void get_seasonal_gap_allset()
+{
+  int i;
+
+  if(strlen(parset.str_gap_prior) == 0)  /* default */
+  {
+    for(i=0; i<nset; i++)
+    {
+      gap_center[i] = YEAR_DAY/2.0;
+      gap_width[i] = get_seasonal_gap(dataset[i].con.t, dataset[i].con.n);
+      if(thistask == roottask)
+        printf("Gap of set %d: %f %f\n", i, gap_center[i], gap_width[i]);
+      gap_width[i] /= 2.0;
+    }
+  }
+  else /* input from str_gap_prior */
+  {
+    char *pstr = parset.str_gap_prior;
+    int j;
+
+    pstr += 1;
+    j = 0;
+    for(i=0; i<nset-1; i++)
+    {
+      if(sscanf(pstr, "%lf:%lf", &gap_center[j], &gap_width[j]) < 2)
+      {
+        if(thistask == 0)
+          printf("No enough gap priors.\n");
+        exit(0);
+      }
+      if(thistask == roottask)
+        printf("Gap of set %d: %f %f\n", i, gap_center[i], gap_width[i]);
+      gap_width[i] /= 2.0;
+
+      j++;
+
+      pstr = strchr(pstr, ':'); /* values are separated by ":" */
+      if(pstr!=NULL)
+      {
+        pstr++;
+      }
+      else
+      {
+        if(thistask == 0)
+          printf("No enough gap priors.\n");
+        exit(0);
+      }
+    }
+
+    if(sscanf(pstr, "%lf:%lf", &gap_center[j], &gap_width[j]) < 2)
+    {
+      if(thistask == 0)
+        printf("No enough gap priors.\n");
+      exit(0);
+    }
+    if(thistask == roottask)
+      printf("Gap of set %d: %f %f\n", j, gap_center[j], gap_width[j]);
+    gap_width[j] /= 2.0;
+  }
+  return;
 }

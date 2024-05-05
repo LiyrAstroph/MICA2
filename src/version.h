@@ -10,7 +10,7 @@
 
 /* MICA version number */
 #define MICA_MAJOR_VERSION 2
-#define MICA_MINOR_VERSION 0
-#define MICA_PATCH_VERSION 0
+#define MICA_MINOR_VERSION 1
+#define MICA_PATCH_VERSION 3
 
 #endif

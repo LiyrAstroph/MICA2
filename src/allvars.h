@@ -14,6 +14,7 @@
 
 #define PI            (M_PI)
 #define MICA_MAX_STR_LENGTH  (256)
+#define YEAR_DAY      (365.25)
 
 enum model_type {gmodel=0, pmap, vmap};
 
@@ -57,6 +58,9 @@ extern double *lag_prior, *width_prior;
 extern void *model_trans;
 extern double *resp_ratio_prior;
 
+/* for seasonal gap */
+extern double *gap_width, *gap_center;
+
 // error exit
 extern char str_error_exit[200];
 // mathematic functions
@@ -92,6 +96,10 @@ typedef struct
   int width_limit_low_isset, width_limit_upper_isset;
   double width_limit_low, width_limit_upper;
   
+  /* seasonal gap */
+  int flag_gap;
+  char str_gap_prior[MICA_MAX_STR_LENGTH];
+  
   /* otpions for cdnest */
   int max_num_saves;
   int num_particles;
@@ -125,7 +133,7 @@ typedef struct /* each dataset contains one continuum and several line */
   LC *line;
 }DATASET;
 
-extern double width_factor;
+extern double width_factor, lag_factor;
 
 extern DATASET *dataset; 
 extern int nset;

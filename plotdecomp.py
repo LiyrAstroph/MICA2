@@ -330,6 +330,7 @@ if __name__ == "__main__":
   if args.param == None:
     print("Please specify paramter file!")
     print("e.g., python plotdecomp.py --param src/param")
+    print(parser.parse_args(['-h']))
     sys.exit(0)
 
   fparam = args.param

@@ -57,7 +57,7 @@ NumCompUpp                1                # upper limit of number of Gaussians/
                                            # default: 1, 1
 
 FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
-FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
+FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
                                            # default: 0, 0
 
 #StrWidthPrior           [1:10:5:20]        # width priors if the default priors not good enough
@@ -65,7 +65,7 @@ FlagLineSysErr            1                # 0, not include systematic error of 
                                            # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 
                                            # default: None
 
-TypeLagPrior              1                # type of lag prior for each Gaussians/tophats.
+TypeLagPrior              0                # type of lag prior for each Gaussians/tophats.
                                            # default: 0
                                            # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
                                            #
@@ -99,6 +99,16 @@ StrRatioPrior           [1.0e-3:1.0]       # the response ratio of 2nd to 1st co
                                            # format: [ratio_1:ratio_2]
                                            # default: [1.0e-3:1.0]
 
+FlagGap                 0                  # whether include seasonal gap
+                                           # 0: no; 1: yes.
+                                           # default: 0
+
+#StrGapPrior            [182.6:140.0]      # gap priors if the default priors are not good enough
+                                           # valid when FlagGap == 1
+                                           # format: [gap_center_set1:gap_width_set1:gap_center_set2:gap_width_set2...]
+                                           # gap_center_set1: gap center for 1st dataset (+n*year will also be included)
+                                           # gap_width_set1:  gap width for 1st dataset
+                                           # default: None
 #==================================================================
 # options for cdnest sampling
 # use the default values or do not turn them on IF NOT familiar with them

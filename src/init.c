@@ -159,6 +159,7 @@ void init()
     }
 
     width_factor = 3.0;
+    lag_factor = 0.0;
   }
   else if(parset.type_tf == 1)
   {
@@ -192,6 +193,7 @@ void init()
     }
 
     width_factor = 1.0;
+    lag_factor = 0.0;
   }
   else if(parset.type_tf == 2)
   {
@@ -224,7 +226,8 @@ void init()
       Sll_single2 = Sll_single2_gamma_linear;
     }
 
-    width_factor = 1.0;
+    width_factor = 0.0;
+    lag_factor = 1.0;
   }
   else 
   {
@@ -257,10 +260,13 @@ void init()
       Sll_single2 = Sll_single2_exp_linear;
     }
 
-    width_factor = 1.0;
+    width_factor = 0.0;
+    lag_factor = 0.0;
   }
 
   allocate_memory();
+
+  get_seasonal_gap_allset();
 }
 
 void allocate_memory()
@@ -311,7 +317,13 @@ void allocate_memory()
 
   /* evidence */
   logz_arr = malloc(parset.num_gaussian_diff * sizeof(double));
-
+  
+  /* seasonal gap */
+  if(parset.flag_gap == 1)
+  {
+    gap_center = (double *)malloc(nset*sizeof(double));
+    gap_width = (double *)malloc(nset*sizeof(double));
+  }
   return;
 }
 
@@ -364,6 +376,12 @@ void free_memory()
   free(workspace_inv);
 
   free(logz_arr);
+
+  if(parset.flag_gap == 1)
+  {
+    free(gap_center);
+    free(gap_width);
+  }
   return;
 }
 

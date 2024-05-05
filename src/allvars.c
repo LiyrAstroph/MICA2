@@ -60,6 +60,9 @@ double *lag_prior, *width_prior;
 void *model_trans;
 double *resp_ratio_prior;
 
+/* for seasonal gap */
+double *gap_width, *gap_center;
+
 // mathematic functions
 int *workspace_ipiv;
 double *workspace_inv;
@@ -73,4 +76,4 @@ int flag_warning = 0;
 
 int nscale, nrec_max;
 
-double width_factor;
+double width_factor, lag_factor;

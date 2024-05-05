@@ -217,6 +217,18 @@ void set_idx_line_pm()
   return;
 }
 
+/* get which set is updated */
+int get_idx_set(const int which)
+{
+  int i;
+  for(i=0; i<nset; i++)
+  {
+    if(which >= idx_line_pm[i][0])
+      return i;
+  }
+  return 0;
+}
+
 void set_par_range_line()
 {
   int i, j, k;
@@ -350,7 +362,7 @@ void print_para_names_line()
     for(k=0; k<num_gaussian; k++)
     {
       i++;
-      sprintf(fstr, "%d-th Gaussian %s", k, "amplitude");
+      sprintf(fstr, "%d-th component %s", k, "amplitude");
       if(parset.flag_negative_resp == 0)
       {
         fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
@@ -363,12 +375,12 @@ void print_para_names_line()
       }
 
       i++;
-      sprintf(fstr, "%d-th Gaussian %s", k, "center");
+      sprintf(fstr, "%d-th component %s", k, "center");
       fprintf(fp, "%2d %-25s UNI    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
 
       i++;
-      sprintf(fstr, "%d-th Gaussian %s", k, "sigma");
+      sprintf(fstr, "%d-th component %s", k, "sigma");
       fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
     }
@@ -543,16 +555,11 @@ double perturb_line_prior0(void *model)
 
     if(parset.flag_lag_posivity)
     {
-      int idx;
-      idx = check_gauss_positivity(which);
-      if(idx == 1 && (pm[which] - width_factor*exp(pm[which+1]) < 0.0))
-      {
-        logH = -DBL_MAX; /* give a huge penalty */
-      }
-      else if(idx == 2 && (pm[which-1] - width_factor*exp(pm[which]) < 0.0))
-      {
-        logH = -DBL_MAX; /* give a huge penalty */
-      }
+      logH += check_positivity(model, which);
+    }
+    if(parset.flag_gap == 1)
+    {
+      logH += check_gap(model, which);
     }
   }
   
@@ -603,16 +610,11 @@ double perturb_line_prior1(void *model)
 
     if(parset.flag_lag_posivity)
     {
-      int idx;
-      idx = check_gauss_positivity(which);
-      if(idx == 1 && (pm[which] - width_factor*exp(pm[which+1]) < 0.0))
-      {
-        logH = -DBL_MAX; /* give a huge penalty */
-      }
-      else if(idx == 2 && (pm[which-1] - width_factor*exp(pm[which]) < 0.0))
-      {
-        logH = -DBL_MAX; /* give a huge penalty */
-      }
+      logH += check_positivity(model, which);
+    }
+    if(parset.flag_gap == 1)
+    {
+      logH += check_gap(model, which);
     }
   }
   
@@ -639,6 +641,68 @@ int check_gauss_center(int which, int *igau)
     return 0;
   }
   return 0;
+}
+
+/*!
+ * check whether the lag is positive
+ */
+double check_positivity(const void *model, const int which)
+{
+  double logH = 0.0;
+  double *pm = (double *)model;
+  
+  int idx;
+  idx = get_idx_param(which);
+  if(idx == 1 && (pm[which] - width_factor*exp(pm[which+1]) < 0.0))
+  {
+    logH = -100.0; /* give a huge penalty */
+  }
+  else if(idx == 2 && (pm[which-1] - width_factor*exp(pm[which]) < 0.0))
+  {
+    logH = -100.0; /* give a huge penalty */
+  }
+
+  return logH;
+}
+
+/*!
+ * check whether the lag falls into the gap
+ */
+double check_gap(const void *model, const int which)
+{
+  double logH = 0.0;
+  double *pm = (double *)model;
+
+  /* check seasonal gap */
+  int idx, iset;
+  double gap, dgap, lag;
+  idx = ((which-num_params_var)%(1+3*num_gaussian)-1)%3;
+  iset = get_idx_set(which);
+  
+  //printf("%d %d %d\n", which, iset, idx);
+
+  if( idx == 1 ) //shift 
+  {
+    lag = pm[which] + lag_factor*exp(pm[which+1]);
+    gap = lag - floor(lag/YEAR_DAY) * YEAR_DAY;
+    dgap = fabs(gap - gap_center[iset]);
+    if(dgap < gap_width[iset] && pm[which+1]  < log(gap_width[iset]))
+    {
+      logH += -100.0 * (1 - pow(dgap/gap_width[iset], 2));
+    }
+  }
+  else if (idx == 2) //width
+  {
+    lag = pm[which-1] + lag_factor*exp(pm[which]);
+    gap = lag - floor(lag/YEAR_DAY) * YEAR_DAY;
+    dgap = fabs(gap - gap_center[iset]);
+    if(dgap < gap_width[iset]  && pm[which]  < log(gap_width[iset]))
+    {
+      logH += -100.0 * (1 - pow(dgap/gap_width[iset], 2));
+    }
+  }
+  
+  return logH;
 }
 
 int get_num_params_line()

@@ -20,6 +20,7 @@ cdef extern from "allvars.h":
     char str_lag_prior[256]
     char str_ratio_prior[256]
     char str_width_prior[256]
+    char str_gap_prior[256]
   
     int flag_uniform_var_params
     int flag_uniform_tranfuns
@@ -30,6 +31,7 @@ cdef extern from "allvars.h":
     int model
     int flag_lag_posivity
     int flag_negative_resp
+    int flag_gap
   
     int num_gaussian_low, num_gaussian_upper, num_gaussian_diff
   

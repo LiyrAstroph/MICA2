@@ -212,24 +212,25 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       indx_line.append(indx_line[i-1] + (len(nl[i-1])-1)*(1+ngau*3))
   
   # data sampling
-  if show_gap == True:
-    DT_gap = []
-    for i in range(nd):
-      ns = nl[i]
-      t_con = data[indx_con_data[i]:indx_con_data[i]+ns[0], 0]
-      dt = t_con[1:] - t_con[:-1]
-      span = t_con[-1] - t_con[0]
-      ny = int(np.ceil(span/365.0))
+  if show_gap is not None:
+    if isinstance(show_gap, bool) and show_gap == True:
+      DT_gap = []
+      for i in range(nd):
+        ns = nl[i]
+        t_con = data[indx_con_data[i]:indx_con_data[i]+ns[0], 0]
+        dt = t_con[1:] - t_con[:-1]
+        span = t_con[-1] - t_con[0]
+        ny = int(np.ceil(span/365.0))
 
-      if ny > 1:
-        dt = np.sort(dt)
-        idx_dt = np.where(dt<365)[0]
-        dt = dt[idx_dt]
-        gap = np.mean(dt[-ny:])
-      else:
-        gap = None
+        if ny > 1:
+          dt = np.sort(dt)
+          idx_dt = np.where(dt<365)[0]
+          dt = dt[idx_dt]
+          gap = np.mean(dt[-ny:])
+        else:
+          gap = None
 
-      DT_gap.append(gap)
+        DT_gap.append(gap)
 
   # print time lags, median, and 68.3% confidence limits
   if flagnegresp == False:
@@ -611,18 +612,32 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       #if(tau[0]<0.0):
       #  ax.axvline(x=0.0, ls='--', color='red')
       
-      if show_gap == True:
-        xlim = ax.get_xlim()
-        gap = DT_gap[m]
-        offset = 0
-        if gap is not None:
+      if show_gap is not None:
+        if  isinstance(show_gap, bool) and show_gap == True:
+          xlim = ax.get_xlim()
+          gap = DT_gap[m]
+          offset = 0
+          if gap is not None:
+            while gap + offset > xlim[0] and gap + offset < xlim[1]:
+              ylim = ax.get_ylim()
+              ax.fill_between(x=[offset+365/2-gap/2, offset+365/2+gap/2], y1=[ylim[1], ylim[1]], y2=[ylim[0], ylim[0]], color='darkgrey', alpha=0.5)
+              ax.set_ylim(ylim[0], ylim[1])
+              ax.text(offset+365/2, ylim[1]-0.1*(ylim[1]-ylim[0]), "gap", ha='center', fontsize=10)
+              offset += 365
+          ax.set_xlim(xlim[0], xlim[1])
+
+        elif type(show_gap) == list or type(show_gap) == np.ndarray:
+          xlim = ax.get_xlim()
+          center = float(show_gap[m*2])
+          gap = float(show_gap[m*2+1])
+          offset = 0
           while gap + offset > xlim[0] and gap + offset < xlim[1]:
             ylim = ax.get_ylim()
-            ax.fill_between(x=[offset+365/2-gap/2, offset+365/2+gap/2], y1=[ylim[1], ylim[1]], y2=[ylim[0], ylim[0]], color='darkgrey', alpha=0.5)
+            ax.fill_between(x=[offset+center-gap/2, offset+center+gap/2], y1=[ylim[1], ylim[1]], y2=[ylim[0], ylim[0]], color='darkgrey', alpha=0.5)
             ax.set_ylim(ylim[0], ylim[1])
-            ax.text(offset+365/2, ylim[1]-0.1*(ylim[1]-ylim[0]), "gap", ha='center', fontsize=10)
+            ax.text(offset+center, ylim[1]-0.1*(ylim[1]-ylim[0]), "gap", ha='center', fontsize=10)
             offset += 365
-        ax.set_xlim(xlim[0], xlim[1])
+          ax.set_xlim(xlim[0], xlim[1])
       
       # then line light curve
       ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))
@@ -738,11 +753,19 @@ def plot_results_all(args, param, doshow=True, tf_lag_range=None, hist_lag_range
     flagnegresp = int(param["FlagNegativeResp"])
   except:
     flagnegresp = 0
+  
+  show_gap = False
+  if args.show_gap:
+    try:
+      str_gap = param["StrGapPrior"]
+      show_gap = str_gap[1:-1].split(":")
+    except:
+      show_gap = args.show_gap
 
   for ngau in range(ngau_low, ngau_upp+1):
     plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, args.resp_input, 
                  doshow=doshow, tf_lag_range=args.tf_lag_range, hist_lag_range=args.hist_lag_range, show_pmax=args.show_pmax, 
-                 show_gap=args.show_gap)
+                 show_gap=show_gap)
 
 def _param_parser(fname):
   """
@@ -772,6 +795,7 @@ if __name__ == "__main__":
   if args.param == None:
     print("Please specify paramter file!")
     print("e.g., python plotfig.py --param src/param")
+    print(parser.parse_args(['-h']))
     sys.exit()
 
   fparam = args.param

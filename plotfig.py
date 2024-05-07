@@ -153,6 +153,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   
   sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
   sample_info = np.loadtxt(fdir+"/data/posterior_sample_info1d.txt_%d"%ngau)
+  idx_pmax = np.argmax(sample_info)
   data = np.loadtxt(fdir+fname)
   sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
 
@@ -428,17 +429,22 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       hb = data[indx_con_data[m] + np.sum(ns[:j]):indx_con_data[m] + np.sum(ns[:j+1]), :] 
       sall_hb = sall[(indx_con_rec[m] + np.sum(ns_rec[:j])):(indx_con_rec[m] + np.sum(ns_rec[:j+1])), :]
       
+      #===========================================================================================================
       # histogram of time lags 
       ax = fig.add_axes((figlc_center, 0.95-(j+1)*axheight, 0.16, axheight))
 
       for k in range(ngau):
         if typetf in [0, 1]: # gaussian or tophat
           cen = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+          cen_pmax = sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
         elif typetf == 2:  # gamma, use peaks
           cen =  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
                 +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen_pmax =  sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                +np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
         elif typetf == 3:  # exp, use peaks
           cen =  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+          cen_pmax =  sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
 
         cen_min = np.min(cen)
         cen_max = np.max(cen)
@@ -447,6 +453,9 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           ax.hist(cen, density=True, bins=bins, alpha=1)
         else:
           ax.hist(cen, density=True, bins=bins, alpha=0.6)
+        
+        if show_pmax == True:
+          ax.axvline(x=cen_pmax, ls='--', color='r')
 
       ax.set_xlim((tau1-(tau2-tau1)*0.1, tau2+(tau2-tau1)*0.1))
       
@@ -469,6 +478,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       else:
         ax.set_xlabel("Time Lag (day)")
       
+      #===========================================================================================================
       # only plot centroid lag when no negative response
       if flagnegresp == False:
         ax = fig.add_axes((figlc_centroid, 0.95-(j+1)*axheight, 0.16, axheight))
@@ -476,31 +486,50 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         if typemodel == 0 or typemodel == 2: # centroid time lag
           cent = np.zeros(sample.shape[0])
           norm = np.zeros(sample.shape[0])
+          cent_pmax = 0.0
+          norm_pmax = 0.0
           for k in range(ngau):
-
-            if flagnegresp == 0: # no negative responses
               if typetf in [0, 1]:
                 norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
                 cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
                         * sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                
+                norm_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+                cent_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                        * sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                
               elif typetf == 2:
                 norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
                 cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
                       * (sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
                         +2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
+                
+                norm_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+                cent_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                      * (sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                        +2*np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
               elif typetf == 3:
                 norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
                 cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
                       * (sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
                         +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
-            else:
-              norm += 1.0
-              cent += sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                
+                norm_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+                cent_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
+                      * (sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                        +np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
+
           
-          ax.hist(cent/norm, density=True, range=(tau1_cent, tau2_cent), bins=20)
+          cent_min = np.min(cent/norm)
+          cent_max = np.max(cent/norm)
+          bins = np.max((20, int((tau2_cent-tau1_cent)/(cent_max-cent_min + 1.0e-100) * 5)))
+          ax.hist(cent/norm, density=True, range=(tau1_cent, tau2_cent), bins=bins)
           ax.set_xlim((tau1_cent-0.1*(tau2_cent-tau1_cent), tau2_cent+0.1*(tau2_cent-tau1_cent)))
           ax.minorticks_on()
           ax.yaxis.set_tick_params(labelleft=False)
+
+          if show_pmax == True:
+            ax.axvline(x = cent_pmax/norm_pmax, ls='--', color='r')
 
           if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2):
             ax.set_title("Centroid")
@@ -532,7 +561,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         # vmap model, no need to plot for the first lc, which has a zero lag wrt the driving lc. 
         if typemodel == 2 and j == 1:
           ax.set_visible(False)
-
+      
+      #===========================================================================================================
       # transfer function
       ax = fig.add_axes((0.39, 0.95-(j+1)*axheight, 0.16, axheight))
       
@@ -552,9 +582,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
       
       if show_pmax == True:
-        argmax = np.argmax(sample_info)
-        tran_pmax = calculate_tran(tau, sample[argmax, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
-        ax.plot(tau, tran_pmax)
+        tran_pmax = calculate_tran(tau, sample[idx_pmax, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
+        ax.plot(tau, tran_pmax, label=r'$L_{\rm max}$', color='r', ls='--')
         
 
       #plot input response function
@@ -575,7 +604,9 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         
         tran_input[:, 1] *= tran_scale
         ax.plot(tran_input[:, 0], tran_input[:, 1], label='input', lw=1)
-        ax.legend()
+      
+      if resp_input != None or show_pmax == True:
+        ax.legend(fontsize=10)
 
       # determine the best range of time lag for gamma tf
       if tf_lag_range is None:

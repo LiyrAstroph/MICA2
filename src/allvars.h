@@ -15,6 +15,7 @@
 #define PI            (M_PI)
 #define MICA_MAX_STR_LENGTH  (256)
 #define YEAR_DAY      (365.25)
+#define EPS           (1.0e-5)
 
 enum model_type {gmodel=0, pmap, vmap};
 
@@ -68,7 +69,7 @@ extern int *workspace_ipiv;
 extern double *workspace_inv;
 
 
-extern int flag_postprc, flag_end, flag_restart, flag_decomp;
+extern int flag_postprc, flag_end, flag_restart, flag_decomp, flag_examine;
 
 typedef struct 
 {

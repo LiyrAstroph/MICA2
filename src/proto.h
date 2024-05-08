@@ -238,6 +238,7 @@ double check_gap(const void *model, const int which);
 // testing functions
 void test_covariance();
 void test_gamma();
+void test_exp();
 void test_gauss();
 void test_tophat();
 

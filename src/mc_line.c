@@ -5186,7 +5186,10 @@ double Slc_exp(double tcon, double tline, const void *model, int nds, int nls)
     }
     else 
     {
-      St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
+      if(fabs(p2) < EPS)
+        St = exp(-DT/taud) * (DT/taud + 1.0/p1);
+      else
+        St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
     }
     
     Sttot += St * fg;
@@ -5231,7 +5234,10 @@ double Slc_exp_linear(double tcon, double tline, const void *model, int nds, int
     }
     else 
     {
-      St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
+      if(fabs(p2) < EPS)
+        St = exp(-DT/taud) * (DT/taud + 1.0/p1);
+      else
+        St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
     }
     
     Sttot += St * fg;
@@ -5289,7 +5295,10 @@ void Slc_array_exp(double *tcon, int ncon, double *tline, int nline, const void 
         }
         else 
         {
-          St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
+          if(fabs(p2) < EPS)
+            St = exp(-DT/taud) * (DT/taud + 1.0/p1);
+          else
+            St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
         }
 
         Smat[i*nline + j] += St * fg;
@@ -5349,7 +5358,10 @@ void Slc_array_exp_linear(double *tcon, int ncon, double *tline, int nline, cons
         }
         else 
         {
-          St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
+          if(fabs(p2) < EPS)
+            St = exp(-DT/taud) * (DT/taud + 1.0/p1);
+          else
+            St = exp(-DT/taud)/p2 + exp(-DT/tau1)*(-1.0/p2 + 1.0/p1);
         }
 
         Smat[i*nline + j] += St * fg;
@@ -5408,13 +5420,19 @@ double Sll_exp(double t1, double t2, const void *model, int nds, int nls)
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2 * p4) 
-           + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+        if(fabs(p4) < EPS)
+          St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+        else
+          St = exp( DT/taud)/(p2 * p4) 
+            + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
       }
       else 
       {
-        St = exp(-DT/taud)/(p1 * p3) 
-           + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+        if(fabs(p1) < EPS)
+          St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+        else
+          St = exp(-DT/taud)/(p1 * p3) 
+            + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
       }
 
       Sttot += St*fg12;
@@ -5472,13 +5490,19 @@ double Sll_exp_linear(double t1, double t2, const void *model, int nds, int nls)
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2 * p4) 
-           + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+        if(fabs(p4) < EPS)
+          St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+        else
+          St = exp( DT/taud)/(p2 * p4) 
+            + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
       }
       else 
       {
-        St = exp(-DT/taud)/(p1 * p3) 
-           + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+        if(fabs(p1) < EPS)
+          St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+        else
+          St = exp(-DT/taud)/(p1 * p3) 
+            + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
       }
 
       Sttot += St*fg12;
@@ -5547,13 +5571,19 @@ void Sll_array_exp(double *tline, int nline, const void *model, int nds, int nls
 
           if(DT<=0)
           {
-            St = exp( DT/taud)/(p2 * p4) 
-               + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+            if(fabs(p4) < EPS)
+              St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+            else
+              St = exp( DT/taud)/(p2 * p4) 
+                + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
           }
           else 
           {
-            St = exp(-DT/taud)/(p1 * p3) 
-               + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+            if(fabs(p1) < EPS)
+              St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+            else
+              St = exp(-DT/taud)/(p1 * p3) 
+                + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
           }
 
           Smat[i*nline + j] += St * fg12;
@@ -5624,13 +5654,19 @@ void Sll_array_exp_linear(double *tline, int nline, const void *model, int nds, 
 
           if(DT<=0)
           {
-            St = exp( DT/taud)/(p2 * p4) 
-               + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+            if(fabs(p4) < EPS)
+              St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+            else
+              St = exp( DT/taud)/(p2 * p4) 
+                + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
           }
           else 
           {
-            St = exp(-DT/taud)/(p1 * p3) 
-               + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+            if(fabs(p1) < EPS)
+              St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+            else
+              St = exp(-DT/taud)/(p1 * p3) 
+                + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
           }
 
           Smat[i*nline + j] += St * fg12;
@@ -5691,13 +5727,19 @@ double Sll2_exp(double t1, double t2, const void *model, int nds, int nls1, int 
   
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2 * p4) 
-           + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+        if(fabs(p4) < EPS)
+          St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+        else
+          St = exp( DT/taud)/(p2 * p4) 
+            + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
       }
       else 
       {
-        St = exp(-DT/taud)/(p1 * p3) 
-           + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+        if(fabs(p1) < EPS)
+          St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+        else
+          St = exp(-DT/taud)/(p1 * p3) 
+            + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
       }
 
       Sttot += St*fg12;
@@ -5756,13 +5798,19 @@ double Sll2_exp_linear(double t1, double t2, const void *model, int nds, int nls
   
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2 * p4) 
-           + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+        if(fabs(p4) < EPS)
+          St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+        else
+          St = exp( DT/taud)/(p2 * p4) 
+            + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
       }
       else 
       {
-        St = exp(-DT/taud)/(p1 * p3) 
-           + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+        if(fabs(p1) < EPS)
+          St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+        else
+          St = exp(-DT/taud)/(p1 * p3) 
+            + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
       }
 
       Sttot += St*fg12;
@@ -5832,13 +5880,19 @@ void Sll2_array_exp(double *tline1, int nline1, double *tline2, int nline2, cons
 
           if(DT<=0)
           {
-            St = exp( DT/taud)/(p2 * p4) 
-               + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+            if(fabs(p4) < EPS)
+              St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+            else
+              St = exp( DT/taud)/(p2 * p4) 
+                + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
           }
           else 
           {
-            St = exp(-DT/taud)/(p1 * p3) 
-               + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+            if(fabs(p1) < EPS)
+              St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+            else
+              St = exp(-DT/taud)/(p1 * p3) 
+                + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
           }
 
           Smat[i*nline2 + j] += St*fg12;
@@ -5910,13 +5964,19 @@ void Sll2_array_exp_linear(double *tline1, int nline1, double *tline2, int nline
 
           if(DT<=0)
           {
-            St = exp( DT/taud)/(p2 * p4) 
-               + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
+            if(fabs(p4) < EPS)
+              St = exp( DT/taud) * ( -DT/tau2/p2 + tau1/tau2*1.0/p2/p2 + 1.0/(p3*p52) );
+            else
+              St = exp( DT/taud)/(p2 * p4) 
+                + exp( DT/tau2)/(p4 * p52) * (-1.0 + p4/p3);
           }
           else 
           {
-            St = exp(-DT/taud)/(p1 * p3) 
-               + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
+            if(fabs(p1) < EPS)
+              St = exp(-DT/taud) * ( DT/tau1/p3 + tau2/tau1*1.0/p3/p3 + 1.0/(p2*p51) );
+            else
+              St = exp(-DT/taud)/(p1 * p3) 
+                + exp(-DT/tau1)/(p1 * p51) * (-1.0 + p1/p2);
           }
           
           Smat[i*nline2 + j] += St*fg12;
@@ -5934,6 +5994,7 @@ void test_covariance()
   test_gamma();
   test_gauss();
   test_tophat();
+  test_exp();
 }
 
 /*
@@ -5978,6 +6039,65 @@ void test_gamma()
   free(idx_line_pm[0]);
   free(idx_line_pm);
   fclose(fp);
+}
+
+void test_exp()
+{
+  FILE *fp;
+  void *model = (void *)malloc(7*sizeof(double));
+  double *pm = (double *)model;
+  int nt, i;
+  double dt, Scc, Slc, Sll, Slc_single, Sll_single, taud, width; 
+
+  num_gaussian = 1;
+  idx_con_pm = malloc(1*sizeof(double));
+  idx_line_pm = malloc(1*sizeof(double*));
+  idx_line_pm[0] = malloc(1*sizeof(double));
+  idx_con_pm[0] = 0;
+  idx_line_pm[0][0] = 3;
+
+  nt=500;
+
+  pm[2] = log(20);
+  pm[4] = log(1.0);
+  pm[5] = 30.0;
+  pm[6] = log(20.0);
+
+  taud = exp(pm[2]);
+  
+  fp = fopen("data/S_exp.txt", "w");
+  for(i=0; i<nt; i++)
+  {
+    dt = -200.0 + 400.0/(nt-1) * i;
+    Scc = exp(-fabs(dt)/taud);
+    Slc = Slc_exp(0.0, dt, model, 0, 0);
+    Sll = Sll_exp(0.0, dt, model, 0, 0);
+    Slc_single = Slc_single_exp(0.0, dt, model, 0, 0, 0);
+    Sll_single = Sll_single_exp(0.0, dt, model, 0, 0, 0);
+    fprintf(fp, "%f %e %e %e %e %e\n", dt, Scc, Slc, Sll, Slc_single, Sll_single);
+  }
+  fclose(fp);
+
+  fp = fopen("data/S_exp_width.txt", "w");
+  for(i=0; i<nt; i++)
+  {
+    dt = 0.0;
+    width = log(exp(pm[2]) + (-5.0+10.0/(nt-1)*i));
+    pm[6] = width;
+    Scc = exp(-fabs(dt)/taud);
+    Slc = Slc_exp(0.0, dt, model, 0, 0);
+    Sll = Sll_exp(0.0, dt, model, 0, 0);
+    Slc_single = Slc_single_exp(0.0, dt, model, 0, 0, 0);
+    Sll_single = Sll_single_exp(0.0, dt, model, 0, 0, 0);
+    fprintf(fp, "%f %e %e %e %e %e\n", width, Scc, Slc, Sll, Slc_single, Sll_single);
+  }
+  fclose(fp);
+
+  free(model);
+  free(idx_con_pm);
+  free(idx_line_pm[0]);
+  free(idx_line_pm);
+  
 }
 
 void test_gauss()

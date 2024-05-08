@@ -2102,7 +2102,10 @@ double Slc_single_gamma(double tcon, double tline, const void *model, int nds, i
     }
     else 
     {
-      St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
+      if(fabs(p2) < EPS)
+        St = exp(-DT/taud) * (DT*DT/2 + (p1*DT+1)/p1/p1);
+      else
+        St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
     }
 
     Sttot += St * fg;
@@ -2144,7 +2147,10 @@ double Slc_single_gamma_linear(double tcon, double tline, const void *model, int
     }
     else 
     {
-      St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
+      if(fabs(p2) < EPS)
+        St = exp(-DT/taud) * (DT*DT/2 + (p1*DT+1)/p1/p1);
+      else
+        St = exp(-DT/taud)/p2/p2 + exp(-DT/tau1)*(-(p2*DT+1)/p2/p2 + (p1*DT+1)/p1/p1);
     }
 
     Sttot += St * fg;
@@ -2164,7 +2170,7 @@ double Sll2_single_gamma(double t1, double t2, const void *model, int nds, int n
 {
   double *pm=(double *)model;
   int idx1, idx2, idx, k1, k2, idxk1, idxk2;
-  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5;
+  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5, tmp;
   double Dt, DT, St, Sttot;
 
   idx = idx_con_pm[nds];
@@ -2201,11 +2207,23 @@ double Sll2_single_gamma(double t1, double t2, const void *model, int nds, int n
       
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
+        if(fabs(p4) < EPS)
+        {
+          tmp = p2*DT;
+          St =  exp( DT/taud) * (1/(p2*p2*p2*p2)*(3-2*tmp+tmp*tmp/2) + (1-p3*DT+2*p3/p5)/(p3*p3 * p5*p5));
+        }
+        else
+          St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
+        if(fabs(p1) < EPS)
+        {
+          tmp = p3*DT;
+          St = exp(-DT/taud) * (1/(p3*p3*p3*p3)*(3+2*tmp+tmp*tmp/2) + (1+p2*DT+2*p2/p5)/(p2*p2 * p5*p5));
+        }
+        else
+          St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St * fg12;
@@ -2219,7 +2237,7 @@ double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds
 {
   double *pm=(double *)model;
   int idx1, idx2, idx, k1, k2, idxk1, idxk2;
-  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5;
+  double fg1, fg2, tau01, tau02, tau1, tau2, taud, fg12, p1, p2, p3, p4, p5, tmp;
   double Dt, DT, St, Sttot;
 
   idx = idx_con_pm[nds];
@@ -2256,11 +2274,23 @@ double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds
       
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
+        if(fabs(p4) < EPS)
+        {
+          tmp = p2*DT;
+          St =  exp( DT/taud) * (1/(p2*p2*p2*p2)*(3-2*tmp+tmp*tmp/2) + (1-p3*DT+2*p3/p5)/(p3*p3 * p5*p5));
+        }
+        else
+          St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
+        if(fabs(p1) < EPS)
+        {
+          tmp = p3*DT;
+          St = exp(-DT/taud) * (1/(p3*p3*p3*p3)*(3+2*tmp+tmp*tmp/2) + (1+p2*DT+2*p2/p5)/(p2*p2 * p5*p5));
+        }
+        else
+          St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St * fg12;
@@ -2280,7 +2310,7 @@ double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds
 double Sll_single_gamma(double t1, double t2, const void *model, int nds, int nls, int kgau)
 {
   double Dt, DT, St, Sttot;
-  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5, tmp;
   double *pm = (double *)model;
   int idx, k1, k2, idxk1, idxk2;
 
@@ -2317,11 +2347,23 @@ double Sll_single_gamma(double t1, double t2, const void *model, int nds, int nl
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
+        if(fabs(p4) < EPS)
+        {
+          tmp = p2*DT;
+          St =  exp( DT/taud) * (1/(p2*p2*p2*p2)*(3-2*tmp+tmp*tmp/2) + (1-p3*DT+2*p3/p5)/(p3*p3 * p5*p5));
+        }
+        else
+          St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
+        if(fabs(p1) < EPS)
+        {
+          tmp = p3*DT;
+          St = exp(-DT/taud) * (1/(p3*p3*p3*p3)*(3+2*tmp+tmp*tmp/2) + (1+p2*DT+2*p2/p5)/(p2*p2 * p5*p5));
+        }
+        else
+          St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;
@@ -2334,7 +2376,7 @@ double Sll_single_gamma(double t1, double t2, const void *model, int nds, int nl
 double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau)
 {
   double Dt, DT, St, Sttot;
-  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5, tmp;
   double *pm = (double *)model;
   int idx, k1, k2, idxk1, idxk2;
 
@@ -2371,11 +2413,23 @@ double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds,
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
+        if(fabs(p4) < EPS)
+        {
+          tmp = p2*DT;
+          St =  exp( DT/taud) * (1/(p2*p2*p2*p2)*(3-2*tmp+tmp*tmp/2) + (1-p3*DT+2*p3/p5)/(p3*p3 * p5*p5));
+        }
+        else
+          St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
+        if(fabs(p1) < EPS)
+        {
+          tmp = p3*DT;
+          St = exp(-DT/taud) * (1/(p3*p3*p3*p3)*(3+2*tmp+tmp*tmp/2) + (1+p2*DT+2*p2/p5)/(p2*p2 * p5*p5));
+        }
+        else
+          St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;
@@ -2395,7 +2449,7 @@ double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds,
 double Sll_single2_gamma(double t1, double t2, const void *model, int nds, int nls, int kgau)
 {
   double Dt, DT, St, Sttot;
-  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5, tmp;
   double *pm = (double *)model;
   int idx, k1, k2, idxk1, idxk2;
 
@@ -2432,11 +2486,23 @@ double Sll_single2_gamma(double t1, double t2, const void *model, int nds, int n
       
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
+        if(fabs(p4) < EPS)
+        {
+          tmp = p2*DT;
+          St =  exp( DT/taud) * (1/(p2*p2*p2*p2)*(3-2*tmp+tmp*tmp/2) + (1-p3*DT+2*p3/p5)/(p3*p3 * p5*p5));
+        }
+        else
+          St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
+        if(fabs(p1) < EPS)
+        {
+          tmp = p3*DT;
+          St = exp(-DT/taud) * (1/(p3*p3*p3*p3)*(3+2*tmp+tmp*tmp/2) + (1+p2*DT+2*p2/p5)/(p2*p2 * p5*p5));
+        }
+        else
+          St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;
@@ -2449,7 +2515,7 @@ double Sll_single2_gamma(double t1, double t2, const void *model, int nds, int n
 double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds, int nls, int kgau)
 {
   double Dt, DT, St, Sttot;
-  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5;
+  double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p5, tmp;
   double *pm = (double *)model;
   int idx, k1, k2, idxk1, idxk2;
 
@@ -2486,11 +2552,23 @@ double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds
     
       if(DT<=0)
       {
-        St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
+        if(fabs(p4) < EPS)
+        {
+          tmp = p2*DT;
+          St =  exp( DT/taud) * (1/(p2*p2*p2*p2)*(3-2*tmp+tmp*tmp/2) + (1-p3*DT+2*p3/p5)/(p3*p3 * p5*p5));
+        }
+        else
+          St = exp( DT/taud)/(p2*p2 * p4*p4) + exp( DT/tau2)/(p4*p4 * p5*p5) * ( -(1-p4*DT+2*p4/p5) + (1-p3*DT+2*p3/p5)*(p4*p4)/(p3*p3) );
       }
       else 
       {
-        St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
+        if(fabs(p1) < EPS)
+        {
+          tmp = p3*DT;
+          St = exp(-DT/taud) * (1/(p3*p3*p3*p3)*(3+2*tmp+tmp*tmp/2) + (1+p2*DT+2*p2/p5)/(p2*p2 * p5*p5));
+        }
+        else
+          St = exp(-DT/taud)/(p1*p1 * p3*p3) + exp(-DT/tau1)/(p1*p1 * p5*p5) * ( -(1+p1*DT+2*p1/p5) + (1+p2*DT+2*p2/p5)*(p1*p1)/(p2*p2) );
       }
 
       Sttot += St*fg12;

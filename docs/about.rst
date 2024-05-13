@@ -59,6 +59,12 @@ As an alternative option, ``mica2`` also supports several types of transfer func
   For :math:`k`-th component, the transfer function is zero if :math:`\tau < \tau_{k}`, the peak location is :math:`\tau_k`,
   and the centriod lag is :math:`\tau_k+\omega_k`.
 
+.. figure:: _static/fig_tf.jpg
+  :scale: 25%
+  :align: center 
+
+  Different shapes of transfer funcitons in MICA.
+
 Here is an example for reverberation mapping analysis of the light curves from Hu et al. (2020) using **MICA**,
 
 .. figure:: _static/fig_pg2130.jpg

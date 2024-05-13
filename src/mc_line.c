@@ -393,7 +393,7 @@ void output_reconstruction_parallel()
     for(i=0; i<nset; i++)
     {
       /* reconstuct all the light curves */
-      recostruct_line_from_varmodel3((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+      recontruct_line_from_varmodel3((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
       
       for(k=0; k<nall[i][0]; k++)
       {
@@ -751,7 +751,7 @@ void output_reconstruction()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        recontruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
         
         /* output reconstructed lines */
         np = nall[i][0];
@@ -1075,7 +1075,7 @@ void output_reconstruction2()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recostruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        recontruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -1325,7 +1325,7 @@ void postprocess_line()
  *    inverse_mat()
  *    multiply_mat_MN()
  */
-void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
+void recontruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
   int i, j, k, m, info, idx, *ipiv;
@@ -1481,7 +1481,7 @@ void recostruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
  *    multiply_mat_MN_inverseA()
  * 
  */
-void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
+void recontruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
   int i, j, k, m, info, idx, *ipiv;
@@ -1642,7 +1642,7 @@ void recostruct_line_from_varmodel(const void *model, int nds, int *nall, double
  * calculate inverse using matrix partition 
  * 
  */
-void recostruct_line_from_varmodel3(const void *model, int nds, int *nall, double *tall, 
+void recontruct_line_from_varmodel3(const void *model, int nds, int *nall, double *tall, 
                                     double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *W, *D, *phi, *fe;
@@ -6139,7 +6139,7 @@ void test_gamma()
   idx_con_pm[0] = 0;
   idx_line_pm[0][0] = 3;
 
-  nt=500;
+  nt=5000;
 
   pm[2] = log(20);
   pm[4] = log(1.0);
@@ -6165,7 +6165,7 @@ void test_gamma()
   for(i=0; i<nt; i++)
   {
     dt = 0.0;
-    width = log(exp(pm[2]) + (-1.0+10.0/(nt-1)*i));
+    width = log(exp(pm[2]) + (-0.01+0.02/(nt-1)*i));
     pm[6] = width;
     Scc = exp(-fabs(dt)/taud);
     Slc = Slc_gamma(0.0, dt, model, 0, 0);
@@ -6223,7 +6223,7 @@ void test_exp()
   for(i=0; i<nt; i++)
   {
     dt = 0.0;
-    width = log(exp(pm[2]) + (-5.0+10.0/(nt-1)*i));
+    width = log(exp(pm[2]) + (-0.01+0.02/(nt-1)*i));
     pm[6] = width;
     Scc = exp(-fabs(dt)/taud);
     Slc = Slc_exp(0.0, dt, model, 0, 0);

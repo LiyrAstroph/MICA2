@@ -393,7 +393,7 @@ void output_reconstruction_parallel()
     for(i=0; i<nset; i++)
     {
       /* reconstuct all the light curves */
-      recontruct_line_from_varmodel3((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+      reconstruct_line_from_varmodel3((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
       
       for(k=0; k<nall[i][0]; k++)
       {
@@ -751,7 +751,7 @@ void output_reconstruction()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recontruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        reconstruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
         
         /* output reconstructed lines */
         np = nall[i][0];
@@ -1075,7 +1075,7 @@ void output_reconstruction2()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recontruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        reconstruct_line_from_varmodel3(post_model_trans, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -1325,7 +1325,7 @@ void postprocess_line()
  *    inverse_mat()
  *    multiply_mat_MN()
  */
-void recontruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
+void reconstruct_line_from_varmodel2(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
   int i, j, k, m, info, idx, *ipiv;
@@ -1481,7 +1481,7 @@ void recontruct_line_from_varmodel2(const void *model, int nds, int *nall, doubl
  *    multiply_mat_MN_inverseA()
  * 
  */
-void recontruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
+void reconstruct_line_from_varmodel(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
   int i, j, k, m, info, idx, *ipiv;
@@ -1642,7 +1642,7 @@ void recontruct_line_from_varmodel(const void *model, int nds, int *nall, double
  * calculate inverse using matrix partition 
  * 
  */
-void recontruct_line_from_varmodel3(const void *model, int nds, int *nall, double *tall, 
+void reconstruct_line_from_varmodel3(const void *model, int nds, int *nall, double *tall, 
                                     double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *W, *D, *phi, *fe;
@@ -2265,6 +2265,28 @@ double prob_line_variability4(const void *model)
     
     prob += prob1 -0.5*lndet - 0.5*lndet_ICq;
   }
+  return prob;
+}
+
+/*!
+ * check whether q falls within the flux limit
+ */
+double check_flux(double *yq, int iset)
+{
+  int j;
+  double diff, prob=0.0;
+
+  /*check whether q is beyond flux min and max */
+  diff = fabs(yq[0*nq+0] - flux_minmax[iset][0*2+0])/flux_minmax[iset][0*2+1];
+  if(diff > 1.0)
+    prob -= 100.0*pow(diff, 2);
+  for(j=0; j<dataset[iset].nlset; j++)
+  {
+    diff = fabs(yq[(1+j)*nq+0] - flux_minmax[iset][(1+j)*2+0])/flux_minmax[iset][(1+j)*2+1];
+    if(diff > 1.0)
+      prob -= 100.0*pow(diff, 2);
+  }
+
   return prob;
 }
 

@@ -63,6 +63,9 @@ double *resp_ratio_prior;
 /* for seasonal gap */
 double *gap_width, *gap_center;
 
+/* for max and min flux of each dataset */
+double **flux_minmax;
+
 // mathematic functions
 int *workspace_ipiv;
 double *workspace_inv;

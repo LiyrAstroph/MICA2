@@ -826,7 +826,7 @@ void output_reconstruction_vmap_parallel()
     for(i=0; i<nset; i++)
     {
       /* reconstuct all the light curves */
-      recontruct_line_from_varmodel_vmap((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+      reconstruct_line_from_varmodel_vmap((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
       
       for(k=0; k<nall[i][0]; k++)
       {
@@ -1166,7 +1166,7 @@ void output_reconstruction_vmap()
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */
-        recontruct_line_from_varmodel_vmap(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+        reconstruct_line_from_varmodel_vmap(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -1312,7 +1312,7 @@ void output_reconstruction_vmap()
  *    multiply_mat_MN_inverseA()
  * 
  */
-void recontruct_line_from_varmodel_vmap(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
+void reconstruct_line_from_varmodel_vmap(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
   int i, j, k, m, info, idx, *ipiv;

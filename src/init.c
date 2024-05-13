@@ -346,8 +346,11 @@ void free_memory()
       free(dataset[i].line[j].fe);
     }
     free(dataset[i].line);
+
+    free(flux_minmax[i]);
   }
   free(dataset);
+  free(flux_minmax);
 
   /* free alldata */
   for(i=0; i<nset; i++)

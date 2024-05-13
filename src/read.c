@@ -513,11 +513,11 @@ int read_data()
     MPI_Bcast(&dataset[i].con.n, 1, MPI_INT, roottask, MPI_COMM_WORLD);
     MPI_Bcast(&dataset[i].nlset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
 
-    dataset[i].con.t = malloc(dataset[i].con.n * sizeof(double));
-    dataset[i].con.f = malloc(dataset[i].con.n * sizeof(double));
-    dataset[i].con.fe = malloc(dataset[i].con.n * sizeof(double));
+    dataset[i].con.t  = (double *)malloc(dataset[i].con.n * sizeof(double));
+    dataset[i].con.f  = (double *)malloc(dataset[i].con.n * sizeof(double));
+    dataset[i].con.fe = (double *)malloc(dataset[i].con.n * sizeof(double));
 
-    dataset[i].line = malloc(dataset[i].nlset * sizeof(LC));
+    dataset[i].line   = (LC *)malloc(dataset[i].nlset * sizeof(LC));
   }
 
   /* read number of points in each line light curves. */
@@ -555,9 +555,9 @@ int read_data()
     {
       MPI_Bcast(&(dataset[i].line[j].n), 1, MPI_INT, roottask, MPI_COMM_WORLD);
 
-      dataset[i].line[j].t = malloc(dataset[i].line[j].n * sizeof(double));
-      dataset[i].line[j].f = malloc(dataset[i].line[j].n * sizeof(double));
-      dataset[i].line[j].fe = malloc(dataset[i].line[j].n * sizeof(double));
+      dataset[i].line[j].t  = (double *)malloc(dataset[i].line[j].n * sizeof(double));
+      dataset[i].line[j].f  = (double *)malloc(dataset[i].line[j].n * sizeof(double));
+      dataset[i].line[j].fe = (double *)malloc(dataset[i].line[j].n * sizeof(double));
     }
   }
 
@@ -608,6 +608,13 @@ int read_data()
       MPI_Bcast(dataset[i].line[j].f, dataset[i].line[j].n, MPI_DOUBLE, roottask, MPI_COMM_WORLD);
       MPI_Bcast(dataset[i].line[j].fe, dataset[i].line[j].n, MPI_DOUBLE, roottask, MPI_COMM_WORLD);
     }
+  }
+
+  /* save max and min flux of each dataset */
+  flux_minmax = (double **)malloc(nset * sizeof(double *));
+  for(i=0; i<nset; i++)
+  {
+    flux_minmax[i] = (double *)malloc((1+dataset[i].nlset)*2 * sizeof(double));
   }
 
   scale_con_line();
@@ -775,7 +782,7 @@ void cal_mean_error()
 void scale_con_line()
 {
   int i, j, k;
-  double mean, Rmax, fmax, fmin, scale;  /* mean flux, difference between max and min fluxes*/
+  double mean, Rmax, fdmax, fdmin, scale;  /* mean flux, difference between max and min fluxes*/
 
   for(i=0; i<nset; i++)
   {
@@ -783,16 +790,16 @@ void scale_con_line()
     {
       /* continuum */
       mean = 0.0;
-      fmax = fmin = dataset[i].con.f[0]; 
+      fdmax = fdmin = dataset[i].con.f[0]; 
       for(j=0; j<dataset[i].con.n; j++)
       {
         mean += dataset[i].con.f[j];
 
-        if(fmax<dataset[i].con.f[j]) fmax = dataset[i].con.f[j];
-        if(fmin>dataset[i].con.f[j]) fmin = dataset[i].con.f[j];
+        if(fdmax<dataset[i].con.f[j]) fdmax = dataset[i].con.f[j];
+        if(fdmin>dataset[i].con.f[j]) fdmin = dataset[i].con.f[j];
       }
       mean /= dataset[i].con.n;
-      Rmax = (fmax-fmin)/2.0;
+      Rmax = (fdmax-fdmin)/2.0;
 
       /* check if the mean is positive*/
       if(Rmax == 0.0)
@@ -829,6 +836,10 @@ void scale_con_line()
         dataset[i].con.f[j] /= scale;
         dataset[i].con.fe[j] /= scale;
       }
+
+      /* save flux min and max */
+      flux_minmax[i][0*2 + 0] = (fdmin+fdmax)/2/scale;
+      flux_minmax[i][0*2 + 1] = (fdmax-fdmin)/2/scale;
     }
     else /* for vmap, no continuum data points */
     {
@@ -839,17 +850,17 @@ void scale_con_line()
     for(j=0; j<dataset[i].nlset; j++)
     {
       mean = 0.0;
-      fmax = fmin = dataset[i].line[j].f[0];
+      fdmax = fdmin = dataset[i].line[j].f[0];
       for(k=0; k<dataset[i].line[j].n; k++)
       {
         mean += dataset[i].line[j].f[k];
 
-        if(fmax<dataset[i].line[j].f[k]) fmax = dataset[i].line[j].f[k];
-        if(fmin>dataset[i].line[j].f[k]) fmin = dataset[i].line[j].f[k];
+        if(fdmax<dataset[i].line[j].f[k]) fdmax = dataset[i].line[j].f[k];
+        if(fdmin>dataset[i].line[j].f[k]) fdmin = dataset[i].line[j].f[k];
       }
       mean /= dataset[i].line[j].n;
-      Rmax = (fmax-fmin)/2.0;
-      
+      Rmax = (fdmax-fdmin)/2.0;
+
       /* check if the mean is positive*/
       if(Rmax == 0.0)
       {
@@ -886,6 +897,10 @@ void scale_con_line()
         dataset[i].line[j].f[k] /= scale;
         dataset[i].line[j].fe[k] /= scale;
       }
+
+      /* save flux min and max */
+      flux_minmax[i][(1+j)*2 + 0] = (fdmin+fdmax)/2/scale;
+      flux_minmax[i][(1+j)*2 + 1] = (fdmax-fdmin)/2/scale;
     }
   }
 

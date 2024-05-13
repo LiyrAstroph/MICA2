@@ -62,6 +62,9 @@ extern double *resp_ratio_prior;
 /* for seasonal gap */
 extern double *gap_width, *gap_center;
 
+/* for max and min flux of each dataset */
+extern double **flux_minmax;
+
 // error exit
 extern char str_error_exit[200];
 // mathematic functions

@@ -22,7 +22,7 @@ DNestFptrSet *fptrset_line;
 
 double dnest_line(int argc, char **argv)
 {
-  int i, j, k, ic;
+  int i, j, k, ic, idx;
   double logz, dlag;
   char *dnest_data_dir[MICA_MAX_STR_LENGTH];
 
@@ -101,7 +101,7 @@ double dnest_line(int argc, char **argv)
   if(parset.type_lag_prior >= 2 && parset.type_lag_prior <=3)
   {
     dlag = (parset.lag_limit_upper - parset.lag_limit_low)/(num_gaussian-1);
-    if(parset.flag_uniform_tranfuns == 0)
+    if(parset.flag_uniform_tranfuns != 1)
     {
       ic = num_params_var;
       for(j=0; j<nset; j++)
@@ -136,7 +136,7 @@ double dnest_line(int argc, char **argv)
   if(parset.type_tf == 1 && parset.type_lag_prior == 3)
   {
     dlag = (parset.lag_limit_upper - parset.lag_limit_low)/(num_gaussian-1);
-    if(parset.flag_uniform_tranfuns == 0)
+    if(parset.flag_uniform_tranfuns != 1)
     {
       ic = num_params_var;
       for(j=0; j<nset; j++)
@@ -167,6 +167,27 @@ double dnest_line(int argc, char **argv)
     }
   }
   
+  /* center and width are uniform */
+  if(parset.flag_uniform_tranfuns == 2)
+  {
+    /* start from the second set */
+    for(i=1; i<nset; i++)
+    {
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        idx = idx_line_pm[i][j];
+        for(k=0; k<num_gaussian; k++)
+        {
+          par_fix[idx+1 + k*3 + 1] = 1;
+          par_fix_val[idx+1 + k*3 + 1] = 99.9; /* center, will be changed to the same as 1st set in perturb */
+
+          par_fix[idx+1 + k*3 + 2] = 1;
+          par_fix_val[idx+1 + k*3 + 2] = 99.9; /* width, will be changed to the same as 1st set in perturb */
+        }
+      }
+    }
+  }
+
   print_para_names_line();
   
   strcpy(dnest_data_dir, parset.file_dir);
@@ -229,6 +250,29 @@ int get_idx_set(const int which)
     }
   }
   return 0;
+}
+
+/* set the center and width for the case of flag_uniform_transfuns == 2 */
+void set_center_width(const void *model)
+{
+  int i, j, k, idx, idx0;
+  double *pm = (double *)model;
+  
+  /* start from the second set */
+  for(i=1; i<nset; i++)
+  {
+    for(j=0; j<dataset[i].nlset; j++)
+    {
+      idx0 = idx_line_pm[0][j];
+      idx  = idx_line_pm[i][j];
+      for(k=0; k<num_gaussian; k++)
+      {
+        pm[idx+1 + k*3 + 1] = pm[idx0+1 + k*3 + 1]; 
+        pm[idx+1 + k*3 + 2] = pm[idx0+1 + k*3 + 2]; 
+      }
+    }
+  }
+  return;
 }
 
 void set_par_range_line()
@@ -457,6 +501,12 @@ void from_prior_line(void *model)
     if(par_fix[i] == 1)
       pm[i] = par_fix_val[i];
   }
+
+  if(parset.flag_uniform_tranfuns == 2)
+  {
+    set_center_width(model);
+  }
+
   return;
 }
 
@@ -564,6 +614,11 @@ double perturb_line_prior0(void *model)
       logH += check_gap(model, which);
     }
   }
+
+  if(parset.flag_uniform_tranfuns == 2)
+  {
+    set_center_width(model);
+  }
   
   return logH;
 }
@@ -618,6 +673,11 @@ double perturb_line_prior1(void *model)
     {
       logH += check_gap(model, which);
     }
+  }
+
+  if(parset.flag_uniform_tranfuns == 2)
+  {
+    set_center_width(model);
   }
   
   return logH;

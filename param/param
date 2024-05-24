@@ -26,6 +26,9 @@ FlagUniformVarParams      0                # whether each dataset has the same v
 
 FlagUniformTranFuns       0                # whether each dataset has the same line parameters.
                                            # note that different lines have different parameters.
+                                           # 0: no
+                                           # 1: all parameters of transfer function keep the same 
+                                           # 2: except amplitude, other parameters keep the same
                                            # default: 0
 
 FlagLongtermTrend         0                # Longterm trend in light curves, use a polynomial to fit 
@@ -60,7 +63,7 @@ FlagConSysErr             0                # 0, not include systematic error of 
 FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
                                            # default: 0, 0
 
-#StrWidthPrior           [1:10:5:20]        # width priors if the default priors not good enough
+#StrWidthPrior           [1:10:5:20]       # width priors if the default priors not good enough
                                            # format: [width1_1:width1_2:width2_1:width2_2...]
                                            # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 
                                            # default: None

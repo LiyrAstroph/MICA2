@@ -439,6 +439,11 @@ int read_parset()
       printf("For gamma and exp tf, no need to use FlagLagPositivity, instead, set LagLimitLow > 0.\n");
       exit(0);
     }
+    if(parset.flag_uniform_tranfuns != 0 && parset.model != 0)
+    {
+      printf("For uniform transfuns, typemodel should be 0 (general model).\n");
+      exit(0);
+    }
   }
 
   MPI_Bcast(&parset, sizeof(parset), MPI_BYTE, roottask, MPI_COMM_WORLD);
@@ -816,7 +821,7 @@ void scale_con_line()
         if(thistask == 0)
         {
           printf("The mean of continuum of %d-th set is negative or too small (=%f)!\n", i, mean);
-          printf("Using Rmax=fmax-fmin (=%f) to normalize the continuum light curve!\n", Rmax);
+          printf("Calculate Rmax=fmax-fmin (=%f)!\n", Rmax);
           //printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
           //exit(0);
         }
@@ -826,8 +831,18 @@ void scale_con_line()
         scale = mean;
         if(thistask == 0)
         {
-          printf("Using the mean (=%f) to normalize the continuum of %d-th set !\n", mean, i);
+          printf("Calculate the mean (=%f) of %d-th set !\n", mean, i);
         }
+      }
+
+      if(parset.flag_uniform_tranfuns == 1 || parset.flag_uniform_var_params == 1)
+      {
+        scale = 1.0;  /* no scale */
+      }
+
+      if(thistask == 0)
+      {
+        printf("Use %f to normalize the continuum light curve of %d-th set!\n", scale, i);
       }
 
       dataset[i].con.scale=scale;
@@ -876,7 +891,7 @@ void scale_con_line()
         if(thistask == 0)
         {
           printf("The mean of %d-th line of %d-th set is negative or too small (=%f)!\n", j, i, mean);
-          printf("Use Rmax=fmax-fmin (=%f) to normalize the line light curve!\n", Rmax);
+          printf("Calculate Rmax=fmax-fmin (=%f)!\n", Rmax);
           //printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
           //exit(0);
         }
@@ -886,8 +901,18 @@ void scale_con_line()
         scale = mean;
         if(thistask == 0)
         {
-          printf("Using the mean (=%f) to normalize the %d-th line of %d-th set !\n", mean, j, i);
+          printf("Calculate the mean (=%f) of the %d-th line of %d-th set !\n", mean, j, i);
         }
+      }
+
+      if(parset.flag_uniform_tranfuns == 1 || parset.flag_uniform_var_params == 1)
+      {
+        scale = 1.0;  /* no scale */
+      }
+
+      if(thistask == 0)
+      {
+        printf("Use %f to normalize the %d-th line of %d-th set !\n", scale, j, i);
       }
 
       dataset[i].line[j].scale=scale;

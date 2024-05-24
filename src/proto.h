@@ -64,6 +64,7 @@ double dnest_line(int argc, char **argv);
 void set_par_range_line();
 void print_para_names_line();
 void set_idx_line_pm();
+void set_center_width(const void *model);
 void mc_line();
 int mc_line_init();
 int mc_line_end();

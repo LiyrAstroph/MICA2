@@ -286,18 +286,18 @@ cdef class basis:
     timelag = []
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
       sample = np.atleast_2d(np.loadtxt(self.parset.file_dir.decode("UTF-8")+"/data/posterior_sample1d.txt_%d"%i))
-      if self.parset.flag_uniform_tranfuns == 0:
+      if self.parset.flag_uniform_tranfuns == 1:  # uniform tf
+        idx_line = self.num_param_var
+        idx_line += (1+(i*3))*line
+        timelag.append(sample[:, idx_line+2:idx_line+2+i*3:3])
+      else:
         idx_line = self.num_param_var
         for j in range(0, set-1):
           idx_line += (1+(i*3))*self.nlset[j]
 
         idx_line += (1+(i*3))*line
         timelag.append(sample[:, idx_line+2:idx_line+2+i*3:3])
-      else:
-        idx_line = self.num_param_var
-        idx_line += (1+(i*3))*line
-        timelag.append(sample[:, idx_line+2:idx_line+2+i*3:3])
-
+        
     return timelag
   
   def _get_data_dimension(self):
@@ -490,10 +490,13 @@ cdef class gmodel(basis):
       raise ValueError("flag_uniform_var_params is unrecognized!")
     
     # uniform transfer function parameters of mulitple datasets
-    if flag_uniform_tranfuns == False:
-      self.parset.flag_uniform_tranfuns = 0
-    elif flag_uniform_tranfuns == True:
-      self.parset.flag_uniform_tranfuns = 1
+    if isinstance(flag_uniform_tranfuns, bool):
+      if flag_uniform_tranfuns == False:
+        self.parset.flag_uniform_tranfuns = 0
+      elif flag_uniform_tranfuns == True:
+        self.parset.flag_uniform_tranfuns = 1
+    elif isinstance(flag_uniform_tranfuns, int):
+      self.parset.flag_uniform_tranfuns = flag_uniform_tranfuns
     else:
       raise ValueError("flag_uniform_tranfuns is unrecognized!")
 

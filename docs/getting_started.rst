@@ -70,7 +70,7 @@ Make installation using the command
 This will generate a Python package ``pymica`` and install it to the user's Python package sites. 
 In the folder ``tests/python``, the Python script ``example.py`` shows how to use pymica.
 
-Running
+Running with Binary Version
 =============================
 
 First create two subdirectories ``data/`` and ``param`` in the current working directory. All the output files will be placed 
@@ -227,6 +227,96 @@ A typical parameter file looks like::
   #===================================================================
 
 see :ref:`cdnest_label` for the detail of CDNest options.
+
+Running with Python Version
+==============================
+In Python environment, import mica and other necessary packages as, 
+
+.. code:: python
+
+  from mpi4py import MPI
+  import numpy as np
+  import matplotlib.pyplot as plt
+  import pymica
+
+Then initialize MPI environment as 
+
+.. code:: python
+
+  # initiate MPI
+  comm = MPI.COMM_WORLD
+  rank = comm.Get_rank()
+
+If one did not create the formated data file (see below), one could directly load the light curves 
+and feed them to MICA as  
+
+.. code:: python
+
+  if rank == 0:
+    con = np.loadtxt("cont.txt")
+    line= np.loadtxt("line.txt")
+
+    # make a data dict 
+    data_input = {"set1":[con, line]}
+
+    # if multiple datasets, e.g., 
+    #data_input = {"set1":[con1, line1], "set2":[con2, line2]}
+
+    # if a dataset has multiple lines, e.g.,
+    #data_input = {"set1":[con, line1, line2]}
+  else:
+    data_input = None 
+
+  data_input = comm.bcast(data_input, root=0)
+
+  #create a model
+  #there are two ways
+  #1) one way from the param file
+
+  #model = pymica.gmodel(param_file="param/param_input")
+
+  #2) the ohter way is through the setup function
+  
+  # type: gmodel(), pmap(), vmap()
+  model = pymica.gmodel()
+
+  # type： gaussian, tophat, gamma, exp
+  model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 1], max_num_saves=2000)
+
+If one already has created the formatted data file (see blow), one can directly input the file name as 
+
+.. code:: python
+
+  model.setup(data_file="file_name", type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 1], max_num_saves=2000)
+
+
+After the above initialization, run the code as 
+
+.. code:: python
+  
+  #run mica
+  model.run()
+
+  #posterior run, only re-generate posterior samples, do not run MCMC
+  # model.post_run()
+
+  #do decomposition for the cases of multiple components 
+  # model.decompose()
+
+  # plot results
+  if rank == 0:
+    
+    # plot results, doshow controls whether showing the results on screen
+    # 
+    model.plot_results(doshow=True, tf_lag_range=None, hist_lag_range=None, show_pmax=True) 
+    model.post_process()  # generate plots for the properties of MCMC sampling 
+
+    # get the full sample 
+    # sample is a list, each element contains an array of posterior samples
+    # sample[0] is for the case of number_component[0]
+    # sample[1] is for the case of number_component[1] 
+    # ...
+    sample = model.get_posterior_sample()
 
 Data format
 ==============================

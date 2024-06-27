@@ -523,6 +523,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           cent_min = np.min(cent/norm)
           cent_max = np.max(cent/norm)
           bins = np.max((20, int((tau2_cent-tau1_cent)/(cent_max-cent_min + 1.0e-100) * 5)))
+          bins = np.min((bins, 100))
           ax.hist(cent/norm, density=True, range=(tau1_cent, tau2_cent), bins=bins)
           ax.set_xlim((tau1_cent-0.1*(tau2_cent-tau1_cent), tau2_cent+0.1*(tau2_cent-tau1_cent)))
           ax.minorticks_on()
@@ -625,9 +626,15 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
 
       ylim = ax.get_ylim()
       if resp_input == None:
-        ax.set_ylim(ylim[0], np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
+        ymax = np.max(tran_best)
+        ymin = np.min(tran_best)
+        dy = ymax - ymin 
+        ax.set_ylim(np.max((ylim[0], ymin-0.1*dy)), np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
       else:
-        ax.set_ylim(ylim[0], np.min((ylim[1], np.max((np.max(tran_best)*1.5, np.max(tran_input[:, 1])*1.5)))))
+        ymax = np.max((tran_best, tran_input[:, 1]))
+        ymin = np.min((tran_best, tran_input[:, 1]))
+        dy = ymax - ymin 
+        ax.set_ylim(np.max((ylim[0], ymin-0.1*dy)), np.min((ylim[1], np.max((np.max(tran_best)*1.5, np.max(tran_input[:, 1])*1.5)))))
       
       if j != len(ns)-1:
         ax.xaxis.set_tick_params(labelbottom=False)

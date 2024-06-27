@@ -819,6 +819,10 @@ void output_reconstruction_vmap_parallel()
   }
   
   post_model = (double *)posterior_sample_task;
+
+  /* for the virtual driving light curve, yq = 0 */
+  yq[0] = yq[1] =  0.0;
+
   for(m=0; m<num_ps_task; m++)
   {
     printf("# sample %d on task %d\n", m, thistask);
@@ -1383,7 +1387,12 @@ void reconstruct_line_from_varmodel_vmap(const void *model, int nds, int *nall, 
   multiply_mat_MN_transposeA(PEmat2, fall_data, yq, nqall, 1, nall_data); // yq = L^T*C^-1*y;  Nqx1
   memcpy(PEmat1, Cq, nqall*nqall*sizeof(double));
   multiply_mat_MN_inverseA(PEmat1, yq, nqall, 1, ipiv); // yq = (L^T*C^-1*L)^-1 * L^T*C^-1*y; Nqx1
-  memcpy(yqall, yq, nqall*sizeof(double));
+
+  /* note that no yq for the virtual driving light curve, so start from 2 */
+  for(i=0; i<nqall; i++)
+  {
+    yqall[i+2] = yq[i];
+  }
 
   multiply_mat_MN(Larr, yq, yave, nall_data, 1, nqall); // yave = L * q; Nx1
   for(i=0; i<nall_data; i++)

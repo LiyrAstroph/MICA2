@@ -448,11 +448,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
 
         cen_min = np.min(cen)
         cen_max = np.max(cen)
-        bins = np.max((5, int((cen_max-cen_min)/(tau2-tau1 + 1.0e-100) * 20)))
+        bins = np.max((5, int((tau2-tau1)/(cen_max-cen_min + 1.0e-100) * 20)))
+        bins = np.min((bins, 100))
         if k == 0:
-          ax.hist(cen, density=True, bins=bins, alpha=1)
+          ax.hist(cen, density=True, range=(tau1, tau2), bins=bins, alpha=1)
         else:
-          ax.hist(cen, density=True, bins=bins, alpha=0.6)
+          ax.hist(cen, density=True, range=(tau1, tau2), bins=bins, alpha=0.6)
         
         if show_pmax == True:
           ax.axvline(x=cen_pmax, ls='--', color='r')
@@ -522,7 +523,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           
           cent_min = np.min(cent/norm)
           cent_max = np.max(cent/norm)
-          bins = np.max((20, int((tau2_cent-tau1_cent)/(cent_max-cent_min + 1.0e-100) * 5)))
+          bins = np.max((5, int((tau2_cent-tau1_cent)/(cent_max-cent_min + 1.0e-100) * 20)))
           bins = np.min((bins, 100))
           ax.hist(cent/norm, density=True, range=(tau1_cent, tau2_cent), bins=bins)
           ax.set_xlim((tau1_cent-0.1*(tau2_cent-tau1_cent), tau2_cent+0.1*(tau2_cent-tau1_cent)))

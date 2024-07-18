@@ -192,7 +192,7 @@ void print_para_names_pmap()
     return;
 
   int i, j, k;
-  char fname[MICA_MAX_STR_LENGTH], fstr[25];
+  char fname[MICA_MAX_STR_LENGTH], fstr[MICA_MAX_STR_LENGTH];
 
   FILE *fp;
 

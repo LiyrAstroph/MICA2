@@ -62,6 +62,12 @@ void mc_vmap()
   for(j=0; j<parset.num_gaussian_diff; j++)
   {
     num_gaussian = parset.num_gaussian_low + j;
+
+    type_lag_prior_pr = 1; 
+    if(parset.type_lag_prior == 0 && num_gaussian > 1)
+    {
+      type_lag_prior_pr = 0;
+    }
     
     if(thistask == roottask)
     {

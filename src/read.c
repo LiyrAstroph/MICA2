@@ -508,6 +508,16 @@ int read_data()
                "This will improve the computational speed [~O(N^3)]!\n");
         // exit(-1);
       }
+      
+      /* for vmap, zero continuum point */
+      if(parset.model == vmap)
+      {
+        if(dataset[i].con.n > 0)
+        {
+          printf("vmap mode, the number of continuum points in %d-th dataset should be zero!\n", i);
+          exit(-1);
+        }
+      }
     }
   }
   MPI_Barrier(MPI_COMM_WORLD);

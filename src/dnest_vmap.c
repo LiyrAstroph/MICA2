@@ -29,7 +29,10 @@ double dnest_vmap(int argc, char **argv)
   fptrset_vmap = dnest_malloc_fptrset();
   /* setup functions used for dnest*/
   fptrset_vmap->from_prior = from_prior_vmap;
-  fptrset_vmap->perturb = perturb_vmap;
+  if(type_lag_prior_pr == 0) 
+    fptrset_vmap->perturb = perturb_vmap_prior0;
+  else /* prior 1 or 2 or 3 or 4 */
+    fptrset_vmap->perturb = perturb_vmap_prior1;
   fptrset_vmap->print_particle = print_particle_vmap;
   fptrset_vmap->restart_action = restart_action_vmap;
 
@@ -159,7 +162,15 @@ void set_par_range_vmap()
     for(k=0; k<num_gaussian; k++)
     {
       /* amplitude of gaussian */
-      par_range_model[i][0] = line_range_model[1][0];
+      /* for vmap, 1st gaussian of 1st line, amplitude shoud not be too small */
+      if(k == 0 && j== 0)
+      {
+        par_range_model[i][0] = log(0.1);
+      }
+      else
+      {
+        par_range_model[i][0] = line_range_model[1][0];
+      }
       par_range_model[i++][1] = line_range_model[1][1];
 
       /* center of gaussian */
@@ -210,7 +221,7 @@ void print_para_names_vmap()
     return;
 
   int i, j, k;
-  char fname[MICA_MAX_STR_LENGTH], fstr[25];
+  char fname[MICA_MAX_STR_LENGTH], fstr[MICA_MAX_STR_LENGTH];
 
   FILE *fp;
 
@@ -282,6 +293,29 @@ void from_prior_vmap(void *model)
   {
     pm[i] = par_range_model[i][0] + dnest_rand()*(par_range_model[i][1] - par_range_model[i][0]);
   }
+  
+  /* sort Gaussian centers */
+  if(type_lag_prior_pr == 0)
+  {
+    double *centers;
+    centers = malloc(num_gaussian * sizeof(double));
+
+    for(i=0; i<num_params_line; i+= 1+3*num_gaussian)
+    {
+      ic = num_params_var + i + 1;
+      for(j=0; j<num_gaussian; j++)
+      {
+        centers[j] = pm[ic+j*3 + 1];
+      }
+      qsort(centers, num_gaussian, sizeof(double), mica_cmp);
+
+      for(j=0; j<num_gaussian; j++)
+      {
+        pm[ic + j*3 + 1] = centers[j];
+      }
+    }
+    free(centers);
+  }
 
   /* constrain Gaussian widths */
   if(parset.flag_lag_posivity != 0)
@@ -347,7 +381,79 @@ double log_likelihoods_cal_restart_vmap(const void *model)
   return logL;
 }
 
-double perturb_vmap(void *model)
+double perturb_vmap_prior0(void *model)
+{
+  double *pm = (double *)model;
+  double logH = 0.0, limit1, limit2, width;
+  int which, which_level, igau, size_levels;
+  
+  /* sample variability parameters more frequently */
+  do
+  {
+    which = dnest_rand_int(num_params);
+    
+  }while(par_fix[which] == 1);
+
+  /* level-dependent width */
+  which_level_update = dnest_get_which_level_update();
+  size_levels = dnest_get_size_levels();
+  
+  which_level = which_level_update-5 > (size_levels - 15)?(size_levels-15):which_level_update-5;
+  if( which_level > 0)
+  {
+    limit1 = limits[(which_level-1) * num_params *2 + which *2];
+    limit2 = limits[(which_level-1) * num_params *2 + which *2 + 1];
+    width = limit2 - limit1;
+  }
+  else
+  {
+    width = ( par_range_model[which][1] - par_range_model[which][0] );
+  }
+  
+  if(which < num_params_var)
+  {
+    logH -= (-0.5*pow((pm[which]-var_param[which])/var_param_std[which], 2.0) );
+    pm[which] += dnest_randh() * width;
+    dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
+    logH += (-0.5*pow((pm[which]-var_param[which])/var_param_std[which], 2.0) );
+  }
+  else
+  {
+    pm[which] += dnest_randh() * width;
+    if(check_gauss_center(which, &igau) == 1) // Gaussian center is perturbed
+    {
+      if(igau == 0)
+      {
+        dnest_wrap(&pm[which], par_range_model[which][0], pm[which+3]);
+      }
+      else if(igau < num_gaussian - 1)
+      {
+        dnest_wrap(&pm[which], pm[which-3], pm[which+3]);        
+      }
+      else
+      {
+        dnest_wrap(&pm[which], pm[which-3], par_range_model[which][1]);
+      }
+    }
+    else
+    {
+      dnest_wrap(&pm[which], par_range_model[which][0], par_range_model[which][1]);
+    } 
+
+    if(parset.flag_lag_posivity)
+    {
+      logH += check_positivity(model, which);
+    }
+    if(parset.flag_gap == 1)
+    {
+      logH += check_gap(model, which);
+    }
+  }
+
+  return logH;
+}
+
+double perturb_vmap_prior1(void *model)
 {
   double *pm = (double *)model;
   double logH = 0.0, limit1, limit2, width;

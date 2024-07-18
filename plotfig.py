@@ -395,16 +395,16 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       for j in range(1, len(ns)): 
         if typetf == 0:  # gaussian  
           for k in range(ngau):
-            tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                              -3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-            tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                              +3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+            tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              -3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
+            tau2_tf = np.max((tau2_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              +3*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
         elif typetf == 1: # tophats
           for k in range(ngau):
-            tau1_tf = np.min((tau1_tf, np.min(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                              -1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
-            tau2_tf = np.max((tau2_tf, np.max(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                              +1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))))
+            tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              -1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
+            tau2_tf = np.max((tau2_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                              +1.5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
         elif typetf == 2:  # gamma
           for k in range(ngau):
             tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
@@ -461,13 +461,13 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.set_xlim((tau1-(tau2-tau1)*0.1, tau2+(tau2-tau1)*0.1))
       
       # vmap model, no need to plot for the first lc, which has a zero lag wrt the driving lc. 
-      if typemodel == 2 and j == 1:
+      if typemodel == 2 and j == 1 and ngau == 1:
         ax.set_visible(False)
       
       if flagnegresp == False:
         ax.yaxis.set_tick_params(labelleft=False)
 
-      if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2):
+      if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2 and ngau == 1 ) or (typemodel == 2 and j == 1 and ngau != 1):
         if typetf in [0, 1]:
           ax.set_title("Centers")
         else:
@@ -533,7 +533,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           if show_pmax == True:
             ax.axvline(x = cent_pmax/norm_pmax, ls='--', color='r')
 
-          if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2):
+          if (typemodel != 2 and j == 1) or (typemodel == 2 and j == 2 and ngau == 1) or (typemodel==2 and j == 1 and ngau != 1):
             ax.set_title("Centroid")
             
           if j != len(ns)-1:
@@ -561,7 +561,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
               ax.set_title("Response Ratio")
         
         # vmap model, no need to plot for the first lc, which has a zero lag wrt the driving lc. 
-        if typemodel == 2 and j == 1:
+        if typemodel == 2 and j == 1 and ngau == 1:
           ax.set_visible(False)
       
       #===========================================================================================================

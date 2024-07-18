@@ -821,7 +821,10 @@ void output_reconstruction_vmap_parallel()
   post_model = (double *)posterior_sample_task;
 
   /* for the virtual driving light curve, yq = 0 */
-  yq[0] = yq[1] =  0.0;
+  for(i=0; i<nq; i++)
+  {
+    yq[i] =  0.0;
+  }
 
   for(m=0; m<num_ps_task; m++)
   {
@@ -1087,12 +1090,12 @@ void output_reconstruction_vmap()
       fall_best[i] = malloc(ntall[i] * sizeof(double));
       fall_std[i] = malloc(ntall[i] * sizeof(double));
 
-      yq_best[i] = malloc(nq*(nlset_max)*sizeof(double));
-      yq_std[i] = malloc(nq*(nlset_max)*sizeof(double));
+      yq_best[i] = malloc(nq*(1+nlset_max)*sizeof(double));
+      yq_std[i] = malloc(nq*(1+nlset_max)*sizeof(double));
     }
     
     post_model = malloc(size_of_modeltype);
-    yq = malloc(nq*(nlset_max)*sizeof(double));
+    yq = malloc(nq*(1+nlset_max)*sizeof(double));
 
     for(i=0; i<nset; i++)
     {
@@ -1391,7 +1394,7 @@ void reconstruct_line_from_varmodel_vmap(const void *model, int nds, int *nall, 
   /* note that no yq for the virtual driving light curve, so start from 2 */
   for(i=0; i<nqall; i++)
   {
-    yqall[i+2] = yq[i];
+    yqall[i+nq] = yq[i];
   }
 
   multiply_mat_MN(Larr, yq, yave, nall_data, 1, nqall); // yave = L * q; Nx1

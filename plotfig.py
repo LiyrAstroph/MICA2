@@ -386,6 +386,18 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
 
       tau1_cent = hist_lag_range[0]
       tau2_cent = hist_lag_range[1]
+    
+    # ratio range 
+    if typemodel == 1:
+      ratio1 = 1.0e10
+      ratio2 = 1.0e-10
+      for j in range(1, len(ns)): 
+        for k in range(1, ngau):
+          ratio1 = np.min((ratio1, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3], q=0.05)))
+          ratio2 = np.max((ratio2, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3], q=0.05)))
+      
+      ratio1 /= np.log(10.0)
+      ratio2 /= np.log(10.0)
 
 
     # set time lag range for transfer function
@@ -545,9 +557,9 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
           for k in range(1, ngau):
             ratio = sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3]/np.log(10.0)
             if k == 1:
-              ax.hist(ratio, density=True, bins=20, alpha=1)
+              ax.hist(ratio, density=True, bins=30, alpha=1, range=(ratio1, ratio2))
             else:
-              ax.hist(ratio, density=True, bins=20, alpha=0.6)
+              ax.hist(ratio, density=True, bins=30, alpha=0.6, range=(ratio1, ratio2))
 
             ax.yaxis.set_tick_params(labelleft=False)
             ax.minorticks_on()

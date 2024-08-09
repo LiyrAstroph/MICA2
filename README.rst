@@ -4,6 +4,9 @@ MICA2
   :target: https://mica2.readthedocs.io/en/latest/?badge=latest
   :alt: Documentation Status
 
+.. image:: https://zenodo.org/badge/165156155.svg
+  :target: https://zenodo.org/doi/10.5281/zenodo.7029428
+  
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Read `the documentation <http://mica2.readthedocs.io/>`_.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

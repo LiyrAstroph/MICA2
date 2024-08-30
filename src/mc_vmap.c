@@ -723,8 +723,8 @@ void output_reconstruction_vmap_parallel()
     nall[i][0] = 0;
     for(j=0; j<dataset[i].nlset; j++)
     {
-      /* number < 500 */
-      nall[i][0] = fmax(nall[i][0], fmin(dataset[i].line[j].n*nscale, 500));
+      /* number < 200 */
+      nall[i][0] = fmax(nall[i][0], fmin(dataset[i].line[j].n*nscale, parset.nd_rec));
     }
 
     for(j=0; j<dataset[i].nlset; j++)
@@ -1074,8 +1074,8 @@ void output_reconstruction_vmap()
       nall[i][0] = 0;
       for(j=0; j<dataset[i].nlset; j++)
       {
-        /* number < 500 */
-        nall[i][0] = fmax(nall[i][0], fmin(dataset[i].line[j].n*nscale, 500));
+        /* number < 200 */
+        nall[i][0] = fmax(nall[i][0], fmin(dataset[i].line[j].n*nscale, parset.nd_rec));
       }
 
       for(j=0; j<dataset[i].nlset; j++)

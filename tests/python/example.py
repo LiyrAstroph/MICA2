@@ -57,6 +57,7 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #            flag_trend=0, flag_lag_posivity=False,
 #            lag_limit=[0, 100], number_component=[1, 1],
 #            width_limit=[0.1, 100],
+#            nd_rec=200,
 #            flag_con_sys_err=False, flag_line_sys_err=False,
 #            type_lag_prior=0, lag_prior=[[0, 50]],
 #            width_prior[[1, 40]],

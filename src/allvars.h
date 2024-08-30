@@ -100,6 +100,9 @@ typedef struct
   int width_limit_low_isset, width_limit_upper_isset;
   double width_limit_low, width_limit_upper;
   
+  /* number of points of reconstruction */
+  int nd_rec;
+  
   /* seasonal gap */
   int flag_gap;
   char str_gap_prior[MICA_MAX_STR_LENGTH];

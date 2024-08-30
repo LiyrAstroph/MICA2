@@ -283,7 +283,7 @@ void output_reconstruction_parallel()
   {
     nall[i] = (int *)malloc((1+nlset_max) * sizeof(int));
 
-    nall[i][0] = (int) fmin(dataset[i].con.n*nscale, 500);
+    nall[i][0] = (int) fmin(dataset[i].con.n*nscale, parset.nd_rec);
     for(j=0; j<dataset[i].nlset; j++)
       nall[i][1+j] = nall[i][0];
     
@@ -634,7 +634,7 @@ void output_reconstruction()
     {
       nall[i] = malloc((1+nlset_max) * sizeof(int));
 
-      nall[i][0] = (int) fmin(dataset[i].con.n*nscale, 500);
+      nall[i][0] = (int) fmin(dataset[i].con.n*nscale, parset.nd_rec);
       for(j=0; j<dataset[i].nlset; j++)
         nall[i][1+j] = nall[i][0];
       
@@ -1000,7 +1000,7 @@ void output_reconstruction2()
     for(i=0; i<nset; i++)
     {
       /* time nodes of continuum */
-      nall[i][0] = (int)fmin(dataset[i].con.n * nscale, 500);
+      nall[i][0] = (int)fmin(dataset[i].con.n * nscale, parset.nd_rec);
       tspan = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
       for(j=0; j<nall[i][0]; j++)
         tall[i][j] = (tspan+0.1*tspan)/(nall[i][0]-1.0) * j 
@@ -1010,7 +1010,7 @@ void output_reconstruction2()
       np = nall[i][0];
       for(j=0; j<dataset[i].nlset; j++)
       {
-        nall[i][1+j] = (int)fmin(dataset[i].line[j].n * nscale, 500);
+        nall[i][1+j] = (int)fmin(dataset[i].line[j].n * nscale, parset.nd_rec);
         tspan = dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0];
         for(k=0; k<nall[i][1+j]; k++)
         {

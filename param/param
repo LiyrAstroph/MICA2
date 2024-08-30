@@ -63,6 +63,9 @@ FlagConSysErr             0                # 0, not include systematic error of 
 FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
                                            # default: 0, 0
 
+NumPointRec            200              # number of points in reconstruction for each light curve
+                                           # default: 200
+
 #StrWidthPrior           [1:10:5:20]       # width priors if the default priors not good enough
                                            # format: [width1_1:width1_2:width2_1:width2_2...]
                                            # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 

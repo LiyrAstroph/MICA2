@@ -131,7 +131,7 @@ void output_decompose_line_parallel()
   {
     nall[i] = malloc((1+nlset_max) * sizeof(int));
 
-    nall[i][0] = (int) fmin(dataset[i].con.n*nscale, 500);
+    nall[i][0] = (int) fmin(dataset[i].con.n*nscale, parset.nd_rec);
     for(j=0; j<dataset[i].nlset; j++)
       nall[i][1+j] = nall[i][0];
     
@@ -451,7 +451,7 @@ void output_decompose_line()
     {
       nall[i] = malloc((1+nlset_max) * sizeof(int));
 
-      nall[i][0] = (int) fmin(dataset[i].con.n*nscale, 500);
+      nall[i][0] = (int) fmin(dataset[i].con.n*nscale, parset.nd_rec);
       for(j=0; j<dataset[i].nlset; j++)
         nall[i][1+j] = nall[i][0];
       

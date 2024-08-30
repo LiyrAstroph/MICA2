@@ -34,7 +34,9 @@ cdef extern from "allvars.h":
     int flag_gap
   
     int num_gaussian_low, num_gaussian_upper, num_gaussian_diff
-  
+    
+    int nd_rec
+    
     double lag_limit_low, lag_limit_upper
     int width_limit_low_isset, width_limit_upper_isset
     double width_limit_low, width_limit_upper

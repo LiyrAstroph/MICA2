@@ -224,6 +224,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = DOUBLE;
 
+    strcpy(pardict[nt].tag, "NumPointRec");
+    pardict[nt].addr = &parset.nd_rec;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = INT;
+
     num_pardict = nt;
     
     char fname[200];
@@ -252,6 +257,7 @@ int read_parset()
     parset.num_gaussian_low = 1;
     parset.num_gaussian_upper = 1;
     parset.flag_gap = 0;
+    parset.nd_rec = 200;
     strcpy(parset.str_lag_prior,"");
     strcpy(parset.str_ratio_prior,"");
     strcpy(parset.str_width_prior,"");
@@ -390,6 +396,12 @@ int read_parset()
     if(parset.num_gaussian_upper == 1)
     {
       parset.type_lag_prior = 0;
+    }
+
+    if(parset.nd_rec < 0)
+    {
+      printf("NumPointRec should be larger than 0.\n");
+      exit(0);
     }
 
     if(parset.type_lag_prior < 0 || parset.type_lag_prior > 4)
@@ -684,8 +696,7 @@ int read_data()
         nline_max = dataset[i].line[j].n;
     }
 
-    if(nrec_max < alldata[i].n * (1+dataset[i].nlset))
-      nrec_max = alldata[i].n * (1+dataset[i].nlset);
+    nrec_max = fmax(nrec_max, fmax(ncon_max, nline_max) * (1 + dataset[i].nlset));
   }
 
   tspan_max = 0.0;

@@ -30,6 +30,7 @@ Documentation
    prm.rst
    vrm.rst
    gap.rst
+   python.rst
    tests.rst
    negresp.rst
    list.rst

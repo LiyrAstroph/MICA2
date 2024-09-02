@@ -162,6 +162,10 @@ A typical parameter file looks like::
   FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
                                              # defaul: 0, 0
   
+  NumPointRec              200               # number of points in reconstruction for each light curve
+                                             # note: a too large number causes very slow reconstruction
+                                             # default: 200
+  
   #StrWidthPrior           [1:10:5:20]       # width priors if the default priors not good enough
                                              # format: [width1_1:width1_2:width2_1:width2_2...]
                                              # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 
@@ -317,6 +321,8 @@ After the above initialization, run the code as
     # sample[1] is for the case of number_component[1] 
     # ...
     sample = model.get_posterior_sample()
+
+See :ref:`python_label` for a detailed guideline.
 
 Data format
 ==============================

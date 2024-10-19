@@ -144,7 +144,7 @@ def calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line,
   return tran 
 
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, resp_input, 
-                 doshow=True, tf_lag_range=None, hist_lag_range=None, show_pmax=False, show_gap=False):
+                 doshow=True, tf_lag_range=None, hist_lag_range=None, hist_bins=None, show_pmax=False, show_gap=False):
   """
   reconstruct line lcs according to the time sapns of the continuum.
   """
@@ -380,6 +380,15 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
               + np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
             tau2_cent = np.max((tau2_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
               + np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
+      
+      dtau = tau2 - tau1
+      tau1 -= 0.1*dtau
+      tau2 += 0.1*dtau
+
+      dtau = tau2_cent - tau1_cent
+      tau1_cent -= 0.1*dtau
+      tau2_cent += 0.1*dtau
+
     else:
       tau1 = hist_lag_range[0]
       tau2 = hist_lag_range[1]
@@ -457,11 +466,15 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         elif typetf == 3:  # exp, use peaks
           cen =  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           cen_pmax =  sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+        
+        if hist_bins is None:
+          cen_min = np.min(cen)
+          cen_max = np.max(cen)
+          bins = np.max((5, int((tau2-tau1)/(cen_max-cen_min + 1.0e-100) * 20)))
+          bins = np.min((bins, 100))
+        else:
+          bins = hist_bins
 
-        cen_min = np.min(cen)
-        cen_max = np.max(cen)
-        bins = np.max((5, int((tau2-tau1)/(cen_max-cen_min + 1.0e-100) * 20)))
-        bins = np.min((bins, 100))
         if k == 0:
           ax.hist(cen, density=True, range=(tau1, tau2), bins=bins, alpha=1)
         else:
@@ -470,7 +483,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         if show_pmax == True:
           ax.axvline(x=cen_pmax, ls='--', color='r')
 
-      ax.set_xlim((tau1-(tau2-tau1)*0.1, tau2+(tau2-tau1)*0.1))
+      ax.set_xlim((tau1, tau2))
       
       # vmap model, no need to plot for the first lc, which has a zero lag wrt the driving lc. 
       if typemodel == 2 and j == 1 and ngau == 1:
@@ -533,12 +546,16 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
                         +np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
 
           
-          cent_min = np.min(cent/norm)
-          cent_max = np.max(cent/norm)
-          bins = np.max((5, int((tau2_cent-tau1_cent)/(cent_max-cent_min + 1.0e-100) * 20)))
-          bins = np.min((bins, 100))
+          if hist_bins is None:
+            cent_min = np.min(cent/norm)
+            cent_max = np.max(cent/norm)
+            bins = np.max((5, int((tau2_cent-tau1_cent)/(cent_max-cent_min + 1.0e-100) * 20)))
+            bins = np.min((bins, 100))
+          else:
+            bins = hist_bins
+
           ax.hist(cent/norm, density=True, range=(tau1_cent, tau2_cent), bins=bins)
-          ax.set_xlim((tau1_cent-0.1*(tau2_cent-tau1_cent), tau2_cent+0.1*(tau2_cent-tau1_cent)))
+          ax.set_xlim((tau1_cent, tau2_cent))
           ax.minorticks_on()
           ax.yaxis.set_tick_params(labelleft=False)
 
@@ -740,7 +757,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   pdf.close()
   return
 
-def plot_results_all(args, param, doshow=True, tf_lag_range=None, hist_lag_range=None):
+def plot_results_all(args, param, doshow=True, tf_lag_range=None, hist_lag_range=None, hist_bins=None):
   try:
     fdir = param["FileDir"]+"/"
   except:
@@ -815,7 +832,7 @@ def plot_results_all(args, param, doshow=True, tf_lag_range=None, hist_lag_range
 
   for ngau in range(ngau_low, ngau_upp+1):
     plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, typetf, typemodel, args.resp_input, 
-                 doshow=doshow, tf_lag_range=args.tf_lag_range, hist_lag_range=args.hist_lag_range, show_pmax=args.show_pmax, 
+                 doshow=doshow, tf_lag_range=args.tf_lag_range, hist_lag_range=args.hist_lag_range, hist_bins=args.hist_bins, show_pmax=args.show_pmax, 
                  show_gap=show_gap)
 
 def _param_parser(fname):
@@ -839,6 +856,7 @@ if __name__ == "__main__":
   parser.add_argument('--resp_input', type=str, help="str, a file storing input response function")
   parser.add_argument('--tf_lag_range', type=float, nargs='+', help="time lag range for the transfer function, e.g., --tf_lag_range 0 100")
   parser.add_argument('--hist_lag_range', type=float, nargs='+', help="time lag range for the histograms, e.g., --hist_lag_range 0 100")
+  parser.add_argument('--hist_bins', type=int, nargs='+', help="number of bins for the histograms, e.g., --hist_bins 20")
   parser.add_argument('--show_gap', action='store_true', default=False, help="whether show seasonal gaps, e.g., --show_gap")
   parser.add_argument('--show_pmax', action='store_true', default=False, help="whether show the results of the maximum posterior ppint, e.g., --show_pmax")
   args = parser.parse_args()

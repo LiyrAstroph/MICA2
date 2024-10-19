@@ -83,7 +83,7 @@ if rank == 0:
   
   # plot results, doshow controls whether showing the results on screen
   # 
-  model.plot_results(doshow=True, tf_lag_range=None, hist_lag_range=None) 
+  model.plot_results(doshow=True, tf_lag_range=None, hist_lag_range=None, hist_bins=None) 
   model.post_process()  # generate plots for the properties of MCMC sampling 
 
   # get the full sample 

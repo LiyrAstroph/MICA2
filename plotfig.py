@@ -607,7 +607,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       tran2 = np.percentile(tran, 100.0-(100.0-68.3)/2.0, axis=0)
 
       out = np.column_stack((tau, tran_best, tran_best-tran1, tran2-tran_best))
-      np.savetxt(fdir+f"/data/tranfunc_{m}.txt_{ngau}", out, fmt="%f")
+      np.savetxt(fdir+f"/data/tranfunc_{m}_{j}.txt_{ngau}", out, fmt="%f")
       
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')

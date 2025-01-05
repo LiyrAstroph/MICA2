@@ -483,3 +483,72 @@ void set_argv(int flag_pp, int flag_de, int flag_re)
   flag_restart = flag_re;
   return;
 }
+
+/*!
+ *  load prior ranges for parameters from fname 
+ *
+ */
+void load_par_names(char *fname)
+{
+  if(thistask!= roottask)
+    return;
+  
+  int i, begin, end;
+  FILE *fp;
+  char str[MICA_MAX_STR_LENGTH], buf[MICA_MAX_STR_LENGTH];
+  int type, fix;
+  double val_min, val_max, val, mean, std;
+
+  fp = fopen(fname, "r");
+  if(fp == NULL)
+  {
+    fprintf(stderr, "# Error: Cannot open file %s.\n", fname);
+    exit(0);
+  }
+  
+  printf("# Loading parameter prior from %s\n", fname);
+
+  fgets(str, MICA_MAX_STR_LENGTH, fp);
+  while(!feof(fp))
+  { 
+    sscanf(str, "%s", buf);
+
+    if(buf[0] == '#')
+      continue;
+    
+    begin = 0;
+    while (isspace((unsigned char) str[begin]))
+      begin++;
+    end = strlen(str) - 1;
+    while ((end >= begin) && isspace((unsigned char) str[end]))
+      end--;
+    for (i = begin; i <= end; i++)
+        str[i - begin] = str[i];
+    str[i - begin] = '\0';
+    if(strlen(str)==0)
+      continue;
+    
+    /* format: %4d %-28s %10.6f %10.6f %4d %15.6e*/
+    if(sscanf(str,"%d %s %s %lf %lf %d %lf", &i, buf, buf, &val_min, &val_max, &fix, &val)<7)
+    {
+      printf("Error in reading %s.\nThe line %s is problematic.\n", fname, str);
+      exit(0);
+    }
+    
+    if(i >= num_params)
+    {
+      printf("Error: the number %d exceed the total number %d of parameters.\n", i, num_params);
+      exit(0);
+    }
+
+    par_range_model[i][0] = val_min;
+    par_range_model[i][1] = val_max;
+    par_fix[i] = fix;
+    par_fix_val[i] = val;
+    // printf("%d %-28s %f %f\n", i, buf, val_min, val_max);
+
+    fgets(str, MICA_MAX_STR_LENGTH, fp);
+  }
+  
+  fclose(fp);
+}

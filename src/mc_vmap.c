@@ -84,13 +84,16 @@ void mc_vmap()
       logz_max = logz_arr[j];
       jzmax = j;
     }
+    
+    if(flag_para_name != 1)
+    {
+      postprocess_vmap();
 
-    postprocess_vmap();
-
-    output_reconstruction_vmap_parallel();
+      output_reconstruction_vmap_parallel();
+    }
   }
   
-  if(thistask == roottask)
+  if(thistask == roottask && flag_para_name != 1)
   {
     char fname[200];
     printf("*****************************************************\n");

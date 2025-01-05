@@ -38,6 +38,8 @@ void init();
 
 void print_version();
 
+void load_par_names(char *fname);
+
 /* for con */
 double dnest_con(int argc, char **argv);
 void set_par_range_con();

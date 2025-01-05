@@ -40,8 +40,10 @@ int main(int argc, char **argv)
     flag_restart = 0;
     flag_decomp = 0;
     flag_examine = 0;
+    flag_load_prior = 0;
+    flag_para_name = 0;
 
-    while( (opt = getopt(argc, argv, "pvrde")) != -1)
+    while( (opt = getopt(argc, argv, "pvrdel:n")) != -1)
     {
       switch(opt)
       {
@@ -65,6 +67,22 @@ int main(int argc, char **argv)
         
         case 'e':
           flag_examine = 1;
+          break;
+        
+        case 'l': /* Load parameter prior */
+          flag_load_prior = 1;
+          strcpy(prior_file, optarg);
+          printf("# Load parameter prior from %s.\n", prior_file);
+          break;
+        
+        case 'n': /* print parameter names */
+          printf("# Print parameter name.\n");
+          flag_para_name = 1;
+          break;
+        
+        case '?':
+          printf("# Incorrect option -%c %s.\n", optopt, optarg);
+          exit(0);
           break;
       }
     }
@@ -94,6 +112,8 @@ int main(int argc, char **argv)
   MPI_Bcast(&flag_restart, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&flag_decomp, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&flag_examine, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+  MPI_Bcast(&flag_load_prior, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+  MPI_Bcast(&flag_para_name, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   
   if(flag_examine == 1)
   {

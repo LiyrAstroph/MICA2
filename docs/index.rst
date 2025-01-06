@@ -31,6 +31,7 @@ Documentation
    vrm.rst
    gap.rst
    python.rst
+   para_prior.rst
    tests.rst
    negresp.rst
    list.rst

@@ -397,6 +397,13 @@ int read_parset()
     {
       parset.type_lag_prior = 0;
     }
+    
+    /* when loading prior, only support a single value of num_gaussian */
+    if(flag_load_prior == 1 && parset.num_gaussian_diff > 1)
+    {
+      printf("For loading prior (-l), only support NumGausssianUpp=NumGaussianLow.\n");
+      exit(0);
+    }
 
     if(parset.nd_rec < 0)
     {

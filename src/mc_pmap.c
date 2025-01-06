@@ -78,18 +78,21 @@ void mc_pmap()
       logz_max = logz_arr[j];
       jzmax = j;
     }
-  
-    postprocess_line();
-
-    output_reconstruction_parallel();
     
-    if(num_gaussian > 1 && flag_decomp == 1)
+    if(flag_para_name != 1)
     {
-      output_decompose_line_parallel();
+      postprocess_line();
+
+      output_reconstruction_parallel();
+      
+      if(num_gaussian > 1 && flag_decomp == 1)
+      {
+        output_decompose_line_parallel();
+      }
     }
   }
   
-  if(thistask == roottask)
+  if(thistask == roottask && flag_para_name != 1)
   {
     char fname[200];
     printf("*****************************************************\n");

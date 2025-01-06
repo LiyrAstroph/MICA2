@@ -96,11 +96,29 @@ double dnest_pmap(int argc, char **argv)
     }
   }
   
+  if(flag_load_prior == 1)
+  {
+    load_par_names(prior_file);
+    
+    /* cope with drw parameters */
+    set_drw_par_range_load();
+
+    for(i=0; i<num_params; i++)
+    {
+      MPI_Bcast(par_range_model[i], 2, MPI_DOUBLE, roottask, MPI_COMM_WORLD);
+    }
+    MPI_Bcast(par_fix, num_params, MPI_INT, roottask, MPI_COMM_WORLD);
+    MPI_Bcast(par_fix_val, num_params, MPI_DOUBLE, roottask, MPI_COMM_WORLD);
+  }
+
   print_para_names_pmap();
   
-  strcpy(dnest_data_dir, parset.file_dir);
-  strcat(dnest_data_dir, "/data/");
-  logz = dnest(argc, argv, fptrset_pmap, num_params, NULL, NULL, NULL, dnest_data_dir, dnest_options_file, NULL, NULL);
+  if(flag_para_name != 1)
+  {
+    strcpy(dnest_data_dir, parset.file_dir);
+    strcat(dnest_data_dir, "/data/");
+    logz = dnest(argc, argv, fptrset_pmap, num_params, NULL, NULL, NULL, dnest_data_dir, dnest_options_file, NULL, NULL);
+  }
 
   //free memory
   dnest_free_fptrset(fptrset_pmap);
@@ -204,6 +222,8 @@ void print_para_names_pmap()
     exit(-1);
   }
 
+  printf("# Print parameter file: %s\n", fname);
+
   i=-1;
   for(j=0; j<num_params_var; j+=3)
   {
@@ -231,24 +251,24 @@ void print_para_names_pmap()
       i++;
       if(k == 0)
       {
-        sprintf(fstr, "%d-th component %s", k, "amplitude");
+        sprintf(fstr, "%d-th_component_%s", k, "amplitude");
         fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
                 par_fix[i], par_fix_val[i]);
       }
       else 
       {
-        sprintf(fstr, "%d-th component %s", k, "resp ratio");
+        sprintf(fstr, "%d-th_component_%s", k, "resp_ratio");
         fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
                 par_fix[i], par_fix_val[i]);
       }
 
       i++;
-      sprintf(fstr, "%d-th component %s", k, "center");
+      sprintf(fstr, "%d-th_component_%s", k, "center");
       fprintf(fp, "%2d %-25s UNI    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
 
       i++;
-      sprintf(fstr, "%d-th component %s", k, "sigma");
+      sprintf(fstr, "%d-th_component_%s", k, "sigma");
       fprintf(fp, "%2d %-25s LOG    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
     }

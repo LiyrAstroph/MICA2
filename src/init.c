@@ -552,3 +552,44 @@ void load_par_names(char *fname)
   
   fclose(fp);
 }
+
+/*!
+ * set drw parameter ranges using continuum reconstruction results
+ * and compare with the loaded priors
+ *
+ */
+void set_drw_par_range_load()
+{
+  if(thistask != roottask)
+    return;
+
+  int i, j;
+  double upp, low;
+  /* note omit of the continuum systematic error parameter */
+  for(j=0; j<num_params_var; j+=3)
+  {
+    for(i=j+1; i<j+3; i++)
+    {
+      /* nozero std means the parameter is not fixed */
+      if(var_param_std[i] > 0.0)
+      {
+        /* range from continuum reconstruction */
+        low = var_param[i] - 5.0 * var_param_std[i];
+        upp = var_param[i] + 5.0 * var_param_std[i];
+
+        if(par_range_model[i][0] > upp || par_range_model[i][1] < low)
+        {
+          printf("# Error: the input drw parameter priors are inconsistent with those from continuum reconstructions.\n");
+          printf("Input: [%f %f]; ContRecon: [%f %f]\n", par_range_model[i][0], par_range_model[i][1],
+                                                        low, upp);
+          exit(0);
+        }
+
+        /*compare with loaded priors */
+        par_range_model[i][0] = fmax(par_range_model[i][0], low);
+        par_range_model[i][1] = fmin(par_range_model[i][1], upp);
+      }
+    }
+  }
+  return;
+}

@@ -129,7 +129,7 @@ double dnest_vmap(int argc, char **argv)
     strcat(dnest_data_dir, "/data/");
     logz = dnest(argc, argv, fptrset_vmap, num_params, NULL, NULL, NULL, dnest_data_dir, dnest_options_file, NULL, NULL);
   }
-  
+
   //free memory
   dnest_free_fptrset(fptrset_vmap);
   for(i=0; i<num_params; i++)
@@ -247,6 +247,8 @@ void print_para_names_vmap()
     fprintf(stderr, "# Error: Cannot open file %s\n", fname);
     exit(-1);
   }
+
+  printf("# Print parameter file: %s\n", fname);
 
   i=-1;
   for(j=0; j<num_params_var; j+=3)

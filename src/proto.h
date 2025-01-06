@@ -39,6 +39,7 @@ void init();
 void print_version();
 
 void load_par_names(char *fname);
+void set_drw_par_range_load();
 
 /* for con */
 double dnest_con(int argc, char **argv);

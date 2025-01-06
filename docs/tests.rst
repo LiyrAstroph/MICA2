@@ -75,6 +75,7 @@ III. gamma
 ---------- 
 
 The transfer function is a gamma function (k=2). Run the Python script as 
+
 .. code:: bash 
 
   mpiexe -n 6 python example.py
@@ -94,6 +95,7 @@ IV. exp
 -------
 
 The transfer function consists of two exponential functions. Run the Python script as 
+
 .. code:: bash 
 
   mpiexe -n 6 python example.py

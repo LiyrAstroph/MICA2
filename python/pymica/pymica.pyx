@@ -31,6 +31,7 @@ cdef class basis:
   cdef int nset, num_param_var 
   cdef list nlset
   cdef list gap_prior
+  cdef int flag_load_prior
 
   def __cinit__(self):
     
@@ -44,6 +45,7 @@ cdef class basis:
     self.num_param_var = 0
 
     self.gap_prior = None
+    self.flag_load_prior = 0
 
     if self.rank == 0:
       # check data folder
@@ -417,6 +419,21 @@ cdef class basis:
     self.parset.max_ptol = ptol
 
     return
+  
+  def set_priors(self, prior_file=None):
+    """
+    set prior files
+    """
+    if isinstance(prior_file, str):
+      self.flag_load_prior = 1
+      set_prior_file(prior_file.encode("UTF-8"))
+      if self.flag_load_prior == 1 and self.parset.num_gaussian_diff > 1:
+        raise ValueError("when calling set_priors(), only support a single number of component, e.g.,"
+                         "number_component[0]=number_component[1].\n")
+    else:
+      raise ValueError("prior_file should be a string!")
+    
+    return
 
 
 #==========================================================================
@@ -528,6 +545,10 @@ cdef class gmodel(basis):
       self.parset.num_gaussian_upper = number_component[1]
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
     
+    if self.flag_load_prior == 1 and self.parset.num_gaussian_diff > 1:
+      raise ValueError("when calling set_priors(), only support a single number of component, e.g.,"
+                       "number_component[0]=number_component[1].\n")
+
     self.parset.type_lag_prior = type_lag_prior
 
     # if lag_prior is input
@@ -593,7 +614,7 @@ cdef class gmodel(basis):
     """
     do posterior running
     """
-    set_argv(1, 0, 0) # postprocess, decompose, restart
+    set_argv(1, 0, 0, 0) # postprocess, decompose, restart, para names
     read_data()
     init()
     mc_line()
@@ -604,7 +625,7 @@ cdef class gmodel(basis):
     """
     do decomposition
     """
-    set_argv(1, 1, 0) # postprocess, decompose, restart
+    set_argv(1, 1, 0, 0) # postprocess, decompose, restart, para names
     read_data()
     init()
     mc_line()
@@ -615,9 +636,21 @@ cdef class gmodel(basis):
     """
     resume from a last run
     """
-    set_argv(0, 0, 1)
+    set_argv(0, 0, 1, 0)
     read_data()
     init()
+    mc_line()
+    end_run()
+    return
+  
+  def print_para_names(self):
+    """
+    print para names 
+    """
+    set_argv(0, 0, 0, 1)
+    read_data()
+    init()
+    mc_con()
     mc_line()
     end_run()
     return
@@ -752,7 +785,7 @@ cdef class pmap(basis):
     """
     do posterior running
     """
-    set_argv(1, 0, 0) # postprocess, decompose, restart
+    set_argv(1, 0, 0, 0) # postprocess, decompose, restart, para names
     read_data()
     init()
     mc_pmap()
@@ -763,7 +796,7 @@ cdef class pmap(basis):
     """
     do decomposition
     """
-    set_argv(1, 1, 0)  # postprocess, decompose, restart
+    set_argv(1, 1, 0, 0)  # postprocess, decompose, restart, para names
     read_data()
     init()
     mc_pmap()
@@ -774,9 +807,21 @@ cdef class pmap(basis):
     """
     resume from a last run
     """
-    set_argv(0, 0, 1)
+    set_argv(0, 0, 1, 0)
     read_data()
     init()
+    mc_pmap()
+    end_run()
+    return
+  
+  def print_para_names(self):
+    """
+    print para names 
+    """
+    set_argv(0, 0, 0, 1)
+    read_data()
+    init()
+    mc_con()
     mc_pmap()
     end_run()
     return
@@ -890,6 +935,10 @@ cdef class vmap(basis):
       self.parset.num_gaussian_upper = number_component[1]
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
     
+    if self.flag_load_prior == 1 and self.parset.num_gaussian_diff > 1:
+      raise ValueError("when calling set_priors(), only support a single number of component, e.g.,"
+                       "number_component[0]=number_component[1].\n")
+                       
     self.parset.type_lag_prior = type_lag_prior
 
     # if lag_prior is input
@@ -954,7 +1003,7 @@ cdef class vmap(basis):
     """
     do posterior running
     """
-    set_argv(1, 0, 0) # postprocess, decompose, restart
+    set_argv(1, 0, 0, 0) # postprocess, decompose, restart, para names
     read_data()
     init()
     mc_vmap()
@@ -965,7 +1014,7 @@ cdef class vmap(basis):
     """
     do decomposition
     """
-    set_argv(1, 1, 0) # postprocess, decompose, restart
+    set_argv(1, 1, 0, 0) # postprocess, decompose, restart, para names
     read_data()
     init()
     mc_vmap()
@@ -976,9 +1025,21 @@ cdef class vmap(basis):
     """
     resume from a last run
     """
-    set_argv(0, 0, 1)
+    set_argv(0, 0, 1, 0)
     read_data()
     init()
+    mc_vmap()
+    end_run()
+    return
+  
+  def print_para_names(self):
+    """
+    print para names 
+    """
+    set_argv(0, 0, 0, 1)
+    read_data()
+    init()
+    mc_con()
     mc_vmap()
     end_run()
     return

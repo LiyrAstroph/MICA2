@@ -476,11 +476,20 @@ int write_options_line(char *fname)
   return 0;
 }
 
-void set_argv(int flag_pp, int flag_de, int flag_re)
+void set_argv(int flag_pp, int flag_de, int flag_re, int flag_pn)
 {
   flag_postprc = flag_pp;
   flag_decomp = flag_de;
   flag_restart = flag_re;
+  flag_para_name = flag_pn;
+  return;
+}
+
+void set_prior_file(char *fname)
+{
+  flag_load_prior = 1;
+  strcpy(prior_file, fname);
+
   return;
 }
 

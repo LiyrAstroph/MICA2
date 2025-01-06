@@ -12,7 +12,7 @@
 
 void begin_run();
 void end_run();
-void set_argv(int flag_pp, int flag_de, int flag_re);
+void set_argv(int flag_pp, int flag_de, int flag_re, int flag_pn);
 
 /* mpi */
 void set_mpi();
@@ -40,6 +40,7 @@ void print_version();
 
 void load_par_names(char *fname);
 void set_drw_par_range_load();
+void set_prior_file(char *fname);
 
 /* for con */
 double dnest_con(int argc, char **argv);

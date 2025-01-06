@@ -12,7 +12,8 @@ the generated prior file from the last run)
 
 .. code-block:: bash
 
-    ./brains param -n 
+    ./mica2 param -n 
+
 
 This will output the prior ranges to a file named `data/para_names_xx.txt`. The content looks like::
 
@@ -43,6 +44,21 @@ Afterwards, pass this new prior file to MICA as
 
 .. code-block:: bash
 
-    mpiexec -n 6 ./mica param -l data/new_prior.txt
+    mpiexec -n 6 ./mica2 param -l data/new_prior.txt
 
 MICA will read in the prior ranges and use them for MCMC sampling.
+
+
+In the Python version, one can generate the default prior ranges as 
+
+.. code-block:: python
+
+    model = pymica.gmodel()
+    ...
+    model.print_para_names()
+
+To load priors from a file, say, `data/new_prior.txt`, call the function 
+
+.. code-block:: python 
+
+    model.set_priors("data/new_prior.txt")

@@ -73,7 +73,7 @@ extern double *workspace_inv;
 
 
 extern int flag_postprc, flag_end, flag_restart, flag_decomp, flag_examine, 
-           flag_para_name, flag_load_prior;
+           flag_para_name, flag_load_prior, flag_postsample;
 extern char prior_file[MICA_MAX_STR_LENGTH];
 
 typedef struct 

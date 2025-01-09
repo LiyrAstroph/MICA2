@@ -42,8 +42,9 @@ int main(int argc, char **argv)
     flag_examine = 0;
     flag_load_prior = 0;
     flag_para_name = 0;
+    flag_postsample = 0;
 
-    while( (opt = getopt(argc, argv, "pvrdel:n")) != -1)
+    while( (opt = getopt(argc, argv, "pvrdel:ns")) != -1)
     {
       switch(opt)
       {
@@ -80,6 +81,11 @@ int main(int argc, char **argv)
           flag_para_name = 1;
           break;
         
+        case 's': /* only calculate posterior sample */
+          printf("# Calculate posterior sample.\n");
+          flag_postsample = 1;
+          break;
+        
         case '?':
           printf("# Incorrect option -%c %s.\n", optopt, optarg);
           exit(0);
@@ -114,6 +120,7 @@ int main(int argc, char **argv)
   MPI_Bcast(&flag_examine, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&flag_load_prior, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   MPI_Bcast(&flag_para_name, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+  MPI_Bcast(&flag_postsample, 1, MPI_INT, roottask, MPI_COMM_WORLD);
   
   if(flag_examine == 1)
   {

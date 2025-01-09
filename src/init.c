@@ -476,12 +476,13 @@ int write_options_line(char *fname)
   return 0;
 }
 
-void set_argv(int flag_pp, int flag_de, int flag_re, int flag_pn)
+void set_argv(int flag_pp, int flag_de, int flag_re, int flag_pn, int flag_ps)
 {
   flag_postprc = flag_pp;
   flag_decomp = flag_de;
   flag_restart = flag_re;
   flag_para_name = flag_pn;
+  flag_postsample = flag_ps;  /* whether only calculate posterior sample */
   return;
 }
 

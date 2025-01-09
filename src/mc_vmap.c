@@ -85,7 +85,7 @@ void mc_vmap()
       jzmax = j;
     }
     
-    if(flag_para_name != 1)
+    if(flag_para_name != 1 && flag_postsample != 1)
     {
       postprocess_vmap();
 

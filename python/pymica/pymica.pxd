@@ -63,5 +63,5 @@ cdef extern from "proto.h":
   void output_decompose_line()
   void begin_run()
   void end_run()
-  void set_argv(int flag_pp, int flag_de, int flag_re, int flag_pn)
+  void set_argv(int flag_pp, int flag_de, int flag_re, int flag_pn, int flag_ps)
   void set_prior_file(char *fname)

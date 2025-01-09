@@ -614,7 +614,7 @@ cdef class gmodel(basis):
     """
     do posterior running
     """
-    set_argv(1, 0, 0, 0) # postprocess, decompose, restart, para names
+    set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
     mc_line()
@@ -625,7 +625,7 @@ cdef class gmodel(basis):
     """
     do decomposition
     """
-    set_argv(1, 1, 0, 0) # postprocess, decompose, restart, para names
+    set_argv(1, 1, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
     mc_line()
@@ -636,7 +636,7 @@ cdef class gmodel(basis):
     """
     resume from a last run
     """
-    set_argv(0, 0, 1, 0)
+    set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
     mc_line()
@@ -647,7 +647,7 @@ cdef class gmodel(basis):
     """
     print para names 
     """
-    set_argv(0, 0, 0, 1)
+    set_argv(0, 0, 0, 1, 0)
     read_data()
     init()
     mc_con()
@@ -785,7 +785,7 @@ cdef class pmap(basis):
     """
     do posterior running
     """
-    set_argv(1, 0, 0, 0) # postprocess, decompose, restart, para names
+    set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
     mc_pmap()
@@ -796,7 +796,7 @@ cdef class pmap(basis):
     """
     do decomposition
     """
-    set_argv(1, 1, 0, 0)  # postprocess, decompose, restart, para names
+    set_argv(1, 1, 0, 0, 0)  # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
     mc_pmap()
@@ -807,7 +807,7 @@ cdef class pmap(basis):
     """
     resume from a last run
     """
-    set_argv(0, 0, 1, 0)
+    set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
     mc_pmap()
@@ -818,7 +818,7 @@ cdef class pmap(basis):
     """
     print para names 
     """
-    set_argv(0, 0, 0, 1)
+    set_argv(0, 0, 0, 1, 0)
     read_data()
     init()
     mc_con()
@@ -1003,7 +1003,7 @@ cdef class vmap(basis):
     """
     do posterior running
     """
-    set_argv(1, 0, 0, 0) # postprocess, decompose, restart, para names
+    set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
     mc_vmap()
@@ -1014,7 +1014,7 @@ cdef class vmap(basis):
     """
     do decomposition
     """
-    set_argv(1, 1, 0, 0) # postprocess, decompose, restart, para names
+    set_argv(1, 1, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
     mc_vmap()
@@ -1025,7 +1025,7 @@ cdef class vmap(basis):
     """
     resume from a last run
     """
-    set_argv(0, 0, 1, 0)
+    set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
     mc_vmap()
@@ -1036,7 +1036,7 @@ cdef class vmap(basis):
     """
     print para names 
     """
-    set_argv(0, 0, 0, 1)
+    set_argv(0, 0, 0, 1, 0)
     read_data()
     init()
     mc_con()

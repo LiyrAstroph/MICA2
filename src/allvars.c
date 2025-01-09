@@ -74,7 +74,7 @@ double *workspace_inv;
 char str_error_exit[200];
 
 int flag_postprc, flag_end, flag_restart, flag_decomp, flag_examine, 
-    flag_para_name, flag_load_prior;
+    flag_para_name, flag_load_prior, flag_postsample;
 char prior_file[MICA_MAX_STR_LENGTH];
 
 int flag_warning = 0;

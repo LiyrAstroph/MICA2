@@ -7,6 +7,14 @@ CC       = mpicc
 OPTIMIZE = -O2 -Wall -finline-functions -fcommon
 #OPTIMIZE += -DDebug
 
+# test whether Intel OneAPI MKL exists
+ifneq (${MKLROOT},)
+  FlagIntelMKL = true
+endif
+ifeq (${FlagIntelMKL}, true)
+  OPTIMIZE += -DIntelMKL
+endif
+
 #------------target system---------
 #SYSTEM="Darwin"
 SYSTEM="Linux"
@@ -18,8 +26,15 @@ SYSTEM="Linux"
 ifeq ($(SYSTEM), "Linux")
 GSL_INCL    = $(shell pkg-config --cflags gsl) 
 GSL_LIBS    = $(shell pkg-config --libs gsl) 
-LAPACK_INCL = -I/usr/include/lapacke
-LAPACK_LIBS = -L/usr/lib64 -llapacke -llapack -lblas
+
+ifeq (${FlagIntelMKL}, true)
+  LAPACK_INCL = -I/opt/intel/oneapi/mkl/latest/include
+  LAPACK_LIBS = -L/opt/intel/oneapi/mkl/latest/lib -lmkl_core -lmkl_gnu_thread -lgomp -lpthread -lmkl_intel_ilp64
+else 
+  LAPACK_INCL = -I/usr/include/lapacke
+  LAPACK_LIBS = -L/usr/lib64 -llapacke -llapack -lblas
+endif
+
 #DNEST_INCL  = -I /home/liyropt/Projects/GIT/CDNest/
 #DNEST_LIBS  = -L /home/liyropt/Projects/GIT/CDNest -ldnest
 

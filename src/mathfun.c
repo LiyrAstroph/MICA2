@@ -9,8 +9,16 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <gsl/gsl_cblas.h>
-#include <lapacke.h>
+
+/* whether using Intel OneAPI MKL */
+#ifdef IntelMKL
+  #include <mkl_cblas.h>
+  #include <mkl_lapacke.h>
+#else 
+  #include <gsl/gsl_cblas.h>
+  #include <lapacke.h>
+#endif
+
 
 #include "allvars.h"
 #include "proto.h"

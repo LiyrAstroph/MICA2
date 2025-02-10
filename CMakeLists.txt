@@ -74,22 +74,34 @@ else(GSL_FOUND)
   message(FATAL_ERROR "GSL not found")
 endif(GSL_FOUND)
 
-#=====================================================
-# BLAS
-find_package(BLAS REQUIRED)
-if(BLAS_FOUND)
-  include_directories(${BLAS_INCLUDE_DIRS})
-  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${BLAS_LIBRARIES})
-else(BLAS_FOUND)
-  message(FATAL_ERROR "BLAS not found")
-endif(BLAS_FOUND)
 
-#=====================================================
-# LAPACK
-find_package(LAPACK REQUIRED)
-if(LAPACK_FOUND)
-  target_link_options(${CMAKE_PROJECT_NAME} PUBLIC ${LAPACK_LINKER_FLAGS})
-  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LAPACK_LIBRARIES} lapacke)
-else(LAPACK_FOUND)
-  message(FATAL_ERROR "LAPACKE not found")
-endif(LAPACK_FOUND)
+find_package(MKL CONFIG REQUIRED)
+if(MKL_FOUND)
+  #message(STATUS "${MKL_IMPORTED_TARGETS}") #Provides available list of targets based on input
+  target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE -DIntelMKL)
+  target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
+  target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL>)
+
+else(MKL_FOUND)
+  #=====================================================
+  # BLAS
+  find_package(BLAS REQUIRED)
+  if(BLAS_FOUND)
+    include_directories(${BLAS_INCLUDE_DIRS})
+    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${BLAS_LIBRARIES})
+  else(BLAS_FOUND)
+    message(FATAL_ERROR "BLAS not found")
+  endif(BLAS_FOUND)
+
+  #=====================================================
+  # LAPACK
+  find_package(LAPACK REQUIRED)
+  if(LAPACK_FOUND)
+    target_link_options(${CMAKE_PROJECT_NAME} PUBLIC ${LAPACK_LINKER_FLAGS})
+    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${LAPACK_LIBRARIES} lapacke)
+  else(LAPACK_FOUND)
+    message(FATAL_ERROR "LAPACKE not found")
+  endif(LAPACK_FOUND)
+endif(MKL_FOUND)
+

@@ -10,6 +10,8 @@
 #include <math.h>
 #include <unistd.h>
 #include <float.h>
+#include <ctype.h>
+#include <string.h>
 
 #include "allvars.h"
 #include "proto.h"

@@ -9,6 +9,13 @@ import numpy
 if not os.environ.get("CC"):
   os.environ["CC"] = "mpicc"
 
+# check Intel OneAPI MKL
+if os.environ.get("MKLROOT"):
+  mklroot = os.environ.get("MKLROOT")
+  FlagIntelMKL=True
+else:
+  FlagIntelMKL=False
+
 try:
   from Cython.Build import cythonize
 except ImportError:
@@ -40,8 +47,17 @@ if os.name == 'nt':  # Windows, assumming MSVC compiler
   compiler_args = ['/Ox', '/fp:fast']
   link_args = []
 elif os.name == 'posix':  # UNIX, assumming GCC compiler
-  libraries = ['m', 'c', 'gsl', 'gslcblas', 'lapack', 'lapacke'] + mpiconf['libraries']
-  compiler_args = ['-O3', '-ffast-math', '-fcommon'] 
+  if FlagIntelMKL:
+    include_dirs += [os.path.join(mklroot, "include"),]
+    library_dirs += [os.path.join(mklroot, "lib"),]
+    libraries = ['m', 'c', 'gsl', 'mkl_intel_ilp64', 'mkl_core', 'mkl_gnu_thread', 'gomp', 'pthread', ] 
+    compiler_args = ['-DIntelMKL',]
+  else:
+    libraries = ['m', 'c', 'gsl', 'gslcblas', 'lapack', 'lapacke']
+    compiler_args = []
+  
+  libraries += mpiconf['libraries']
+  compiler_args += ['-O3', '-ffast-math', '-fcommon'] 
   link_args = []
 
 src = [os.path.join(basedir, "python", "pymica", "pymica.pyx")] + glob(os.path.join(basedir, "src", "*.c")) \

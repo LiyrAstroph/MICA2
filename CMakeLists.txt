@@ -75,7 +75,7 @@ else(GSL_FOUND)
 endif(GSL_FOUND)
 
 
-find_package(MKL CONFIG REQUIRED)
+find_package(MKL CONFIG)
 if(MKL_FOUND)
   #message(STATUS "${MKL_IMPORTED_TARGETS}") #Provides available list of targets based on input
   target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE -DIntelMKL)

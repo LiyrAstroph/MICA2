@@ -843,6 +843,9 @@ void output_reconstruction_vmap_parallel()
     {
       /* reconstuct all the light curves */
       reconstruct_line_from_varmodel_vmap((void *)post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+
+      /* normalize the virtual light curve, 0.1 is the desired std */
+      light_curve_normalize(fall[i], feall[i], nall[i][0], 0.1);
       
       for(k=0; k<nall[i][0]; k++)
       {
@@ -1183,6 +1186,9 @@ void output_reconstruction_vmap()
       {
         /* reconstuct all the light curves */
         reconstruct_line_from_varmodel_vmap(post_model, i, nall[i], tall[i], fall[i], feall[i], yq); 
+
+        /* normalize the virtual light curve, 0.1 is the desired std */
+        light_curve_normalize(fall[i], feall[i], nall[i][0], 0.1);
 
         for(k=0; k<nall[i][0]; k++)
         {
@@ -1711,3 +1717,37 @@ void set_covar_Amat_line_vmap(const void *model, int nds, int *nall, double *tal
   }
   return;
 }
+
+/*
+ * force a light curve to have a zero mean and a specified std
+ *
+ */
+ void light_curve_normalize(double *y, double *ye, int n, double std_input)
+ {
+  int i;
+  double mean, std;
+
+  mean = 0.0;
+  for(i=0; i<n; i++)
+  {
+    mean += y[i];
+  }
+  mean /= n;
+  
+  // subtract mean and get std
+  std = 0.0;
+  for(i=0; i<n; i++)
+  {
+    y[i] -= mean;
+    std  += y[i]*y[i];
+  }
+  std = sqrt(std/n)/std_input;
+  
+  //normalize std
+  for(i=0; i<n; i++)
+  {
+    y[i]  /= std;
+    ye[i] /= std;
+  }
+  return;
+ }

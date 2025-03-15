@@ -904,6 +904,10 @@ void output_reconstruction_vmap_parallel()
         fall_best_buf[i][k] /= num_ps;
         fall_std_buf[i][k] /= num_ps;
         fall_std_buf[i][k] = sqrt(fall_std_buf[i][k] - fall_best_buf[i][k]*fall_best_buf[i][k]);
+      }
+      /* for virtual light curve, do not include maximum error. */
+      for(k=nall[i][0]; k<ntall[i]; k++)
+      {
         fall_std_buf[i][k] = fmax(fall_std_buf[i][k], feall_max_buf[i][k]);
       }
 
@@ -1233,7 +1237,8 @@ void output_reconstruction_vmap()
         fall_best[i][k] /= num_ps;
         fall_std[i][k] /= num_ps;
         fall_std[i][k] = sqrt(fall_std[i][k] - fall_best[i][k]*fall_best[i][k]);
-        fall_std[i][k] = fmax(fall_std[i][k], feall_max[i][k]);
+        /* for virtual light curve, do not include maximum error */
+        // fall_std[i][k] = fmax(fall_std[i][k], feall_max[i][k]);
       }
         
       np = nall[i][0];

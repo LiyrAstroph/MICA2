@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     printf("%d cores used.\n", totaltask);
 
     opterr = 0; /* reset getopt. */
-    optind = 0; /* reset getopt. */
+    optind = 1; /* reset getopt, starting from 1st arg, the 0th is program name by default. */
     
     flag_postprc = 0;
     flag_end = 0;
@@ -47,12 +47,7 @@ int main(int argc, char **argv)
     flag_para_name = 0;
     flag_postsample = 0;
 
-    /* MAC getopt and GNU  getopt seem not compatible */
-#if defined(__APPLE__) && defined(__MACH__)
-    while( (opt = getopt(argc-1, argv+1, "pvrdel:ns")) != -1)
-#else
     while( (opt = getopt(argc, argv, "pvrdel:ns")) != -1)
-#endif
     {
       switch(opt)
       {

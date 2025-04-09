@@ -661,8 +661,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
         dy = ymax - ymin 
         ax.set_ylim(np.max((ylim[0], ymin-0.1*dy)), np.min((ylim[1], np.max(np.max(tran_best)*1.5))))
       else:
-        ymax = np.max((tran_best, tran_input[:, 1]))
-        ymin = np.min((tran_best, tran_input[:, 1]))
+        ymax = np.max((np.max(tran_best), np.max(tran_input[:, 1])))
+        ymin = np.min((np.min(tran_best), np.min(tran_input[:, 1])))
         dy = ymax - ymin 
         ax.set_ylim(np.max((ylim[0], ymin-0.1*dy)), np.min((ylim[1], np.max((np.max(tran_best)*1.5, np.max(tran_input[:, 1])*1.5)))))
       

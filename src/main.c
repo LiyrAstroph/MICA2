@@ -47,7 +47,12 @@ int main(int argc, char **argv)
     flag_para_name = 0;
     flag_postsample = 0;
 
+    /* MAC getopt and GNU  getopt seem not compatible */
+#if defined(__APPLE__) && defined(__MACH__)
+    while( (opt = getopt(argc-1, argv+1, "pvrdel:ns")) != -1)
+#else
     while( (opt = getopt(argc, argv, "pvrdel:ns")) != -1)
+#endif
     {
       switch(opt)
       {

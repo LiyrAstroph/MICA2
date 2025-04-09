@@ -77,7 +77,13 @@ double dnest(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
 
     opterr = 0;
     optind = 0;
+
+    /* MAC getopt and GNU  getopt seem not compatible */
+#if defined(__APPLE__) && defined(__MACH__)
+    while( (optid = getopt(argc-1, argv+1, "r:s:pt:clx:g:m:")) != -1)
+#else
     while( (optid = getopt(argc, argv, "r:s:pt:clx:g:m:")) != -1)
+#endif
     {
       switch(optid)
       {

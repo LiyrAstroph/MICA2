@@ -15,6 +15,7 @@
 
 #include "dnest_con.h"
 #include "allvars.h"
+#include "dnest.h"
 
 #include "proto.h"
 

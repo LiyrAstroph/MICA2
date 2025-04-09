@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #include "allvars.h"
 #include "dnest.h"
@@ -21,7 +22,7 @@ double dnest_con(int argc, char **argv)
 {
   int i;
   double logz;
-  char *dnest_data_dir[MICA_MAX_STR_LENGTH];
+  char dnest_data_dir[MICA_MAX_STR_LENGTH];
 
   num_params = num_params_var;
 

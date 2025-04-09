@@ -4,7 +4,7 @@
 SHELL=/bin/bash
 
 CC       = mpicc
-OPTIMIZE = -O2 -Wall -finline-functions -fcommon
+OPTIMIZE = -O2 -Wall -finline-functions -fcommon -std=c11
 #OPTIMIZE += -DDebug
 
 # test whether Intel OneAPI MKL exists
@@ -32,7 +32,7 @@ ifeq (${FlagIntelMKL}, true)
   LAPACK_LIBS = -L${MKLROOT}/lib -lmkl_intel_ilp64 -lmkl_core -lmkl_gnu_thread -lgomp -lpthread 
 else 
   LAPACK_INCL = -I/usr/include/lapacke
-  LAPACK_LIBS = -L/usr/lib64 -llapacke -llapack -lblas
+  LAPACK_LIBS = -L/usr/lib64 -llapacke -llapack
 endif
 
 #DNEST_INCL  = -I /home/liyropt/Projects/GIT/CDNest/
@@ -48,7 +48,7 @@ GSL_LIBS = -L/sharefs/mbh/user/liyanrong/soft/gsl/lib  -lgsl -lgslcblas -lm
 MPICHLIB = -L/sharefs/mbh/user/liyanrong/soft/mpich3/lib -lmpich
 MPIINCL  = -I/sharefs/mbh/user/liyanrong/soft/mpich3/include
 LAPACK_INCL = -I/sharefs/mbh/user/liyanrong/soft/lapack/include
-LAPACK_LIBS = -L/sharefs/mbh/user/liyanrong/soft/lapack/lib -llapacke -llapack -lblas -lgfortran
+LAPACK_LIBS = -L/sharefs/mbh/user/liyanrong/soft/lapack/lib -llapacke -llapack -lgfortran
 
 #DNEST_INCL  = -I /sharefs/mbh/user/liyanrong/GIT/DNest/
 #DNEST_LIBS  = -L /sharefs/mbh/user/liyanrong/GIT/DNest -ldnest
@@ -60,7 +60,7 @@ GSL_LIBS = -lgsl -lgslcblas -lm
 MPICHLIB = -lmpich
 MPIINCL  =
 LAPACK_INCL = -I/HOME/ihep_yrli_1/BIGDATA/soft/lapack/include
-LAPACK_LIBS = -L/HOME/ihep_yrli_1/BIGDATA/soft/lapack/lib -llapacke -llapack -lblas -lgfortran
+LAPACK_LIBS = -L/HOME/ihep_yrli_1/BIGDATA/soft/lapack/lib -llapacke -llapack -lgfortran
 
 #DNEST_INCL  = -I /HOME/ihep_yrli_1/BIGDATA/soft/DNest/
 #DNEST_LIBS  = -L /HOME/ihep_yrli_1/BIGDATA/soft/DNest -ldnest
@@ -76,8 +76,8 @@ OBJS     = $(SRC)/main.o $(SRC)/allvars.o $(SRC)/system.o $(SRC)/run.o        \
            $(SRC)/mc_con.o $(SRC)/init.o $(SRC)/mathfun.o                     \
            $(SRC)/mc_line.o  $(SRC)/error.o  ${SRC}/version.o                 \
            $(SRC)/line_decomp.o $(SRC)/dnest_pmap.o $(SRC)/mc_pmap.o          \
-	       $(CDN)/dnest.o  $(CDN)/dnestpostprocess.o                          \
-	       $(CDN)/dnestvars.o $(SRC)/mc_vmap.o $(SRC)/dnest_vmap.o
+	         $(CDN)/dnest.o  $(CDN)/dnestpostprocess.o                          \
+	         $(CDN)/dnestvars.o $(SRC)/mc_vmap.o $(SRC)/dnest_vmap.o
   
 INCL     = Makefile $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h      \
            $(SRC)/dnest_line.h $(SRC)/version.h $(SRC)/dnest_pmap.h          \

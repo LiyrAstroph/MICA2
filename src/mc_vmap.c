@@ -16,6 +16,7 @@
 
 #include "dnest_vmap.h"
 #include "allvars.h"
+#include "dnest.h"
 
 #include "proto.h"
 

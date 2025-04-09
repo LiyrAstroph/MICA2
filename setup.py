@@ -57,7 +57,7 @@ elif os.name == 'posix':  # UNIX, assumming GCC compiler
     compiler_args = []
   
   libraries += mpiconf['libraries']
-  compiler_args += ['-O3', '-ffast-math', '-fcommon'] 
+  compiler_args += ['-O3', '-ffast-math', '-fcommon', '-std=c11'] 
   link_args = []
 
 src = [os.path.join(basedir, "python", "pymica", "pymica.pyx")] + glob(os.path.join(basedir, "src", "*.c")) \

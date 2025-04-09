@@ -46,6 +46,9 @@ double dnest(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
              char *sample_dir, char *optfile, DNestOptions *opts, void *args)
 {
   int optid;
+  extern int optind, opterr, optopt;
+  extern char *optarg;
+  extern int getopt(int argc, char *const *argv, const char *options);
 
   MPI_Comm_rank(MPI_COMM_WORLD, &dnest_thistask);
   MPI_Comm_size(MPI_COMM_WORLD, &dnest_totaltask);
@@ -195,6 +198,7 @@ void dnest_run()
   Level *pl, *levels_orig;
   int *buf_size_above, *buf_displs;
   double *plimits;
+  extern int fileno(FILE *stream);
   
   // used to gather levels' information
   if(dnest_thistask == dnest_root)

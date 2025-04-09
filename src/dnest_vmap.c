@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
+#include <string.h>
 
 #include "allvars.h"
 #include "dnest.h"
@@ -24,7 +25,7 @@ double dnest_vmap(int argc, char **argv)
 {
   int i, j, k, ic, idx;
   double logz, dlag;
-  char *dnest_data_dir[MICA_MAX_STR_LENGTH];
+  char dnest_data_dir[MICA_MAX_STR_LENGTH];
 
   fptrset_vmap = dnest_malloc_fptrset();
   /* setup functions used for dnest*/

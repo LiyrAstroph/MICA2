@@ -11,8 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <math.h>
 
-#define PI            (M_PI)
+#define PI            (3.14159265358979323846)
 #define MICA_MAX_STR_LENGTH  (256)
 #define YEAR_DAY      (365.25)
 #define EPS           (1.0e-5)

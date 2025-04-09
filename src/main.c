@@ -19,6 +19,9 @@ int main(int argc, char **argv)
 {
   double t0=0.0, t1=0.0, dt;
   int opt;
+  extern int optind, opterr, optopt;
+  extern char *optarg;
+  extern int getopt(int argc, char *const *argv, const char *options);
 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &thistask);

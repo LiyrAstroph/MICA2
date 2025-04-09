@@ -87,6 +87,7 @@ int mc_pmap_end();
 void mc_pmap();
 void transform_response_ratio_inplace(const void *model_in);
 void transform_response_ratio(const void *model_in, void *model_out);
+void print_para_names_pmap();
 
 /* for vmap */
 double prob_line_variability3_vmap(const void *model);
@@ -105,6 +106,7 @@ void set_covar_Pmat_data_line_array_vmap(const void *model, int k);
 void set_covar_Umat_line_vmap(const void *model, int k, int *nall, double *tall);
 void set_covar_Amat_line_vmap(const void *model, int k, int *nall, double *tall);
 void light_curve_normalize(double *y, double *ye, int n, double std_input);
+void print_para_names_vmap();
 
 double (*Sll)(double t1, double t2, const void *model, int nds, int nls);
 void (*Sll_array)(double *tline, int nline, const void *model, int nds, int nls, double *Smat);

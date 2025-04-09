@@ -10,9 +10,9 @@ set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 
 ##if using clang compiler, add c++11/c++14/c++17... support (https://clang.llvm.org/cxx_status.html)
-if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
-  message(${CMAKE_C_COMPILER_ID})
-  set(CMAKE_C_FLAGS "-std=c++11 ${CMAKE_C_FLAGS}")
+message("C Compiler: " ${CMAKE_C_COMPILER} "," ${CMAKE_C_COMPILER_ID} "," ${CMAKE_C_STANDARD})
+if (${CMAKE_C_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_C_COMPILER_ID} STREQUAL "AppleClang")
+  set(CMAKE_C_FLAGS "-std=c11 ${CMAKE_C_FLAGS}")
 endif()
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -84,16 +84,6 @@ if(MKL_FOUND)
   target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL>)
 
 else(MKL_FOUND)
-  #=====================================================
-  # BLAS
-  find_package(BLAS REQUIRED)
-  if(BLAS_FOUND)
-    include_directories(${BLAS_INCLUDE_DIRS})
-    target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${BLAS_LIBRARIES})
-  else(BLAS_FOUND)
-    message(FATAL_ERROR "BLAS not found")
-  endif(BLAS_FOUND)
-
   #=====================================================
   # LAPACK
   find_package(LAPACK REQUIRED)

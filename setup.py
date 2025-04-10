@@ -34,13 +34,28 @@ def configure_mpi():
 
   return mpiconf
 
+def configure_gsl():
+  """
+  get configuration of gsl
+  """
+  if pkgconfig.exists('gsl'):
+    gslconf = pkgconfig.parse('gsl')
+  else:
+    raise SystemError("Not found GS installed.")
+
+  return gslconf
+
 mpiconf = configure_mpi()
+gslconf = configure_gsl()
+
+lapack_include_dir=[]
+lapack_library_dir=[]
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 homedir = os.environ['HOME']
 include_dirs = [basedir, os.path.join(basedir, "src"), numpy.get_include(),] + mpiconf['include_dirs'] \
-              +[os.path.join(basedir, "cdnest"),]
-library_dirs = [basedir] + mpiconf['library_dirs']
+              +[os.path.join(basedir, "cdnest"),] + gslconf['include_dirs'] + lapack_include_dir
+library_dirs = [basedir] + mpiconf['library_dirs'] + gslconf['library_dirs'] + lapack_library_dir
 
 if os.name == 'nt':  # Windows, assumming MSVC compiler
   libraries = ['dnest']

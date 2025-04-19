@@ -12,6 +12,7 @@
 #include <mpi.h>
 #include <string.h>
 
+#include "mygetopt.h"
 #include "allvars.h"
 #include "proto.h"
 
@@ -19,9 +20,9 @@ int main(int argc, char **argv)
 {
   double t0=0.0, t1=0.0, dt;
   int opt;
-  extern int optind, opterr, optopt;
-  extern char *optarg;
-  extern int getopt(int argc, char *const *argv, const char *options);
+  extern int my_optind, my_opterr, my_optopt;
+  extern char *my_optarg;
+  extern int my_getopt(int argc, char *const *argv, const char *options);
 
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &thistask);
@@ -34,8 +35,6 @@ int main(int argc, char **argv)
     printf("===============MICA2==================\n");
     printf("Starts to run...\n");
     printf("%d cores used.\n", totaltask);
-
-    opterr = 0; /* reset getopt. */
     
     flag_postprc = 0;
     flag_end = 0;
@@ -45,17 +44,11 @@ int main(int argc, char **argv)
     flag_load_prior = 0;
     flag_para_name = 0;
     flag_postsample = 0;
+    
+    my_opterr = 0; /* supress getopt error */
+    my_optind = 0; /* optind=0 reset getopt */
 
-    /* MAC getopt and GNU  getopt seem not compatible */
-#if defined(__APPLE__) && defined(__MACH__)
-    extern int optreset;
-    optreset = 1; /* in BSD, optreset=1 reset getopt */
-    optind = 1; 
-#else
-    optind = 0; /* in GNU, optind=0 reset getopt */
-#endif
-
-    while( (opt = getopt(argc, argv, "pvrdel:ns")) != -1)
+    while( (opt = my_getopt(argc, argv, "pvrdel:ns")) != -1)
     {
       switch(opt)
       {
@@ -83,7 +76,7 @@ int main(int argc, char **argv)
         
         case 'l': /* Load parameter prior */
           flag_load_prior = 1;
-          strcpy(prior_file, optarg);
+          strcpy(prior_file, my_optarg);
           printf("# Load parameter prior from %s.\n", prior_file);
           break;
         
@@ -98,14 +91,14 @@ int main(int argc, char **argv)
           break;
         
         case '?':
-          printf("# Incorrect option -%c %s.\n", optopt, optarg);
+          printf("# Incorrect option -%c %s.\n", my_optopt, my_optarg);
           exit(0);
           break;
       }
     }
 
-    if(optind < argc ) // parameter file is specified 
-      strcpy(parset.param_file, argv[optind]); /* copy input parameter file */
+    if(my_optind < argc ) // parameter file is specified 
+      strcpy(parset.param_file, argv[my_optind]); /* copy input parameter file */
     else
     {
       fprintf(stderr, "# Error: No parameter file specified!\n");
@@ -113,15 +106,15 @@ int main(int argc, char **argv)
     }
     
     strcpy(dnest_options_file_line, "\0"); /* empty the string */
-    if(optind+1 < argc)
+    if(my_optind+1 < argc)
     {
-      strcpy(dnest_options_file_line, argv[optind+1]); /* copy input OPTIONS1D file */
+      strcpy(dnest_options_file_line, argv[my_optind+1]); /* copy input OPTIONS1D file */
     }
     
     strcpy(dnest_options_file_con, "\0"); /* empty the string */
-    if(optind+2 < argc)
+    if(my_optind+2 < argc)
     {
-      strcpy(dnest_options_file_con, argv[optind+2]); /* copy input OPTIONSCON file */
+      strcpy(dnest_options_file_con, argv[my_optind+2]); /* copy input OPTIONSCON file */
     }
   }
   MPI_Bcast(&flag_postprc, 1, MPI_INT, roottask, MPI_COMM_WORLD);

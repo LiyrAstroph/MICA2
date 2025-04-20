@@ -72,15 +72,16 @@ static int handle_nonopt_argv = 0;
 
 static enum
 {
-  REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER
-} ordering;
+  MY_REQUIRE_ORDER, MY_PERMUTE, MY_RETURN_IN_ORDER
+} my_ordering;
 
 /* Describe the part of ARGV that contains non-options that have
    been skipped.  `first_nonopt' is the index in ARGV of the first of them;
-   `last_nonopt' is the index after the last of them.  */
+   `last_nonopt' is the index after the last of them.  
+   Valid only when PERMUTE */
 
-static int first_nonopt;
-static int last_nonopt;
+static int my_first_nonopt;
+static int my_last_nonopt;
 
 /* Describe how to deal with options that follow non-option ARGV-elements.
 
@@ -136,20 +137,24 @@ static void check_gnu_extension(const char *optstring)
   if (optstring[0] == '+' || getenv("POSIXLY_CORRECT") != NULL) 
   {
     posixly_correct = 1;
+    my_ordering = MY_REQUIRE_ORDER;
   } 
   else 
   {
     posixly_correct = 0;
+    my_ordering = MY_PERMUTE;
   }
 
   /* "-" means keeping argv in order as input */
   if (optstring[0] == '-') 
   {
     handle_nonopt_argv = 1;
+    my_ordering = MY_RETURN_IN_ORDER;
   } 
   else 
   {
     handle_nonopt_argv = 0;
+    my_ordering = MY_PERMUTE;
   }
 }
 
@@ -242,6 +247,8 @@ static int my_getopt_internal(int argc, char * const argv[], const char *optstri
   /* static start and end are initiated to 0 
    * start points to the current non-option argument
    * end points to the next option argument
+   * 
+   * start = 0 means no need to permute
    */
   static int start, end;
 
@@ -262,6 +269,7 @@ static int my_getopt_internal(int argc, char * const argv[], const char *optstri
     my_optind = 1;
     my_optnext = NULL;
     start = end = 0;
+    my_first_nonopt = my_last_nonopt = 1; /* 0th argument is always program name */
   }
 
   /* skip the beginning "+" or "-" */
@@ -275,7 +283,7 @@ static int my_getopt_internal(int argc, char * const argv[], const char *optstri
   /* advace scan and permute argv */
   if (my_optnext == NULL && start != 0) 
   {
-    int last_pos = my_optind - 1;
+    int last_pos = my_optind - 1; 
    
     /* because non-option arguments are placed at the end, update optind accordingly */
     my_optind -= end - start;
@@ -284,7 +292,10 @@ static int my_getopt_internal(int argc, char * const argv[], const char *optstri
       my_optind = 1;
     }
 
-    /* place the non-option arguments at the end */
+    /* place the non-option arguments at the end 
+     * when end == start, non-option arguments are moved to the end, stop loop.
+     */
+    my_last_nonopt = end;
     while (start < end--) 
     {
       int i;
@@ -296,6 +307,9 @@ static int my_getopt_internal(int argc, char * const argv[], const char *optstri
       }
       ((char const **)argv)[i] = arg;
       last_pos--;
+
+      /* store the index of the first non-option argument */
+      my_first_nonopt = i;
     }
     start = 0; 
   }
@@ -552,6 +566,8 @@ found:
   return opt->flag ? 0 : opt->val;
 }
 
+/*===========================================================*/
+#ifdef MYGETOPT_TEST
 
 static void print_opts(int opt, int argc, char **argv)
 {
@@ -578,9 +594,6 @@ static void print_opts(int opt, int argc, char **argv)
       fprintf(stderr, "'%s'%c", argv[i], (i + 1 == argc) ? '\n' : ' ');
   }
 }
-
-/*===========================================================*/
-#ifdef MYGETOPT_TEST
 
 void test_short(int argc, char **argv)
 {
@@ -785,6 +798,8 @@ int main(int argc, char **argv)
   argv_copy = copy_argv(argc, argv);
   test_long(argc, argv);
   free_argv(argc, argv_copy);
+
+  printf("first-nonopt: %d %d\n", my_first_nonopt, my_last_nonopt);
 }
 
 #endif

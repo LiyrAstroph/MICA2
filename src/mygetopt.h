@@ -87,18 +87,20 @@ extern int my_getopt_long_only(int argc, char * const argv[], const char *optstr
                                const struct option *longopts, int *longindex);
 
 
-// #ifndef MY_GETOPT_NO_COMPAT_MACRO
-// #define getopt my_getopt
-// #define getopt_long my_getopt_long
-// #define getopt_long_only my_getopt_long_only
-// #define optarg my_optarg
-// #define optind my_optind
-// #define opterr my_opterr
-// #define optopt my_optopt
-// #define no_argument my_no_argument
-// #define required_argument my_required_argument
-// #define optional_argument my_optional_argument
-// #endif
+#define MY_GETOPT_NO_COMPAT_MACRO
+                               
+#ifndef MY_GETOPT_NO_COMPAT_MACRO
+#define getopt my_getopt
+#define getopt_long my_getopt_long
+#define getopt_long_only my_getopt_long_only
+#define optarg my_optarg
+#define optind my_optind
+#define opterr my_opterr
+#define optopt my_optopt
+#define no_argument my_no_argument
+#define required_argument my_required_argument
+#define optional_argument my_optional_argument
+#endif
 
 #if defined(__cplusplus)
 }

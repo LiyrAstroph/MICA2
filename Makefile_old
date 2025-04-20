@@ -31,15 +31,34 @@ ifeq (${FlagIntelMKL}, true)
   LAPACK_INCL = -I${MKLROOT}/include
   LAPACK_LIBS = -L${MKLROOT}/lib -lmkl_intel_ilp64 -lmkl_core -lmkl_gnu_thread -lgomp -lpthread 
 else 
-  LAPACK_INCL = -I/usr/include/lapacke
-  LAPACK_LIBS = -L/usr/lib64 -llapacke -llapack
+  LAPACK_INCL = $(shell pkg-config --cflags lapack) 
+  LAPACK_LIBS = $(shell pkg-config --libs lapack lapacke)
 endif
 
-#DNEST_INCL  = -I /home/liyropt/Projects/GIT/CDNest/
-#DNEST_LIBS  = -L /home/liyropt/Projects/GIT/CDNest -ldnest
+#MPICHINCL     = $(shell pkg-config --cflags mpich) 
+#MPICHLIB      = $(shell pkg-config --libs mpich) 
 
-MPICHINCL     = $(shell pkg-config --cflags mpich) 
-MPICHLIB    = $(shell pkg-config --libs mpich) 
+#HWLOC_INCL    = $(shell pkg-config --cflags hwloc) 
+#HWLOC_LIBS    = $(shell pkg-config --libs hwloc) 
+endif
+
+ifeq ($(SYSTEM), "Darwin")
+GSL_INCL    = $(shell pkg-config --cflags gsl) 
+GSL_LIBS    = $(shell pkg-config --libs gsl) 
+
+ifeq (${FlagIntelMKL}, true)
+  LAPACK_INCL = -I${MKLROOT}/include
+  LAPACK_LIBS = -L${MKLROOT}/lib -lmkl_intel_ilp64 -lmkl_core -lmkl_gnu_thread -lgomp -lpthread 
+else 
+  LAPACK_INCL = $(shell pkg-config --cflags lapack) 
+  LAPACK_LIBS = $(shell pkg-config --libs lapack lapacke)
+endif
+
+#MPICHINCL     = $(shell pkg-config --cflags mpich) 
+#MPICHLIB    = $(shell pkg-config --libs mpich) 
+
+HWLOC_INCL    = $(shell pkg-config --cflags hwloc) 
+HWLOC_LIBS    = $(shell pkg-config --libs hwloc) 
 endif
 
 ifeq ($(SYSTEM), "Cluster")
@@ -86,8 +105,8 @@ INCL     = Makefile_old $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h   \
            $(SRC)/mygetopt.h
 
 OPTIONS  = $(OPTIMIZE)
-CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL) $(CDN_INCL)
-LIBS     = $(GSL_LIBS) $(LAPACK_LIBS) $(MPICHLIB) $(FFTW_LIBS)
+CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL) $(CDN_INCL) $(HWLOC_INCL)
+LIBS     = $(GSL_LIBS) $(LAPACK_LIBS) $(MPICHLIB) $(FFTW_LIBS) $(HWLOC_LIBS)
 
 $(EXEC):$(OBJS)
 	cd $(SRC)

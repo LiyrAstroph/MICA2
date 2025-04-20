@@ -21,9 +21,43 @@ Third-party package dependence
 
   * **CMake** ---- the compilation tool, downloaded at https://cmake.org/download/
 
-Note that in Linux system, there are package managers that can install the above libraries convienently. 
-If so, use them. In this case, the libraries usually are installed in standard environment path. Otherwise, any of the above 
-libraries is not installed in standard locations in your system, the compiling configurations below may need slight adjustments.
+Note that one does not need to compile the above packages from the sourcecode. Using package managers will be more convenient.
+
+- On Linux system, there are package managers that can install the above libraries convienently. 
+  If so, use them, e.g., for Fedora/Redhat distribution 
+
+  .. code-block:: bash 
+
+    dnf install mpich mpich-devel hwloc hwloc-devel gsl gsl-devel lapack lapack-dvel
+
+  In this case, the libraries usually are installed in standard environment path. Otherwise, any of the above 
+  libraries is not installed in standard locations in your system, the compiling configurations below may need slight adjustments.
+
+- On MacOS, one can use `homebrew <https://brew.sh>`_ package manager to install the required packages
+
+  .. code-block:: bash 
+
+    brew install mpich hwloc gsl lapack
+
+  To make lapack and hwloc finndable by pkgconfig, export the paths of ``lapack.pc`` and ``hwloc.pc`` to the 
+  environment  ``PKG_CONFIG_PATH``. For example, if lapack is installed at ``/opt/homebrew/opt/lapack`` and 
+  hwloc is installed at ``/opt/homebrew/opt/hwloc``, then execute the commands
+
+  .. code-block:: bash
+
+    export PKG_CONFIG_PATH=/opt/homebrew/opt/lapack/lib/pkgconfig:$PKG_CONFIG_PATH
+    export PKG_CONFIG_PATH=/opt/homebrew/opt/hwloc/lib/pkgconfig:$PKG_CONFIG_PATH
+  
+  or put the above commands into ``.bashrc``.  If the above commands do not work, one can also add the paths to 
+  the environments ``LDFLAGS`` and ``CFLAGS`` in the terminal 
+
+  .. code-block:: bash 
+    
+    export LDFLAGS=-L/opt/homebrew/opt/lapack/lib:$LDFLAGS
+    export CPPFLAGS=-I/opt/homebrew/opt/lapack/include:$CPPFLAGS
+    
+    export LDFLAGS=-L/opt/homebrew/opt/hwloc/lib:$LDFLAGS
+    export CPPFLAGS=-I/opt/homebrew/opt/hwloc/include:$CPPFLAGS
 
 For Intel CPUs, the Intel OneAPI MKL library provides optimized interfaces to LAPACKE and BLAS libraries. Using MKL libraray can improve
 the running speed and it is therefore highly recommended. MICA automatically checks the system environment variable ``MKLROOT`` to 

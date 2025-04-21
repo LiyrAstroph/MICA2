@@ -90,6 +90,7 @@ EXEC     = mica2
 SRC      = ./src
 CDN      = ./cdnest
 CDN_INCL = -I$(CDN)
+SRC_INCL = -I$(SRC)
 OBJS     = $(SRC)/main.o $(SRC)/allvars.o $(SRC)/system.o $(SRC)/run.o        \
            $(SRC)/dnest_con.o  $(SRC)/dnest_line.o $(SRC)/read.o              \
            $(SRC)/mc_con.o $(SRC)/init.o $(SRC)/mathfun.o                     \
@@ -105,7 +106,9 @@ INCL     = Makefile_old $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h   \
            $(SRC)/mygetopt.h
 
 OPTIONS  = $(OPTIMIZE)
-CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL) $(CDN_INCL) $(HWLOC_INCL)
+CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL) \
+           $(CDN_INCL) $(HWLOC_INCL) $(SRC_INCL)
+           
 LIBS     = $(GSL_LIBS) $(LAPACK_LIBS) $(MPICHLIB) $(FFTW_LIBS) $(HWLOC_LIBS)
 
 $(EXEC):$(OBJS)

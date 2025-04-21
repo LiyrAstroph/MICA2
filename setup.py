@@ -41,21 +41,45 @@ def configure_gsl():
   if pkgconfig.exists('gsl'):
     gslconf = pkgconfig.parse('gsl')
   else:
-    raise SystemError("Not found GS installed.")
+    raise SystemError("Not found GSL installed.")
 
   return gslconf
+
+def configure_hwloc():
+  """
+  get configuration of hwloc
+  """
+  if pkgconfig.exists('hwloc'):
+    hwlocconf = pkgconfig.parse('hwloc')
+  else:
+    raise SystemError("Not found hwloc installed.")
+
+  return hwlocconf
+
+def configure_lapack():
+  """
+  get configuration of lapck
+  """
+  if pkgconfig.exists('lapack'):
+    lapackconf = pkgconfig.parse('lapack')
+  else:
+    raise SystemError("Not found Lapack installed.")
+
+  return lapackconf
 
 mpiconf = configure_mpi()
 gslconf = configure_gsl()
 
-lapack_include_dir=[]
-lapack_library_dir=[]
+#======================================================================
+#in MacOS, sometimes hwloc library is not found, specify the path here
+hwlocconf = configure_hwloc()
+#======================================================================
 
 basedir = os.path.dirname(os.path.abspath(__file__))
 homedir = os.environ['HOME']
 include_dirs = [basedir, os.path.join(basedir, "src"), numpy.get_include(),] + mpiconf['include_dirs'] \
-              +[os.path.join(basedir, "cdnest"),] + gslconf['include_dirs'] + lapack_include_dir
-library_dirs = [basedir] + mpiconf['library_dirs'] + gslconf['library_dirs'] + lapack_library_dir
+              +[os.path.join(basedir, "cdnest"),] + gslconf['include_dirs'] + hwlocconf['include_dirs']
+library_dirs = [basedir] + mpiconf['library_dirs'] + gslconf['library_dirs'] + hwlocconf['library_dirs']
 
 if os.name == 'nt':  # Windows, assumming MSVC compiler
   libraries = ['dnest']
@@ -68,6 +92,9 @@ elif os.name == 'posix':  # UNIX, assumming GCC compiler
     libraries = ['m', 'c', 'gsl', 'mkl_intel_ilp64', 'mkl_core', 'mkl_gnu_thread', 'gomp', 'pthread', ] 
     compiler_args = ['-DIntelMKL',]
   else:
+    lapackconf = configure_lapack()
+    include_dirs += lapackconf['include_dirs']
+    library_dirs += lapackconf['library_dirs']
     libraries = ['m', 'c', 'gsl', 'gslcblas', 'lapack', 'lapacke']
     compiler_args = []
   

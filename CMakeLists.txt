@@ -25,6 +25,7 @@ endif()
 set(SRC "src")
 set(CDNEST "cdnest")
 include_directories(${CDNEST})
+include_directories(${SRC})
 
 add_executable(${CMAKE_PROJECT_NAME}
   ${SRC}/main.c

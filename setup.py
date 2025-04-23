@@ -58,10 +58,10 @@ def configure_hwloc():
 
 def configure_lapack():
   """
-  get configuration of lapck
+  get configuration of lapck/lapacke
   """
-  if pkgconfig.exists('lapack'):
-    lapackconf = pkgconfig.parse('lapack')
+  if pkgconfig.exists('lapacke'):
+    lapackconf = pkgconfig.parse('lapacke')
   else:
     raise SystemError("Not found Lapack installed.")
 
@@ -98,7 +98,7 @@ elif os.name == 'posix':  # UNIX, assumming GCC compiler
     libraries = ['m', 'c', 'gsl', 'gslcblas', 'lapack', 'lapacke']
     compiler_args = []
   
-  libraries += mpiconf['libraries']
+  libraries += mpiconf['libraries'] + hwlocconf['libraries']
   compiler_args += ['-O3', '-ffast-math', '-fcommon', '-std=c11'] 
   link_args = []
 

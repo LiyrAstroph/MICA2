@@ -15,6 +15,16 @@ ifeq (${FlagIntelMKL}, true)
   OPTIMIZE += -DIntelMKL
 endif
 
+# test pkg-config or pkgconf
+PKGCONF = 
+ifneq ($(shell which pkgconf),)
+  PKGCONF = pkgconf 
+else ifneq ((shell which pkg-config),)
+  PKGCONF = pkg-config
+else 
+  $(error "pkgconf is not installed on the system.")
+endif
+
 #------------target system---------
 #SYSTEM="Darwin"
 SYSTEM="Linux"
@@ -24,41 +34,41 @@ SYSTEM="Linux"
 #=======================================================
 # make editing according to your system's configurations
 ifeq ($(SYSTEM), "Linux")
-GSL_INCL    = $(shell pkg-config --cflags gsl) 
-GSL_LIBS    = $(shell pkg-config --libs gsl) 
+GSL_INCL    = $(shell ${PKGCONF} --cflags gsl) 
+GSL_LIBS    = $(shell ${PKGCONF} --libs gsl) 
 
 ifeq (${FlagIntelMKL}, true)
   LAPACK_INCL = -I${MKLROOT}/include
   LAPACK_LIBS = -L${MKLROOT}/lib -lmkl_intel_ilp64 -lmkl_core -lmkl_gnu_thread -lgomp -lpthread 
 else 
-  LAPACK_INCL = $(shell pkg-config --cflags lapack) 
-  LAPACK_LIBS = $(shell pkg-config --libs lapack lapacke)
+  LAPACK_INCL = $(shell ${PKGCONF} --cflags lapack) 
+  LAPACK_LIBS = $(shell ${PKGCONF} --libs lapack lapacke)
 endif
 
-#MPICHINCL     = $(shell pkg-config --cflags mpich) 
-#MPICHLIB      = $(shell pkg-config --libs mpich) 
+#MPICHINCL     = $(shell ${PKGCONF} --cflags mpich) 
+#MPICHLIB      = $(shell ${PKGCONF} --libs mpich) 
 
-#HWLOC_INCL    = $(shell pkg-config --cflags hwloc) 
-#HWLOC_LIBS    = $(shell pkg-config --libs hwloc) 
+#HWLOC_INCL    = $(shell ${PKGCONF} --cflags hwloc) 
+#HWLOC_LIBS    = $(shell ${PKGCONF} --libs hwloc) 
 endif
 
 ifeq ($(SYSTEM), "Darwin")
-GSL_INCL    = $(shell pkg-config --cflags gsl) 
-GSL_LIBS    = $(shell pkg-config --libs gsl) 
+GSL_INCL    = $(shell ${PKGCONF} --cflags gsl) 
+GSL_LIBS    = $(shell ${PKGCONF} --libs gsl) 
 
 ifeq (${FlagIntelMKL}, true)
   LAPACK_INCL = -I${MKLROOT}/include
   LAPACK_LIBS = -L${MKLROOT}/lib -lmkl_intel_ilp64 -lmkl_core -lmkl_gnu_thread -lgomp -lpthread 
 else 
-  LAPACK_INCL = $(shell pkg-config --cflags lapack) 
-  LAPACK_LIBS = $(shell pkg-config --libs lapack lapacke)
+  LAPACK_INCL = $(shell ${PKGCONF} --cflags lapack) 
+  LAPACK_LIBS = $(shell ${PKGCONF} --libs lapack lapacke)
 endif
 
-#MPICHINCL     = $(shell pkg-config --cflags mpich) 
-#MPICHLIB    = $(shell pkg-config --libs mpich) 
+#MPICHINCL     = $(shell ${PKGCONF} --cflags mpich) 
+#MPICHLIB    = $(shell ${PKGCONF} --libs mpich) 
 
-HWLOC_INCL    = $(shell pkg-config --cflags hwloc) 
-HWLOC_LIBS    = $(shell pkg-config --libs hwloc) 
+HWLOC_INCL    = $(shell ${PKGCONF} --cflags hwloc) 
+HWLOC_LIBS    = $(shell ${PKGCONF} --libs hwloc) 
 endif
 
 ifeq ($(SYSTEM), "Cluster")

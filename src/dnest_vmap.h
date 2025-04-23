@@ -7,7 +7,7 @@
 
 #ifndef _DNEST_VMAP_H
 
-#define _DNEST_VAMP_H
+#define _DNEST_VMAP_H
 
 #include <stdbool.h>
 #include <stdio.h>

@@ -7,7 +7,7 @@
 
 #ifndef _DNEST_PMAP_H
 
-#define _DNEST_PAMP_H
+#define _DNEST_PMAP_H
 
 #include <stdbool.h>
 #include <stdio.h>

@@ -15,6 +15,9 @@ Third-party package dependence
     Note that in some cases, the package **hwloc** is not automatically installed when installing mpich. One needs to install it 
     and its development package **hwloc-devel** to use mpi.
 
+    There is another popular MPI library `OpenMPI <https://www.open-mpi.org/>`_. If one sticks to OpenMPI, make sure to use the same 
+    MPI library between compiling and running MICA.
+
   * **GSL** --- the GNU Scientific Library, downloaded at http://www.gnu.org/software/gs
 
   * **LAPACKE** --- the C-interface of LAPACK, downloaded at http://www.netlib.org/lapack/
@@ -39,7 +42,7 @@ Note that one does not need to compile the above packages from the sourcecode. U
 
     brew install mpich hwloc gsl lapack
 
-  To make lapack and hwloc finndable by pkgconfig, export the paths of ``lapack.pc`` and ``hwloc.pc`` to the 
+  To make lapack and hwloc findable by pkgconfig, export the paths of ``lapack.pc`` and ``hwloc.pc`` to the 
   environment  ``PKG_CONFIG_PATH``. For example, if lapack is installed at ``/opt/homebrew/opt/lapack`` and 
   hwloc is installed at ``/opt/homebrew/opt/hwloc``, then execute the commands
 
@@ -101,7 +104,27 @@ the command
 Python Callable Version: ``pymica``
 -------------------------------
 
-Make installation using the command 
+The Python package `mpi4py <https://pypi.org/project/mpi4py/>`_ is required. Install it using ``pip``
+
+.. code-block:: bash 
+
+  python -m pip install mpi4py
+
+Note that ``pip`` keeps previously built wheel files on its cache for future reuse. 
+If you want to reinstall the mpi4py package using a different or updated MPI implementation, 
+you have to either first remove the cached wheel file with
+
+.. code-block:: bash 
+  
+  python -m pip cache remove mpi4py
+
+or ask ``pip`` to disable the cache:
+
+.. code-block:: bash
+  
+  python -m pip install --no-cache-dir mpi4py
+
+Now install MICA using the command 
 
 .. code:: bash 
 

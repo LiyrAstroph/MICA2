@@ -115,4 +115,12 @@ For python version, ``mica`` provide a module ``pmap`` callable as follows.
     
     model.plot_results() # plot results
     model.post_process()  # generate plots for the properties of MCMC sampling
-  
+
+
+Here is an example for pmap analysis. The data is extracted from Fausnaugh et al. 2018, ApJ, 854, 10.
+
+.. figure:: _static/fig_pmap.jpg
+  :scale: 20 %
+  :align: center
+
+  An examplary result of MICA2 analysis with pmap mode. 

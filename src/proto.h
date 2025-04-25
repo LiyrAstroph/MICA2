@@ -41,6 +41,7 @@ void print_version();
 void load_par_names(char *fname);
 void set_drw_par_range_load();
 void set_prior_file(char *fname);
+int check_time_sorted(double *time_series, int n);
 
 /* for con */
 double dnest_con(int argc, char **argv);

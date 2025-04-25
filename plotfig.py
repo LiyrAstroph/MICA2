@@ -584,7 +584,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
             if j != len(ns)-1:
               ax.xaxis.set_tick_params(labelbottom=False)
             else:
-              ax.set_xlabel("$\log R$")
+              ax.set_xlabel(r"$\log R$")
 
             if j == 1:
               ax.set_title("Response Ratio")

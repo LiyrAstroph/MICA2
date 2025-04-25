@@ -612,6 +612,13 @@ int read_data()
       }
       fscanf(fp, "\n");
 
+      /* check whether time is sorted */
+      if(check_time_sorted(dataset[i].con.t, dataset[i].con.n)==1)
+      {
+        printf("--- continuum of %d-th set.\n", i);
+        exit(0);
+      }
+
       /* line */
       for(j=0; j<dataset[i].nlset; j++)
       {
@@ -625,6 +632,13 @@ int read_data()
           fscanf(fp, "%lf %lf %lf\n", &(dataset[i].line[j].t[k]), &(dataset[i].line[j].f[k]), &(dataset[i].line[j].fe[k]));
         }
         fscanf(fp, "\n");
+
+        /* check whether time is sorted */
+        if(check_time_sorted(dataset[i].line[j].t, dataset[i].line[j].n) == 1)
+        {
+          printf("--- %d-th line of %d-th set.\n", j, i);
+          exit(0);
+        }
       }
     }
   }
@@ -1113,4 +1127,25 @@ void get_seasonal_gap_allset()
     gap_width[j] /= 2.0;
   }
   return;
+}
+
+/*!
+ * check whether data is sorted in time.
+ * 
+ */
+int check_time_sorted(double *time_series, int n)
+{
+  int i;
+  double dt;
+
+  for(i=1; i<n; i++)
+  {
+    dt = time_series[i] - time_series[i-1];
+    if(dt < 0.0)
+    {
+      printf("light curve data are not in ascending order in time.\n");
+      return 1;
+    }
+  }
+  return 0;
 }

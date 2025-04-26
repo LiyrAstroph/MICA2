@@ -19,13 +19,13 @@ Rename the above files as
 
   cp restart_dnest1d.txt_yy_xxx restart_dnest1d.txt_yy     # namely, remove "_xxx"
 
-Then change the step numbers in the option files (e.g., param/OPTIONS1D) and resume from last run as 
+Then change the step numbers in the param file and resume from last run as 
 
 .. code:: bash 
   
-  mpiexec -n np ./mica2 para/param param/OPTIONS1D -r 
+  mpiexec -n np ./mica2 para/param -r 
 
 where "np" is the number of cores. It must be the same as the number of cores used in last run.
 
-In the Python verson `pymica`, a function `restart()` is provided to do resuming from last run. See 
+In the Python verson `pymica`, a function `restart()` is provided to resume from last run. See 
 the Python script `example.py` in the subfolder `tests/python` in the source package.

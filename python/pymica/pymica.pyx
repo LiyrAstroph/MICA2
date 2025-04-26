@@ -639,6 +639,7 @@ cdef class gmodel(basis):
     set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
+    mc_con()
     mc_line()
     end_run()
     return
@@ -810,6 +811,7 @@ cdef class pmap(basis):
     set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
+    mc_con()
     mc_pmap()
     end_run()
     return
@@ -1028,6 +1030,7 @@ cdef class vmap(basis):
     set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
+    mc_con()
     mc_vmap()
     end_run()
     return

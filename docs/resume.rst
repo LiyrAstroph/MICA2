@@ -17,7 +17,6 @@ Rename the above files as
 
 .. code:: bash
 
-  cp restart_dnest.txt_xxx restart_dnest.txt
   cp restart_dnest1d.txt_yy_xxx restart_dnest1d.txt_yy     # namely, remove "_xxx"
 
 Then change the step numbers in the option files (e.g., param/OPTIONS1D) and resume from last run as 

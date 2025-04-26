@@ -24,7 +24,17 @@ void begin_run()
   /* do not need to run mc_con if only postprocessing */
   if(flag_postprc!=1 && flag_decomp != 1 && parset.model != vmap)
   {
-    mc_con();
+    /* if restart, only postprocess continuum to get the parameters */
+    if(flag_restart == 1)
+    {
+      flag_postprc = 1;
+      mc_con();
+      flag_postprc = 0;
+    }
+    else 
+    {
+      mc_con();
+    }
   }
   
   if(parset.model == gmodel)

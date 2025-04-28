@@ -5,6 +5,12 @@
  * Jun 22, 2018
  */
 
+/* in some cases, fileno, not being a standard C function, 
+ * is simply not declared in the <stdio.h> header. 
+ * the function is declared when e.g., _POSIX_SOURCE is defined.
+ */
+#define _POSIX_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

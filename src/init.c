@@ -5,12 +5,6 @@
  * Jun 22, 2018
  */
 
-/* in some cases, fileno, not being a standard C function, 
- * is simply not declared in the <stdio.h> header. 
- * the function is declared when e.g., _POSIX_SOURCE is defined.
- */
-#define _POSIX_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -21,6 +15,12 @@
 
 #include "allvars.h"
 #include "proto.h"
+
+/* 
+ * in some cases, fsyno and fileno are not explicited defined.
+ */
+extern int fsync(int fd);
+extern int fileno(FILE *stream);
 
 void init()
 {

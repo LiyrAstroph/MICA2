@@ -39,9 +39,10 @@ model = pymica.vmap()
 
 # use Gaussians
 model.setup(data=data_input, type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=5000)
-
-# or use tophats
-#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=2000)
+# gaussian:    type_tf = "gaussian"
+# tophat:      type_tf = "tophat"
+# exponential: type_tf = "exp"
+# gamma (k=2): type_tf = "gamma"
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,

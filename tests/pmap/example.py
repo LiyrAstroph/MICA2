@@ -47,7 +47,10 @@ model = pymica.pmap()
 model.setup(data=data_input, type_tf='gaussian', max_num_saves=5000, lag_prior=[[-5, 5],[0, 50]], \
             ratio_prior=[[0.05, 0.5]], flag_con_sys_err=True, flag_line_sys_err=True, width_limit=[0.01, 100])
 
-# if using top-hats, set type_tf='tophat'
+# gaussian:    type_tf = "gaussian"
+# tophat:      type_tf = "tophat"
+# exponential: type_tf = "exp"
+# gamma (k=2): type_tf = "gamma"
 
 #run mica
 model.run()

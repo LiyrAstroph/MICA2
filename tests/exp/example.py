@@ -52,10 +52,10 @@ model = pymica.gmodel()
 # use gamma
 model.setup(data=data_input, type_tf='exp', lag_limit=[0, 50], number_component=[2, 2], max_num_saves=2000)
 # for gamma tf, lag_limit mean the time shift of the gamma function
-# gaussians: type_tf = "gaussian"
-# tophats: type_tf = "tophat"
-# gamma:   tyep_tf = "gamma"
-# exp:     type_tf = "exp"
+# gaussian:    type_tf = "gaussian"
+# tophat:      type_tf = "tophat"
+# exponential: type_tf = "exp"
+# gamma (k=2): type_tf = "gamma"
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,

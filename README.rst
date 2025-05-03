@@ -75,7 +75,10 @@ Edit a Python script named, e.g., example.py, as the following.
   
   model = pymica.gmodel()
   model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[2, 2], max_num_saves=200)
-  # if using tophats, set type_tf='tophat'
+  # gaussian:    type_tf = "gaussian"
+  # tophat:      type_tf = "tophat"
+  # exponential: type_tf = "exp"
+  # gamma (k=2): type_tf = "gamma"
   
   #the full arguments are 
   #model.setup(data_file=None, data=None,
@@ -168,7 +171,10 @@ does not contain those contaminations and purely reflects continuum variations.
     
   model = pymica.pmap()
   model.setup(data=data_input, type_tf='gaussian', max_num_saves=2000, lag_prior=[[-5, 5],[0, 50]], ratio_prior=[0.01, 0.5])
-  # if using tophats, set type_tf='tophat'
+  # gaussian:    type_tf = "gaussian"
+  # tophat:      type_tf = "tophat"
+  # exponential: type_tf = "exp"
+  # gamma (k=2): type_tf = "gamma"
     
   #run mica
   model.run()
@@ -217,7 +223,10 @@ similar to the normal modes.
   
   model = pymica.vmap()
   model.setup(data=data_input, type_tf='gaussian', lag_limit=[-2, 5], number_component=[1, 1], max_num_saves=2000)
-  # if using tophats, set type_tf='tophat'
+  # gaussian:    type_tf = "gaussian"
+  # tophat:      type_tf = "tophat"
+  # exponential: type_tf = "exp"
+  # gamma (k=2): type_tf = "gamma"
   # see the documentation for the format of vmap data.
 
   #run mica

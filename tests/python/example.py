@@ -44,11 +44,10 @@ data_input = comm.bcast(data_input, root=0)
 model = pymica.gmodel()
 # use Gaussians
 model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=500)
-
-# or use tophats
-#model.setup(data=data_input, type_tf='tophat', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=2000)
-# or use gammas
-#model.setup(data=data_input, type_tf='gamma', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=2000)
+# gaussian:    type_tf = "gaussian"
+# tophat:      type_tf = "tophat"
+# exponential: type_tf = "exp"
+# gamma (k=2): type_tf = "gamma"
 
 #the full arguments are 
 #model.setup(data_file=None, data=None,

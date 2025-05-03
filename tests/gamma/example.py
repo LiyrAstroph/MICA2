@@ -52,8 +52,10 @@ model = pymica.gmodel()
 # use gamma
 model.setup(data=data_input, type_tf='gamma', lag_limit=[10, 30], number_component=[1, 1], max_num_saves=2000)
 # for gamma tf, lag_limit mean the time shift of the gamma function
-# gaussians: type_tf = "gaussian"
-# tophats: type_tf = "tophat"
+# gaussian:    type_tf = "gaussian"
+# tophat:      type_tf = "tophat"
+# exponential: type_tf = "exp"
+# gamma (k=2): type_tf = "gamma"
 
 
 
@@ -86,7 +88,7 @@ model.run()
 # plot results
 if rank == 0:
   
-  model.plot_results(doshow=True, resp_input="resp_input.txt") # plot results, doshow controls whether showing the results on screen
+  model.plot_results(doshow=True, resp_input="resp_input.txt", show_pmax=True) # plot results, doshow controls whether showing the results on screen
   model.post_process()  # generate plots for the properties of MCMC sampling 
 
   # get the full sample 

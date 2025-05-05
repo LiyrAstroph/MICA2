@@ -434,7 +434,18 @@ cdef class basis:
       raise ValueError("prior_file should be a string!")
     
     return
-
+  
+  def prepare(self, last_steps=None):
+    """
+    prepare files for restart
+    """
+    from shutil import copy
+    
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1):
+      src = self.parset.file_dir.decode("UTF-8")+"/data/restart_dnest1d.txt_%d_%d"%(i, last_steps)
+      dst = self.parset.file_dir.decode("UTF-8")+"/data/restart_dnest1d.txt_%d"%(i)
+      copy(src, dst)
+    
 
 #==========================================================================
 # general model 
@@ -639,7 +650,9 @@ cdef class gmodel(basis):
     set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
+    set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
     mc_con()
+    set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
     mc_line()
     end_run()
     return
@@ -811,7 +824,9 @@ cdef class pmap(basis):
     set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
+    set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
     mc_con()
+    set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
     mc_pmap()
     end_run()
     return
@@ -1030,7 +1045,9 @@ cdef class vmap(basis):
     set_argv(0, 0, 1, 0, 0)
     read_data()
     init()
+    set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
     mc_con()
+    set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
     mc_vmap()
     end_run()
     return

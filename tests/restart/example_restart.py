@@ -1,5 +1,12 @@
 # 
-# an exemplary script to show the usage of pymica
+# an exemplary script to show how to resume from the last run
+#
+# include two scripts,
+# 1) example_initial.py: do a run 
+# 2) example_restart.py: resume from the run
+
+# this is the script for resuming the last run
+# you need to firstly execute "example_initial.py" to do a run
 #
 # Yan-Rong Li, liyanrong@mail.ihep.ac.cn
 # Jun 22, 2018
@@ -9,6 +16,7 @@ from mpi4py import MPI
 import numpy as np
 import pymica
 import matplotlib.pyplot as plt
+import shutil
 
 # initiate MPI
 comm = MPI.COMM_WORLD
@@ -43,7 +51,7 @@ data_input = comm.bcast(data_input, root=0)
 
 model = pymica.gmodel()
 # use Gaussians
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=500)
+model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_component=[1, 2], max_num_saves=1000)
 # gaussian:    type_tf = "gaussian"
 # tophat:      type_tf = "tophat"
 # exponential: type_tf = "exp"
@@ -65,17 +73,15 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #            lam=10, beta=100, ptol=0.1, 
 #            max_num_levels=0)
 
-#run mica
-model.run()
+
+# prepare the snapshorts
+# this will copy "restart_dnest1d.txt_xx_yyyy" to "restart_dnest1d.txt_xx",
+#                xx: number of components; yyyy: steps from which to resume
+#
+model.prepare(last_steps=500)
 
 #resume from last run
-# model.restart()
-
-#posterior run, only re-generate posterior samples, do not run MCMC
-# model.post_run()
-
-#do decomposition for the cases of multiple components 
-# model.decompose()
+model.restart()
 
 # plot results
 if rank == 0:
@@ -84,30 +90,3 @@ if rank == 0:
   # 
   model.plot_results(doshow=True, tf_lag_range=None, hist_lag_range=None, hist_bins=None) 
   model.post_process()  # generate plots for the properties of MCMC sampling 
-
-  # get the full sample 
-  # sample is a list, each element contains an array of posterior samples
-  # sample[0] is for the case of number_component[0]
-  # sample[1] is for the case of number_component[1] 
-  # ...
-  sample = model.get_posterior_sample()
-
-  # get the posterior sample of time lags of the "line" in the dataset "set"
-  # timelag is a list, each element contains an array of posterior samples
-  # timelag[0] is for the case of number_component[0]
-  # timelag[1] is for the case of number_component[1]
-  # ...
-  timelag = model.get_posterior_sample_timelag(set=0, line=0) 
-  plt.plot(timelag[1][:, 0])
-  plt.plot(timelag[1][:, 1])
-  plt.show()
-
-  # get the posterior sample of widths of the "line" in the dataset "set"
-  # width is a list, each element contains an array of posterior samples
-  # width[0] is for the case of number_component[0]
-  # width[1] is for the case of number_component[1]
-  # ...
-  width = model.get_posterior_sample_width(set=0, line=0) 
-  plt.plot(width[1][:, 0])
-  plt.plot(width[1][:, 1])
-  plt.show()

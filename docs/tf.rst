@@ -1,5 +1,5 @@
 ***************************************************
-Calculating Transfer Function and Its Uncertainties 
+Transfer Function and Its Uncertainties 
 ***************************************************
 
 ``mica2`` calculates the transfer function and its uncertainties from 

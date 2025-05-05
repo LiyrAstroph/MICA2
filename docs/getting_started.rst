@@ -102,7 +102,7 @@ the command
 
 
 Python Callable Version: ``pymica``
--------------------------------
+-----------------------------------
 
 The Python package `mpi4py <https://pypi.org/project/mpi4py/>`_ is required. Install it using ``pip``
 
@@ -159,7 +159,7 @@ The second way is editing the above generated option file ``OPTIONS1D`` and tran
 where ``OPTIONS1D`` is an options file stored in the directory ``param/``, 
 see :ref:`cdnest_label` for the detail.
 
-Parameter file
+Parameter File
 =============================
 
 A typical parameter file looks like::
@@ -387,7 +387,7 @@ After the above initialization, run the code as
 
 See :ref:`python_label` for a detailed guideline.
 
-Data format
+Data Format
 ==============================
 
 ``mica2`` reads data files with a format as::

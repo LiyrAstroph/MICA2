@@ -1,5 +1,5 @@
 # 
-# an examplary script to show the useage of pymica
+# an exemplary script to show the usage of pymica
 #
 # Yan-Rong Li, liyanrong@mail.ihep.ac.cn
 # Jun 22, 2018

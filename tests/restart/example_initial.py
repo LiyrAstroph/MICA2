@@ -1,5 +1,12 @@
 # 
-# an exemplary script to show the usage of pymica
+# an exemplary script to show how to resume from the last run
+#
+# include two scripts,
+# 1) example_initial.py: do a run 
+# 2) example_restart.py: resume from the run
+#
+# this is the script for the initial run
+# after that, execute "example_restart.py" to resume the run
 #
 # Yan-Rong Li, liyanrong@mail.ihep.ac.cn
 # Jun 22, 2018
@@ -68,46 +75,9 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #run mica
 model.run()
 
-#resume from last run
-# model.restart()
-
-#posterior run, only re-generate posterior samples, do not run MCMC
-# model.post_run()
-
-#do decomposition for the cases of multiple components 
-# model.decompose()
-
 # plot results
 if rank == 0:
-  
   # plot results, doshow controls whether showing the results on screen
   # 
   model.plot_results(doshow=True, tf_lag_range=None, hist_lag_range=None, hist_bins=None) 
   model.post_process()  # generate plots for the properties of MCMC sampling 
-
-  # get the full sample 
-  # sample is a list, each element contains an array of posterior samples
-  # sample[0] is for the case of number_component[0]
-  # sample[1] is for the case of number_component[1] 
-  # ...
-  sample = model.get_posterior_sample()
-
-  # get the posterior sample of time lags of the "line" in the dataset "set"
-  # timelag is a list, each element contains an array of posterior samples
-  # timelag[0] is for the case of number_component[0]
-  # timelag[1] is for the case of number_component[1]
-  # ...
-  timelag = model.get_posterior_sample_timelag(set=0, line=0) 
-  plt.plot(timelag[1][:, 0])
-  plt.plot(timelag[1][:, 1])
-  plt.show()
-
-  # get the posterior sample of widths of the "line" in the dataset "set"
-  # width is a list, each element contains an array of posterior samples
-  # width[0] is for the case of number_component[0]
-  # width[1] is for the case of number_component[1]
-  # ...
-  width = model.get_posterior_sample_width(set=0, line=0) 
-  plt.plot(width[1][:, 0])
-  plt.plot(width[1][:, 1])
-  plt.show()

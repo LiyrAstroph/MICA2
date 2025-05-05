@@ -60,6 +60,10 @@ tests/exp/*
 !tests/exp/example.py
 !tests/exp/sim_data.txt
 !tests/exp/resp_input.txt
+!tests/restart
+!tests/restart/example_initial.py
+!tests/restart/example_restart.py
+!tests/restart/sim_data.txt
 cdnest/*
 !cdnest/*.[ch]
 !python/pymica/__init__.py

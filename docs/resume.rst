@@ -27,5 +27,5 @@ Then change the step numbers in the param file and resume from last run as
 
 where "np" is the number of cores. It must be the same as the number of cores used in last run.
 
-In the Python verson `pymica`, a function `restart()` is provided to resume from last run. See 
-the Python script `example.py` in the subfolder `tests/python` in the source package.
+In the Python verson `pymica`, the function `prepare()` copies the snapshots and the function `restart()` resumes from last run. See 
+the Python scripts the subfolder `tests/restart` in the source package.

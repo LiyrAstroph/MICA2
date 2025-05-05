@@ -32,8 +32,8 @@ Documentation
    gap.rst
    python.rst
    para_prior.rst
-   tests.rst
    negresp.rst
+   tests.rst
    list.rst
    faq.rst
 

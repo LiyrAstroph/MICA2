@@ -6,15 +6,35 @@
  */
 
 #include <string.h>
+#include <sys/stat.h>
+#include <stdio.h>
 
 #include "proto.h"
 #include "allvars.h"
 
 #include "proto.h"
 
+extern int stat(const char *path, struct stat *buf);
+
 void begin_run()
 {
   //strcat(parset.param_file, "src/param");
+  
+  /* check data/ and param/ directories */
+  if(thistask == roottask)
+  {
+    struct stat st;
+    if(stat("data/", &st) != 0 || !S_ISDIR(st.st_mode))
+    {
+      fprintf(stderr, "Error: data/ directory not found. Please create it.\n");
+      exit(1);
+    }
+    if(stat("param/", &st) != 0 || !S_ISDIR(st.st_mode))
+    {
+      fprintf(stderr, "Error: param/ directory not found. Please create it.\n");
+      exit(1);
+    }
+  }
 
   read_parset();
   read_data();

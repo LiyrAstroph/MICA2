@@ -61,6 +61,7 @@ tests/exp/*
 !tests/exp/sim_data.txt
 !tests/exp/resp_input.txt
 !tests/restart
+!tests/restart/*
 !tests/restart/example_initial.py
 !tests/restart/example_restart.py
 !tests/restart/sim_data.txt

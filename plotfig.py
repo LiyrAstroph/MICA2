@@ -14,6 +14,16 @@ import argparse
 
 __all__ = ["plot_results"]
 
+# set the default parameters for matplotlib
+plt.rcParams["xtick.top"] = True
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["ytick.right"] = True
+plt.rcParams["xtick.minor.visible"] = True
+plt.rcParams["ytick.minor.visible"] = True
+plt.rcParams["xtick.direction"] = "in"
+plt.rcParams["ytick.direction"] = "in"
+
 def calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line, id, il):
   """
   calculate transfer function given a set of parameters

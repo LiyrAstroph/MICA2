@@ -13,6 +13,16 @@ import configparser as cp
 from matplotlib.backends.backend_pdf import PdfPages
 import argparse
 
+# set the default parameters for matplotlib
+plt.rcParams["xtick.top"] = True
+plt.rcParams["xtick.bottom"] = True
+plt.rcParams["ytick.left"] = True
+plt.rcParams["ytick.right"] = True
+plt.rcParams["xtick.minor.visible"] = True
+plt.rcParams["ytick.minor.visible"] = True
+plt.rcParams["xtick.direction"] = "in"
+plt.rcParams["ytick.direction"] = "in"
+
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 

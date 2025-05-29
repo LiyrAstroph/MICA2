@@ -21,6 +21,7 @@ Documentation
    about.rst
    getting_started.rst
    prior.rst
+   sys_err.rst
    cdnest.rst
    resume.rst
    delay.rst

@@ -1,4 +1,4 @@
-.. sys_err_label:
+.. _sys_err_label:
 
 ************************
 Systematic Error Parameter

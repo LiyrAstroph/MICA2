@@ -5,7 +5,7 @@
 
 Welcome to MICA2's documentation!
 =================================
-A Non-parametric Approach to Constrain the Transfer Function in Reverberation Mapping.
+A Non-parametric Approach to Constrain the Transfer Function and Measure the Time Delay in Reverberation Mapping.
 
 The transfer function is expressed into a family of Gaussians and the continuum variability is described by a damped random walk.
 

@@ -2,7 +2,8 @@
 *********************
 What is MICA?
 *********************
-``mica2`` is a non-parameteric approach to analyze light curves in reverberation mapping and infer the transfer functions. 
+``mica2`` is a non-parameteric approach to analyze light curves in reverberation mapping and infer the 
+transfer functions and time delays. 
 A transfer function or delay map relates a time series  to its driving time series as
 
 .. math::
@@ -17,7 +18,8 @@ A transfer function or delay map relates a time series  to its driving time seri
 
 .. note::
   There is a factor :math:`1/\sqrt{2\pi}\omega_k` before the exponential 
-  in the above transfer function.
+  in the above transfer function, therefore, :math:`f_k` represents the 
+  response amplitide.
 
 .. figure:: _static/fig_sch_loc.jpg
   :scale: 50 %

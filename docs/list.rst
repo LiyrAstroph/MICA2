@@ -1,7 +1,7 @@
 ***********************************
 A List of References That Used MICA
 ***********************************
-Here is a list of references that used MICA in time lag analysis, retrieved from the NASA ADS (updated on Ju 14, 2024).
+Here is a list of references that used MICA in time lag analysis, retrieved from the NASA ADS (updated on Jul 14, 2024).
 
 - `Chelouche, D. et al. 2018, Nature Astronomy, 3, 251 <https://ui.adsabs.harvard.edu/abs/2019NatAs...3..251C/abstract>`_,
   *Direct evidence of non-disk optical continuum emission around an active black hole*

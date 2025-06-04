@@ -24,7 +24,7 @@ Third-party package dependence
 
   * **CMake** ---- the compilation tool, downloaded at https://cmake.org/download/
 
-Note that one does not need to compile the above packages from the sourcecode. Using package managers will be more convenient.
+Note that one does not need to compile the above packages from the source code. Using package managers will be more convenient.
 
 - On Linux system, there are package managers that can install the above libraries convienently. 
   If so, use them, e.g., for Fedora/Redhat distribution 

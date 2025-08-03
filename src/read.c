@@ -830,7 +830,81 @@ void scale_con_line()
 {
   int i, j, k;
   double mean, Rmax, fdmax, fdmin, scale;  /* mean flux, difference between max and min fluxes*/
+  int flag_norm = 0; /* by default use mean to do normalization  */
 
+  /* first determine whether using mean or Rmax to do normalizations */
+  if(thistask == roottask)
+  {
+    for(i=0; i<nset; i++)
+    {
+      if(parset.model != vmap )
+      {
+        /* continuum */
+        mean = 0.0;
+        fdmax = fdmin = dataset[i].con.f[0]; 
+        for(j=0; j<dataset[i].con.n; j++)
+        {
+          mean += dataset[i].con.f[j];
+
+          if(fdmax<dataset[i].con.f[j]) fdmax = dataset[i].con.f[j];
+          if(fdmin>dataset[i].con.f[j]) fdmin = dataset[i].con.f[j];
+        }
+        mean /= dataset[i].con.n;
+        Rmax = (fdmax-fdmin)/2.0;
+
+        /* check if the mean is positive*/
+        if(Rmax == 0.0)
+        {
+          printf("Error: the continuum of %d-th set is constant, without variability. \n", i);
+          exit(0);
+        }
+        else if(mean < Rmax/100.0)
+        {
+          flag_norm = 1;
+        }
+        else
+        {
+          flag_norm = 0;
+        }
+      }
+
+      /* line */
+      for(j=0; j<dataset[i].nlset; j++)
+      {
+        mean = 0.0;
+        fdmax = fdmin = dataset[i].line[j].f[0];
+        for(k=0; k<dataset[i].line[j].n; k++)
+        {
+          mean += dataset[i].line[j].f[k];
+
+          if(fdmax<dataset[i].line[j].f[k]) fdmax = dataset[i].line[j].f[k];
+          if(fdmin>dataset[i].line[j].f[k]) fdmin = dataset[i].line[j].f[k];
+        }
+        mean /= dataset[i].line[j].n;
+        Rmax = (fdmax-fdmin)/2.0;
+
+        /* check if the mean is positive*/
+        if(Rmax == 0.0)
+        {
+          printf("Error: the %d-th line of %d-th set is constant, without variability. \n", j, i);
+          exit(0);
+        }
+        else if(mean < Rmax/100.0 ) /* use Rmax to do normalization */
+        {
+          flag_norm = 1;
+        }
+        else if (flag_norm != 1) /* use mean to do normalization, not yet set to 1 */
+        {
+          flag_norm = 0;
+        }
+      }
+    }
+  }
+  
+  /* now broadcast the value */
+  MPI_Bcast(&flag_norm, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+
+  /* do the normalization */
   for(i=0; i<nset; i++)
   {
     if(parset.model != vmap )
@@ -848,32 +922,20 @@ void scale_con_line()
       mean /= dataset[i].con.n;
       Rmax = (fdmax-fdmin)/2.0;
 
-      /* check if the mean is positive*/
-      if(Rmax == 0.0)
-      {
-        if(thistask == 0)
-        {
-          printf("Error: the continuum of %d-th set is constant, without variability. \n", i);
-          exit(0);
-        }
-      }
-      else if(mean < Rmax/100.0)
+      if(flag_norm == 1) /* use Rmax to do normalization */
       {
         scale = Rmax;
         if(thistask == 0)
         {
-          printf("The mean of continuum of %d-th set is negative or too small (=%f)!\n", i, mean);
-          printf("Calculate Rmax=fmax-fmin (=%f)!\n", Rmax);
-          //printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
-          //exit(0);
+          printf("Calculate Rmax=fmax-fmin (=%f) of continuum of %d-th set!\n", Rmax, i);
         }
       }
-      else
+      else /* use mean to do normalization */
       {
         scale = mean;
         if(thistask == 0)
         {
-          printf("Calculate the mean (=%f) of %d-th set !\n", mean, i);
+          printf("Calculate the mean (=%f) of continuum of %d-th set!\n", mean, i);
         }
       }
 
@@ -918,27 +980,15 @@ void scale_con_line()
       mean /= dataset[i].line[j].n;
       Rmax = (fdmax-fdmin)/2.0;
 
-      /* check if the mean is positive*/
-      if(Rmax == 0.0)
-      {
-        if(thistask == 0)
-        {
-          printf("Error: the %d-th line of %d-th set is constant, without variability. \n", j, i);
-          exit(0);
-        }
-      }
-      else if(mean < Rmax/100.0)
+      if(flag_norm == 1) /* use Rmax to do normalization */
       {
         scale = Rmax;
         if(thistask == 0)
         {
-          printf("The mean of %d-th line of %d-th set is negative or too small (=%f)!\n", j, i, mean);
-          printf("Calculate Rmax=fmax-fmin (=%f)!\n", Rmax);
-          //printf("A positive mean is required becasue MICA first normalizes the light curve with its mean!\n");
-          //exit(0);
+          printf("Calculate Rmax=fmax-fmin (=%f) of the %d-th line of %d-th set!\n", Rmax, j, i);
         }
       }
-      else 
+      else /* use mean to do normalization */
       {
         scale = mean;
         if(thistask == 0)

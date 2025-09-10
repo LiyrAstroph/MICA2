@@ -1,7 +1,7 @@
 ***********************************
 A List of References That Used MICA
 ***********************************
-Here is a list of references that used MICA in time lag analysis, retrieved from the NASA ADS (updated on Jul 14, 2024).
+Here is a list of references that used MICA in time lag analysis, retrieved from the NASA ADS (updated on Sep 10, 2025).
 
 - `Chelouche, D. et al. 2018, Nature Astronomy, 3, 251 <https://ui.adsabs.harvard.edu/abs/2019NatAs...3..251C/abstract>`_,
   *Direct evidence of non-disk optical continuum emission around an active black hole*
@@ -38,6 +38,15 @@ Here is a list of references that used MICA in time lag analysis, retrieved from
   *Broad-line region in NGC 4151 monitored by two decades of reverberation mapping campaigns - I. 
   Evolution of structure and kinematics*
 
-- `Li, Y.-R. et al. 2024, ApJ, in press <https://ui.adsabs.harvard.edu/abs/2024arXiv240708120L/abstract>`_,
-  *Spectroastrometry and Reverberation Mapping (SARM) of Active Galactic Nuclei. I. The Hβ 
+- `Li, Y.-R. et al. 2024, ApJ, 974, 86 <https://ui.adsabs.harvard.edu/abs/2024arXiv240708120L/abstract>`_,
+  *Spectroastrometry and Reverberation Mapping of Active Galactic Nuclei. I. The Hβ 
   Broad-line Region Structure and Black Hole Mass of Five Quasars*
+
+- `Guo, W.-J., et al. 2025, A&A, 698, 134 <https://ui.adsabs.harvard.edu/abs/2025A%26A...698A.135G/abstract>`_,
+  *Multiple flares and asymmetric broad emission lines in a recurring changing-look active galactic nucleus*
+
+- `Fu, Y.-X., Li, Y.-R., et al. 2025, MNRAS, in press <https://ui.adsabs.harvard.edu/abs/2025MNRAS.tmp.1419F/abstract>`_,
+  *Continuum Reverberation Mapping of Accretion Disks Surrounding Supermassive Black Hole Binaries: Observational Signatures*
+
+- `Ayubinia, A., et al., 2025, ApJ, in press <https://arxiv.org/abs/2509.07878v1>`_,
+  *Scaling Relations of the Dusty Torus with Luminosity and the Broad-Line Region*

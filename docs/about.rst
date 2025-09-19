@@ -2,8 +2,9 @@
 *********************
 What is MICA?
 *********************
-``mica2`` is a non-parameteric approach to analyze light curves in reverberation mapping and infer the 
+``MICA`` stands for Multiple and Inhomogeneous Component Analysis. It is a non-parametric approach to analyze light curves in reverberation mapping and infer the 
 transfer functions and time delays. 
+
 A transfer function or delay map relates a time series  to its driving time series as
 
 .. math::
@@ -27,7 +28,7 @@ A transfer function or delay map relates a time series  to its driving time seri
   
   Schematic of the transfer function for a system that consists of discrete clouds.
 
-As an alternative option, ``mica2`` also supports several types of transfer functions 
+As alternative options, ``mica2`` also supports several types of transfer functions 
 
 - Top-hat transfer function.
 

@@ -66,7 +66,7 @@ void mc_pmap()
     
     if(thistask == roottask)
     {
-      printf("# number of Gaussian/Tophat: %d\n", num_gaussian);
+      printf("# number of components: %d\n", num_gaussian);
     }
     
     sprintf(postfix, "_%d", num_gaussian);
@@ -99,16 +99,16 @@ void mc_pmap()
     printf("*****************************************************\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
-      printf("number of Gaussian/Tophat: %d, evidence: %f\n", parset.num_gaussian_low + j, logz_arr[j]);
+      printf("number of components: %d, evidence: %f\n", parset.num_gaussian_low + j, logz_arr[j]);
     }
 
-    printf("best number of Gaussian/Tophat: %d.\n", parset.num_gaussian_low + jzmax);
+    printf("best number components: %d.\n", parset.num_gaussian_low + jzmax);
     printf("*****************************************************\n");
 
     FILE *fp;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
-    fprintf(fp, "# number_of_gaussians/tophats     evidence\n");
+    fprintf(fp, "# number_of_components     evidence\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
       fprintf(fp, "%d       %f\n", parset.num_gaussian_low + j, logz_arr[j]);

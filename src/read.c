@@ -169,6 +169,11 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "StrTypeTFMix");
+    pardict[nt].addr = &parset.str_type_tf_mix;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = STRING;
+
     strcpy(pardict[nt].tag, "FlagLagPositivity");
     pardict[nt].addr = &parset.flag_lag_posivity;
     pardict[nt].isset = 0;
@@ -262,6 +267,7 @@ int read_parset()
     strcpy(parset.str_ratio_prior,"");
     strcpy(parset.str_width_prior,"");
     strcpy(parset.str_gap_prior,"");
+    strcpy(parset.str_type_tf_mix,"");
     /*cdnest options */
     parset.num_particles = 1;
     parset.max_num_saves = 2000;
@@ -314,9 +320,9 @@ int read_parset()
     }
     fclose(fparam);
 
-    if((parset.model<0) || (parset.model>2))
+    if((parset.model<0) || (parset.model>3))
     {
-      printf("TypeModel should be 0-2.\n 0: general model; 1: pmap; 2: vmap.\n");
+      printf("TypeModel should be 0-3.\n 0: general model; 1: pmap; 2: vmap; 3: mmap.\n");
       exit(0);
     }
 
@@ -462,6 +468,22 @@ int read_parset()
     {
       printf("For uniform transfuns, typemodel should be 0 (general model).\n");
       exit(0);
+    }
+    if(parset.model == mmap)
+    {
+      if(parset.str_type_tf_mix[0] == '\0')
+      {
+        printf("For mmap mode, StrTypeTFMix should be set!\n");
+        exit(-1);
+      }
+      int len = strlen(parset.str_type_tf_mix);
+      if(len < 2)
+      {
+        printf("StrTypeTFMix (='%s') should contain at least two numbers!\n", parset.str_type_tf_mix);
+        exit(-1);
+      }
+      parset.num_gaussian_low = len;
+      parset.num_gaussian_upper = len;
     }
   }
 

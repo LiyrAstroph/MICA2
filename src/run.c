@@ -69,6 +69,10 @@ void begin_run()
   {
     mc_vmap();
   }
+  else if(parset.model == mmap)
+  {
+    mc_mmap();
+  }
 }
 
 /*!

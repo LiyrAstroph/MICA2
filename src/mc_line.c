@@ -2884,6 +2884,8 @@ double Sll_gauss_linear(double t1, double t2, const void *model, int nds, int nl
  * nds: index of dataset
  * nls: index of line
  *
+ * note: for same line, covariance function is symmetric,
+ *       so only the lower triangle of Smat is filled
  */
 
 void Sll_array_gauss(double *tline, int nline, const void *model, int nds, int nls, double *Smat)
@@ -3009,11 +3011,13 @@ void Sll_array_gauss_linear(double *tline, int nline, const void *model, int nds
 }
 
 /*
- * covariance between different line
+ * covariance between different lines
  *
  * nds: index of dataset
  * nls1, nls2: indexes of line1 and line2
  *
+ * note: for different lines, covariance is not symmetric,
+ *       so the full Smat is filled
  */
 double Sll2_gauss(double t1, double t2, const void *model, int nds, int nls1, int nls2)
 {
@@ -6145,6 +6149,7 @@ void test_covariance()
   test_gauss();
   test_tophat();
   test_exp();
+  test_mix();
 }
 
 /*

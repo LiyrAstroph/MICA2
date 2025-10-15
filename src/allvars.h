@@ -18,7 +18,7 @@
 #define YEAR_DAY      (365.25)
 #define EPS           (1.0e-5)
 
-enum model_type {gmodel=0, pmap, vmap};
+enum model_type {gmodel=0, pmap, vmap, mmap};
 
 /* variables for MPICH */
 extern int thistask, totaltask, namelen;
@@ -60,6 +60,9 @@ extern double *lag_prior, *width_prior;
 extern void *model_trans;
 extern double *resp_ratio_prior;
 
+/* mmap */
+extern double *Smat_lc_buf, *Smat_ll_buf;
+
 /* for seasonal gap */
 extern double *gap_width, *gap_center;
 
@@ -96,6 +99,7 @@ typedef struct
   char str_lag_prior[MICA_MAX_STR_LENGTH];
   char str_ratio_prior[MICA_MAX_STR_LENGTH];
   char str_width_prior[MICA_MAX_STR_LENGTH];
+  char str_type_tf_mix[MICA_MAX_STR_LENGTH];
 
   int num_gaussian_low, num_gaussian_upper, num_gaussian_diff;
 

@@ -109,6 +109,48 @@ void set_covar_Amat_line_vmap(const void *model, int k, int *nall, double *tall)
 void light_curve_normalize(double *y, double *ye, int n, double std_input);
 void print_para_names_vmap();
 
+/* for mmap */
+void mc_mmap();
+int mc_mmap_init();
+int mc_mmap_end();
+void postprocess_mmap();
+void output_reconstruction_parallel_mmap();
+void reconstruct_line_from_varmodel_mmap(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall);
+double dnest_mmap(int argc, char **argv);
+double prob_line_variability_mmap(const void *model);
+void set_covar_Pmat_data_line_array_mmap(const void *model, int k);
+void set_covar_Umat_line_mmap(const void *model, int nds, int *nall, double *tall);
+void set_covar_Amat_line_mmap(const void *model, int nds, int *nall, double *tall);
+
+double Slc_mmap(double tcon, double tline, const void *model, int nds, int nls);
+double Slc_gauss_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
+double Slc_gamma_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
+double Slc_exp_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
+
+double Sll_mmap(double t1, double t2, const void *model, int nds, int nls);
+double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+
+double Sll2_mmap(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+
+void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
+void Slc_array_gamma_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
+void Slc_array_exp_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
+void Sll_array_gau_gau(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Slc_array_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+void Sll_array_mmap(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
+
 double (*Sll)(double t1, double t2, const void *model, int nds, int nls);
 void (*Sll_array)(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 double (*Sll2)(double t1, double t2, const void *model, int nds, int nls1, int nls2);
@@ -252,6 +294,7 @@ void test_gamma();
 void test_exp();
 void test_gauss();
 void test_tophat();
+void test_mix();
 
 // mathfunc.c
 void inverse_mat(double *a, int n, int *info, int *ipiv);

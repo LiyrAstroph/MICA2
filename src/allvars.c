@@ -60,6 +60,9 @@ double *lag_prior, *width_prior;
 void *model_trans;
 double *resp_ratio_prior;
 
+/* mmap */
+double *Smat_lc_buf, *Smat_ll_buf;
+
 /* for seasonal gap */
 double *gap_width, *gap_center;
 

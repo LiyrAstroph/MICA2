@@ -35,11 +35,13 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${SRC}/dnest_line.c 
   ${SRC}/dnest_pmap.c
   ${SRC}/dnest_vmap.c
+  ${SRC}/dnest_mmap.c
   ${SRC}/read.c
   ${SRC}/mc_con.c
   ${SRC}/mc_line.c
   ${SRC}/mc_pmap.c
   ${SRC}/mc_vmap.c
+  ${SRC}/mc_mmap.c
   ${SRC}/init.c
   ${SRC}/mathfun.c
   ${SRC}/line_decomp.c

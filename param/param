@@ -7,16 +7,21 @@
 FileDir                   ./
 DataFile                  data/mrk509_data.txt
 
-TypeModel                 0                # 0: general model
+TypeModel                 3                # 0: general model
                                            # 1: pmap, photometric RM
                                            # 2: vmap, use a virtual driving light curve.
+                                           # 3: mmap, mixture of TF types
                                            # default: 0
 
-TypeTF                    0                # 0: Gaussian
+TypeTF                    3                # 0: Gaussian
                                            # 1: Top-hat
                                            # 2: Gamma (with k=2)
-                                           # 3: Exponential 
+                                           # 3: Exponential
+                                           #  
                                            # default: 0
+
+StrTypeTFMix              30               # string for the TF types of mixture mode
+                                           # e.g., "02": gaussian-gamma; "20": gamma-gaussian
 
 MaxNumberSaves            1000             # number of MCMC sampling steps
                                            # default: 2000
@@ -40,7 +45,7 @@ FlagLongtermTrend         0                # Longterm trend in light curves, use
                                            # Use the default if you do not know this.
 
 LagLimitLow               0.0              # lower limit of the range of time lag to be explored
-LagLimitUpp               100.0            # upper limit of the range of time lag to be explored
+LagLimitUpp               500.0            # upper limit of the range of time lag to be explored
                                            # can be negative
 
 #WidthLimitLow            1.0              # lower and upper limit of lag width
@@ -55,12 +60,12 @@ FlagNegativeResp          0                # whether turn on negative response
                                            # 0, no; 1, yes
                                            # default: 0
 
-NumCompLow                1                # lower limit of number of Gaussians/tophats
-NumCompUpp                1                # upper limit of number of Gaussians/tophats
+NumCompLow                2                # lower limit of number of Gaussians/tophats
+NumCompUpp                2                # upper limit of number of Gaussians/tophats
                                            # default: 1, 1
 
-FlagConSysErr             0                # 0, not include systematic error of continuum; 1, include
-FlagLineSysErr            0                # 0, not include systematic error of line; 1, include
+FlagConSysErr             1                # 0, not include systematic error of continuum; 1, include
+FlagLineSysErr            1                # 0, not include systematic error of line; 1, include
                                            # default: 0, 0
 
 NumPointRec            200              # number of points in reconstruction for each light curve
@@ -71,7 +76,7 @@ NumPointRec            200              # number of points in reconstruction for
                                            # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 
                                            # default: None
 
-TypeLagPrior              0                # type of lag prior for each Gaussians/tophats.
+TypeLagPrior              4                # type of lag prior for each Gaussians/tophats.
                                            # default: 0
                                            # 0,  limit0 < lag0 < lag1 < lag2 <... < limit1
                                            #
@@ -96,7 +101,7 @@ TypeLagPrior              0                # type of lag prior for each Gaussian
                                            #
                                            # 4,  user specified with "StrLagPrior"
 
-StrLagPrior             [0:10:10:50]       # valid if TypeLagPrior==4
+StrLagPrior             [0:200:200:500]       # valid if TypeLagPrior==4
                                            # format: [lag1_1:lag1_2:lag2_1:lag2_2...]
                                            # "LagLimitLow" and "LagLimitUpp" no longer applicable
 

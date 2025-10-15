@@ -26,6 +26,7 @@ double (*FP_Sll[4*4])(double t1, double t2, const void *model, int nds, int nls,
 
 void (*FP_Slc_array[4])(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
 void (*FP_Sll_array[4*4])(double *tline, int nline, const void *model, int nds, int nls, int k1, int k2, double *Smat);
+void (*FP_Sll2_array[4*4])(double *tline, int nline, const void *model, int nds, int nls1, int nls2, int k1, int k2, double *Smat);
 
 void mc_mmap()
 {
@@ -1753,12 +1754,12 @@ double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls,
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_comp1*3;
+  idxk1 = idx + 1 + k_comp2*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp2*3;
+  idxk2 = idx + 1 + k_comp1*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -1880,12 +1881,12 @@ double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls,
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_comp1*3;
+  idxk1 = idx + 1 + k_comp2*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp2*3;
+  idxk2 = idx + 1 + k_comp1*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -2459,12 +2460,12 @@ void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_comp1*3;
+  idxk1 = idx + 1 + k_comp2*3; /* note here use k_comp2, because the second component is Gaussian */
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp2*3;
+  idxk2 = idx + 1 + k_comp1*3; /* note here use k_comp1 */
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -2612,12 +2613,12 @@ void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_comp1*3;
+  idxk1 = idx + 1 + k_comp2*3;  /* note here use k_comp2 */
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp2*3;
+  idxk2 = idx + 1 + k_comp1*3;  /* note here use k_comp1 */
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);

@@ -128,26 +128,26 @@ double Slc_gamma_mmap(double tcon, double tline, const void *model, int nds, int
 double Slc_exp_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 
 double Sll_mmap(double t1, double t2, const void *model, int nds, int nls);
-double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
-double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
-double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
-double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
-double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
-double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
-double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls, int k_gau, int k_gam);
+double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
+double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
+double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
+double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
+double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
+double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
+double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
 
 double Sll2_mmap(double t1, double t2, const void *model, int nds, int nls1, int nls2);
 
-void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
-void Slc_array_gamma_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
-void Slc_array_exp_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
-void Sll_array_gau_gau(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
-void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
-void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
-void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
-void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
-void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
-void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int nls, int k_gau, int k_gam, double *Smat);
+void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);
+void Slc_array_gamma_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);
+void Slc_array_exp_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);
+void Sll_array_gau_gau(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
 void Slc_array_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 void Sll_array_mmap(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 

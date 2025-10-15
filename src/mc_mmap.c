@@ -1983,7 +1983,7 @@ void Slc_array_mmap(double *tcon, int ncon, double *tline, int nline, const void
  * k_gau: index of gaussian component
  */
 void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, 
-  int nds, int nls, int k_gau, double *Smat)
+  int nds, int nls, int k_comp, double *Smat)
 {
   double *pm = (double *)model;
   double Dt, DT, taud, fg, wg, tau0, St, wt, wt2;
@@ -1994,7 +1994,7 @@ void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, cons
 
   idx = idx_line_pm[nds][nls];
 
-  k = k_gau;
+  k = k_comp;
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
@@ -2026,7 +2026,7 @@ void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, cons
 }
 
 void Slc_array_gamma_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, 
-  int nds, int nls, int k_gau,double *Smat)
+  int nds, int nls, int k_comp,double *Smat)
 {
   double *pm = (double *)model;
   double Dt, DT, taud, fg, tau1, tau0, St, p1, p2;
@@ -2037,7 +2037,7 @@ void Slc_array_gamma_mmap(double *tcon, int ncon, double *tline, int nline, cons
 
   idx = idx_line_pm[nds][nls];
 
-  k = k_gau;
+  k = k_comp;
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
@@ -2076,7 +2076,7 @@ void Slc_array_gamma_mmap(double *tcon, int ncon, double *tline, int nline, cons
 }
 
 void Slc_array_exp_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, 
-  int nds, int nls, int k_gau, double *Smat)
+  int nds, int nls, int k_comp, double *Smat)
 {
   double *pm = (double *)model;
   double Dt, DT, taud, fg, tau1, tau0, St, p1, p2;
@@ -2087,7 +2087,7 @@ void Slc_array_exp_mmap(double *tcon, int ncon, double *tline, int nline, const 
 
   idx = idx_line_pm[nds][nls];
 
-  k = k_gau;
+  k = k_comp;
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
@@ -2177,7 +2177,7 @@ void Sll_array_mmap(double *tline, int nline, const void *model, int nds, int nl
  *
  */
 void Sll_array_gau_gau(double *tline, int nline, const void *model, int nds, int nls, 
-                        int k_gau, int k_gam, double *Smat)
+                        int k_comp1, int k_comp2, double *Smat)
 {
   double Dt, DT, St, A, At, At2;
   double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12;
@@ -2189,14 +2189,14 @@ void Sll_array_gau_gau(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  k1 = k_gau;
+  k1 = k_comp1;
   {
     idxk1 = idx + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
     tau1 =    pm[idxk1 + 1] ;
     wg1 = exp(pm[idxk1 + 2]);
 
-    k2 = k_gam;
+    k2 = k_comp2;
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
@@ -2231,7 +2231,7 @@ void Sll_array_gau_gau(double *tline, int nline, const void *model, int nds, int
 }
 
 void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int nls, 
-                        int k_gau, int k_gam, double *Smat)
+                        int k_comp1, int k_comp2, double *Smat)
 {
   double Dt, DT, St;
   double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p51, p52, tmp;
@@ -2243,7 +2243,7 @@ void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  k1 = k_gau;
+  k1 = k_comp1;
   {
     idxk1 = idx + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
@@ -2253,7 +2253,7 @@ void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
 
-    k2 = k_gam;
+    k2 = k_comp2;
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
@@ -2308,7 +2308,7 @@ void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int
 }
 
 void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int nls, 
-                        int k_gau, int k_gam, double *Smat)
+                        int k_comp1, int k_comp2, double *Smat)
 {
   double Dt, DT, St;
   double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p51, p52;
@@ -2320,7 +2320,7 @@ void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  k1 = k_gau;
+  k1 = k_comp1;
   {
     idxk1 = idx + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
@@ -2330,7 +2330,7 @@ void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
 
-    k2 = k_gam;
+    k2 = k_comp2;
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
@@ -2377,7 +2377,7 @@ void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int
 }
 
 void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int nls, 
-                        int k_gau, int k_gam, double *Smat)
+                        int k_comp1, int k_comp2, double *Smat)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
@@ -2389,12 +2389,12 @@ void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_gau*3;
+  idxk1 = idx + 1 + k_comp1*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_gam*3;
+  idxk2 = idx + 1 + k_comp2*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -2447,7 +2447,7 @@ void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int
 }
 
 void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int nls, 
-                        int k_gau, int k_gam, double *Smat)
+                        int k_comp1, int k_comp2, double *Smat)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
@@ -2459,12 +2459,12 @@ void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_gau*3;
+  idxk1 = idx + 1 + k_comp1*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_gam*3;
+  idxk2 = idx + 1 + k_comp2*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -2524,7 +2524,7 @@ void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int
  *
  */
 void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int nls, 
-                        int k_gau, int k_gam, double *Smat)
+                        int k_comp1, int k_comp2, double *Smat)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
@@ -2536,12 +2536,12 @@ void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_gau*3;
+  idxk1 = idx + 1 + k_comp1*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_gam*3;
+  idxk2 = idx + 1 + k_comp2*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -2600,7 +2600,7 @@ void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int
 }
 
 void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int nls, 
-                        int k_gau, int k_gam, double *Smat)
+                        int k_comp1, int k_comp2, double *Smat)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
@@ -2612,12 +2612,12 @@ void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int
 
   idx = idx_line_pm[nds][nls];
 
-  idxk1 = idx + 1 + k_gau*3;
+  idxk1 = idx + 1 + k_comp1*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_gam*3;
+  idxk2 = idx + 1 + k_comp2*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);

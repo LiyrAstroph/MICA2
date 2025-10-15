@@ -128,13 +128,13 @@ double Slc_gamma_mmap(double tcon, double tline, const void *model, int nds, int
 double Slc_exp_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 
 double Sll_mmap(double t1, double t2, const void *model, int nds, int nls);
-double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
-double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
-double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
-double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
-double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
-double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
-double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2);
+double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
 
 double Sll2_mmap(double t1, double t2, const void *model, int nds, int nls1, int nls2);
 

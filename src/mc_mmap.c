@@ -22,7 +22,7 @@
 
 /* function pointer for covariance between continuum and line */
 double (*FP_Slc[4])(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
-double (*FP_Sll[4*4])(double t1, double t2, const void *model, int nds, int nls, int k1, int k2);
+double (*FP_Sll[4*4])(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k1, int k2);
 
 void (*FP_Slc_array[4])(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
 void (*FP_Sll_array[4*4])(double *tline, int nline, const void *model, int nds, int nls, int k1, int k2, double *Smat);
@@ -1459,7 +1459,7 @@ double Slc_exp_mmap(double tcon, double tline, const void *model, int nds, int n
 
 /*=========================================================================*/
 /*
- * auto-covariance of a line between guassian and exp components
+ * auto-covariance of a line between components
  *
  * nds: index of dataset
  * nls: indexes of line
@@ -1480,37 +1480,39 @@ double Sll_mmap(double t1, double t2, const void *model, int nds, int nls)
     {
       type2 = parset.str_type_tf_mix[k2] - '0'; /* type of k2 component */ 
 
-      Stot += FP_Sll[type1*4 + type2](t1, t2, model, nds, nls, k1, k2);
+      Stot += FP_Sll[type1*4 + type2](t1, t2, model, nds, nls, nls, k1, k2);
     }
   }
 
   return Stot;
 }
 
-double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls, int k_comp1, int k_comp2)
+double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, 
+  int k_comp1, int k_comp2)
 {
   double Dt, DT, St, Sttot, A;
   double taud, fg1, tau1, wg1, fg2, tau2, wg2;
   double *pm = (double *)model;
-  int idx, k1, k2, idxk1, idxk2;
+  int idx, idx1, idx2, k1, k2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
   Dt = t1 - t2;
 
-  idx = idx_line_pm[nds][nls];
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
 
   Sttot = 0.0;
   k1 = k_comp1;
   {
-    idxk1 = idx + 1 + k1*3;
+    idxk1 = idx1 + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
     tau1 =    pm[idxk1 + 1] ;
     wg1 = exp(pm[idxk1 + 2]);
 
     k2 = k_comp2;
     {
-      idxk2 = idx + 1 + k2*3;
+      idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
       tau2 =    pm[idxk2 + 1] ;
       wg2 = exp(pm[idxk2 + 2]);
@@ -1546,25 +1548,26 @@ double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls, in
   return Sttot;
 }
 
-double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls, 
+double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2, 
                         int k_comp1, int k_comp2)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
   double *pm = (double *)model;
-  int i, j, k1, k2, idx, idxk1, idxk2;
+  int i, j, k1, k2, idx, idx1, idx2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
 
-  idx = idx_line_pm[nds][nls];
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
 
-  idxk1 = idx + 1 + k_comp1*3;
+  idxk1 = idx1 + 1 + k_comp1*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp2*3;
+  idxk2 = idx2 + 1 + k_comp2*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -1605,25 +1608,26 @@ double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls,
   return St;
 }
 
-double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls, 
+double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2,
                         int k_comp1, int k_comp2)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
   double *pm = (double *)model;
-  int i, j, k1, k2, idx, idxk1, idxk2;
+  int i, j, k1, k2, idx, idx1, idx2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
 
-  idx = idx_line_pm[nds][nls];
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
 
-  idxk1 = idx + 1 + k_comp1*3;
+  idxk1 = idx1 + 1 + k_comp1*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp2*3;
+  idxk2 = idx2 + 1 + k_comp2*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -1669,24 +1673,25 @@ double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls,
   return St;
 }
 
-double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls, 
+double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2, 
                         int k_comp1, int k_comp2)
 {
   double Dt, DT, St, Sttot;
   double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p51, p52, tmp;
   double *pm = (double *)model;
-  int idx, k1, k2, idxk1, idxk2;
+  int idx, idx1, idx2, k1, k2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
   Dt = t1 - t2;
 
-  idx = idx_line_pm[nds][nls];
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
 
   Sttot = 0.0;
   k1 = k_comp1;
   {
-    idxk1 = idx + 1 + k1*3;
+    idxk1 = idx1 + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
     tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
@@ -1696,7 +1701,7 @@ double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls,
 
     k2 = k_comp2;
     {
-      idxk2 = idx + 1 + k2*3;
+      idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
       tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
@@ -1741,25 +1746,26 @@ double Sll_gam_gam(double t1, double t2, const void *model, int nds, int nls,
   return Sttot;
 }
 
-double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls, 
+double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, 
                         int k_comp1, int k_comp2)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
   double *pm = (double *)model;
-  int i, j, k1, k2, idx, idxk1, idxk2;
+  int i, j, k1, k2, idx, idx1, idx2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
 
-  idx = idx_line_pm[nds][nls];
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
 
-  idxk1 = idx + 1 + k_comp2*3;
+  idxk1 = idx2 + 1 + k_comp2*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp1*3;
+  idxk2 = idx1 + 1 + k_comp1*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -1805,24 +1811,25 @@ double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls,
   return St;
 }
 
-double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls, 
+double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2,
                         int k_comp1, int k_comp2)
 {
   double Dt, DT, St, Sttot;
   double taud, fg1, tau01, tau1, fg2, tau02, tau2, fg12, p1, p2, p3, p4, p51, p52;
   double *pm = (double *)model;
-  int idx, k1, k2, idxk1, idxk2;
+  int idx, idx1, idx2, k1, k2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
   Dt = t1 - t2;
 
-  idx = idx_line_pm[nds][nls];
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
 
   Sttot = 0.0;
   k1 = k_comp1;
   {
-    idxk1 = idx + 1 + k1*3;
+    idxk1 = idx1 + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
     tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
@@ -1832,7 +1839,7 @@ double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls,
 
     k2 = k_comp2;
     {
-      idxk2 = idx + 1 + k2*3;
+      idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
       tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
@@ -1868,25 +1875,26 @@ double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls,
   
   return Sttot;
 }
-double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls, 
+double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, 
                         int k_comp1, int k_comp2)
 {
   double Dt, DT, St;
   double taud, fg1, tau1, wid1, fg2, tau2, wid2, fg12, diff, C1, C2, fac;
   double *pm = (double *)model;
-  int i, j, k1, k2, idx, idxk1, idxk2;
+  int i, j, k1, k2, idx, idx1, idx2, idxk1, idxk2;
 
   idx = idx_con_pm[nds];
   taud = exp(pm[idx+2]);
 
-  idx = idx_line_pm[nds][nls];
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
 
-  idxk1 = idx + 1 + k_comp2*3;
+  idxk1 = idx2 + 1 + k_comp2*3;
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx + 1 + k_comp1*3;
+  idxk2 = idx1 + 1 + k_comp1*3;
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
@@ -2708,8 +2716,8 @@ void test_mix()
   for(i=0; i<nt; i++)
   {
     dt = -200.0 + 400.0/(nt-1) * i;
-    Sll = Sll_gau_exp(dt, 0.0, model, 0, 0, 0, 1);
-    Sll2 = Sll_gau_gam(dt, 0.0, model, 0, 0, 0, 1);
+    Sll = Sll_gau_exp(dt, 0.0, model, 0, 0, 0, 0, 1);
+    Sll2 = Sll_gau_gam(dt, 0.0, model, 0, 0, 0, 0, 1);
     fprintf(fp, "%f %e %e\n", dt, Sll, Sll2);
   }
 

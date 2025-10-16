@@ -1585,7 +1585,7 @@ double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls1, i
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -1600,7 +1600,7 @@ double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls1, i
         +     C2 * exp( DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/taud)))
         +(C1-C2) * exp( DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/wid2)));
 
-    St *= fg12 / 2;
+    St *= fg12;
   }
   else
   {
@@ -1615,7 +1615,7 @@ double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls1, i
         + wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / (sqrt(PI/2)) 
                        -fac * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(1.0/sqrt(2)*fac)));
     
-    St *= fg12 / 2;
+    St *= fg12;
   }
     
   return St;
@@ -1645,7 +1645,7 @@ double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls1, i
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -1663,7 +1663,7 @@ double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls1, i
         +(C1 - C2) * wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / sqrt(PI/2)
                                   -fac * exp(DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc(fac/sqrt(2))));
 
-    St *= fg12 / 2;
+    St *= fg12;
   }
   else
   {
@@ -1680,7 +1680,7 @@ double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls1, i
         + wid1*wid1/(wid2*wid2)/2 *  ( (1+fac*fac) * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(fac/sqrt(2)))
                                        - fac * exp(-DT*DT/(wid1*wid1)/2)/sqrt(PI/2) );
     
-    St *= fg12 / 2;
+    St *= fg12;
   }
     
   return St;
@@ -1783,7 +1783,7 @@ double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls1, i
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -1801,7 +1801,7 @@ double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls1, i
         +(C1 - C2) * wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / sqrt(PI/2)
                                   -fac * exp(DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc(fac/sqrt(2))));
 
-    St *= fg12 / 2;
+    St *= fg12;
   }
   else
   {
@@ -1818,7 +1818,7 @@ double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls1, i
         + wid1*wid1/(wid2*wid2)/2 *  ( (1+fac*fac) * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(fac/sqrt(2)))
                                        - fac * exp(-DT*DT/(wid1*wid1)/2)/sqrt(PI/2) );
     
-    St *= fg12 / 2;
+    St *= fg12;
   }
     
   return St;
@@ -1912,7 +1912,7 @@ double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls1, i
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -1927,7 +1927,7 @@ double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls1, i
         +     C2 * exp( DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/taud)))
         +(C1-C2) * exp( DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/wid2)));
 
-    St *= fg12 / 2;
+    St *= fg12;
   }
   else
   {
@@ -1942,7 +1942,7 @@ double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls1, i
         + wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / (sqrt(PI/2)) 
                        -fac * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(1.0/sqrt(2)*fac)));
     
-    St *= fg12 / 2;
+    St *= fg12;
   }
     
   return St;
@@ -2436,7 +2436,7 @@ void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -2454,7 +2454,7 @@ void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int
             +     C2 * exp( DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/taud)))
             +(C1-C2) * exp( DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/wid2)));
 
-        Smat[i*nline + j] = St * fg12 / 2;
+        Smat[i*nline + j] = St * fg12;
       }
     }
   }
@@ -2475,7 +2475,7 @@ void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int
             + wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / (sqrt(PI/2)) 
                            -fac * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(1.0/sqrt(2)*fac)));
         
-        Smat[i*nline + j] = St * fg12 / 2;
+        Smat[i*nline + j] = St * fg12;
       }
     }
   }
@@ -2506,7 +2506,7 @@ void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -2524,7 +2524,7 @@ void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int
             +     C2 * exp( DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/taud)))
             +(C1-C2) * exp( DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/wid2)));
 
-        Smat[i*nline + j] = St * fg12 / 2;
+        Smat[i*nline + j] = St * fg12;
       }
     }
   }
@@ -2545,7 +2545,7 @@ void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int
             + wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / (sqrt(PI/2)) 
                            -fac * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(1.0/sqrt(2)*fac)));
         
-        Smat[i*nline + j] = St * fg12 / 2;
+        Smat[i*nline + j] = St * fg12;
       }
     }
   }
@@ -2583,7 +2583,7 @@ void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -2605,7 +2605,7 @@ void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int
             +(C1 - C2) * wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / sqrt(PI/2)
                                       -fac * exp(DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc(fac/sqrt(2))));
 
-        Smat[i*nline + j] =  St * fg12 / 2;
+        Smat[i*nline + j] =  St * fg12;
       }
     }
   }
@@ -2628,7 +2628,7 @@ void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int
             + wid1*wid1/(wid2*wid2)/2 *  ( (1+fac*fac) * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(fac/sqrt(2)))
                                           - fac * exp(-DT*DT/(wid1*wid1)/2)/sqrt(PI/2) );
         
-        Smat[i*nline + j] =  St * fg12 / 2;
+        Smat[i*nline + j] =  St * fg12;
       }
     }
   }
@@ -2659,7 +2659,7 @@ void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -2681,7 +2681,7 @@ void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int
             +(C1 - C2) * wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / sqrt(PI/2)
                                       -fac * exp(DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc(fac/sqrt(2))));
 
-        Smat[i*nline + j] =  St * fg12 / 2;
+        Smat[i*nline + j] =  St * fg12;
       }
     }
   }
@@ -2704,7 +2704,7 @@ void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int
             + wid1*wid1/(wid2*wid2)/2 *  ( (1+fac*fac) * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(fac/sqrt(2)))
                                           - fac * exp(-DT*DT/(wid1*wid1)/2)/sqrt(PI/2) );
         
-        Smat[i*nline + j] =  St * fg12 / 2;
+        Smat[i*nline + j] =  St * fg12;
       }
     }
   }
@@ -2835,7 +2835,7 @@ void Sll2_array_gau_gam(double *tline1, int nline1, double *tline2, int nline2, 
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -2857,7 +2857,7 @@ void Sll2_array_gau_gam(double *tline1, int nline1, double *tline2, int nline2, 
             +(C1 - C2) * wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / sqrt(PI/2)
                                       -fac * exp(DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc(fac/sqrt(2))));
 
-        Smat[i*nline2 + j] =  St * fg12 / 2;
+        Smat[i*nline2 + j] =  St * fg12;
       }
     }
   }
@@ -2880,7 +2880,7 @@ void Sll2_array_gau_gam(double *tline1, int nline1, double *tline2, int nline2, 
             + wid1*wid1/(wid2*wid2)/2 *  ( (1+fac*fac) * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(fac/sqrt(2)))
                                           - fac * exp(-DT*DT/(wid1*wid1)/2)/sqrt(PI/2) );
         
-        Smat[i*nline2 + j] =  St * fg12 / 2;
+        Smat[i*nline2 + j] =  St * fg12;
       }
     }
   }
@@ -2912,7 +2912,7 @@ void Sll2_array_gau_exp(double *tline1, int nline1, double *tline2, int nline2, 
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -2930,7 +2930,7 @@ void Sll2_array_gau_exp(double *tline1, int nline1, double *tline2, int nline2, 
             +     C2 * exp( DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/taud)))
             +(C1-C2) * exp( DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/wid2)));
 
-        Smat[i*nline2 + j] = St * fg12 / 2;
+        Smat[i*nline2 + j] = St * fg12;
       }
     }
   }
@@ -2951,7 +2951,7 @@ void Sll2_array_gau_exp(double *tline1, int nline1, double *tline2, int nline2, 
             + wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / (sqrt(PI/2)) 
                            -fac * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(1.0/sqrt(2)*fac)));
         
-        Smat[i*nline2 + j] = St * fg12 / 2;
+        Smat[i*nline2 + j] = St * fg12;
       }
     }
   }
@@ -3061,7 +3061,7 @@ void Sll2_array_gam_gau(double *tline1, int nline1, double *tline2, int nline2, 
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -3083,7 +3083,7 @@ void Sll2_array_gam_gau(double *tline1, int nline1, double *tline2, int nline2, 
             +(C1 - C2) * wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / sqrt(PI/2)
                                       -fac * exp(DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc(fac/sqrt(2))));
 
-        Smat[i*nline2 + j] =  St * fg12 / 2;
+        Smat[i*nline2 + j] =  St * fg12;
       }
     }
   }
@@ -3106,7 +3106,7 @@ void Sll2_array_gam_gau(double *tline1, int nline1, double *tline2, int nline2, 
             + wid1*wid1/(wid2*wid2)/2 *  ( (1+fac*fac) * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(fac/sqrt(2)))
                                           - fac * exp(-DT*DT/(wid1*wid1)/2)/sqrt(PI/2) );
         
-        Smat[i*nline2 + j] =  St * fg12 / 2;
+        Smat[i*nline2 + j] =  St * fg12;
       }
     }
   }
@@ -3198,17 +3198,17 @@ void Sll2_array_exp_gau(double *tline1, int nline1, double *tline2, int nline2, 
   idx1 = idx_line_pm[nds][nls1];
   idx2 = idx_line_pm[nds][nls2];
 
-  idxk1 = idx2 + 1 + k_comp2*3;
+  idxk1 = idx2 + 1 + k_comp2*3;  /* note here k_comp2 */
   fg1  = exp(pm[idxk1 + 0]);
   tau1 =     pm[idxk1 + 1] ;
   wid1 = exp(pm[idxk1 + 2]);
 
-  idxk2 = idx1 + 1 + k_comp1*3;
+  idxk2 = idx1 + 1 + k_comp1*3;  /* note here k_comp1 */
   fg2  = exp(pm[idxk2 + 0]);
   tau2 =     pm[idxk2 + 1] ;
   wid2 = exp(pm[idxk2 + 2]);
 
-  fg12 = fg1 * fg2;
+  fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
   if(abs(diff) > EPS)
@@ -3219,14 +3219,14 @@ void Sll2_array_exp_gau(double *tline1, int nline1, double *tline2, int nline2, 
     {
       for(j=0; j<nline2; j++)
       {
-        Dt = -(tline1[i] - tline2[j]);
+        Dt = -(tline1[i] - tline2[j]);  /* note here t2 - t1 */
         DT = Dt - (tau1 - tau2);
 
         St =      C1 * exp(-DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(-1.0/sqrt(2)*(DT/wid1-wid1/taud)))
             +     C2 * exp( DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/taud)))
             +(C1-C2) * exp( DT/wid2 + wid1*wid1/(wid2*wid2)/2 + gsl_sf_log_erfc( 1.0/sqrt(2)*(DT/wid1+wid1/wid2)));
 
-        Smat[i*nline2 + j] = St * fg12 / 2;
+        Smat[i*nline2 + j] = St * fg12;
       }
     }
   }
@@ -3238,7 +3238,7 @@ void Sll2_array_exp_gau(double *tline1, int nline1, double *tline2, int nline2, 
     {
       for(j=0; j<nline2; j++)
       {
-        Dt = -(tline1[i] - tline2[j]);
+        Dt = -(tline1[i] - tline2[j]);  /* note here t2 - t1 */
         DT = Dt - (tau1 - tau2);
         fac = DT/wid1 + wid1/taud;
 
@@ -3247,7 +3247,7 @@ void Sll2_array_exp_gau(double *tline1, int nline1, double *tline2, int nline2, 
             + wid1/wid2 * ( exp(-DT*DT/(wid1*wid1)/2) / (sqrt(PI/2)) 
                            -fac * exp(DT/taud + wid1*wid1/(taud*taud)/2 + gsl_sf_log_erfc(1.0/sqrt(2)*fac)));
         
-        Smat[i*nline2 + j] = St * fg12 / 2;
+        Smat[i*nline2 + j] = St * fg12;
       }
     }
   }

@@ -94,6 +94,22 @@ void mc_mmap()
 
     output_reconstruction_parallel_mmap();
   }
+  
+  if(thistask == roottask && flag_para_name != 1)
+  {
+    char fname[200];
+
+    printf("*****************************************************\n");
+    printf("number of components: %d, evidence: %f\n", num_gaussian, logz);
+    printf("*****************************************************\n");
+
+    FILE *fp;
+    sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
+    fp = fopen(fname, "w");
+    fprintf(fp, "# number_of_components     evidence\n");
+    fprintf(fp, "%d       %f\n", num_gaussian, logz);
+    fclose(fp);
+  }  
 
   mc_mmap_end();
 
@@ -826,7 +842,7 @@ int mc_mmap_init()
       else
       {
         if(thistask == 0)
-          printf("No enough lag priors.");
+          printf("No enough lag priors.\n");
         exit(0);
       }
     }

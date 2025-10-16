@@ -476,12 +476,25 @@ int read_parset()
         printf("For mmap mode, StrTypeTFMix should be set!\n");
         exit(-1);
       }
+
       int len = strlen(parset.str_type_tf_mix);
       if(len < 2)
       {
         printf("StrTypeTFMix (='%s') should contain at least two numbers!\n", parset.str_type_tf_mix);
         exit(-1);
       }
+
+      /* check whether StrTypeTFMix is valid */
+      for(i=0; i<len; i++)
+      {
+        if(parset.str_type_tf_mix[i] < '0' || parset.str_type_tf_mix[i] > '3')
+        {
+          printf("StrTypeTFMix (='%s') should only contain numbers 0-3!\n", parset.str_type_tf_mix);
+          exit(-1);
+        }
+      }
+      
+      /* fix the number of components */
       parset.num_gaussian_low = len;
       parset.num_gaussian_upper = len;
     }

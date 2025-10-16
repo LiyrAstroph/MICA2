@@ -284,7 +284,7 @@ int mc_vmap_init()
       else
       {
         if(thistask == 0)
-          printf("No enough lag priors.");
+          printf("No enough lag priors.\n");
         exit(0);
       }
     }

@@ -1610,7 +1610,7 @@ double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls1, i
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -1670,7 +1670,7 @@ double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls1, i
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -1808,7 +1808,7 @@ double Sll_gam_gau(double t1, double t2, const void *model, int nds, int nls1, i
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -1888,7 +1888,7 @@ double Sll_gam_exp(double t1, double t2, const void *model, int nds, int nls1, i
   if(DT >= 0)
   {
     diff = taud - wid1;
-    if(abs(diff) > EPS)
+    if(fabs(diff) > EPS)
     {
       St = 1.0/(p1*p3*p3)*exp(-DT/taud) + (1.0/p2-1.0/p1)/(p5*p5)*exp(-DT/wid1);
     }
@@ -1900,7 +1900,7 @@ double Sll_gam_exp(double t1, double t2, const void *model, int nds, int nls1, i
   else 
   {
     diff = taud - wid2;
-    if(abs(diff) > EPS)
+    if(fabs(diff) > EPS)
     {
       St = 1.0/(p2*p4*p4)*exp(DT/taud) 
           + ((1.0/p3-1.0/p4)*(1.0/p5/p5 - DT/p5) + (1.0/p3/p3 - 1.0/p4/p4)/p5)*exp(DT/wid2);
@@ -2007,7 +2007,7 @@ double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls1, i
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -2079,7 +2079,7 @@ double Sll_exp_gam(double t1, double t2, const void *model, int nds, int nls1, i
   if(DT >= 0)
   {
     diff = taud - wid1;
-    if(abs(diff) > EPS)
+    if(fabs(diff) > EPS)
     {
       St = 1.0/(p1*p3*p3)*exp(-DT/taud) + (1.0/p2-1.0/p1)/(p5*p5)*exp(-DT/wid1);
     }
@@ -2091,7 +2091,7 @@ double Sll_exp_gam(double t1, double t2, const void *model, int nds, int nls1, i
   else 
   {
     diff = taud - wid2;
-    if(abs(diff) > EPS)
+    if(fabs(diff) > EPS)
     {
       St = 1.0/(p2*p4*p4)*exp(DT/taud) 
           + ((1.0/p3-1.0/p4)*(1.0/p5/p5 - DT/p5) + (1.0/p3/p3 - 1.0/p4/p4)/p5)*exp(DT/wid2);
@@ -2598,7 +2598,7 @@ void Sll_array_gau_exp(double *tline, int nline, const void *model, int nds, int
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -2668,7 +2668,7 @@ void Sll_array_exp_gau(double *tline, int nline, const void *model, int nds, int
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -2745,7 +2745,7 @@ void Sll_array_gau_gam(double *tline, int nline, const void *model, int nds, int
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -2821,7 +2821,7 @@ void Sll_array_gam_gau(double *tline, int nline, const void *model, int nds, int
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -2913,7 +2913,7 @@ void Sll_array_exp_gam(double *tline, int nline, const void *model, int nds, int
       if(DT >= 0)
       {
         diff = taud - wid1;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p1*p3*p3)*exp(-DT/taud) + (1.0/p2-1.0/p1)/(p5*p5)*exp(-DT/wid1);
         }
@@ -2925,7 +2925,7 @@ void Sll_array_exp_gam(double *tline, int nline, const void *model, int nds, int
       else 
       {
         diff = taud - wid2;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p2*p4*p4)*exp(DT/taud) 
              + ((1.0/p3-1.0/p4)*(1.0/p5/p5 - DT/p5) + (1.0/p3/p3 - 1.0/p4/p4)/p5)*exp(DT/wid2);
@@ -2984,7 +2984,7 @@ void Sll_array_gam_exp(double *tline, int nline, const void *model, int nds, int
       if(DT >= 0)
       {
         diff = taud - wid1;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p1*p3*p3)*exp(-DT/taud) + (1.0/p2-1.0/p1)/(p5*p5)*exp(-DT/wid1);
         }
@@ -2996,7 +2996,7 @@ void Sll_array_gam_exp(double *tline, int nline, const void *model, int nds, int
       else 
       {
         diff = taud - wid2;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p2*p4*p4)*exp(DT/taud) 
              + ((1.0/p3-1.0/p4)*(1.0/p5/p5 - DT/p5) + (1.0/p3/p3 - 1.0/p4/p4)/p5)*exp(DT/wid2);
@@ -3139,7 +3139,7 @@ void Sll2_array_gau_gam(double *tline1, int nline1, double *tline2, int nline2, 
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -3216,7 +3216,7 @@ void Sll2_array_gau_exp(double *tline1, int nline1, double *tline2, int nline2, 
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -3365,7 +3365,7 @@ void Sll2_array_gam_gau(double *tline1, int nline1, double *tline2, int nline2, 
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -3459,7 +3459,7 @@ void Sll2_array_gam_exp(double *tline1, int nline1, double *tline2, int nline2, 
       if(DT >= 0)
       {
         diff = taud - wid1;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p1*p3*p3)*exp(-DT/taud) + (1.0/p2-1.0/p1)/(p5*p5)*exp(-DT/wid1);
         }
@@ -3471,7 +3471,7 @@ void Sll2_array_gam_exp(double *tline1, int nline1, double *tline2, int nline2, 
       else 
       {
         diff = taud - wid2;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p2*p4*p4)*exp(DT/taud) 
              + ((1.0/p3-1.0/p4)*(1.0/p5/p5 - DT/p5) + (1.0/p3/p3 - 1.0/p4/p4)/p5)*exp(DT/wid2);
@@ -3585,7 +3585,7 @@ void Sll2_array_exp_gau(double *tline1, int nline1, double *tline2, int nline2, 
   fg12 = fg1 * fg2 / 2;
 
   diff = taud-wid2; 
-  if(abs(diff) > EPS)
+  if(fabs(diff) > EPS)
   {
     C1 = taud/(taud+wid2);
     C2 = taud/(taud-wid2);
@@ -3672,7 +3672,7 @@ void Sll2_array_exp_gam(double *tline1, int nline1, double *tline2, int nline2, 
       if(DT >= 0)
       {
         diff = taud - wid1;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p1*p3*p3)*exp(-DT/taud) + (1.0/p2-1.0/p1)/(p5*p5)*exp(-DT/wid1);
         }
@@ -3684,7 +3684,7 @@ void Sll2_array_exp_gam(double *tline1, int nline1, double *tline2, int nline2, 
       else 
       {
         diff = taud - wid2;
-        if(abs(diff) > EPS)
+        if(fabs(diff) > EPS)
         {
           St = 1.0/(p2*p4*p4)*exp(DT/taud) 
              + ((1.0/p3-1.0/p4)*(1.0/p5/p5 - DT/p5) + (1.0/p3/p3 - 1.0/p4/p4)/p5)*exp(DT/wid2);

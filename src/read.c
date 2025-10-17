@@ -471,6 +471,8 @@ int read_parset()
     }
     if(parset.model == mmap)
     {
+      /* presently, do not check posivity for mmap, may be adjusted late on */
+      parset.flag_lag_posivity = 0; 
       if(parset.str_type_tf_mix[0] == '\0')
       {
         printf("For mmap mode, StrTypeTFMix should be set!\n");

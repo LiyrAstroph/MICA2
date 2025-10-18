@@ -126,6 +126,7 @@ double Slc_mmap(double tcon, double tline, const void *model, int nds, int nls);
 double Slc_gauss_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 double Slc_gamma_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 double Slc_exp_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
+double Slc_tophat_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 
 double Sll_mmap(double t1, double t2, const void *model, int nds, int nls);
 double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
@@ -137,6 +138,9 @@ double Sll_exp_exp(double t1, double t2, const void *model, int nds, int nls1, i
 double Sll_exp_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
 double Sll_exp_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
 double Sll_gam_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_tophat_tophat(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_tophat_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
+double Sll_gau_tophat(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
 
 double Sll2_mmap(double t1, double t2, const void *model, int nds, int nls1, int nls2);
 
@@ -144,6 +148,7 @@ void Slc_array_mmap(double *tcon, int ncon, double *tline, int nline, const void
 void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);
 void Slc_array_gamma_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);
 void Slc_array_exp_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);
+void Slc_array_tophat_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);
 
 void Sll_array_mmap(double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 void Sll_array_gau_gau(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
@@ -155,6 +160,9 @@ void Sll_array_gam_gam(double *tline, int nline, const void *model, int nds, int
 void Sll_array_gam_exp(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
 void Sll_array_exp_exp(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
 void Sll_array_exp_gam(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_tophat_tophat(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_tophat_gau(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
+void Sll_array_gau_tophat(double *tline, int nline, const void *model, int nds, int nls, int k_comp1, int k_comp2, double *Smat);
 
 void Sll2_array_mmap(double *tline1, int nline1, double *tline2, int nline2, const void *model, int nds, int nls1, int nls2, double *Smat);
 void Sll2_array_gau_gau(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
@@ -174,6 +182,12 @@ void Sll2_array_exp_gau(double *tline1, int nline1, double *tline2, int nline2, 
 void Sll2_array_exp_gam(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
   int nds, int nls1, int nls2, int k_comp1, int k_comp2, double *Smat);
 void Sll2_array_gam_exp(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
+  int nds, int nls1, int nls2, int k_comp1, int k_comp2, double *Smat);
+void Sll2_array_tophat_tophat(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
+  int nds, int nls1, int nls2, int k_comp1, int k_comp2, double *Smat);
+void Sll2_array_tophat_gau(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
+  int nds, int nls1, int nls2, int k_comp1, int k_comp2, double *Smat);
+void Sll2_array_gau_tophat(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
   int nds, int nls1, int nls2, int k_comp1, int k_comp2, double *Smat);
 
 double (*Sll)(double t1, double t2, const void *model, int nds, int nls);

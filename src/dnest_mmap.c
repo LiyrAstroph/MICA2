@@ -212,6 +212,50 @@ void from_prior_mmap(void *model)
     pm[i] = par_range_model[i][0] + dnest_rand()*(par_range_model[i][1] - par_range_model[i][0]);
   }
 
+  /* sort component centers */
+  if(type_lag_prior_pr == 0)
+  {
+    double *centers;
+    centers = malloc(num_gaussian * sizeof(double));
+
+    for(i=0; i<num_params_line; i+= 1+3*num_gaussian)
+    {
+      ic = num_params_var + i + 1;
+      for(j=0; j<num_gaussian; j++)
+      {
+        centers[j] = pm[ic+j*3 + 1];
+      }
+      qsort(centers, num_gaussian, sizeof(double), mica_cmp);
+
+      for(j=0; j<num_gaussian; j++)
+      {
+        pm[ic + j*3 + 1] = centers[j];
+      }
+    }
+    free(centers);
+  }
+
+  /* constrain Gaussian widths */
+  if(parset.flag_lag_posivity != 0)
+  {
+    for(i=0; i<num_params_line; i+= 1+3*num_gaussian)
+    {
+      ic = num_params_var + i + 2;
+      j = 0;
+      while(pm[ic-1] - width_factor*pm[ic] < 0.0)
+      {
+        pm[ic-1] = par_range_model[ic-1][0] + dnest_rand()*(par_range_model[ic-1][1] - par_range_model[ic-1][0]);
+        pm[ic] = par_range_model[ic][0] + dnest_rand()*(par_range_model[ic][1] - par_range_model[ic][0]);
+        j+1;
+        if(j>100)
+        {
+          pm[ic] = pm[ic-1]/width_factor; 
+          break;
+        }
+      }
+    }
+  }
+
   for(i=0; i<num_params; i++)
   {
     if(par_fix[i] == 1)
@@ -244,7 +288,6 @@ double log_likelihoods_cal_mmap(const void *model)
   logL = prob_line_variability_mmap(model);
   return logL;
 }
-
 
 double log_likelihoods_cal_initial_mmap(const void *model)
 {

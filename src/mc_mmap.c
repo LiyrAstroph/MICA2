@@ -862,9 +862,11 @@ int mc_mmap_init()
 
   FP_Sll[1*4+0] = Sll_tophat_gau;
   FP_Sll[1*4+1] = Sll_tophat_tophat;
+  FP_Sll[1*4+2] = Sll_tophat_gam;
   FP_Sll[1*4+3] = Sll_tophat_exp;
 
   FP_Sll[2*4+0] = Sll_gam_gau;
+  FP_Sll[2*4+1] = Sll_gam_tophat;
   FP_Sll[2*4+2] = Sll_gam_gam;
   FP_Sll[2*4+3] = Sll_gam_exp;
 
@@ -887,9 +889,11 @@ int mc_mmap_init()
 
   FP_Sll_array[1*4+0] = Sll_array_tophat_gau;
   FP_Sll_array[1*4+1] = Sll_array_tophat_tophat;
+  FP_Sll_array[1*4+2] = Sll_array_tophat_gam;
   FP_Sll_array[1*4+3] = Sll_array_tophat_exp;
 
   FP_Sll_array[2*4+0] = Sll_array_gam_gau;
+  FP_Sll_array[2*4+1] = Sll_array_gam_tophat;
   FP_Sll_array[2*4+2] = Sll_array_gam_gam;
   FP_Sll_array[2*4+3] = Sll_array_gam_exp;
   
@@ -906,9 +910,11 @@ int mc_mmap_init()
 
   FP_Sll2_array[1*4+0] = Sll2_array_tophat_gau;
   FP_Sll2_array[1*4+1] = Sll2_array_tophat_tophat;
+  FP_Sll2_array[1*4+2] = Sll2_array_tophat_gam;
   FP_Sll2_array[1*4+3] = Sll2_array_tophat_exp;
 
   FP_Sll2_array[2*4+0] = Sll2_array_gam_gau;
+  FP_Sll2_array[2*4+1] = Sll2_array_gam_tophat;
   FP_Sll2_array[2*4+2] = Sll2_array_gam_gam;
   FP_Sll2_array[2*4+3] = Sll2_array_gam_exp;
 
@@ -2475,6 +2481,173 @@ double Sll_tophat_exp(double t1, double t2, const void *model, int nds, int nls1
 
   return St;
 }
+
+double Sll_tophat_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2, 
+                        int k_comp1, int k_comp2)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12, p1, p2, p3, p4, p5, p6, diff;
+  double *pm = (double *)model;
+  int idx, idx1, idx2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  idxk1 = idx2 + 1 + k_comp2*3;
+  fg1 = exp(pm[idxk1 + 0]);
+  tau1 =    pm[idxk1 + 1] ;
+  wg1 = exp(pm[idxk1 + 2]);
+
+  idxk2 = idx1 + 1 + k_comp1*3;
+  fg2 = exp(pm[idxk2 + 0]);
+  tau2 =    pm[idxk2 + 1] ;
+  wg2 = exp(pm[idxk2 + 2]);
+
+  fg12 = fg1*fg2/(wg1*wg1)/wg2/2;
+
+  Dt = t2 - t1;
+  DT = Dt - (tau1 - tau2);
+  
+  p1 = (taud + wg1)/taud/wg1;
+  p2 = (taud - wg1)/taud/wg1;
+
+  if(DT<=-wg2)
+  {
+    St = 1/(p1*p1) * taud * exp(DT/taud)*(exp(wg2/taud)-exp(-wg2/taud));
+  }
+  else if(DT<=wg2)
+  {
+    diff = taud - wg1;
+    if(fabs(diff)>EPS)
+    { 
+      St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+          +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+          +1/(p2*p2)*taud*exp(-(wg2+DT)/wg1)*(p2*(wg2+DT)+1)
+          -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)-1/(p2*p2)*taud*exp(-(wg2+DT)/taud);
+    }
+    else
+    {
+      St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+          +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+          -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)
+          -1.0/2*taud*(wg2+DT)*(wg2+DT)*exp(-(wg2+DT)/taud);
+    }
+  }
+  else
+  {
+    diff = taud - wg1; 
+
+    p3 = (-wg2+DT)/wg1;
+    p4 = ( wg2+DT)/wg1;
+  
+    if(fabs(diff)>EPS)
+    {
+      St = 1/(p2*p2)*taud*(exp(-(-wg2+DT)/taud)-exp(-(wg2+DT)/taud))
+          +(1/(p1*p1)-1/(p2*p2))*wg1*(exp(-p3)-exp(-p4))
+          +(1/p1-1/p2)*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1));
+    }
+    else
+    {
+      p5 = (-wg2+DT)/taud;
+      p6 = ( wg2+DT)/taud;
+
+      St = 1/(p1*p1)*wg1*(exp(-p3)-exp(-p4))
+          +1/p1*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1))
+          +1.0/2*(taud*taud*taud)*(exp(-p5)*(p5*p5+2*p5+2) - exp(-p6)*(p6*p6+2*p6+2));
+    }
+  }
+
+  St *= fg12;
+
+  return St;
+}
+
+double Sll_gam_tophat(double t1, double t2, const void *model, int nds, int nls1, int nls2, 
+                        int k_comp1, int k_comp2)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12, p1, p2, p3, p4, p5, p6, diff;
+  double *pm = (double *)model;
+  int idx, idx1, idx2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  idxk1 = idx1 + 1 + k_comp1*3;
+  fg1 = exp(pm[idxk1 + 0]);
+  tau1 =    pm[idxk1 + 1] ;
+  wg1 = exp(pm[idxk1 + 2]);
+
+  idxk2 = idx2 + 1 + k_comp2*3;
+  fg2 = exp(pm[idxk2 + 0]);
+  tau2 =    pm[idxk2 + 1] ;
+  wg2 = exp(pm[idxk2 + 2]);
+
+  fg12 = fg1*fg2/(wg1*wg1)/wg2/2;
+
+  Dt = t1 - t2;
+  DT = Dt - (tau1 - tau2);
+  
+  p1 = (taud + wg1)/taud/wg1;
+  p2 = (taud - wg1)/taud/wg1;
+
+  if(DT<=-wg2)
+  {
+    St = 1/(p1*p1) * taud * exp(DT/taud)*(exp(wg2/taud)-exp(-wg2/taud));
+  }
+  else if(DT<=wg2)
+  {
+    diff = taud - wg1;
+    if(fabs(diff)>EPS)
+    { 
+      St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+          +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+          +1/(p2*p2)*taud*exp(-(wg2+DT)/wg1)*(p2*(wg2+DT)+1)
+          -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)-1/(p2*p2)*taud*exp(-(wg2+DT)/taud);
+    }
+    else
+    {
+      St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+          +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+          -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)
+          -1.0/2*taud*(wg2+DT)*(wg2+DT)*exp(-(wg2+DT)/taud);
+    }
+  }
+  else
+  {
+    diff = taud - wg1; 
+
+    p3 = (-wg2+DT)/wg1;
+    p4 = ( wg2+DT)/wg1;
+  
+    if(fabs(diff)>EPS)
+    {
+      St = 1/(p2*p2)*taud*(exp(-(-wg2+DT)/taud)-exp(-(wg2+DT)/taud))
+          +(1/(p1*p1)-1/(p2*p2))*wg1*(exp(-p3)-exp(-p4))
+          +(1/p1-1/p2)*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1));
+    }
+    else
+    {
+      p5 = (-wg2+DT)/taud;
+      p6 = ( wg2+DT)/taud;
+
+      St = 1/(p1*p1)*wg1*(exp(-p3)-exp(-p4))
+          +1/p1*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1))
+          +1.0/2*(taud*taud*taud)*(exp(-p5)*(p5*p5+2*p5+2) - exp(-p6)*(p6*p6+2*p6+2));
+    }
+  }
+
+  St *= fg12;
+
+  return St;
+}
+
 /*=========================================================================*/
 /*
  * covariance between different lines
@@ -3754,6 +3927,179 @@ void Sll_array_exp_tophat(double *tline, int nline, const void *model, int nds, 
 
   return;
 }
+
+void Sll_array_tophat_gam(double *tline, int nline, const void *model, int nds, int nls, 
+                        int k_comp1, int k_comp2, double *Smat)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12, p1, p2, p3, p4, p5, p6, diff;
+  double *pm = (double *)model;
+  int i, j, k1, k2, idx, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  idxk1 = idx + 1 + k_comp2*3;  /* note here use k_comp2 */
+  fg1  = exp(pm[idxk1 + 0]);
+  tau1 =     pm[idxk1 + 1] ;
+  wg1 = exp(pm[idxk1 + 2]);
+
+  idxk2 = idx + 1 + k_comp1*3;  /* note here use k_comp1 */
+  fg2  = exp(pm[idxk2 + 0]);
+  tau2 =     pm[idxk2 + 1] ;
+  wg2 = exp(pm[idxk2 + 2]);
+
+  fg12 = fg1*fg2/(wg1*wg1)/wg2/2;
+
+  p1 = (taud + wg1)/taud/wg1;
+  p2 = (taud - wg1)/taud/wg1;
+  diff = taud - wg1;
+
+  for(i=0; i<nline; i++)
+  {
+    for(j=0; j<=i; j++)
+    {
+      Dt = -(tline[i] - tline[j]); /* note, here tj-ti */
+      DT = Dt - (tau1 - tau2);
+
+      if(DT<=-wg2)
+      {
+        St = 1/(p1*p1) * taud * exp(DT/taud)*(exp(wg2/taud)-exp(-wg2/taud));
+      }
+      else if(DT<=wg2)
+      {
+        if(fabs(diff)>EPS)
+        { 
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              +1/(p2*p2)*taud*exp(-(wg2+DT)/wg1)*(p2*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)-1/(p2*p2)*taud*exp(-(wg2+DT)/taud);
+        }
+        else
+        {
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)
+              -1.0/2*taud*(wg2+DT)*(wg2+DT)*exp(-(wg2+DT)/taud);
+        }
+      }
+      else
+      {
+        p3 = (-wg2+DT)/wg1;
+        p4 = ( wg2+DT)/wg1;
+      
+        if(fabs(diff)>EPS)
+        {
+          St = 1/(p2*p2)*taud*(exp(-(-wg2+DT)/taud)-exp(-(wg2+DT)/taud))
+              +(1/(p1*p1)-1/(p2*p2))*wg1*(exp(-p3)-exp(-p4))
+              +(1/p1-1/p2)*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1));
+        }
+        else
+        {
+          p5 = (-wg2+DT)/taud;
+          p6 = ( wg2+DT)/taud;
+
+          St = 1/(p1*p1)*wg1*(exp(-p3)-exp(-p4))
+              +1/p1*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1))
+              +1.0/2*(taud*taud*taud)*(exp(-p5)*(p5*p5+2*p5+2) - exp(-p6)*(p6*p6+2*p6+2));
+        }
+      }
+
+      Smat[i*nline + j] = St * fg12;
+    }
+  }
+
+  return;
+}
+
+void Sll_array_gam_tophat(double *tline, int nline, const void *model, int nds, int nls, 
+                        int k_comp1, int k_comp2, double *Smat)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12, p1, p2, p3, p4, p5, p6, diff;
+  double *pm = (double *)model;
+  int i, j, k1, k2, idx, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx = idx_line_pm[nds][nls];
+
+  idxk1 = idx + 1 + k_comp1*3;  /* note here use k_comp1 */
+  fg1  = exp(pm[idxk1 + 0]);
+  tau1 =     pm[idxk1 + 1] ;
+  wg1 = exp(pm[idxk1 + 2]);
+
+  idxk2 = idx + 1 + k_comp2*3;  /* note here use k_comp2 */
+  fg2  = exp(pm[idxk2 + 0]);
+  tau2 =     pm[idxk2 + 1] ;
+  wg2 = exp(pm[idxk2 + 2]);
+
+  fg12 = fg1*fg2/(wg1*wg1)/wg2/2;
+
+  p1 = (taud + wg1)/taud/wg1;
+  p2 = (taud - wg1)/taud/wg1;
+  diff = taud - wg1;
+
+  for(i=0; i<nline; i++)
+  {
+    for(j=0; j<=i; j++)
+    {
+      Dt = tline[i] - tline[j]; /* note, here ti-tj */
+      DT = Dt - (tau1 - tau2);
+
+      if(DT<=-wg2)
+      {
+        St = 1/(p1*p1) * taud * exp(DT/taud)*(exp(wg2/taud)-exp(-wg2/taud));
+      }
+      else if(DT<=wg2)
+      {
+        if(fabs(diff)>EPS)
+        { 
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              +1/(p2*p2)*taud*exp(-(wg2+DT)/wg1)*(p2*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)-1/(p2*p2)*taud*exp(-(wg2+DT)/taud);
+        }
+        else
+        {
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)
+              -1.0/2*taud*(wg2+DT)*(wg2+DT)*exp(-(wg2+DT)/taud);
+        }
+      }
+      else
+      {
+        p3 = (-wg2+DT)/wg1;
+        p4 = ( wg2+DT)/wg1;
+      
+        if(fabs(diff)>EPS)
+        {
+          St = 1/(p2*p2)*taud*(exp(-(-wg2+DT)/taud)-exp(-(wg2+DT)/taud))
+              +(1/(p1*p1)-1/(p2*p2))*wg1*(exp(-p3)-exp(-p4))
+              +(1/p1-1/p2)*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1));
+        }
+        else
+        {
+          p5 = (-wg2+DT)/taud;
+          p6 = ( wg2+DT)/taud;
+
+          St = 1/(p1*p1)*wg1*(exp(-p3)-exp(-p4))
+              +1/p1*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1))
+              +1.0/2*(taud*taud*taud)*(exp(-p5)*(p5*p5+2*p5+2) - exp(-p6)*(p6*p6+2*p6+2));
+        }
+      }
+
+      Smat[i*nline + j] = St * fg12;
+    }
+  }
+
+  return;
+}
+
 /*=========================================================================*/
 /*
  * covariance between different lines for an array of time
@@ -4770,6 +5116,180 @@ void Sll2_array_tophat_exp(double *tline1, int nline1, double *tline2, int nline
   return;
 }
 
+void Sll2_array_tophat_gam(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
+  int nds, int nls1, int nls2, int k_comp1, int k_comp2, double *Smat)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12, p1, p2, p3, p4, p5, p6, diff;
+  double *pm = (double *)model;
+  int i, j, k1, k2, idx, idx1, idx2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  idxk1 = idx2 + 1 + k_comp2*3;  /* note here use k_comp2 */
+  fg1  = exp(pm[idxk1 + 0]);
+  tau1 =     pm[idxk1 + 1] ;
+  wg1 = exp(pm[idxk1 + 2]);
+
+  idxk2 = idx1 + 1 + k_comp1*3;  /* note here use k_comp1 */
+  fg2  = exp(pm[idxk2 + 0]);
+  tau2 =     pm[idxk2 + 1] ;
+  wg2 = exp(pm[idxk2 + 2]);
+
+  fg12 = fg1*fg2/(wg1*wg1)/wg2/2;
+
+  p1 = (taud + wg1)/taud/wg1;
+  p2 = (taud - wg1)/taud/wg1;
+  diff = taud - wg1;
+
+  for(i=0; i<nline1; i++)
+  {
+    for(j=0; j<nline2; j++)
+    {
+      Dt = -(tline1[i] - tline2[j]); /* note, here tj-ti */
+      DT = Dt - (tau1 - tau2);
+
+      if(DT<=-wg2)
+      {
+        St = 1/(p1*p1) * taud * exp(DT/taud)*(exp(wg2/taud)-exp(-wg2/taud));
+      }
+      else if(DT<=wg2)
+      {
+        if(fabs(diff)>EPS)
+        { 
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              +1/(p2*p2)*taud*exp(-(wg2+DT)/wg1)*(p2*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)-1/(p2*p2)*taud*exp(-(wg2+DT)/taud);
+        }
+        else
+        {
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)
+              -1.0/2*taud*(wg2+DT)*(wg2+DT)*exp(-(wg2+DT)/taud);
+        }
+      }
+      else
+      {
+        p3 = (-wg2+DT)/wg1;
+        p4 = ( wg2+DT)/wg1;
+      
+        if(fabs(diff)>EPS)
+        {
+          St = 1/(p2*p2)*taud*(exp(-(-wg2+DT)/taud)-exp(-(wg2+DT)/taud))
+              +(1/(p1*p1)-1/(p2*p2))*wg1*(exp(-p3)-exp(-p4))
+              +(1/p1-1/p2)*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1));
+        }
+        else
+        {
+          p5 = (-wg2+DT)/taud;
+          p6 = ( wg2+DT)/taud;
+
+          St = 1/(p1*p1)*wg1*(exp(-p3)-exp(-p4))
+              +1/p1*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1))
+              +1.0/2*(taud*taud*taud)*(exp(-p5)*(p5*p5+2*p5+2) - exp(-p6)*(p6*p6+2*p6+2));
+        }
+      }
+
+      Smat[i*nline2 + j] = St * fg12;
+    }
+  }
+
+  return;
+}
+
+void Sll2_array_gam_tophat(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
+  int nds, int nls1, int nls2, int k_comp1, int k_comp2, double *Smat)
+{
+  double Dt, DT, St;
+  double taud, fg1, tau1, wg1, fg2, tau2, wg2, fg12, p1, p2, p3, p4, p5, p6, diff;
+  double *pm = (double *)model;
+  int i, j, k1, k2, idx, idx1, idx2, idxk1, idxk2;
+
+  idx = idx_con_pm[nds];
+  taud = exp(pm[idx+2]);
+
+  idx1 = idx_line_pm[nds][nls1];
+  idx2 = idx_line_pm[nds][nls2];
+
+  idxk1 = idx1 + 1 + k_comp1*3;  /* note here use k_comp1 */
+  fg1  = exp(pm[idxk1 + 0]);
+  tau1 =     pm[idxk1 + 1] ;
+  wg1 = exp(pm[idxk1 + 2]);
+
+  idxk2 = idx2 + 1 + k_comp2*3;  /* note here use k_comp2 */
+  fg2  = exp(pm[idxk2 + 0]);
+  tau2 =     pm[idxk2 + 1] ;
+  wg2 = exp(pm[idxk2 + 2]);
+
+  fg12 = fg1*fg2/(wg1*wg1)/wg2/2;
+
+  p1 = (taud + wg1)/taud/wg1;
+  p2 = (taud - wg1)/taud/wg1;
+  diff = taud - wg1;
+
+  for(i=0; i<nline1; i++)
+  {
+    for(j=0; j<nline2; j++)
+    {
+      Dt = tline1[i] - tline2[j]; /* note, here ti-tj */
+      DT = Dt - (tau1 - tau2);
+
+      if(DT<=-wg2)
+      {
+        St = 1/(p1*p1) * taud * exp(DT/taud)*(exp(wg2/taud)-exp(-wg2/taud));
+      }
+      else if(DT<=wg2)
+      {
+        if(fabs(diff)>EPS)
+        { 
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              +1/(p2*p2)*taud*exp(-(wg2+DT)/wg1)*(p2*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)-1/(p2*p2)*taud*exp(-(wg2+DT)/taud);
+        }
+        else
+        {
+          St = 2*taud*wg1*wg1*(1-exp(-(wg2+DT)/wg1)*((wg2+DT)/wg1+1))
+              +1/(p1*p1)*taud*exp(-(wg2+DT)/wg1)*(p1*(wg2+DT)+1)
+              -1/(p1*p1)*taud*exp(-(wg2-DT)/taud)
+              -1.0/2*taud*(wg2+DT)*(wg2+DT)*exp(-(wg2+DT)/taud);
+        }
+      }
+      else
+      {
+        p3 = (-wg2+DT)/wg1;
+        p4 = ( wg2+DT)/wg1;
+      
+        if(fabs(diff)>EPS)
+        {
+          St = 1/(p2*p2)*taud*(exp(-(-wg2+DT)/taud)-exp(-(wg2+DT)/taud))
+              +(1/(p1*p1)-1/(p2*p2))*wg1*(exp(-p3)-exp(-p4))
+              +(1/p1-1/p2)*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1));
+        }
+        else
+        {
+          p5 = (-wg2+DT)/taud;
+          p6 = ( wg2+DT)/taud;
+
+          St = 1/(p1*p1)*wg1*(exp(-p3)-exp(-p4))
+              +1/p1*wg1*wg1*(exp(-p3)*(p3+1)-exp(-p4)*(p4+1))
+              +1.0/2*(taud*taud*taud)*(exp(-p5)*(p5*p5+2*p5+2) - exp(-p6)*(p6*p6+2*p6+2));
+        }
+      }
+
+      Smat[i*nline2 + j] = St * fg12;
+    }
+  }
+
+  return;
+}
+
 void test_mix()
 {
   FILE *fp;
@@ -4788,7 +5308,7 @@ void test_mix()
 
   nt=500;
 
-  pm[2] = log(22.0);
+  pm[2] = log(15.0);
   pm[4] = log(1.0);
   pm[5] = 13.0;
   pm[6] = log(25.0);
@@ -4811,8 +5331,8 @@ void test_mix()
   for(i=0; i<nt; i++)
   {
     dt = -200.0 + 400.0/(nt-1) * i;
-    Sll = Sll_exp_tophat(dt, 0.0, model, 0, 0, 0, 0, 1);
-    Sll2 = Sll_tophat_exp(-dt, 0.0, model, 0, 0, 0, 1, 0);
+    Sll = Sll_gam_tophat(dt, 0.0, model, 0, 0, 0, 0, 1);
+    Sll2 = Sll_tophat_gam(-dt, 0.0, model, 0, 0, 0, 1, 0);
     fprintf(fp, "%f %e %e\n", dt, Sll, Sll2);
   }
 

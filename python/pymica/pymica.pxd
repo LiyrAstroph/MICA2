@@ -21,6 +21,7 @@ cdef extern from "allvars.h":
     char str_ratio_prior[256]
     char str_width_prior[256]
     char str_gap_prior[256]
+    char str_type_tf_mix[256]
   
     int flag_uniform_var_params
     int flag_uniform_tranfuns
@@ -60,6 +61,7 @@ cdef extern from "proto.h":
   void mc_line()
   void mc_pmap()
   void mc_vmap()
+  void mc_mmap()
   void output_decompose_line()
   void begin_run()
   void end_run()

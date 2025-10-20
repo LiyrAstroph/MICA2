@@ -22,7 +22,7 @@ from . import utility as ut
 
 import os
 
-__all__ = ["gmodel", "pmap", "vmap"]
+__all__ = ["gmodel", "pmap", "vmap", "mmap"]
 
 cdef class basis:
 
@@ -86,6 +86,7 @@ cdef class basis:
     strcpy(self.parset.str_ratio_prior,"".encode("UTF-8"))
     strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
     strcpy(self.parset.str_gap_prior, "".encode("UTF-8"))
+    strcpy(self.parset.str_type_tf_mix, "".encode("UTF-8"))
     # cdnest options
     self.parset.num_particles = 1
     self.parset.max_num_saves = 2000
@@ -149,6 +150,7 @@ cdef class basis:
       fp.write("{:30}{}\n".format("DataFile", self.parset.data_file.decode("UTF-8")))
       fp.write("{:30}{}\n".format("TypeModel", self.parset.model))
       fp.write("{:30}{}\n".format("TypeTF", self.parset.type_tf))
+      fp.write("{:30}{}\n".format("StrTypeTFMix", self.parset.str_type_tf_mix.decode("UTF-8")))
       fp.write("{:30}{}\n".format("MaxNumberSaves", self.parset.max_num_saves))
       fp.write("{:30}{}\n".format("FlagUniformVarParams", self.parset.flag_uniform_var_params))
       fp.write("{:30}{}\n".format("FlagUniformTranFuns", self.parset.flag_uniform_tranfuns))
@@ -366,6 +368,9 @@ cdef class basis:
       self.parset.type_tf = 2
     elif type_tf == 'exp':
       self.parset.type_tf = 3
+    elif type_tf.isdigit() and all(c in {"0", "1", "2", "3"} for c in type_tf):
+      self.parset.type_tf = 0
+      strcpy(self.parset.str_type_tf_mix, type_tf.encode("UTF-8"))
     else:
       raise ValueError("type_tf is unrecognized!")
     
@@ -1061,5 +1066,219 @@ cdef class vmap(basis):
     init()
     mc_con()
     mc_vmap()
+    end_run()
+    return
+
+#==========================================================================
+# mixture model 
+
+cdef class mmap(basis):
+  """
+  Model class
+  """
+  def __cinit__(self, param_file=None):
+    """
+    initialise with a parameter file.
+    """
+    if param_file != None:
+      if isinstance(param_file, str):
+        strcpy(self.parset.param_file, param_file.encode("UTF-8"))
+        set_param_file(self.parset.param_file)
+        read_parset()
+        get_parset(&self.parset)  # get parset from C
+
+        self._get_data_dimension()
+        # uniform variability parameters of mulitple datasets
+        if self.parset.flag_uniform_var_params == 0:
+          self.num_param_var = 3*self.nset
+        elif self.parset.flag_uniform_var_params == 1:
+          self.num_param_var = 3
+
+      else:
+        raise ValueError("param_file should be a string!")
+
+    return
+  
+  def __cdealloc__(self):
+    return
+  
+
+  def setup(self, data_file=None, data=None,
+                  type_tf='00', max_num_saves=2000, 
+                  flag_uniform_var_params=False, flag_uniform_tranfuns=False,
+                  flag_trend=0, flag_lag_posivity=False,
+                  flag_negative_resp = False,
+                  lag_limit=[0, 100], number_component=[2, 2],
+                  width_limit=None,
+                  flag_con_sys_err=False, flag_line_sys_err=False,
+                  nd_rec=200,
+                  type_lag_prior=0, lag_prior=None,
+                  width_prior=None, flag_gap=False, gap_prior=None,
+                  # follows cdnest parameters
+                  num_particles=1, thread_steps_factor=1, 
+                  new_level_interval_factor=1, save_interval_factor=1,
+                  lam=10, beta=100, ptol=0.1, 
+                  max_num_levels=0):     
+    """
+    setup parameters
+    """
+    
+    basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
+                      flag_negative_resp, \
+                      flag_con_sys_err, flag_line_sys_err, nd_rec, 
+                      # follows cdnest parameters
+                      num_particles = num_particles,
+                      thread_steps_factor = thread_steps_factor, 
+                      new_level_interval_factor = new_level_interval_factor,
+                      save_interval_factor = save_interval_factor,
+                      lam = lam,
+                      beta = beta, 
+                      ptol = ptol, 
+                      max_num_levels = max_num_levels)
+    
+    self.parset.model = 3
+    
+    # uniform variability parameters of mulitple datasets
+    if flag_uniform_var_params == False:
+      self.parset.flag_uniform_var_params = 0
+      self.num_param_var = 3*self.nset
+    elif flag_uniform_var_params == True:
+      self.parset.flag_uniform_var_params = 1
+      self.num_param_var = 3
+    else:
+      raise ValueError("flag_uniform_var_params is unrecognized!")
+    
+    # uniform transfer function parameters of mulitple datasets
+    if isinstance(flag_uniform_tranfuns, bool):
+      if flag_uniform_tranfuns == False:
+        self.parset.flag_uniform_tranfuns = 0
+      elif flag_uniform_tranfuns == True:
+        self.parset.flag_uniform_tranfuns = 1
+    elif isinstance(flag_uniform_tranfuns, int):
+      self.parset.flag_uniform_tranfuns = flag_uniform_tranfuns
+    else:
+      raise ValueError("flag_uniform_tranfuns is unrecognized!")
+
+    # lag limit
+    self.parset.lag_limit_low = lag_limit[0]
+    self.parset.lag_limit_upper = lag_limit[1]
+
+    # width limit
+    if width_limit != None:
+      if width_limit[0] != None:
+        self.parset.width_limit_low_isset = 1
+        self.parset.width_limit_low = width_limit[0]
+      if width_limit[1] != None:
+        self.parset.width_limit_upper_isset = 1
+        self.parset.width_limit_upper = width_limit[1]
+
+    # number of component
+    if isinstance(number_component, int):
+      self.parset.num_gaussian_low = number_component
+      self.parset.num_gaussian_upper = number_component
+    elif isinstance(number_component, list):
+      self.parset.num_gaussian_low = number_component[0]
+      self.parset.num_gaussian_upper = number_component[1]
+    self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
+    
+    if self.flag_load_prior == 1 and self.parset.num_gaussian_diff > 1:
+      raise ValueError("when calling set_priors(), only support a single number of component, e.g.,"
+                       "number_component[0]=number_component[1].\n")
+
+    self.parset.type_lag_prior = type_lag_prior
+
+    # if lag_prior is input
+    if lag_prior != None:
+      if self.parset.num_gaussian_upper > 1:
+        self.parset.type_lag_prior=4
+        # write string of lag prior
+        sstr = "["
+        sstr += "%f:%f"%(lag_prior[0][0], lag_prior[0][1])
+        for i in range(1, self.parset.num_gaussian_upper):
+          sstr += ":%f:%f"%(lag_prior[i][0], lag_prior[i][1])
+        
+        sstr += "]"
+        strcpy(self.parset.str_lag_prior, sstr.encode("UTF-8"))
+      else:
+        self.parset.type_lag_prior=0
+    
+    # if width_prior is input
+    if width_prior != None:
+      # write string of lag prior
+      sstr = "["
+      sstr += "%f:%f"%(width_prior[0][0], width_prior[0][1])
+      for i in range(1, self.parset.num_gaussian_upper):
+        sstr += ":%f:%f"%(width_prior[i][0], width_prior[i][1])
+      
+      sstr += "]"
+      strcpy(self.parset.str_width_prior, sstr.encode("UTF-8"))
+    else:
+      strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
+    
+    if flag_gap == True:
+      self.parset.flag_gap = 1
+      if gap_prior is not None:
+        self.gap_prior = gap_prior
+        sstr = "["
+        sstr += "%f:%f"%(gap_prior[0][0], gap_prior[0][1])
+        for i in range(1, len(gap_prior)):
+          sstr += "%f:%f"%(gap_prior[i][0], gap_prior[i][1])
+        sstr += "]"
+        strcpy(self.parset.str_gap_prior, sstr.encode("UTF-8"))
+    else:
+      self.parset.flag_gap = 0
+      strcpy(self.parset.str_gap_prior, "".encode("UTF-8"))
+
+    self.print_parset()
+
+    # finally set parameters in C.
+    set_parset(&self.parset)
+    return
+  
+  def run(self):
+    """
+    run mica
+    """
+    read_data()
+    init()
+    mc_con()
+    mc_mmap()
+    end_run()
+    return
+  
+  def post_run(self):
+    """
+    do posterior running
+    """
+    set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
+    read_data()
+    init()
+    mc_mmap()
+    end_run()
+    return
+  
+  def restart(self): 
+    """
+    resume from a last run
+    """
+    set_argv(0, 0, 1, 0, 0)
+    read_data()
+    init()
+    set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
+    mc_con()
+    set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
+    mc_mmap()
+    end_run()
+    return
+  
+  def print_para_names(self):
+    """
+    print para names 
+    """
+    set_argv(0, 0, 0, 1, 0)
+    read_data()
+    init()
+    mc_con()
+    mc_mmap()
     end_run()
     return

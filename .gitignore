@@ -8,6 +8,7 @@ data/*
 mica2
 !postprocess.py
 !plotfig.py
+!genmockdata.py
 !docs/_static/*.jpg
 !param
 !param/param

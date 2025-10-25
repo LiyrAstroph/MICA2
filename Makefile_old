@@ -108,12 +108,13 @@ OBJS     = $(SRC)/main.o $(SRC)/allvars.o $(SRC)/system.o $(SRC)/run.o        \
            $(SRC)/line_decomp.o $(SRC)/dnest_pmap.o $(SRC)/mc_pmap.o          \
 	         $(CDN)/dnest.o  $(CDN)/dnestpostprocess.o                          \
 	         $(CDN)/dnestvars.o $(SRC)/mc_vmap.o $(SRC)/dnest_vmap.o            \
-           $(SRC)/mygetopt.o
+           $(SRC)/mygetopt.o $(SRC)/dnest_mmap.o $(SRC)/mc_mmap.o             \
+           $(SRC)/line_decomp_mmap.o
   
 INCL     = Makefile_old $(SRC)/allvars.h $(SRC)/proto.h  $(SRC)/dnest_con.h   \
            $(SRC)/dnest_line.h $(SRC)/version.h $(SRC)/dnest_pmap.h           \
 	         $(CDN)/dnest.h $(CDN)/dnestvars.h $(SRC)/dnest_vmap.h              \
-           $(SRC)/mygetopt.h
+           $(SRC)/mygetopt.h  $(SRC)/dnest_mmap.h
 
 OPTIONS  = $(OPTIMIZE)
 CFLAGS   = $(OPTIONS) $(GSL_INCL) $(LAPACK_INCL) $(MPICHINCL) $(DNEST_INCL) $(FFTW_INCL) \

@@ -45,6 +45,7 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${SRC}/init.c
   ${SRC}/mathfun.c
   ${SRC}/line_decomp.c
+  ${SRC}/line_decomp_mmap.c
   ${SRC}/system.c
   ${SRC}/version.c
   ${SRC}/error.c

@@ -121,6 +121,7 @@ double prob_line_variability_mmap(const void *model);
 void set_covar_Pmat_data_line_array_mmap(const void *model, int k);
 void set_covar_Umat_line_mmap(const void *model, int nds, int *nall, double *tall);
 void set_covar_Amat_line_mmap(const void *model, int nds, int *nall, double *tall);
+void output_decompose_line_parallel_mmap();
 
 double Slc_mmap(double tcon, double tline, const void *model, int nds, int nls);
 double Slc_gauss_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);

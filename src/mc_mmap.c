@@ -93,6 +93,11 @@ void mc_mmap()
     postprocess_mmap();
 
     output_reconstruction_parallel_mmap();
+
+    if(flag_decomp == 1)
+    {
+      output_decompose_line_parallel_mmap();
+    }
   }
   
   if(thistask == roottask && flag_para_name != 1)

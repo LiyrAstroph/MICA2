@@ -138,21 +138,21 @@ def _calculate_tran_mmap(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx
 
         cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
         sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-        tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+        tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)/np.sqrt(2*np.pi)
 
       elif typemodel == 1: #pmap model 
         if k == 0:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
           cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-          tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+          tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)/np.sqrt(2*np.pi)
         else:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
                         pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
           
           cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
-          tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)
+          tran[:] += amp/sig * np.exp(-0.5*(tau - cen)**2/sig**2)/np.sqrt(2*np.pi)
 
     elif tt == 1:  # tophats
       # loop over tophats
@@ -211,7 +211,7 @@ def _calculate_tran_mmap(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
           tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
 
-    else:  # gamma
+    else:  # exp
       # loop over tophats
       if typemodel in [0, 2, 3]: # general, vmap model
         if flagnegresp == 0:
@@ -231,7 +231,7 @@ def _calculate_tran_mmap(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx
           cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
           idx_tau = np.where(tau >= cen)[0]
-          tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+          tran[idx_tau] += amp/sig * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
         else:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
                         pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
@@ -263,6 +263,8 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   idx_pmax = np.argmax(sample_info)
   data = np.loadtxt(fdir+fname)
   sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
+
+  print(typetf)
 
   if flagtrend > 0:
     trend = np.loadtxt(fdir+"/data/trend.txt_%d"%ngau)

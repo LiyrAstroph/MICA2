@@ -242,6 +242,18 @@ def _calculate_tran_mmap(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx
 
   return tran 
 
+def _get_time_lag(sample, idx, tt):
+  """
+  get time lag from sample for the transfer function type tt
+  """
+  if tt in [0, 1]:
+    return sample[:, idx+1] 
+  elif tt == 2:
+    return sample[:, idx+1] + 2*np.exp(sample[:, idx+2])
+  elif tt == 3:
+    return sample[:, idx+1] + 1*np.exp(sample[:, idx+2])
+
+
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, 
                  typetf, typemodel, resp_input, doshow=True, tf_lag_range=None, hist_lag_range=None, 
                  hist_bins=None, show_pmax=False, show_gap=False):
@@ -342,23 +354,29 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       for j in range(1, len(ns)):
         sample_lag[:] = 0.0
         weight_lag[:] = 0.0
-        if typemodel == 0 or typemodel == 2:  # general, vmap model
+        if typemodel in [0, 2, 3]:  # general, vmap model
           for k in range(ngau):
+            tt = int(typetf[k])
+            indx = indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3
             if flagnegresp == 0:  # no negative response
-              sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-              weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+              sample_lag[:] +=  _get_time_lag(sample, indx, tt) * np.exp(sample[:, indx+0])
+              weight_lag[:] +=  np.exp(sample[:, indx+0])
             else:
-              sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+              sample_lag[:] +=  sample[:, indx+1]
               weight_lag[:] +=  1.0
 
         elif typemodel == 1: # pmap model
           k = 0
-          sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-          weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
+          tt = int(typetf[k])
+          indx = indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3
+          sample_lag[:] +=  _get_time_lag(sample, indx, tt) * np.exp(sample[:, indx+0])
+          weight_lag[:] +=  np.exp(sample[:, indx+0])
+          indx0 = indx
           for k in range(1, ngau):
-            sample_lag[:] +=  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] * np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-            weight_lag[:] +=  np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
-                                    sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+            tt = int(typetf[k])
+            indx = indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3
+            sample_lag[:] +=  _get_time_lag(sample, indx, tt) * np.exp(sample[:, indx+0] + sample[:, indx0+0])
+            weight_lag[:] +=  np.exp(sample[:, indx+0] + sample[:, indx0+0])
     
         lag, err1, err2 = np.quantile(sample_lag/weight_lag, q=(0.5, (1.0-0.683)/2.0, 1.0-(1.0-0.683)/2.0))
         err1 = lag-err1

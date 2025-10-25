@@ -309,7 +309,10 @@ def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5
 
   norm = np.sum(np.abs(resp[:])) * dt
   resp[:] /= norm
-  conv = convolve_fft(con[:, 1]-1.0, resp) * dt + 1.0
+  conv_org = convolve_fft(con[:, 1]-1.0, resp) * dt + 1.0
+  # to account for tau[0]!=0
+  conv = np.interp(ts, ts+tau[0], conv_org)
+
 
   plt.plot(con[:, 0], con[:, 1])
   plt.plot(con[:, 0], conv)
@@ -368,5 +371,5 @@ def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5
 
 if __name__ == "__main__":
   
-  tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5.0)}
+  tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("tophat", 1.0, 30.0, 5.0)}
   simlc(tfs, lag_range=[-20, 60], doshow=True)

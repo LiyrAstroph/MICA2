@@ -874,7 +874,7 @@ def _param_parser(fname):
   parse parameter file
   """
   config = cp.RawConfigParser(delimiters=' ', comment_prefixes='#', inline_comment_prefixes='#', 
-  default_section=cp.DEFAULTSECT, empty_lines_in_values=False)
+  default_section=cp.DEFAULTSECT, empty_lines_in_values=False, allow_no_value=True)
   
   with open(fname) as f:
     file_content = '[dump]\n' + f.read()

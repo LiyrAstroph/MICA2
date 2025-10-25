@@ -204,13 +204,19 @@ cdef class basis:
         flag_gap = True
     else:
       flag_gap = False
-
+    
+    typetf = None
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+      if self.parset.model != 3:
+        typetf = str(self.parset.type_tf) * i 
+      else:
+        typetf = self.parset.str_type_tf_mix
+
       ut.plot_results(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
                       self.parset.lag_limit_low, self.parset.lag_limit_upper, \
                       self.parset.flag_uniform_var_params, self.parset.flag_uniform_tranfuns, \
                       self.parset.flag_trend, self.parset.flag_negative_resp, \
-                      self.parset.type_tf, self.parset.model, resp_input, doshow=doshow, \
+                      typetf, self.parset.model, resp_input, doshow=doshow, \
                       tf_lag_range=tf_lag_range, hist_lag_range=hist_lag_range, hist_bins=hist_bins, show_pmax=show_pmax, \
                       show_gap=flag_gap)
     return

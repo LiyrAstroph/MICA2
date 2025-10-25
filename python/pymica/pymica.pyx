@@ -216,7 +216,7 @@ cdef class basis:
                       self.parset.lag_limit_low, self.parset.lag_limit_upper, \
                       self.parset.flag_uniform_var_params, self.parset.flag_uniform_tranfuns, \
                       self.parset.flag_trend, self.parset.flag_negative_resp, \
-                      typetf.decode("UTF-8"), self.parset.model, resp_input, doshow=doshow, \
+                      typetf, self.parset.model, resp_input, doshow=doshow, \
                       tf_lag_range=tf_lag_range, hist_lag_range=hist_lag_range, hist_bins=hist_bins, show_pmax=show_pmax, \
                       show_gap=flag_gap)
     return
@@ -225,10 +225,17 @@ cdef class basis:
     """
     plot line decomposition
     """
-    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+    typetf = None
+    for i in range(2, self.parset.num_gaussian_upper+1, 1):
+      if self.parset.model != 3:
+        typetf = str(self.parset.type_tf) * i 
+      else:
+        typetf = self.parset.str_type_tf_mix
+
       ut.plot_line_decomp(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
                           self.parset.lag_limit_low, self.parset.lag_limit_upper, \
-                          self.parset.type_tf, self.parset.model, self.parset.flag_negative_resp, resp_input, doshow=doshow)
+                          typetf, self.parset.model, self.parset.flag_negative_resp, \
+                          resp_input, doshow=doshow)
     
     return
   

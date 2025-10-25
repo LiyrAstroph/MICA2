@@ -117,7 +117,7 @@ def _get_tf_timelag_range(sample, indx_line, typetf, ngau, ns, m):
 
   return tau1_tf, tau2_tf
 
-def _calculate_tran_mmap(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line, id, il):
+def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line, id, il):
   """
   calculate transfer function given a set of parameters
   """
@@ -263,8 +263,6 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   idx_pmax = np.argmax(sample_info)
   data = np.loadtxt(fdir+fname)
   sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
-
-  print(typetf)
 
   if flagtrend > 0:
     trend = np.loadtxt(fdir+"/data/trend.txt_%d"%ngau)
@@ -682,7 +680,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       tau = np.linspace(tau1_tf, tau2_tf, ntau)
       tran[:, :] = 0.0
       for i in range(sample.shape[0]):
-        tran[i, :] = _calculate_tran_mmap(tau, sample[i, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
+        tran[i, :] = _calculate_tran(tau, sample[i, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
       
       tran_best = np.percentile(tran, 50.0, axis=0)
       tran1 = np.percentile(tran, (100.0-68.3)/2.0, axis=0)
@@ -695,7 +693,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
       
       if show_pmax == True:
-        tran_pmax = _calculate_tran_mmap(tau, sample[idx_pmax, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
+        tran_pmax = _calculate_tran(tau, sample[idx_pmax, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
         ax.plot(tau, tran_pmax, label=r'$L_{\rm max}$', color='r', ls='--')
         
 
@@ -721,20 +719,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       if resp_input != None or show_pmax == True:
         ax.legend(fontsize=10)
 
-      # determine the best range of time lag for gamma tf
-      if tf_lag_range is None:
-        if typetf == 2:
-          idx_best_max = np.argmax(tran_best)
-          idx_best_upp = np.where(tran_best[idx_best_max:]<tran_best[idx_best_max]*0.01)[0]
-          if len(idx_best_upp) == 0:
-            tau_best_upp = tau[-1]
-          else:
-            tau_best_upp = tau[idx_best_max + idx_best_upp[-1]]
-          ax.set_xlim(tau[0], tau_best_upp)
-        else:
-          ax.set_xlim((tau[0], tau[-1]))
-      else:
-        ax.set_xlim(tau1_tf, tau2_tf)
+      ax.set_xlim(tau1_tf, tau2_tf)
 
       ylim = ax.get_ylim()
       if resp_input == None:

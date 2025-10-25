@@ -216,7 +216,7 @@ cdef class basis:
                       self.parset.lag_limit_low, self.parset.lag_limit_upper, \
                       self.parset.flag_uniform_var_params, self.parset.flag_uniform_tranfuns, \
                       self.parset.flag_trend, self.parset.flag_negative_resp, \
-                      typetf, self.parset.model, resp_input, doshow=doshow, \
+                      typetf.decode("UTF-8"), self.parset.model, resp_input, doshow=doshow, \
                       tf_lag_range=tf_lag_range, hist_lag_range=hist_lag_range, hist_bins=hist_bins, show_pmax=show_pmax, \
                       show_gap=flag_gap)
     return

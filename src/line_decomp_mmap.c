@@ -22,6 +22,6 @@
 
 void output_decompose_line_parallel_mmap()
 {
-
+  printf("Decomposition for mmap mode is still in developing...\n");
   return;
 }

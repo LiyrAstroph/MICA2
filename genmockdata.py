@@ -281,24 +281,24 @@ def exponential(t, f, tau, wid):
 ##################################################
 
 def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5.0)},
-          lag_range=[-10, 50], doshow=True):
+          lag_range=[-10, 50], doshow=True, tspan=200, dt=2.0):
   """
   generate mock light curves
 
   """
   print("generate mock light curves...")
 
-  Tot = 500.0
+  Tot = tspan*2.5
   ts, fs = drw(Tot, [0.3, 50.0, 1.0e-100])
   #ts, fs = psd(Tot, [1.0e-5, 2.5, 1.0e-100])
 
   fe = np.zeros(ts.shape[0]) + float(0.01)
   con = np.stack((ts, fs, fe), axis=-1)
-  dt = con[1, 0] - con[0, 0]
+  dt_org = con[1, 0] - con[0, 0]
   
-  ntau = int((lag_range[1]-lag_range[0])/dt)
+  ntau = int((lag_range[1]-lag_range[0])/dt_org)
   resp = np.zeros(ntau)
-  tau = np.array(np.arange(ntau))*dt + lag_range[0]
+  tau = np.array(np.arange(ntau))*dt_org + lag_range[0]
 
   funcs = {"gauss":gauss, "tophat": tophat, "gamma": gamma, "exp":exponential}
 
@@ -307,9 +307,9 @@ def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5
     model = tfs[key][1:]
     resp[:] += funcs[tf](tau, model[0], model[1], model[2])
 
-  norm = np.sum(np.abs(resp[:])) * dt
+  norm = np.sum(np.abs(resp[:])) * dt_org
   resp[:] /= norm
-  conv_org = convolve_fft(con[:, 1]-1.0, resp) * dt + 1.0
+  conv_org = convolve_fft(con[:, 1]-1.0, resp) * dt_org + 1.0
   # to account for tau[0]!=0
   conv = np.interp(ts, ts+tau[0], conv_org)
 
@@ -323,9 +323,9 @@ def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5
 
   np.savetxt("data/resp_input.txt", np.column_stack((tau, resp)))
 
-  DT = 2.0
+  DT = dt
   tline0 = 0.0
-  tline1 = 200.0
+  tline1 = tspan
   nline = int((tline1-tline0)/DT+0.5)+1
   line = np.zeros((nline, 3))
   line[:, 0] = np.linspace(tline0, tline1, nline)
@@ -339,7 +339,7 @@ def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5
   incr = int(DT/(con[1, 0]-con[0, 0])+0.5)
   if incr < 1:
     incr = 1
-  idx = np.where((con[:, 0] >= 0.0) & (con[:, 0] <= 200.0))
+  idx = np.where((con[:, 0] >= 0.0) & (con[:, 0] <= tspan))
   con_out = copy.copy(con[idx[0], :])
   con_out = con_out[::incr, :]
 
@@ -371,5 +371,6 @@ def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5
 
 if __name__ == "__main__":
   
-  tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("tophat", 1.0, 30.0, 5.0)}
-  simlc(tfs, lag_range=[-20, 60], doshow=True)
+  # tfs={"comp1":("gauss", 1.0, -10.0, 5.0), "comp2":("tophat", 1.0, 30.0, 5.0)}
+  tfs={"comp1":("gamma", 1.0, 0.0, 6.0), "comp2":("gauss", 0.5, 50.0, 5.0)}
+  simlc(tfs, lag_range=[-10, 100], doshow=True, tspan=300, dt=1.0)

@@ -210,7 +210,7 @@ cdef class basis:
       if self.parset.model != 3:
         typetf = str(self.parset.type_tf) * i 
       else:
-        typetf = self.parset.str_type_tf_mix
+        typetf = self.parset.str_type_tf_mix.decode("UTF-8")
 
       ut.plot_results(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
                       self.parset.lag_limit_low, self.parset.lag_limit_upper, \
@@ -230,7 +230,7 @@ cdef class basis:
       if self.parset.model != 3:
         typetf = str(self.parset.type_tf) * i 
       else:
-        typetf = self.parset.str_type_tf_mix
+        typetf = self.parset.str_type_tf_mix.decode("UTF-8")
 
       ut.plot_line_decomp(self.parset.file_dir.decode("UTF-8"), self.parset.data_file.decode("UTF-8"), i, \
                           self.parset.lag_limit_low, self.parset.lag_limit_upper, \
@@ -1264,6 +1264,17 @@ cdef class mmap(basis):
     do posterior running
     """
     set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
+    read_data()
+    init()
+    mc_mmap()
+    end_run()
+    return
+  
+  def decompose(self):
+    """
+    do decomposition
+    """
+    set_argv(1, 1, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
     mc_mmap()

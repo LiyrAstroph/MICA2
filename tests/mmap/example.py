@@ -73,7 +73,7 @@ model.run()
 # model.post_run()
 
 #do decomposition for the cases of multiple components 
-# model.decompose()
+model.decompose()
 
 # plot results
 if rank == 0:
@@ -83,6 +83,7 @@ if rank == 0:
   model.plot_results(doshow=True, tf_lag_range=None, hist_lag_range=None, 
                      hist_bins=None, resp_input="resp_input.txt") 
   model.post_process()  # generate plots for the properties of MCMC sampling 
+  model.plot_decomp(doshow=True, resp_input="resp_input.txt")
 
   # get the full sample 
   # sample is a list, each element contains an array of posterior samples
@@ -97,8 +98,8 @@ if rank == 0:
   # timelag[1] is for the case of number_component[1]
   # ...
   timelag = model.get_posterior_sample_timelag(set=0, line=0) 
-  plt.plot(timelag[1][:, 0])
-  plt.plot(timelag[1][:, 1])
+  plt.plot(timelag[0][:, 0])
+  plt.plot(timelag[0][:, 1])
   plt.show()
 
   # get the posterior sample of widths of the "line" in the dataset "set"
@@ -107,6 +108,6 @@ if rank == 0:
   # width[1] is for the case of number_component[1]
   # ...
   width = model.get_posterior_sample_width(set=0, line=0) 
-  plt.plot(width[1][:, 0])
-  plt.plot(width[1][:, 1])
+  plt.plot(width[0][:, 0])
+  plt.plot(width[0][:, 1])
   plt.show()

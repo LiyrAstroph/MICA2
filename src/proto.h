@@ -122,14 +122,29 @@ void set_covar_Pmat_data_line_array_mmap(const void *model, int k);
 void set_covar_Umat_line_mmap(const void *model, int nds, int *nall, double *tall);
 void set_covar_Amat_line_mmap(const void *model, int nds, int *nall, double *tall);
 void output_decompose_line_parallel_mmap();
+void decompose_single_component_mmap(const void *model, int nds, int *nall, 
+  double *tall, double *fall, double *feall, double *yqall, int kgau);
+void set_covar_Umat_line_single_mmap(const void *model, int nds, int *nall, double *tall, int kgau);
+void set_covar_Amat_line_single_mmap(const void *model, int nds, int *nall, double *tall, int kgau);
+
+/* function pointer for covariance between continuum and line */
+double (*FP_Slc[4])(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
+double (*FP_Sll[4*4])(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k1, int k2);
+
+void (*FP_Slc_array[4])(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
+void (*FP_Sll_array[4*4])(double *tline, int nline, const void *model, int nds, int nls, int k1, int k2, double *Smat);
+void (*FP_Sll2_array[4*4])(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
+  int nds, int nls1, int nls2, int k1, int k2, double *Smat);
 
 double Slc_mmap(double tcon, double tline, const void *model, int nds, int nls);
+double Slc_single_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 double Slc_gauss_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 double Slc_gamma_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 double Slc_exp_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 double Slc_tophat_mmap(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
 
 double Sll_mmap(double t1, double t2, const void *model, int nds, int nls);
+double Sll_single_mmap(double t1, double t2, const void *model, int nds, int nls, int k_comp);
 double Sll_gau_gau(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
 double Sll_gau_exp(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
 double Sll_gau_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
@@ -148,6 +163,7 @@ double Sll_gam_tophat(double t1, double t2, const void *model, int nds, int nls1
 double Sll_tophat_gam(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp1, int k_comp2);
 
 double Sll2_mmap(double t1, double t2, const void *model, int nds, int nls1, int nls2);
+double Sll2_single_mmap(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k_comp);
 
 void Slc_array_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, double *Smat);
 void Slc_array_gauss_mmap(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_comp, double *Smat);

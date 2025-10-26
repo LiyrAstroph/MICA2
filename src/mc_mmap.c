@@ -20,15 +20,6 @@
 
 #include "proto.h"
 
-/* function pointer for covariance between continuum and line */
-double (*FP_Slc[4])(double tcon, double tline, const void *model, int nds, int nls, int k_comp);
-double (*FP_Sll[4*4])(double t1, double t2, const void *model, int nds, int nls1, int nls2, int k1, int k2);
-
-void (*FP_Slc_array[4])(double *tcon, int ncon, double *tline, int nline, const void *model, int nds, int nls, int k_gau, double *Smat);
-void (*FP_Sll_array[4*4])(double *tline, int nline, const void *model, int nds, int nls, int k1, int k2, double *Smat);
-void (*FP_Sll2_array[4*4])(double *tline1, int nline1, double *tline2, int nline2, const void *model, 
-  int nds, int nls1, int nls2, int k1, int k2, double *Smat);
-
 void mc_mmap()
 {
   int i, j, argc=0;

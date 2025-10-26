@@ -120,7 +120,28 @@ VI. vmap
 
 Please refer to :ref:`vrm_label` to see the detail.
 
-VII. negative_resp
-------------------
+VII. mmap
+---------
+
+The transfer function consists of two different types of basic functions. 
+MICA2 supports an abitrary number of components. Here two components are used for 
+illustration purpose. Run the Python script as 
+
+.. code:: bash 
+
+  mpiexe -n 6 python example.py
+
+Here 6 cores are used. If one wants to use other number of cores, change the number accordingly.
+
+The output plot looks like 
+
+.. figure:: _static/fig_mmap.jpg
+  :scale: 40 %
+  :align: center
+
+  The results for a test with a mixture of Gamma and Gaussian transfer functions.
+
+VIII. negative_resp
+-------------------
 
 Please refer to :ref:`nega_resp_label` to see the detail.

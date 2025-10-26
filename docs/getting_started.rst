@@ -176,13 +176,19 @@ A typical parameter file looks like::
 
   TypeModel                 0                # 0: general model
                                              # 1: pmap, photometric RM
-                                             # 2: vmap, use a virtual driving light curve.
+                                             # 2: vmap, use a virtual driving light curve
+                                             # 3: mmap, mixture of TF types
+                                             # default: 0
 
   TypeTF                    0                # 0: Gaussian
                                              # 1: Top-hat
                                              # 2: Gamma function (k=2)
                                              # 3: Exponential
                                              # default: 0
+  
+  StrTypeTFMix              30               # string for the TF types of mixture mode (mmap)
+                                             # e.g., "02": gaussian-gamma; "20": gamma-gaussian
+                                             # valid if TypeModel == 3 (mmap)
 
   MaxNumberSaves            1000             # number of MCMC sampling steps
                                              # default: 2000

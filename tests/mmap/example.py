@@ -42,7 +42,7 @@ data_input = comm.bcast(data_input, root=0)
 #2) the ohter way is through the setup function
 
 model = pymica.mmap()
-# use Gaussians
+# use gamma + Gaussian
 model.setup(data=data_input, type_tf='20', lag_limit=[-10, 100], max_num_saves=1000)
 # type_tf, 0：gaussian， 1：tophat， 2：gamma (k=2)， 3： exponential
 # e.g., "01" means gaussian and tophat 

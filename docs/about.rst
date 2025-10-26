@@ -11,7 +11,8 @@ A transfer function or delay map relates a time series  to its driving time seri
   
   L(t) = \int \Psi(\tau) C(t-\tau) d\tau.
 
-``mica2`` expresses the transfer function into a family of displaced Gaussians,
+``mica2`` expresses the transfer function into a family of displaced components. If 
+taking Gaussians as an example, the transfer function is written
 
 .. math::
 
@@ -29,6 +30,7 @@ A transfer function or delay map relates a time series  to its driving time seri
   Schematic of the transfer function for a system that consists of discrete clouds.
 
 As alternative options, ``mica2`` also supports several types of transfer functions 
+and their mixtures.
 
 - Top-hat transfer function.
 

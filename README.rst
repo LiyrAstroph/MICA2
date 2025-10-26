@@ -19,7 +19,7 @@ A Quick Tutorial
 
 Types of Transfer Functions
 ---------------------------
-MICA2 supports serveral types of tranfer functions:
+MICA2 supports serveral types of tranfer functions and their mixtures:
 
 - Gaussian 
 - Tophat 
@@ -43,7 +43,7 @@ Python Module Version: pymica
 
 Edit a Python script named, e.g., example.py, as the following.
 
-.. code-block:: Python
+.. code-block:: python
 
   from mpi4py import MPI
   import numpy as np
@@ -235,5 +235,48 @@ similar to the normal modes.
   # plot results
   if rank == 0:
     
+    model.plot_results() # plot results
+    model.post_process()  # generate plots for the properties of MCMC sampling 
+
+Mixture Reverberation Mapping
+-----------------------------
+
+MICA2 also supports a mixture of basic transfer function types. This is executed with ``mmap`` mode.
+
+.. code-block:: python
+
+  from mpi4py import MPI
+  import numpy as np
+  import pymica
+  import matplotlib.pyplot as plt
+  
+  # initiate MPI
+  comm = MPI.COMM_WORLD
+  rank = comm.Get_rank()
+  
+  # load data
+  if rank == 0:
+    data = np.loadtxt("./sim_data.txt")
+    con = data[:126, :]
+    line= data[126:, :]
+    
+    # make a data dict 
+    data_input = {"set1":[con, line]}
+  
+  else:
+    data_input = None 
+  
+  data_input = comm.bcast(data_input, root=0)
+  
+  model = pymica.mmap()
+  model.setup(data=data_input, type_tf='20', lag_limit=[-10, 100], max_num_saves=1000)
+  # type_tf, 0：gaussian， 1：tophat， 2：gamma (k=2)， 3： exponential
+  # e.g., "01" means gaussian and tophat 
+  
+  #run mica
+  model.run()
+  
+  # plot results
+  if rank == 0:  
     model.plot_results() # plot results
     model.post_process()  # generate plots for the properties of MCMC sampling 

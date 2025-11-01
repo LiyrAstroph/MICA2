@@ -109,6 +109,7 @@ typedef struct
   
   /* number of points of reconstruction */
   int nd_rec;
+  double trec_low_ext, trec_upp_ext;
   
   /* seasonal gap */
   int flag_gap;

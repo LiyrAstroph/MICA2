@@ -82,6 +82,8 @@ cdef class basis:
     self.parset.num_gaussian_upper = 1
     self.parset.flag_gap = 0
     self.parset.nd_rec = 200
+    self.parset.trec_low_ext = 0.0
+    self.parset.trec_upp_ext = 0.0
     strcpy(self.parset.str_lag_prior, "".encode("UTF-8"))
     strcpy(self.parset.str_ratio_prior,"".encode("UTF-8"))
     strcpy(self.parset.str_width_prior, "".encode("UTF-8"))
@@ -169,6 +171,8 @@ cdef class basis:
       fp.write("{:30}{}\n".format("FlagConSysErr", self.parset.flag_con_sys_err))
       fp.write("{:30}{}\n".format("FlagLineSysErr", self.parset.flag_line_sys_err))
       fp.write("{:30}{}\n".format("NumPointRec", self.parset.nd_rec))
+      fp.write("{:30}{}\n".format("TimeRecLowExt", self.parset.trec_low_ext))
+      fp.write("{:30}{}\n".format("TimeRecUppExt", self.parset.trec_upp_ext))
       if strlen(self.parset.str_width_prior) > 0 :
         fp.write("{:30}{}\n".format("StrWidthPrior", self.parset.str_width_prior.decode("UTF-8")))
       fp.write("{:30}{}\n".format("TypeLagPrior", self.parset.type_lag_prior))
@@ -345,7 +349,7 @@ cdef class basis:
                   flag_trend=0, flag_lag_posivity=False,
                   flag_negative_resp=False,
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  nd_rec=200,
+                  nd_rec=200, trec_ext=[0, 0],
                   # follows cdnest parameters
                   num_particles=1, thread_steps_factor=1, 
                   new_level_interval_factor=1, save_interval_factor=1,
@@ -426,6 +430,8 @@ cdef class basis:
       raise ValueError("flag_lag_line_sys_err is unrecognized!")
     
     self.parset.nd_rec = nd_rec 
+    self.parset.trec_low_ext = trec_ext[0]
+    self.parset.trec_upp_ext = trec_ext[1]
 
     self.parset.num_particles = num_particles
     self.parset.thread_steps_factor = thread_steps_factor
@@ -506,7 +512,7 @@ cdef class gmodel(basis):
                   lag_limit=[0, 100], number_component=[1, 1],
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  nd_rec=200,
+                  nd_rec=200, trec_ext=[0, 0],
                   type_lag_prior=0, lag_prior=None,
                   width_prior=None, flag_gap=False, gap_prior=None,
                   # follows cdnest parameters
@@ -520,7 +526,7 @@ cdef class gmodel(basis):
     
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
                       flag_negative_resp, \
-                      flag_con_sys_err, flag_line_sys_err, nd_rec, 
+                      flag_con_sys_err, flag_line_sys_err, nd_rec, trec_ext,
                       # follows cdnest parameters
                       num_particles = num_particles,
                       thread_steps_factor = thread_steps_factor, 
@@ -703,7 +709,7 @@ cdef class pmap(basis):
                   type_tf='gaussian', max_num_saves=2000,
                   flag_trend=0, flag_lag_posivity=False,
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  nd_rec=200,
+                  nd_rec=200, trec_ext=[0, 0],
                   lag_prior=None, ratio_prior=None,
                   width_limit=None,
                   width_prior=None, flag_gap=False, gap_prior=None,
@@ -715,7 +721,7 @@ cdef class pmap(basis):
 
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
                       False, \
-                      flag_con_sys_err, flag_line_sys_err, nd_rec,
+                      flag_con_sys_err, flag_line_sys_err, nd_rec, trec_ext,
                       # follows cdnest parameters
                       num_particles = num_particles,
                       thread_steps_factor = thread_steps_factor, 
@@ -903,7 +909,7 @@ cdef class vmap(basis):
                   lag_limit=[0, 100], number_component=[1, 1],
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  nd_rec=200,
+                  nd_rec=200, trec_ext=[0, 0],
                   type_lag_prior=0, lag_prior=None,
                   width_prior=None, flag_gap=None, gap_prior=None,
                   # follows cdnest parameters
@@ -917,7 +923,7 @@ cdef class vmap(basis):
     
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
                       False, \
-                      flag_con_sys_err, flag_line_sys_err, nd_rec,
+                      flag_con_sys_err, flag_line_sys_err, nd_rec, trec_ext,
                       # follows cdnest parameters
                       num_particles = num_particles,
                       thread_steps_factor = thread_steps_factor, 
@@ -1124,7 +1130,7 @@ cdef class mmap(basis):
                   lag_limit=[0, 100], number_component=[2, 2],
                   width_limit=None,
                   flag_con_sys_err=False, flag_line_sys_err=False,
-                  nd_rec=200,
+                  nd_rec=200, trec_ext=[0, 0],
                   type_lag_prior=0, lag_prior=None,
                   width_prior=None, flag_gap=False, gap_prior=None,
                   # follows cdnest parameters
@@ -1138,7 +1144,7 @@ cdef class mmap(basis):
     
     basis.setup(self, data_file, data, type_tf, max_num_saves, flag_trend, flag_lag_posivity, \
                       flag_negative_resp, \
-                      flag_con_sys_err, flag_line_sys_err, nd_rec, 
+                      flag_con_sys_err, flag_line_sys_err, nd_rec, trec_ext,
                       # follows cdnest parameters
                       num_particles = num_particles,
                       thread_steps_factor = thread_steps_factor, 

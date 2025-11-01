@@ -234,6 +234,16 @@ int read_parset()
     pardict[nt].isset = 0;
     pardict[nt++].id = INT;
 
+    strcpy(pardict[nt].tag, "TimeRecLowExt");
+    pardict[nt].addr = &parset.trec_low_ext;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+
+    strcpy(pardict[nt].tag, "TimeRecUppExt");
+    pardict[nt].addr = &parset.trec_upp_ext;
+    pardict[nt].isset = 0;
+    pardict[nt++].id = DOUBLE;
+
     num_pardict = nt;
     
     char fname[200];
@@ -263,6 +273,8 @@ int read_parset()
     parset.num_gaussian_upper = 1;
     parset.flag_gap = 0;
     parset.nd_rec = 200;
+    parset.trec_low_ext = 0.0;
+    parset.trec_upp_ext = 0.0;
     strcpy(parset.str_lag_prior,"");
     strcpy(parset.str_ratio_prior,"");
     strcpy(parset.str_width_prior,"");

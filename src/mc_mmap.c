@@ -400,6 +400,11 @@ void output_reconstruction_parallel_mmap()
       tbeg = fmin(tbeg, dataset[i].line[j].t[0]);
       tend = fmax(tend, dataset[i].line[j].t[dataset[i].line[j].n-1]);
     }
+
+    /* extend the time range according to trec_low and trec_upp */
+    tbeg += parset.trec_low_ext;
+    tend += parset.trec_upp_ext;
+    
     tspan = tend - tbeg;
     tbeg -= 0.05*tspan;
     tend += 0.05*tspan;

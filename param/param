@@ -70,11 +70,12 @@ FlagLineSysErr            1                # 0, not include systematic error of 
                                            # default: 0, 0
 
 NumPointRec            200                 # number of points in reconstruction for each light curve
+                                           # note: a too large number causes very slow reconstruction
                                            # default: 200
 
 TimeRecLowExt            0                 # extend time range of reconstruction
-TimeRecUppExt            0                 # e.g.: detnote the original time range in the code is [t1, t2]
-                                           # then the output is [t1+TimeRecLowExt , t2+TimeRecUppExt]
+TimeRecUppExt            0                 # if detnote the original time range as [t1, t2]
+                                           # then the options lead to [t1+TimeRecLowExt, t2+TimeRecUppExt]
                                            # default: 0, 0
 
 #StrWidthPrior           [1:10:5:20]       # width priors if the default priors not good enough

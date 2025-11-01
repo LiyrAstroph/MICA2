@@ -31,3 +31,9 @@ Frequently Asked Questions
 
   where :math:`\sigma_i` is the data error of the :math:`i^{\rm th}` data point and :math:`N` is the 
   number of data points. See :ref:`sys_err_label` for more details.
+
+- **How to change the time ranges of light curve reconstruction?**
+  
+  The time ranges can be modified by the options `TimeRecLowExt` and `TimeRecUppExt`. For example, 
+  if denote the origin time rage as [t1, t2], the options will change the time range into 
+  [t1+TimeRecLowExt, t2+TimeRecUppExt].

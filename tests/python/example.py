@@ -56,7 +56,7 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 #            flag_trend=0, flag_lag_posivity=False,
 #            lag_limit=[0, 100], number_component=[1, 1],
 #            width_limit=[0.1, 100],
-#            nd_rec=200,
+#            nd_rec=200, trec_ext=[0, 0],
 #            flag_con_sys_err=False, flag_line_sys_err=False,
 #            type_lag_prior=0, lag_prior=[[0, 50]],
 #            width_prior[[1, 40]],
@@ -84,6 +84,8 @@ if rank == 0:
   # 
   model.plot_results(doshow=True, tf_lag_range=None, hist_lag_range=None, hist_bins=None) 
   model.post_process()  # generate plots for the properties of MCMC sampling 
+  
+  model.plot_decomp()
 
   # get the full sample 
   # sample is a list, each element contains an array of posterior samples

@@ -235,6 +235,11 @@ A typical parameter file looks like::
                                              # note: a too large number causes very slow reconstruction
                                              # default: 200
   
+  TimeRecLowExt            0                 # extend time range of reconstruction
+  TimeRecUppExt            0                 # if detnote the original time range as [t1, t2]
+                                             # then the options lead to [t1+TimeRecLowExt, t2+TimeRecUppExt]
+                                             # default: 0, 0
+  
   #StrWidthPrior           [1:10:5:20]       # width priors if the default priors not good enough
                                              # format: [width1_1:width1_2:width2_1:width2_2...]
                                              # "WidthLimitLow" and "WidthLimitUpp" no longer applicable 

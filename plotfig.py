@@ -231,10 +231,10 @@ def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line
           cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
           idx_tau = np.where(tau >= cen)[0]
-          tran[idx_tau] += amp/sig * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
+          tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
         else:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
-                        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
+                       pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
           
           cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])

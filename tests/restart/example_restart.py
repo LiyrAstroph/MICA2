@@ -77,7 +77,8 @@ model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 100], number_comp
 # prepare the snapshorts
 # this will copy "restart_dnest1d.txt_xx_yyyy" to "restart_dnest1d.txt_xx",
 #                xx: number of components; yyyy: steps from which to resume
-#
+# namely, last_steps = yyyy
+# if last_steps is not given, the size of sample1d.txt will be used.
 model.prepare(last_steps=500)
 
 #resume from last run

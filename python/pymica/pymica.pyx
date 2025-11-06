@@ -10,6 +10,7 @@ from __future__ import absolute_import
 from libc.string cimport *  
 from cpython.mem cimport PyMem_Malloc, PyMem_Free, PyMem_Realloc
 
+import os
 from mpi4py import MPI
 cimport mpi4py.MPI as MPI
 from mpi4py.libmpi cimport *
@@ -466,7 +467,18 @@ cdef class basis:
     from shutil import copy
     
     for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1):
+      # if last_steps is not specified, read the size of sample.
+      if last_steps is None:
+        # Count lines in the file
+        with open(self.parset.file_dir.decode("UTF-8")+"/data/sample1d.txt_%d"%i) as f:
+          last_steps = sum(1 for line in f) - 1
+
       src = self.parset.file_dir.decode("UTF-8")+"/data/restart_dnest1d.txt_%d_%d"%(i, last_steps)
+      # check if src exist
+      if not os.path.exists(src):
+        raise ValueError("The snapshot does not exist! "+ 
+        "Specify 'last_steps' in prepare() to use a different snapshort file.\n")
+
       dst = self.parset.file_dir.decode("UTF-8")+"/data/restart_dnest1d.txt_%d"%(i)
       copy(src, dst)
     

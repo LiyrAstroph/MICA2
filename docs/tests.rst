@@ -14,7 +14,9 @@ There are a suite of tests provided
   - ``exp``: the transfer function is exponential type
   - ``pmap``: photometric reverberation mapping
   - ``vmap``: virtual reverberation mapping
+  - ``mmap``: reverberation mapping with a mixture of transfer function types 
   - ``negative_resp``: the transfer function can be negative
+  - ``restart``: resume from a last run
 
 Change to any one folder and run the test to get familar with the useage of MICA. 
 

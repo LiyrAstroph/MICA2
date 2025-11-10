@@ -126,7 +126,11 @@ cdef class basis:
         # write headers
         fp.write("# %d\n"%len(data))
         for key in data.keys():
-          fp.write("# %d"%data[key][0].shape[0])
+          if data[key][0] is None:
+            fp.write("# 0")
+          else:
+            fp.write("# %d"%data[key][0].shape[0])
+
           for i in range(1, len(data[key])):
             fp.write(":%d"%data[key][i].shape[0])
           fp.write("\n")
@@ -134,7 +138,7 @@ cdef class basis:
         # write data
         for key in data.keys():
           for i in range(len(data[key])):
-            if len(data[key][i]) > 0: # only write data with points
+            if data[key][i] is not None and len(data[key][i]) > 0: # only write data with points
               np.savetxt(fp, data[key][i], fmt="%e")
               fp.write("\n")
 

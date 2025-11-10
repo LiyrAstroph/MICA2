@@ -158,7 +158,7 @@ cdef class basis:
       fp.write("{:30}{}\n".format("FlagUniformVarParams", self.parset.flag_uniform_var_params))
       fp.write("{:30}{}\n".format("FlagUniformTranFuns", self.parset.flag_uniform_tranfuns))
       fp.write("{:30}{}\n".format("FlagLongtermTrend", self.parset.flag_trend))
-      if self.parset.model == 0 or self.parset.model == 2:
+      if self.parset.model in [0, 2, 3]:
         fp.write("{:30}{}\n".format("LagLimitLow", self.parset.lag_limit_low))
         fp.write("{:30}{}\n".format("LagLimitUpp", self.parset.lag_limit_upper))
       if self.parset.width_limit_low_isset == 1:

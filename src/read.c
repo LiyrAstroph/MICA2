@@ -389,6 +389,13 @@ int read_parset()
 
       if(parset.num_gaussian_upper < 2)
         parset.num_gaussian_upper = 2;
+      
+      parset.type_lag_prior = 4;
+      if (parset.str_lag_prior[0] == '\0')
+      {
+        printf("StrLagPrior should be set for pmap mode!\n");
+        exit(0);
+      }
     }
 
     if(parset.num_gaussian_low <= 0)

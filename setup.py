@@ -127,5 +127,5 @@ setup(
       packages=["pymica", "pymica.utility"],
       package_dir={"pymica":"python/pymica", "pymica.utility":''},
       ext_modules = extensions,
-      install_requires=['numpy', 'mpi4py', 'pkgconfig','matplotlib'],
+      install_requires=['cython', 'numpy', 'mpi4py', 'pkgconfig','matplotlib'],
 )

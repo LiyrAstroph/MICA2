@@ -77,3 +77,4 @@ cdnest/*
 !python/pymica/pymica.pxd
 !python/pymica/pymica.pyx
 !.readthedocs.yaml
+!pyproject.toml

@@ -129,6 +129,8 @@ Now install MICA using the command
 .. code:: bash 
 
   python setup.py install --user 
+  #or
+  python -m pip install .
 
 This will generate a Python package ``pymica`` and install it to the user's Python package sites. 
 In the folder ``tests/python``, the Python script ``example.py`` shows how to use pymica.

@@ -204,7 +204,9 @@ cdef class basis:
       fp.close()
     return
   
-  def plot_results(self, doshow=True, resp_input=None, tf_lag_range=None, hist_lag_range=None, hist_bins=None, show_pmax=False, show_gap=False):
+  def plot_results(self, doshow=True, resp_input=None, tf_lag_range=None, 
+                   hist_lag_range=None, hist_bins=None, show_pmax=False, 
+                   show_gap=False, labels=None):
     
     if show_gap == True:
       if self.gap_prior is not None:
@@ -227,7 +229,7 @@ cdef class basis:
                       self.parset.flag_trend, self.parset.flag_negative_resp, \
                       typetf, self.parset.model, resp_input, doshow=doshow, \
                       tf_lag_range=tf_lag_range, hist_lag_range=hist_lag_range, hist_bins=hist_bins, show_pmax=show_pmax, \
-                      show_gap=flag_gap)
+                      show_gap=flag_gap, labels=labels)
     return
   
   def plot_decomp(self, doshow=True, resp_input=None):

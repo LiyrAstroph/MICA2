@@ -256,7 +256,7 @@ def _get_time_lag(sample, idx, tt):
 
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, 
                  typetf, typemodel, resp_input, doshow=True, tf_lag_range=None, hist_lag_range=None, 
-                 hist_bins=None, show_pmax=False, show_gap=False):
+                 hist_bins=None, show_pmax=False, show_gap=False, labels=None):
   
   sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
   sample_info = np.loadtxt(fdir+"/data/posterior_sample_info1d.txt_%d"%ngau)
@@ -455,7 +455,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
     xlim0 = xlim # restore the continuum time range
-
+    
+    if labels is not None and isinstance(labels, list):
+      if labels[m] is not None and labels[m][0] is not None:
+        ax.text(0.05, 0.8, labels[m][0], transform=ax.transAxes)
     #====================================================================================================#
     # now do plotting lines
     
@@ -522,7 +525,9 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       xlim = ax.get_xlim()
       ylim = ax.get_ylim()
       ax.minorticks_on()
-
+      if labels is not None and isinstance(labels, list):
+        if labels[m] is not None and labels[m][j] is not None:
+          ax.text(0.05, 0.8, labels[m][j], transform=ax.transAxes)
       ############################################
       # then posteriror distribution of time lags
       ############################################

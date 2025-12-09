@@ -494,6 +494,20 @@ Output
 
 In the end of running, ``mica2`` prints the obtained Bayesian evidence for each number of Gausssians explored.
 
+Posterior sample
+========================
+The posterior sample of parameters is output to ``posterior_sample1d.txt_xx`` in the ``data`` folder. 
+One can mannually read in the file and then compute statistics to obtain the time lags and 
+other properties of the transfer functions. Alternatively, the Python version ``pymica`` provides 
+a function to load the posterior sample 
+
+.. code-block:: python
+  import pymica 
+  # load the posterior sample for number of components = 1
+  sample = pymica.get_posterior_sample(num_comp=1, fdir="./")
+  # this returns a Pandas table.
+  print(sample.columns)
+
 Plotting
 ========================
 There is a Python script **plotfig.py** provided in the package that can be used to plot the results. 

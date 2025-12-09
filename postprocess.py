@@ -1,12 +1,16 @@
 # 
 # This script makes use of codes from DNest3 (https://github.com/eggplantbren/DNest3), developed by Brendon Brewer.
 #
+
+__all__ = ["postprocess", "get_posterior_sample"]
+
 import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import sys, os
 import configparser as cp 
+import pandas as pd
 
 def logsumexp(values):     # log SUM( exp(values) )
   biggest = np.max(values)
@@ -272,3 +276,45 @@ if __name__ == "__main__":
   ngau_low = int(param["NumCompLow"])
   ngau_upp = int(param["NumCompUpp"])
   postprocess_all(fdir, ngau_low, ngau_upp, temperature)
+
+def get_posterior_sample(num_comp=1, fdir=None):
+  """
+  load posterior sample
+  """
+  
+  if fdir is not None:
+    sample = np.atleast_2d(np.loadtxt(os.path.join(fdir, "data/posterior_sample1d.txt_%d"%num_comp)))
+    try:
+      names = np.loadtxt(os.path.join(fdir, "data/para_names_line.txt_%d"%num_comp), dtype=str, usecols=1)
+    except:
+      names = None
+  else:
+    sample = np.atleast_1d(np.loadtxt("./data/posterior_sample1d.txt_%d"%num_comp))
+    try:
+      names = np.loadtxt(os.path.join("./data/para_names_line.txt_%d"%num_comp), dtype=str, usecols=1)
+    except:
+      names = None
+  
+  idx = np.where(names=="taud")[0]
+  nvar = len(idx)
+
+  colnames=[]
+  id = 0
+  for i in range(nvar):
+    colnames += ["con_err_%d"%id, "sigmad_%d"%id, "taud_%d"%id]
+    id += 1
+  
+  idx = np.where(names=="%d-th_component_sigma"%(num_comp-1))[0]
+  j1 = nvar*3
+  id = 0
+  for i in range(len(idx)):
+    j2 = idx[i]
+    colnames += ["line_err_%d"%id]
+    for j in range(j1+1, j2+1):
+      colnames += [names[j]+"_%d"%id]
+    
+    id += 1
+
+  # assign column names
+  sample = pd.DataFrame(sample, columns=colnames)
+  return sample

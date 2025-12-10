@@ -502,9 +502,10 @@ other properties of the transfer functions. Alternatively, the Python version ``
 a function to load the posterior sample 
 
 .. code-block:: python
-  import pymica 
+  
+  from pymica import utility 
   # load the posterior sample for number of components = 1
-  sample = pymica.get_posterior_sample(num_comp=1, fdir="./")
+  sample = utility.get_posterior_sample(num_comp=1, fdir="./")
   # this returns a Pandas table.
   print(sample.columns)
 

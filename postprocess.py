@@ -296,24 +296,21 @@ def get_posterior_sample(num_comp=1, fdir=None):
       names = None
   
   idx = np.where(names=="taud")[0]
-  nvar = len(idx)
+  nd = len(idx)
 
   colnames=[]
-  id = 0
-  for i in range(nvar):
-    colnames += ["con_err_%d"%id, "sigmad_%d"%id, "taud_%d"%id]
-    id += 1
+  for i in range(nd):
+    colnames += ["con_err_%d"%i, "sigmad_%d"%i, "taud_%d"%i]
   
   idx = np.where(names=="%d-th_component_sigma"%(num_comp-1))[0]
-  j1 = nvar*3
-  id = 0
+  j1 = nd*3
   for i in range(len(idx)):
     j2 = idx[i]
-    colnames += ["line_err_%d"%id]
+    colnames += ["line_err_%d"%i]
     for j in range(j1+1, j2+1):
-      colnames += [names[j]+"_%d"%id]
+      colnames += [names[j]+"_%d"%i]
     
-    id += 1
+    j1 = j2 + 1
 
   # assign column names
   sample = pd.DataFrame(sample, columns=colnames)

@@ -22,7 +22,7 @@
 void *best_model_con;   /*!< best model */
 void *best_model_std_con;  /*!< standard deviation of the best model */
 
-void mc_con()
+void mc_con(double *logz)
 {
   int i, argc=0;
   char **argv;
@@ -56,7 +56,7 @@ void mc_con()
 
   mc_con_init();
 
-  dnest_con(argc, argv);
+  (*logz) = dnest_con(argc, argv);
   
   postprocess_con();
   
@@ -109,6 +109,16 @@ void mc_con()
         fprintf(fp, "%e %e %e\n", tcon[j], fcon[j] * dataset[i].con.scale, fecon[j] * dataset[i].con.scale);
       }
       fprintf(fp, "\n");
+    }
+
+    if(thistask == roottask && flag_para_name != 1)
+    {
+      FILE *fp;
+      sprintf(fname, "%s/%s", parset.file_dir, "data/evidence_con.txt");
+      fp = fopen(fname, "w");
+      fprintf(fp, "# evidence log(z) of continuum modeling\n");
+      fprintf(fp, "%f\n", *logz);
+      fclose(fp);
     }
     
     fclose(fp);

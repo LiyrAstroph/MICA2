@@ -48,30 +48,34 @@ void begin_run()
     if(flag_restart == 1)
     {
       flag_postprc = 1;
-      mc_con();
+      mc_con(&logz_con);
       flag_postprc = 0;
     }
     else 
     {
-      mc_con();
+      mc_con(&logz_con);
     }
   }
-  
-  if(parset.model == gmodel)
+
+  if(parset.model == nmap)
   {
-    mc_line();
+    return;
+  } 
+  else if(parset.model == gmodel)
+  {
+    mc_line(logz_arr);
   }
   else if (parset.model == pmap)
   {
-    mc_pmap();
+    mc_pmap(logz_arr);
   }
   else if (parset.model == vmap)
   {
-    mc_vmap();
+    mc_vmap(logz_arr);
   }
   else if(parset.model == mmap)
   {
-    mc_mmap();
+    mc_mmap(logz_arr);
   }
 }
 

@@ -18,7 +18,8 @@
 #define YEAR_DAY      (365.25)
 #define EPS           (1.0e-5)
 
-enum model_type {gmodel=0, pmap, vmap, mmap};
+/* nmap: null line data */
+enum model_type {gmodel=0, pmap, vmap, mmap, nmap};
 
 /* variables for MPICH */
 extern int thistask, totaltask, namelen;
@@ -53,7 +54,7 @@ extern int num_gaussian;
 extern int nline_max;
 extern int type_lag_prior_pr;
 extern double *Smat_lc, *Smat_ll;
-extern double *logz_arr; /* evidence */
+extern double logz_con, *logz_arr; /* evidence */
 extern double *lag_prior, *width_prior;
 
 /* pmap */

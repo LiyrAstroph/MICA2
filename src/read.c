@@ -332,192 +332,196 @@ int read_parset()
     }
     fclose(fparam);
 
-    if((parset.model<0) || (parset.model>3))
+    if((parset.model<gmodel) || (parset.model>nmap))
     {
-      printf("TypeModel should be 0-3.\n 0: general model; 1: pmap; 2: vmap; 3: mmap.\n");
+      printf("TypeModel should be 0-4.\n 0: general model; 1: pmap; 2: vmap; 3: mmap; 4: nmap.\n");
       exit(0);
     }
 
-    if(parset.model == 0)
+    /* do not check options for nmap, because they are not used */
+    if(parset.model != nmap)
     {
-      if(parset.lag_limit_upper <= parset.lag_limit_low)
+      if(parset.model == 0)
       {
-        printf("LagLimitUpp should be larger than LagLimitLow!\n");
-        exit(0);
-      }
-    }
-
-    if(parset.width_limit_low < DBL_MAX)
-    {
-      parset.width_limit_low_isset = 1;
-    }
-    if(parset.width_limit_upper < DBL_MAX)
-    {
-      parset.width_limit_upper_isset = 1;
-    }
-
-    if(parset.width_limit_low_isset == 1) /* is set */
-    {
-      if(parset.width_limit_low <= 0.0)
-      {
-        printf("WidthLimitLow soubld be positive!\n");
-        exit(0);
-      }
-    }
-    if(parset.width_limit_upper_isset == 1) /* is set */
-    {
-      if(parset.width_limit_upper <= 0.0)
-      {
-        printf("WidthLimitUpp soubld be positive!\n");
-        exit(0);
-      }
-    }
-    if(parset.width_limit_upper_isset == 1 && parset.width_limit_low_isset == 1)
-    {
-      if(parset.width_limit_upper <= parset.width_limit_low)
-      {
-        printf("WidthLimitUpp should be larger than WidthLimitLow!\n");
-        exit(0);
-      }
-    }
-
-    /* pmap mode, num_gaussian >= 2 */
-    if(parset.model == pmap)
-    {
-      if(parset.num_gaussian_low < 2)
-        parset.num_gaussian_low = 2;
-
-      if(parset.num_gaussian_upper < 2)
-        parset.num_gaussian_upper = 2;
-      
-      parset.type_lag_prior = 4;
-      if (parset.str_lag_prior[0] == '\0')
-      {
-        printf("StrLagPrior should be set for pmap mode!\n");
-        exit(0);
-      }
-    }
-
-    if(parset.num_gaussian_low <= 0)
-    {
-      printf("NumGaussianLow should be larger than 0.\n");
-      exit(0);
-    }
-
-    if(parset.num_gaussian_upper <= 0)
-    {
-      printf("NumGaussianUpp should be larger than 0.\n");
-      exit(0);
-    }
-
-    if(parset.num_gaussian_low > parset.num_gaussian_upper)
-    {
-      printf("NumGaussianLow should be smaller than or equal to NumGaussianUpp.\n");
-      exit(0);
-    }
-
-    parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low + 1;
-
-    if(parset.num_gaussian_upper == 1)
-    {
-      parset.type_lag_prior = 0;
-    }
-    
-    /* when loading prior, only support a single value of num_gaussian */
-    if(flag_load_prior == 1 && parset.num_gaussian_diff > 1)
-    {
-      printf("For loading prior (-l), only support NumGausssianUpp=NumGaussianLow.\n");
-      exit(0);
-    }
-
-    if(parset.nd_rec < 0)
-    {
-      printf("NumPointRec should be larger than 0.\n");
-      exit(0);
-    }
-
-    if(parset.type_lag_prior < 0 || parset.type_lag_prior > 4)
-    {
-      printf("Incorrect TypeLagPrior, should be 0-4.\n");
-      exit(0);
-    }
-
-    if(parset.type_lag_prior >= 2 && parset.type_lag_prior <=3 && parset.num_gaussian_low < 3)
-    {
-      printf("For prior type 2 or 3, better to use more Gaussians (>=3)!\n");
-      exit(0);
-    }
-
-    if(parset.flag_trend < 0)
-    {
-      printf("Incorrect FlagLongtermTrend, should be equal to or larger than 0.\n");
-      exit(0);
-    }
-    if(parset.flag_trend > 2)
-    {
-      printf("FlagLongtermTrend seems too large.\n");
-      exit(0);
-    }
-    if(parset.flag_lag_posivity != 0 && parset.lag_limit_low < 0.0)
-    {
-      printf("LagLimitLow shoule be >=0 when enabling FlagLagPositivity.\n");
-      exit(0);
-    }
-    if(parset.flag_negative_resp < 0 && parset.flag_negative_resp > 1)
-    {
-      printf("FlagNegativeResp shoule be 0 or 1.\n");
-      exit(0);
-    }
-    if(parset.flag_negative_resp == 1 && parset.model != 0)
-    {
-      printf("FlagNegativeResp only works when TypeModel = 0.\n");
-      exit(0);
-    }
-    if(parset.flag_negative_resp == 1 && parset.type_lag_prior == 0)
-    {
-      /* make sure the lag prior type > 0 */
-      parset.type_lag_prior = 1;
-    }
-    if(parset.flag_lag_posivity == 1 && (parset.type_tf > 1) && (parset.type_tf <= 3))
-    {
-      printf("For gamma and exp tf, no need to use FlagLagPositivity, instead, set LagLimitLow > 0.\n");
-      exit(0);
-    }
-    if(parset.flag_uniform_tranfuns != 0 && parset.model != 0)
-    {
-      printf("For uniform transfuns, typemodel should be 0 (general model).\n");
-      exit(0);
-    }
-    if(parset.model == mmap)
-    {
-      /* presently, do not check posivity for mmap, may be adjusted late on */
-      parset.flag_lag_posivity = 0; 
-      if(parset.str_type_tf_mix[0] == '\0')
-      {
-        printf("For mmap mode, StrTypeTFMix should be set!\n");
-        exit(-1);
-      }
-
-      int len = strlen(parset.str_type_tf_mix);
-      if(len < 2)
-      {
-        printf("StrTypeTFMix (='%s') should contain at least two numbers!\n", parset.str_type_tf_mix);
-        exit(-1);
-      }
-
-      /* check whether StrTypeTFMix is valid */
-      for(i=0; i<len; i++)
-      {
-        if(parset.str_type_tf_mix[i] < '0' || parset.str_type_tf_mix[i] > '3')
+        if(parset.lag_limit_upper <= parset.lag_limit_low)
         {
-          printf("StrTypeTFMix (='%s') should only contain numbers 0-3!\n", parset.str_type_tf_mix);
-          exit(-1);
+          printf("LagLimitUpp should be larger than LagLimitLow!\n");
+          exit(0);
         }
       }
+
+      if(parset.width_limit_low < DBL_MAX)
+      {
+        parset.width_limit_low_isset = 1;
+      }
+      if(parset.width_limit_upper < DBL_MAX)
+      {
+        parset.width_limit_upper_isset = 1;
+      }
+
+      if(parset.width_limit_low_isset == 1) /* is set */
+      {
+        if(parset.width_limit_low <= 0.0)
+        {
+          printf("WidthLimitLow soubld be positive!\n");
+          exit(0);
+        }
+      }
+      if(parset.width_limit_upper_isset == 1) /* is set */
+      {
+        if(parset.width_limit_upper <= 0.0)
+        {
+          printf("WidthLimitUpp soubld be positive!\n");
+          exit(0);
+        }
+      }
+      if(parset.width_limit_upper_isset == 1 && parset.width_limit_low_isset == 1)
+      {
+        if(parset.width_limit_upper <= parset.width_limit_low)
+        {
+          printf("WidthLimitUpp should be larger than WidthLimitLow!\n");
+          exit(0);
+        }
+      }
+
+      /* pmap mode, num_gaussian >= 2 */
+      if(parset.model == pmap)
+      {
+        if(parset.num_gaussian_low < 2)
+          parset.num_gaussian_low = 2;
+
+        if(parset.num_gaussian_upper < 2)
+          parset.num_gaussian_upper = 2;
+        
+        parset.type_lag_prior = 4;
+        if (parset.str_lag_prior[0] == '\0')
+        {
+          printf("StrLagPrior should be set for pmap mode!\n");
+          exit(0);
+        }
+      }
+
+      if(parset.num_gaussian_low <= 0)
+      {
+        printf("NumGaussianLow should be larger than 0.\n");
+        exit(0);
+      }
+
+      if(parset.num_gaussian_upper <= 0)
+      {
+        printf("NumGaussianUpp should be larger than 0.\n");
+        exit(0);
+      }
+
+      if(parset.num_gaussian_low > parset.num_gaussian_upper)
+      {
+        printf("NumGaussianLow should be smaller than or equal to NumGaussianUpp.\n");
+        exit(0);
+      }
+
+      parset.num_gaussian_diff = parset.num_gaussian_upper - parset.num_gaussian_low + 1;
+
+      if(parset.num_gaussian_upper == 1)
+      {
+        parset.type_lag_prior = 0;
+      }
       
-      /* fix the number of components */
-      parset.num_gaussian_low = len;
-      parset.num_gaussian_upper = len;
+      /* when loading prior, only support a single value of num_gaussian */
+      if(flag_load_prior == 1 && parset.num_gaussian_diff > 1)
+      {
+        printf("For loading prior (-l), only support NumGausssianUpp=NumGaussianLow.\n");
+        exit(0);
+      }
+
+      if(parset.nd_rec < 0)
+      {
+        printf("NumPointRec should be larger than 0.\n");
+        exit(0);
+      }
+
+      if(parset.type_lag_prior < 0 || parset.type_lag_prior > 4)
+      {
+        printf("Incorrect TypeLagPrior, should be 0-4.\n");
+        exit(0);
+      }
+
+      if(parset.type_lag_prior >= 2 && parset.type_lag_prior <=3 && parset.num_gaussian_low < 3)
+      {
+        printf("For prior type 2 or 3, better to use more Gaussians (>=3)!\n");
+        exit(0);
+      }
+
+      if(parset.flag_trend < 0)
+      {
+        printf("Incorrect FlagLongtermTrend, should be equal to or larger than 0.\n");
+        exit(0);
+      }
+      if(parset.flag_trend > 2)
+      {
+        printf("FlagLongtermTrend seems too large.\n");
+        exit(0);
+      }
+      if(parset.flag_lag_posivity != 0 && parset.lag_limit_low < 0.0)
+      {
+        printf("LagLimitLow shoule be >=0 when enabling FlagLagPositivity.\n");
+        exit(0);
+      }
+      if(parset.flag_negative_resp < 0 && parset.flag_negative_resp > 1)
+      {
+        printf("FlagNegativeResp shoule be 0 or 1.\n");
+        exit(0);
+      }
+      if(parset.flag_negative_resp == 1 && parset.model != 0)
+      {
+        printf("FlagNegativeResp only works when TypeModel = 0.\n");
+        exit(0);
+      }
+      if(parset.flag_negative_resp == 1 && parset.type_lag_prior == 0)
+      {
+        /* make sure the lag prior type > 0 */
+        parset.type_lag_prior = 1;
+      }
+      if(parset.flag_lag_posivity == 1 && (parset.type_tf > 1) && (parset.type_tf <= 3))
+      {
+        printf("For gamma and exp tf, no need to use FlagLagPositivity, instead, set LagLimitLow > 0.\n");
+        exit(0);
+      }
+      if(parset.flag_uniform_tranfuns != 0 && parset.model != 0)
+      {
+        printf("For uniform transfuns, typemodel should be 0 (general model).\n");
+        exit(0);
+      }
+      if(parset.model == mmap)
+      {
+        /* presently, do not check posivity for mmap, may be adjusted late on */
+        parset.flag_lag_posivity = 0; 
+        if(parset.str_type_tf_mix[0] == '\0')
+        {
+          printf("For mmap mode, StrTypeTFMix should be set!\n");
+          exit(-1);
+        }
+
+        int len = strlen(parset.str_type_tf_mix);
+        if(len < 2)
+        {
+          printf("StrTypeTFMix (='%s') should contain at least two numbers!\n", parset.str_type_tf_mix);
+          exit(-1);
+        }
+
+        /* check whether StrTypeTFMix is valid */
+        for(i=0; i<len; i++)
+        {
+          if(parset.str_type_tf_mix[i] < '0' || parset.str_type_tf_mix[i] > '3')
+          {
+            printf("StrTypeTFMix (='%s') should only contain numbers 0-3!\n", parset.str_type_tf_mix);
+            exit(-1);
+          }
+        }
+        
+        /* fix the number of components */
+        parset.num_gaussian_low = len;
+        parset.num_gaussian_upper = len;
+      }
     }
   }
 
@@ -869,13 +873,21 @@ void cal_mean_error()
     /* line */
     for(j=0; j<dataset[i].nlset; j++)
     {
-      mean = 0.0;
-      for(k=0; k<dataset[i].line[j].n; k++)
+      /* no data point */
+      if(dataset[i].line[j].n == 0)
       {
-        mean += dataset[i].line[j].fe[k];
+        dataset[i].line[j].error_mean=0.0;
       }
-      mean /= dataset[i].line[j].n;
-      dataset[i].line[j].error_mean=mean;
+      else 
+      {
+        mean = 0.0;
+        for(k=0; k<dataset[i].line[j].n; k++)
+        {
+          mean += dataset[i].line[j].fe[k];
+        }
+        mean /= dataset[i].line[j].n;
+        dataset[i].line[j].error_mean=mean;
+      }
     }
   }
 
@@ -927,6 +939,10 @@ void scale_con_line()
       /* line */
       for(j=0; j<dataset[i].nlset; j++)
       {
+        /* no data point, continuue */
+        if(dataset[i].line[j].n == 0)
+          continue;
+
         mean = 0.0;
         fdmax = fdmin = dataset[i].line[j].f[0];
         for(k=0; k<dataset[i].line[j].n; k++)
@@ -1024,6 +1040,12 @@ void scale_con_line()
     /* line */
     for(j=0; j<dataset[i].nlset; j++)
     {
+      if(dataset[i].line[j].n == 0)
+      {
+        dataset[i].line[j].scale=1.0;
+        continue;
+      }
+
       mean = 0.0;
       fdmax = fdmin = dataset[i].line[j].f[0];
       for(k=0; k<dataset[i].line[j].n; k++)

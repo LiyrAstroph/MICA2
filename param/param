@@ -11,6 +11,7 @@ TypeModel                 3                # 0: general model
                                            # 1: pmap, photometric RM
                                            # 2: vmap, use a virtual driving light curve.
                                            # 3: mmap, mixture of TF types
+                                           # 4: nmap, null RM, i.e., only continuum modeling
                                            # default: 0
 
 TypeTF                    3                # 0: Gaussian

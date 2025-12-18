@@ -23,7 +23,7 @@ from . import utility as ut
 
 import os
 
-__all__ = ["gmodel", "pmap", "vmap", "mmap"]
+__all__ = ["gmodel", "pmap", "vmap", "mmap", "nmap"]
 
 cdef class basis:
 
@@ -33,6 +33,8 @@ cdef class basis:
   cdef list nlset
   cdef list gap_prior
   cdef int flag_load_prior
+  cdef double logz_con
+  cdef double *logz_line
 
   def __cinit__(self):
     
@@ -132,7 +134,10 @@ cdef class basis:
             fp.write("# %d"%data[key][0].shape[0])
 
           for i in range(1, len(data[key])):
-            fp.write(":%d"%data[key][i].shape[0])
+            if data[key][i] is None:
+              fp.write(":0")
+            else:
+              fp.write(":%d"%data[key][i].shape[0])
           fp.write("\n")
         
         # write data
@@ -519,6 +524,7 @@ cdef class gmodel(basis):
     return
   
   def __cdealloc__(self):
+    PyMem_Free(self.logz_line)
     return
   
 
@@ -597,7 +603,9 @@ cdef class gmodel(basis):
       self.parset.num_gaussian_low = number_component[0]
       self.parset.num_gaussian_upper = number_component[1]
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
-    
+
+    self.logz_line = <double *>PyMem_Malloc(self.parset.num_gaussian_diff*sizeof(double))
+
     if self.flag_load_prior == 1 and self.parset.num_gaussian_diff > 1:
       raise ValueError("when calling set_priors(), only support a single number of component, e.g.,"
                        "number_component[0]=number_component[1].\n")
@@ -658,8 +666,8 @@ cdef class gmodel(basis):
     """
     read_data()
     init()
-    mc_con()
-    mc_line()
+    mc_con(&self.logz_con)
+    mc_line(self.logz_line)
     end_run()
     return
   
@@ -670,7 +678,7 @@ cdef class gmodel(basis):
     set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_line()
+    mc_line(self.logz_line)
     end_run()
     return
   
@@ -681,7 +689,7 @@ cdef class gmodel(basis):
     set_argv(1, 1, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_line()
+    mc_line(self.logz_line)
     end_run()
     return
   
@@ -693,9 +701,9 @@ cdef class gmodel(basis):
     read_data()
     init()
     set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
-    mc_con()
+    mc_con(&self.logz_con)
     set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
-    mc_line()
+    mc_line(self.logz_line)
     end_run()
     return
   
@@ -706,10 +714,20 @@ cdef class gmodel(basis):
     set_argv(0, 0, 0, 1, 0)
     read_data()
     init()
-    mc_con()
-    mc_line()
+    mc_con(&self.logz_con)
+    mc_line(self.logz_line)
     end_run()
     return
+  
+  def get_evidence(self):
+    """
+    get evidences
+    """
+    evidence = {}
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1):
+      evidence['logz_%d'%i] = self.logz_line[i - self.parset.num_gaussian_low]
+    
+    return evidence
 
 
 #==========================================================================
@@ -721,6 +739,7 @@ cdef class pmap(basis):
     return 
   
   def __cdealloc__(self):
+    PyMem_Free(self.logz_line)
     return
   
   def setup(self, data_file=None, data=None,
@@ -754,6 +773,8 @@ cdef class pmap(basis):
     self.parset.num_gaussian_upper = 2 
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper - self.parset.num_gaussian_low + 1
     
+    self.logz_line = <double *>PyMem_Malloc(self.parset.num_gaussian_diff*sizeof(double))
+
     self.parset.model=1
     self.parset.type_lag_prior=4
     if lag_prior == None:
@@ -832,8 +853,8 @@ cdef class pmap(basis):
     """
     read_data()
     init()
-    mc_con()
-    mc_pmap()
+    mc_con(&self.logz_con)
+    mc_pmap(self.logz_line)
     end_run()
     return
   
@@ -844,7 +865,7 @@ cdef class pmap(basis):
     set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_pmap()
+    mc_pmap(self.logz_line)
     end_run()
     return
   
@@ -855,7 +876,7 @@ cdef class pmap(basis):
     set_argv(1, 1, 0, 0, 0)  # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_pmap()
+    mc_pmap(self.logz_line)
     end_run()
     return
   
@@ -867,9 +888,9 @@ cdef class pmap(basis):
     read_data()
     init()
     set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
-    mc_con()
+    mc_con(&self.logz_con)
     set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
-    mc_pmap()
+    mc_pmap(self.logz_line)
     end_run()
     return
   
@@ -880,10 +901,20 @@ cdef class pmap(basis):
     set_argv(0, 0, 0, 1, 0)
     read_data()
     init()
-    mc_con()
-    mc_pmap()
+    mc_con(&self.logz_con)
+    mc_pmap(self.logz_line)
     end_run()
     return
+  
+  def get_evidence(self):
+    """
+    get evidences
+    """
+    evidence = {}
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1):
+      evidence['logz_%d'%i] = self.logz_line[i - self.parset.num_gaussian_low]
+  
+    return evidence
 
 
 #==========================================================================
@@ -917,6 +948,7 @@ cdef class vmap(basis):
     return
   
   def __cdealloc__(self):
+    PyMem_Free(self.logz_line)
     return
   
 
@@ -994,6 +1026,8 @@ cdef class vmap(basis):
       self.parset.num_gaussian_upper = number_component[1]
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
     
+    self.logz_line = <double *>PyMem_Malloc(self.parset.num_gaussian_diff*sizeof(double))
+
     if self.flag_load_prior == 1 and self.parset.num_gaussian_diff > 1:
       raise ValueError("when calling set_priors(), only support a single number of component, e.g.,"
                        "number_component[0]=number_component[1].\n")
@@ -1054,7 +1088,7 @@ cdef class vmap(basis):
     """
     read_data()
     init()
-    mc_vmap()
+    mc_vmap(self.logz_line)
     end_run()
     return
   
@@ -1065,7 +1099,7 @@ cdef class vmap(basis):
     set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_vmap()
+    mc_vmap(self.logz_line)
     end_run()
     return
   
@@ -1076,7 +1110,7 @@ cdef class vmap(basis):
     set_argv(1, 1, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_vmap()
+    mc_vmap(self.logz_line)
     end_run()
     return
   
@@ -1088,9 +1122,9 @@ cdef class vmap(basis):
     read_data()
     init()
     set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
-    mc_con()
+    mc_con(&self.logz_con)
     set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
-    mc_vmap()
+    mc_vmap(self.logz_line)
     end_run()
     return
   
@@ -1101,10 +1135,20 @@ cdef class vmap(basis):
     set_argv(0, 0, 0, 1, 0)
     read_data()
     init()
-    mc_con()
-    mc_vmap()
+    mc_con(&self.logz_con)
+    mc_vmap(self.logz_line)
     end_run()
     return
+  
+  def get_evidence(self):
+    """
+    get evidences
+    """
+    evidence = {}
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1):
+      evidence['logz_%d'%i] = self.logz_line[i - self.parset.num_gaussian_low]
+    
+    return evidence
 
 #==========================================================================
 # mixture model 
@@ -1137,6 +1181,7 @@ cdef class mmap(basis):
     return
   
   def __cdealloc__(self):
+    PyMem_Free(self.logz_line)
     return
   
 
@@ -1218,6 +1263,8 @@ cdef class mmap(basis):
       self.parset.num_gaussian_upper = number_component[1]
     self.parset.num_gaussian_diff = self.parset.num_gaussian_upper-self.parset.num_gaussian_low + 1
     
+    self.logz_line = <double *>PyMem_Malloc(self.parset.num_gaussian_diff*sizeof(double))
+
     if self.flag_load_prior == 1 and self.parset.num_gaussian_diff > 1:
       raise ValueError("when calling set_priors(), only support a single number of component, e.g.,"
                        "number_component[0]=number_component[1].\n")
@@ -1278,8 +1325,8 @@ cdef class mmap(basis):
     """
     read_data()
     init()
-    mc_con()
-    mc_mmap()
+    mc_con(&self.logz_con)
+    mc_mmap(self.logz_line)
     end_run()
     return
   
@@ -1290,7 +1337,7 @@ cdef class mmap(basis):
     set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_mmap()
+    mc_mmap(self.logz_line)
     end_run()
     return
   
@@ -1301,7 +1348,7 @@ cdef class mmap(basis):
     set_argv(1, 1, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
-    mc_mmap()
+    mc_mmap(self.logz_line)
     end_run()
     return
   
@@ -1313,9 +1360,9 @@ cdef class mmap(basis):
     read_data()
     init()
     set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
-    mc_con()
+    mc_con(&self.logz_con)
     set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
-    mc_mmap()
+    mc_mmap(self.logz_line)
     end_run()
     return
   
@@ -1326,7 +1373,156 @@ cdef class mmap(basis):
     set_argv(0, 0, 0, 1, 0)
     read_data()
     init()
-    mc_con()
-    mc_mmap()
+    mc_con(&self.logz_con)
+    mc_mmap(self.logz_line)
     end_run()
     return
+  
+  def get_evidence(self):
+    """
+    get evidences
+    """
+    evidence = {}
+    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1):
+      evidence['logz_%d'%i] = self.logz_line[i - self.parset.num_gaussian_low]
+    
+    return evidence
+
+#==========================================================================
+# null model, used to test the significance of reverberation signal 
+
+cdef class nmap(basis):
+  """
+  Model class
+  """
+  def __cinit__(self, param_file=None):
+    """
+    initialise with a parameter file.
+    """
+    if param_file != None:
+      if isinstance(param_file, str):
+        strcpy(self.parset.param_file, param_file.encode("UTF-8"))
+        set_param_file(self.parset.param_file)
+        read_parset()
+        get_parset(&self.parset)  # get parset from C
+
+        self._get_data_dimension()
+        # uniform variability parameters of mulitple datasets
+        if self.parset.flag_uniform_var_params == 0:
+          self.num_param_var = 3*self.nset
+        elif self.parset.flag_uniform_var_params == 1:
+          self.num_param_var = 3
+
+      else:
+        raise ValueError("param_file should be a string!")
+
+    return
+  
+  def __cdealloc__(self):
+    return
+  
+
+  def setup(self, data_file=None, data=None,
+                  max_num_saves=2000, 
+                  flag_con_sys_err=False, 
+                  nd_rec=200, trec_ext=[0, 0],
+                  flag_uniform_var_params=False,
+                  # follows cdnest parameters
+                  num_particles=1, thread_steps_factor=1, 
+                  new_level_interval_factor=1, save_interval_factor=1,
+                  lam=10, beta=100, ptol=0.1, 
+                  max_num_levels=0):     
+    """
+    setup parameters
+    """
+    # for nmap, no line data 
+    data_nmap = {}
+    for key in data.keys():
+      data_nmap[key] = [data[key][0], None]
+
+    basis.setup(self, data_file=data_file, data=data_nmap, \
+                      max_num_saves=max_num_saves, \
+                      flag_con_sys_err=flag_con_sys_err, \
+                      nd_rec=nd_rec, trec_ext=trec_ext,
+                      # follows cdnest parameters
+                      num_particles = num_particles,
+                      thread_steps_factor = thread_steps_factor, 
+                      new_level_interval_factor = new_level_interval_factor,
+                      save_interval_factor = save_interval_factor,
+                      lam = lam,
+                      beta = beta, 
+                      ptol = ptol, 
+                      max_num_levels = max_num_levels)
+    
+    self.parset.model = 4 # nmap
+    
+    # uniform variability parameters of mulitple datasets
+    if flag_uniform_var_params == False:
+      self.parset.flag_uniform_var_params = 0
+      self.num_param_var = 3*self.nset
+    elif flag_uniform_var_params == True:
+      self.parset.flag_uniform_var_params = 1
+      self.num_param_var = 3
+    else:
+      raise ValueError("flag_uniform_var_params is unrecognized!")
+
+    self.print_parset()
+
+    # finally set parameters in C.
+    set_parset(&self.parset)
+    return
+  
+  def run(self):
+    """
+    run mica
+    """
+    read_data()
+    init()
+    mc_con(&self.logz_con)
+    end_run()
+    return
+  
+  def post_run(self):
+    """
+    do posterior running
+    """
+    set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
+    read_data()
+    init()
+    end_run()
+    return
+  
+  def decompose(self):
+    """
+    do decomposition
+    """
+    print("No decomposition for null model.")
+    return
+  
+  def restart(self): 
+    """
+    resume from a last run
+    """
+    set_argv(0, 0, 1, 0, 0)
+    read_data()
+    init()
+    set_argv(1, 0, 1, 0, 0)  # no need to restart continuum, postprc=1
+    mc_con(&self.logz_con)
+    set_argv(0, 0, 1, 0, 0)  # no need to restart continuum, postprc=0
+    end_run()
+    return
+  
+  def print_para_names(self):
+    """
+    print para names 
+    """
+    print("No line parameters for null model.")
+    return
+  
+  def get_evidence(self):
+    """
+    get evidence
+    """
+    evidence = {}
+    evidence["logz"] = self.logz_con
+    return evidence 

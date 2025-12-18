@@ -20,10 +20,9 @@
 
 #include "proto.h"
 
-void mc_mmap()
+void mc_mmap(double *logz)
 {
   int i, j, argc=0;
-  double logz;
   char **argv;
 
   argv = malloc(11*sizeof(char *));
@@ -59,7 +58,7 @@ void mc_mmap()
   
   mc_mmap_init();
 
-  logz = -DBL_MAX;
+  logz[0] = -DBL_MAX;
   num_gaussian = parset.num_gaussian_low;
 
   type_lag_prior_pr = 1; 
@@ -77,7 +76,7 @@ void mc_mmap()
   strcpy(argv[argc], "-x");
   strcpy(argv[argc+1], postfix);
   
-  logz = dnest_mmap(argc+2, argv);
+  logz[0] = dnest_mmap(argc+2, argv);
 
   if(flag_para_name != 1 && flag_postsample != 1)
   {
@@ -102,8 +101,8 @@ void mc_mmap()
     FILE *fp;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
-    fprintf(fp, "# number_of_components     evidence\n");
-    fprintf(fp, "%d       %f\n", num_gaussian, logz);
+    fprintf(fp, "# number_of_components     evidence log(z)\n");
+    fprintf(fp, "%d       %f\n", num_gaussian, logz[0]);
     fclose(fp);
   }  
 

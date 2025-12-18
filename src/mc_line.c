@@ -20,7 +20,7 @@
 
 #include "proto.h"
 
-void mc_line()
+void mc_line(double *logz)
 {
   int i, j, argc=0, jzmax=0, narg, narg0;
   double logz_max;
@@ -101,10 +101,10 @@ void mc_line()
       narg+=2;
     }
 
-    logz_arr[j] = dnest_line(narg, argv);
-    if(logz_max < logz_arr[j])
+    logz[j] = dnest_line(narg, argv);
+    if(logz_max < logz[j])
     {
-      logz_max = logz_arr[j];
+      logz_max = logz[j];
       jzmax = j;
     }
     
@@ -128,7 +128,7 @@ void mc_line()
     printf("*****************************************************\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
-      printf("number of components: %d, evidence: %f\n", parset.num_gaussian_low + j, logz_arr[j]);
+      printf("number of components: %d, evidence: %f\n", parset.num_gaussian_low + j, logz[j]);
     }
 
     printf("best number of components: %d.\n", parset.num_gaussian_low + jzmax);
@@ -137,10 +137,10 @@ void mc_line()
     FILE *fp;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
-    fprintf(fp, "# number_of_components     evidence\n");
+    fprintf(fp, "# number_of_components     evidence log(z)\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
-      fprintf(fp, "%d       %f\n", parset.num_gaussian_low + j, logz_arr[j]);
+      fprintf(fp, "%d       %f\n", parset.num_gaussian_low + j, logz[j]);
     }
     fclose(fp);
   }  

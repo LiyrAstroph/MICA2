@@ -680,7 +680,11 @@ int read_data()
         do 
         {
           pstr++;
-          nset++;
+          sscanf(pstr, "%d", &np);
+          if(np > 0) /* only account those lines with points */
+          {
+            nset++;
+          }
           pstr = strchr(pstr, ':');
         }while(pstr!=NULL);
       }
@@ -712,8 +716,12 @@ int read_data()
         do
         {
           pstr++;
-          sscanf(pstr, "%d", &(dataset[iset].con.n));
-          iset++;
+          sscanf(pstr, "%d", &np);
+          if(np > 0) /* only account those lines with points */
+          {
+            dataset[iset].con.n = np;
+            iset++;
+          }
           pstr = strchr(pstr, ':');
         }while(pstr!=NULL);
       }

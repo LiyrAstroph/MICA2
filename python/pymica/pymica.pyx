@@ -1438,7 +1438,8 @@ cdef class nmap(basis):
     # for nmap, no line data 
     data_nmap = {}
     for key in data.keys():
-      data_nmap[key] = [data[key][0], None]
+      for i in range(len(data[key])):
+        data_nmap[key+"_%d" % i] = [data[key][i], None]
 
     basis.setup(self, data_file=data_file, data=data_nmap, \
                       max_num_saves=max_num_saves, \

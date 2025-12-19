@@ -579,11 +579,10 @@ int read_data()
         {
           pstr++;
           sscanf(pstr, "%d", &np);
-          if(np > 0) /* only account those lines with points */
+          if(np > 0) /* only account those lines with points*/
           {
             dataset[i].nlset++;
           }
-          dataset[i].nlset++;
           pstr = strchr(pstr, ':');
         }while(pstr!=NULL);
 

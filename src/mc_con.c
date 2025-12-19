@@ -78,9 +78,9 @@ void mc_con(double *logz)
       exit(-1);
     }
  
-    tcon = malloc(ncon_max*5 * sizeof(double));
-    fcon = malloc(ncon_max*5 * sizeof(double));
-    fecon = malloc(ncon_max*5 * sizeof(double));
+    tcon = malloc(ncon_max*nscale * sizeof(double));
+    fcon = malloc(ncon_max*nscale * sizeof(double));
+    fecon = malloc(ncon_max*nscale * sizeof(double));
 
     for(i=0; i<nset; i++)
     {
@@ -96,7 +96,7 @@ void mc_con(double *logz)
       fcon_data = dataset[i].con.f;
       fecon_data = dataset[i].con.fe;
 
-      ncon = ncon_data * 5; 
+      ncon = ncon_data * nscale; 
 
       tspan = tcon_data[ncon_data-1] - tcon_data[0];
       for(j=0; j<ncon; j++)
@@ -113,12 +113,12 @@ void mc_con(double *logz)
 
     if(thistask == roottask && flag_para_name != 1)
     {
-      FILE *fp;
+      FILE *fpz;
       sprintf(fname, "%s/%s", parset.file_dir, "data/evidence_con.txt");
-      fp = fopen(fname, "w");
-      fprintf(fp, "# evidence log(z) of continuum modeling\n");
-      fprintf(fp, "%f\n", *logz);
-      fclose(fp);
+      fpz = fopen(fname, "w");
+      fprintf(fpz, "# evidence log(z) of continuum modeling\n");
+      fprintf(fpz, "%f\n", *logz);
+      fclose(fpz);
     }
     
     fclose(fp);

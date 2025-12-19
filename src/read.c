@@ -539,112 +539,214 @@ int read_data()
   double tcad, tspan;
 
   /* read number of data sets. */
-  if(thistask == roottask)
-  { 
-    sprintf(buf, "%s/%s", parset.file_dir, parset.data_file);
-    fp = fopen(buf, "r");
-    if(fp == NULL)
-    {
-      printf("Cannot open file %s.\n", buf);
-      exit(0);
-    }
-    fgets(buf, 256, fp);
-    sscanf(buf, "# %d\n", &nset);
-  }
-
-  MPI_Bcast(&nset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
-
-  dataset = (DATASET *)malloc(nset * sizeof(DATASET));
-
-  /* read number of continuum and number of line sets. */
-  if(thistask == roottask)
+  if(parset.model != nmap)
   {
-    for(i=0; i<nset; i++)
-    {
+    if(thistask == roottask)
+    { 
+      sprintf(buf, "%s/%s", parset.file_dir, parset.data_file);
+      fp = fopen(buf, "r");
+      if(fp == NULL)
+      {
+        printf("Cannot open file %s.\n", buf);
+        exit(0);
+      }
       fgets(buf, 256, fp);
-      sscanf(buf, "%s %s\n", str, str2);
-      if(str[0]!='#')
-      {
-        printf("# Error.\n");
-      }
-      
-      pstr = str2;
-      sscanf(pstr, "%d", &(dataset[i].con.n));
-      pstr = strchr(pstr, ':');
+      sscanf(buf, "# %d\n", &nset);
+    }
 
-      dataset[i].nlset = 0;
-      do 
-      {
-        pstr++;
-        dataset[i].nlset++;
-        pstr = strchr(pstr, ':');
-      }while(pstr!=NULL);
+    MPI_Bcast(&nset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
 
-      if(dataset[i].con.n >= 1000)
+    dataset = (DATASET *)malloc(nset * sizeof(DATASET));
+
+    /* read number of continuum and number of line sets. */
+    if(thistask == roottask)
+    {
+      for(i=0; i<nset; i++)
       {
-        printf("The number of points in %d-th dataset is %d, a bit large!\n", i, dataset[i].con.n);
-        printf("Better to rebin the light curve to reduce the number of points.\n"
-               "This will improve the computational speed [~O(N^3)]!\n");
-        // exit(-1);
-      }
-      
-      /* for vmap, zero continuum point */
-      if(parset.model == vmap)
-      {
-        if(dataset[i].con.n > 0)
+        fgets(buf, 256, fp);
+        sscanf(buf, "%s %s\n", str, str2);
+        if(str[0]!='#')
         {
-          printf("vmap mode, the number of continuum points in %d-th dataset should be zero!\n", i);
-          exit(-1);
+          printf("# Error.\n");
+        }
+        
+        pstr = str2;
+        sscanf(pstr, "%d", &(dataset[i].con.n));
+        pstr = strchr(pstr, ':');
+
+        dataset[i].nlset = 0;
+        do 
+        {
+          pstr++;
+          sscanf(pstr, "%d", &np);
+          if(np > 0) /* only account those lines with points */
+          {
+            dataset[i].nlset++;
+          }
+          dataset[i].nlset++;
+          pstr = strchr(pstr, ':');
+        }while(pstr!=NULL);
+
+        if(dataset[i].con.n >= 1000)
+        {
+          printf("The number of points in %d-th dataset is %d, a bit large!\n", i, dataset[i].con.n);
+          printf("Better to rebin the light curve to reduce the number of points.\n"
+                "This will improve the computational speed [~O(N^3)]!\n");
+          // exit(-1);
+        }
+        
+        /* for vmap, zero continuum point */
+        if(parset.model == vmap)
+        {
+          if(dataset[i].con.n > 0)
+          {
+            printf("vmap mode, the number of continuum points in %d-th dataset should be zero!\n", i);
+            exit(-1);
+          }
         }
       }
     }
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* allocate memory. */
+    for(i=0; i<nset; i++)
+    {
+      MPI_Bcast(&dataset[i].con.n, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+      MPI_Bcast(&dataset[i].nlset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+
+      dataset[i].con.t  = (double *)malloc(dataset[i].con.n * sizeof(double));
+      dataset[i].con.f  = (double *)malloc(dataset[i].con.n * sizeof(double));
+      dataset[i].con.fe = (double *)malloc(dataset[i].con.n * sizeof(double));
+
+      dataset[i].line   = (LC *)malloc(dataset[i].nlset * sizeof(LC));
+    }
+
+    /* read number of points in each line light curves. */
+    if(thistask == roottask)
+    {
+      rewind(fp);
+      fgets(buf, 256, fp);
+
+      for(i=0; i<nset; i++)
+      {
+        printf("set %d, # of points\n", i);
+        fgets(buf, 256, fp);
+        sscanf(buf, "%s %s\n", str, str2);
+        
+        pstr = str2;
+        pstr = strchr(pstr, ':');
+        pstr++;
+        sscanf(pstr, "%d", &(dataset[i].line[0].n));
+        printf("%d %d ", dataset[i].con.n,  dataset[i].line[0].n);
+        for(j=1; j<dataset[i].nlset; j++)
+        {
+          pstr = strchr(pstr, ':');
+          pstr++;
+          sscanf(pstr, "%d", &(dataset[i].line[j].n));
+          printf("%d ", dataset[i].line[j].n);
+        }
+        printf("\n");
+      }
+    }
   }
-  MPI_Barrier(MPI_COMM_WORLD);
-
-  /* allocate memory. */
-  for(i=0; i<nset; i++)
+  else /* for nmap, treat all light curves as continuum */
   {
-    MPI_Bcast(&dataset[i].con.n, 1, MPI_INT, roottask, MPI_COMM_WORLD);
-    MPI_Bcast(&dataset[i].nlset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
-
-    dataset[i].con.t  = (double *)malloc(dataset[i].con.n * sizeof(double));
-    dataset[i].con.f  = (double *)malloc(dataset[i].con.n * sizeof(double));
-    dataset[i].con.fe = (double *)malloc(dataset[i].con.n * sizeof(double));
-
-    dataset[i].line   = (LC *)malloc(dataset[i].nlset * sizeof(LC));
-  }
-
-  /* read number of points in each line light curves. */
-  if(thistask == roottask)
-  {
-    rewind(fp);
-    fgets(buf, 256, fp);
+    int nset_temp, iset;
+    if(thistask == roottask)
+    { 
+      sprintf(buf, "%s/%s", parset.file_dir, parset.data_file);
+      fp = fopen(buf, "r");
+      if(fp == NULL)
+      {
+        printf("Cannot open file %s.\n", buf);
+        exit(0);
+      }
+      fgets(buf, 256, fp); /* the first line is no longer used for nmap */
+      sscanf(buf, "# %d\n", &nset_temp);
+      
+      /* first read the number of light curves */
+      nset = 0;
+      for(i=0; i<nset_temp; i++)
+      {
+        fgets(buf, 256, fp);
+        sscanf(buf, "%s %s\n", str, str2);
+        if(str[0]!='#')
+        {
+          printf("# Error.\n");
+        }
+        
+        pstr = str2;
+        nset++;
+        pstr = strchr(pstr, ':');
+        do 
+        {
+          pstr++;
+          nset++;
+          pstr = strchr(pstr, ':');
+        }while(pstr!=NULL);
+      }
+    }
+    
+    MPI_Bcast(&nset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+    dataset = (DATASET *)malloc(nset * sizeof(DATASET));
+    
+    if(thistask == roottask)
+    {
+      /* now read the number of points in each light curve */
+      rewind(fp);
+      fgets(buf, 256, fp); /* the first line is no longer used for nmap */
+      
+      iset = 0;
+      for(i=0; i<nset_temp; i++)
+      {
+        fgets(buf, 256, fp);
+        sscanf(buf, "%s %s\n", str, str2);
+        if(str[0]!='#')
+        {
+          printf("# Error.\n");
+        }
+        
+        pstr = str2;
+        sscanf(pstr, "%d", &(dataset[iset].con.n));
+        iset++;
+        pstr = strchr(pstr, ':');
+        do
+        {
+          pstr++;
+          sscanf(pstr, "%d", &(dataset[iset].con.n));
+          iset++;
+          pstr = strchr(pstr, ':');
+        }while(pstr!=NULL);
+      }
+      
+      for(i=0; i<nset; i++)
+      {
+        dataset[i].nlset = 0; /* no line set */
+      }
+    }
+    
+    MPI_Barrier(MPI_COMM_WORLD);
 
     for(i=0; i<nset; i++)
     {
-      printf("set %d, # of points\n", i);
-      fgets(buf, 256, fp);
-      sscanf(buf, "%s %s\n", str, str2);
-      
-      pstr = str2;
-      pstr = strchr(pstr, ':');
-      pstr++;
-      sscanf(pstr, "%d", &(dataset[i].line[0].n));
-      printf("%d %d ", dataset[i].con.n,  dataset[i].line[0].n);
-      for(j=1; j<dataset[i].nlset; j++)
+      MPI_Bcast(&dataset[i].con.n, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+      MPI_Bcast(&dataset[i].nlset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
+
+      dataset[i].con.t  = (double *)malloc(dataset[i].con.n * sizeof(double));
+      dataset[i].con.f  = (double *)malloc(dataset[i].con.n * sizeof(double));
+      dataset[i].con.fe = (double *)malloc(dataset[i].con.n * sizeof(double));
+
+      dataset[i].line   = (LC *)malloc(dataset[i].nlset * sizeof(LC));
+      for(j=0; j<dataset[i].nlset; j++)
       {
-        pstr = strchr(pstr, ':');
-        pstr++;
-        sscanf(pstr, "%d", &(dataset[i].line[j].n));
-        printf("%d ", dataset[i].line[j].n);
+        dataset[i].line[j].n = 0; /* no line set */
       }
-      printf("\n");
     }
   }
 
   /* allocate memory. */
   for(i=0; i<nset; i++)
-  {
+  {    
     for(j=0; j<dataset[i].nlset; j++)
     {
       MPI_Bcast(&(dataset[i].line[j].n), 1, MPI_INT, roottask, MPI_COMM_WORLD);
@@ -652,6 +754,10 @@ int read_data()
       dataset[i].line[j].t  = (double *)malloc(dataset[i].line[j].n * sizeof(double));
       dataset[i].line[j].f  = (double *)malloc(dataset[i].line[j].n * sizeof(double));
       dataset[i].line[j].fe = (double *)malloc(dataset[i].line[j].n * sizeof(double));
+      if(dataset[i].line[j].n == 0)
+      {
+        parset.model = nmap;
+      }
     }
   }
 
@@ -702,6 +808,7 @@ int read_data()
       }
     }
   }
+  fclose(fp);
 
   /* broadcast data */
   for(i=0; i<nset; i++)
@@ -793,6 +900,9 @@ int read_data()
     
     for(j=0; j<dataset[i].nlset; j++)
     {
+      if(dataset[i].line[j].n == 0)
+        continue;
+
       tspan = dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0];
       if(tspan_max < tspan)
         tspan_max = tspan;
@@ -817,6 +927,9 @@ int read_data()
 
     for(j=0; j<dataset[i].nlset; j++)
     {
+      if(dataset[i].line[j].n == 0)
+        continue;
+
       tcad = (dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0])/(dataset[i].line[j].n-1);
       if(tcadence_line_min  > tcad)
         tcadence_line_min = tcad;
@@ -837,6 +950,9 @@ int read_data()
       for(j=0; j<dataset[i].nlset; j++)
       {
         n = dataset[i].line[j].n;
+        if(n == 0)
+          continue;
+
         printf("%f %f %f\n", dataset[i].line[j].t[0], dataset[i].line[j].f[0], dataset[i].line[j].fe[0]);
         printf("%f %f %f\n", dataset[i].line[j].t[n-1], dataset[i].line[j].f[n-1], dataset[i].line[j].fe[n-1]);
         printf("\n");

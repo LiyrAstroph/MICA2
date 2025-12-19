@@ -742,7 +742,7 @@ int read_data()
       }
     }
   }
-
+  
   /* allocate memory. */
   for(i=0; i<nset; i++)
   {    
@@ -806,8 +806,8 @@ int read_data()
         }
       }
     }
+    fclose(fp);
   }
-  fclose(fp);
 
   /* broadcast data */
   for(i=0; i<nset; i++)

@@ -1435,13 +1435,8 @@ cdef class nmap(basis):
     """
     setup parameters
     """
-    # for nmap, no line data 
-    data_nmap = {}
-    for key in data.keys():
-      for i in range(len(data[key])):
-        data_nmap[key+"_%d" % i] = [data[key][i], None]
 
-    basis.setup(self, data_file=data_file, data=data_nmap, \
+    basis.setup(self, data_file=data_file, data=data, \
                       max_num_saves=max_num_saves, \
                       flag_con_sys_err=flag_con_sys_err, \
                       nd_rec=nd_rec, trec_ext=trec_ext,

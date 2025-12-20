@@ -535,7 +535,7 @@ int read_data()
 {
   FILE *fp;
   char buf[256], *pstr;
-  int i, j, k, np;
+  int i, j, k, np, nr;
   double tcad, tspan;
 
   /* read number of data sets. */
@@ -576,12 +576,27 @@ int read_data()
         pstr = buf+1;
         sscanf(pstr, "%d", &(dataset[i].con.n));
         pstr = strchr(pstr, ':');
+        if(pstr == NULL) 
+        {
+          dataset[i].nlset = 0;
+          continue;
+        }
 
         dataset[i].nlset = 0;
         do 
         {
           pstr++;
-          sscanf(pstr, "%d", &np);
+          
+          /* remove blanks */
+          while(*pstr == ' ' || *pstr == '\t') pstr++;
+          if(*pstr == '\n' || *pstr == '\r' || *pstr == '\0')
+            *pstr = '\0';
+
+          if(*pstr=='\0')
+            np = 0;
+          else
+            sscanf(pstr, "%d", &np);
+            
           if(np > 0) /* only account those lines with points*/
           {
             dataset[i].nlset++;
@@ -633,18 +648,10 @@ int read_data()
       {
         printf("set %d, # of points\n", i);
         fgets(buf, 256, fp);
-        
-        printf("%d ", dataset[i].con.n);
         pstr = buf+1; /* skip the first # */
-        pstr = strchr(pstr, ':');
-        pstr++;
-        sscanf(pstr, "%d", &np);
-        if(np > 0)
-        {
-          dataset[i].line[0].n = np;
-          printf("%d ", dataset[i].line[0].n);
-        }
-        for(j=1; j<dataset[i].nlset; j++)
+
+        printf("%d ", dataset[i].con.n);
+        for(j=0; j<dataset[i].nlset; j++)
         {
           pstr = strchr(pstr, ':');
           pstr++;
@@ -687,10 +694,26 @@ int read_data()
         pstr = buf+1; /* skip the first # */
         nset++;
         pstr = strchr(pstr, ':');
+        if(pstr == NULL) 
+        {
+          dataset[i].nlset = 0;
+          continue;
+        }
+
         do 
         {
           pstr++;
-          sscanf(pstr, "%d", &np);
+
+          /* remove blanks */
+          while(*pstr == ' ' || *pstr == '\t') pstr++;
+          if(*pstr == '\n' || *pstr == '\r' || *pstr == '\0')
+            *pstr = '\0';
+          
+          if(*pstr=='\0')  
+            np = 0;
+          else
+            sscanf(pstr, "%d", &np);
+
           if(np > 0) /* only account those lines with points */
           {
             nset++;
@@ -723,10 +746,25 @@ int read_data()
         printf("Set %d, %d points\n", iset, dataset[iset].con.n);
         iset++;
         pstr = strchr(pstr, ':');
+        if(pstr == NULL) 
+        {
+          continue;
+        }
+
         do
         {
           pstr++;
-          sscanf(pstr, "%d", &np);
+
+          /* remove blanks */
+          while(*pstr == ' ' || *pstr == '\t') pstr++;
+          if(*pstr == '\n' || *pstr == '\r' || *pstr == '\0')
+            *pstr = '\0';
+          
+          if(*pstr=='\0')  
+            np = 0;
+          else
+            sscanf(pstr, "%d", &np);
+            
           if(np > 0) /* only account those lines with points */
           {
             dataset[iset].con.n = np;

@@ -534,7 +534,7 @@ int read_parset()
 int read_data()
 {
   FILE *fp;
-  char buf[256], str[256], str2[256], *pstr;
+  char buf[256], *pstr;
   int i, j, k, np;
   double tcad, tspan;
 
@@ -551,7 +551,11 @@ int read_data()
         exit(0);
       }
       fgets(buf, 256, fp);
-      sscanf(buf, "# %d\n", &nset);
+      if(buf[0]!='#')
+      {
+        printf("# Error in input data.\n");
+      }
+      sscanf(buf+1, "%d\n", &nset);
     }
 
     MPI_Bcast(&nset, 1, MPI_INT, roottask, MPI_COMM_WORLD);
@@ -564,13 +568,12 @@ int read_data()
       for(i=0; i<nset; i++)
       {
         fgets(buf, 256, fp);
-        sscanf(buf, "%s %s\n", str, str2);
-        if(str[0]!='#')
+        if(buf[0]!='#')
         {
-          printf("# Error.\n");
+          printf("# Error in input data.\n");
         }
         
-        pstr = str2;
+        pstr = buf+1;
         sscanf(pstr, "%d", &(dataset[i].con.n));
         pstr = strchr(pstr, ':');
 
@@ -630,19 +633,27 @@ int read_data()
       {
         printf("set %d, # of points\n", i);
         fgets(buf, 256, fp);
-        sscanf(buf, "%s %s\n", str, str2);
         
-        pstr = str2;
+        printf("%d ", dataset[i].con.n);
+        pstr = buf+1; /* skip the first # */
         pstr = strchr(pstr, ':');
         pstr++;
-        sscanf(pstr, "%d", &(dataset[i].line[0].n));
-        printf("%d %d ", dataset[i].con.n,  dataset[i].line[0].n);
+        sscanf(pstr, "%d", &np);
+        if(np > 0)
+        {
+          dataset[i].line[0].n = np;
+          printf("%d ", dataset[i].line[0].n);
+        }
         for(j=1; j<dataset[i].nlset; j++)
         {
           pstr = strchr(pstr, ':');
           pstr++;
-          sscanf(pstr, "%d", &(dataset[i].line[j].n));
-          printf("%d ", dataset[i].line[j].n);
+          sscanf(pstr, "%d", &np);
+          if(np > 0)
+          {
+            dataset[i].line[j].n = np;
+            printf("%d ", dataset[i].line[j].n);
+          }
         }
         printf("\n");
       }
@@ -660,21 +671,20 @@ int read_data()
         printf("Cannot open file %s.\n", buf);
         exit(0);
       }
-      fgets(buf, 256, fp); /* the first line is no longer used for nmap */
-      sscanf(buf, "# %d\n", &nset_temp);
+      fgets(buf, 256, fp); 
+      sscanf(buf+1, "%d\n", &nset_temp);
       
       /* first read the number of light curves */
       nset = 0;
       for(i=0; i<nset_temp; i++)
       {
         fgets(buf, 256, fp);
-        sscanf(buf, "%s %s\n", str, str2);
-        if(str[0]!='#')
+        if(buf[0]!='#')
         {
-          printf("# Error.\n");
+          printf("# Error in input data.\n");
         }
-        
-        pstr = str2;
+
+        pstr = buf+1; /* skip the first # */
         nset++;
         pstr = strchr(pstr, ':');
         do 
@@ -703,14 +713,14 @@ int read_data()
       for(i=0; i<nset_temp; i++)
       {
         fgets(buf, 256, fp);
-        sscanf(buf, "%s %s\n", str, str2);
-        if(str[0]!='#')
+        if(buf[0]!='#')
         {
-          printf("# Error.\n");
+          printf("# Error in input data.\n");
         }
-        
-        pstr = str2;
+
+        pstr = buf+1; /* skip the first # */
         sscanf(pstr, "%d", &(dataset[iset].con.n));
+        printf("Set %d, %d points\n", iset, dataset[iset].con.n);
         iset++;
         pstr = strchr(pstr, ':');
         do
@@ -720,6 +730,7 @@ int read_data()
           if(np > 0) /* only account those lines with points */
           {
             dataset[iset].con.n = np;
+            printf("Set %d, %d points\n", iset, dataset[iset].con.n);
             iset++;
           }
           pstr = strchr(pstr, ':');
@@ -948,21 +959,20 @@ int read_data()
   if(thistask == roottask)
   {
     int n;
+    printf("#=======================================================\n");
     for(i=0; i<nset; i++)
     {
       printf("set %d, starting and ending points\n", i);
-      printf("%f %f %f\n", dataset[i].con.t[0], dataset[i].con.f[0], dataset[i].con.fe[0]);
-      printf("%f %f %f\n", dataset[i].con.t[dataset[i].con.n-1], dataset[i].con.f[dataset[i].con.n-1], dataset[i].con.fe[dataset[i].con.n-1]);
-      printf("\n");
+      printf("%-4d %f %f %f\n", 0, dataset[i].con.t[0], dataset[i].con.f[0], dataset[i].con.fe[0]);
+      printf("%-4d %f %f %f\n", dataset[i].con.n-1, dataset[i].con.t[dataset[i].con.n-1], dataset[i].con.f[dataset[i].con.n-1], dataset[i].con.fe[dataset[i].con.n-1]);
       for(j=0; j<dataset[i].nlset; j++)
       {
         n = dataset[i].line[j].n;
         if(n == 0)
           continue;
 
-        printf("%f %f %f\n", dataset[i].line[j].t[0], dataset[i].line[j].f[0], dataset[i].line[j].fe[0]);
-        printf("%f %f %f\n", dataset[i].line[j].t[n-1], dataset[i].line[j].f[n-1], dataset[i].line[j].fe[n-1]);
-        printf("\n");
+        printf("%-4d %f %f %f\n", 0, dataset[i].line[j].t[0], dataset[i].line[j].f[0], dataset[i].line[j].fe[0]);
+        printf("%-4d %f %f %f\n", dataset[i].line[j].n-1, dataset[i].line[j].t[n-1], dataset[i].line[j].f[n-1], dataset[i].line[j].fe[n-1]);
       }
     }
   }

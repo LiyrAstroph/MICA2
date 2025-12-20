@@ -792,7 +792,12 @@ int read_data()
           printf("error in reading the data file %s.\n", parset.data_file);
           exit(0);
         }
-        fscanf(fp, "%lf %lf %lf\n", &(dataset[i].con.t[j]), &(dataset[i].con.f[j]), &(dataset[i].con.fe[j]));
+        np = fscanf(fp, "%lf %lf %lf\n", &(dataset[i].con.t[j]), &(dataset[i].con.f[j]), &(dataset[i].con.fe[j]));
+        if(np < 3)
+        {
+          printf("Error in reading %d-th row of continuum of %d-th dataset.\n", j, i);
+          exit(0);
+        }
       }
       fscanf(fp, "\n");
 
@@ -813,7 +818,12 @@ int read_data()
             printf("error in reading the data file %s.\n", parset.data_file);
             exit(0);
           }  
-          fscanf(fp, "%lf %lf %lf\n", &(dataset[i].line[j].t[k]), &(dataset[i].line[j].f[k]), &(dataset[i].line[j].fe[k]));
+          np = fscanf(fp, "%lf %lf %lf\n", &(dataset[i].line[j].t[k]), &(dataset[i].line[j].f[k]), &(dataset[i].line[j].fe[k]));
+          if(np < 3)
+          {
+            printf("Error in reading %d-th row of %d-th line of %d-th dataset.\n", j, k, i);
+            exit(0);
+          }
         }
         fscanf(fp, "\n");
 

@@ -1485,6 +1485,7 @@ cdef class nmap(basis):
     set_argv(1, 0, 0, 0, 0) # postprocess, decompose, restart, para names, postsample
     read_data()
     init()
+    mc_con(&self.logz_con)
     end_run()
     return
   

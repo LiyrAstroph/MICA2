@@ -24,7 +24,7 @@ DNestFptrSet *fptrset_line;
 double dnest_line(int argc, char **argv)
 {
   int i, j, k, ic, idx;
-  double logz, dlag;
+  double logz=0.0, dlag;
   char dnest_data_dir[MICA_MAX_STR_LENGTH];
 
   fptrset_line = dnest_malloc_fptrset();
@@ -507,7 +507,7 @@ void from_prior_line(void *model)
       {
         pm[ic-1] = par_range_model[ic-1][0] + dnest_rand()*(par_range_model[ic-1][1] - par_range_model[ic-1][0]);
         pm[ic] = par_range_model[ic][0] + dnest_rand()*(par_range_model[ic][1] - par_range_model[ic][0]);
-        j+1;
+        j++;
         if(j>100)
         {
           pm[ic] = pm[ic-1]/width_factor; 

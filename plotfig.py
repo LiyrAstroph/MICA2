@@ -426,22 +426,23 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     
     #===============================================
     # residuals
-    ax_res = fig.add_axes((0.89, 0.95-axheight, 0.05, axheight))
-    con0_intp = np.interp(con0[:, 0], sall_con0[:, 0], sall_con0[:, 1])
-    ax_res.hist((con0[:, 1]-con0_intp)/con0[:, 2], bins=20, orientation='horizontal', density=True, color='C0')
-    ax_res.yaxis.set_tick_params(labelleft=False, labelright=True)
-    ax_res.yaxis.set_label_position("right")
-    ax_res.set_ylabel("Res./Err.", labelpad=-5)
-    ax_res.set_ylim(-4, 4)
-    ylim_res = ax_res.get_ylim()
-    ylim_res_max = max(abs(ylim_res[0]), abs(ylim_res[1]))
-    ax_res.set_ylim(-ylim_res_max, ylim_res_max)
-    y = np.linspace(-ylim_res_max, ylim_res_max, 100)
-    x = 1.0/np.sqrt(2.0*np.pi) * np.exp(-0.5*y**2)
-    ax_res.plot(x, y, color='red')
-    ax_res.minorticks_on()
-    ax_res.xaxis.set_tick_params(labelbottom=False)
-    ax_res.set_xlim(0.0, 0.6)
+    if typemodel != 2: # do not plot residuals for vmap model
+      ax_res = fig.add_axes((0.89, 0.95-axheight, 0.05, axheight))
+      con0_intp = np.interp(con0[:, 0], sall_con0[:, 0], sall_con0[:, 1])
+      ax_res.hist((con0[:, 1]-con0_intp)/con0[:, 2], bins=20, orientation='horizontal', density=True, color='C0')
+      ax_res.yaxis.set_tick_params(labelleft=False, labelright=True)
+      ax_res.yaxis.set_label_position("right")
+      ax_res.set_ylabel("Res./Err.", labelpad=-5)
+      ax_res.set_ylim(-4, 4)
+      ylim_res = ax_res.get_ylim()
+      ylim_res_max = max(abs(ylim_res[0]), abs(ylim_res[1]))
+      ax_res.set_ylim(-ylim_res_max, ylim_res_max)
+      y = np.linspace(-ylim_res_max, ylim_res_max, 100)
+      x = 1.0/np.sqrt(2.0*np.pi) * np.exp(-0.5*y**2)
+      ax_res.plot(x, y, color='red')
+      ax_res.minorticks_on()
+      ax_res.xaxis.set_tick_params(labelbottom=False)
+      ax_res.set_xlim(0.0, 0.6)
     #===============================================
 
     # plot long-term trend

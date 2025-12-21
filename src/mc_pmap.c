@@ -105,7 +105,7 @@ void mc_pmap(double *logz)
     printf("best number components: %d.\n", parset.num_gaussian_low + jzmax);
     printf("*****************************************************\n");
 
-    FILE *fp;
+    FILE *fp=NULL;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
     fprintf(fp, "# number_of_components     evidence log(z)\n");

@@ -42,7 +42,7 @@ int read_parset()
     #define STRING 2
     #define INT 3
 
-    FILE *fparam;
+    FILE *fparam=NULL;
     int i, j, nt;
     char str[200], buf1[200], buf2[200], buf3[200];
 
@@ -533,9 +533,9 @@ int read_parset()
 /* read date file */
 int read_data()
 {
-  FILE *fp;
+  FILE *fp=NULL;
   char buf[256], *pstr;
-  int i, j, k, np, nr;
+  int i, j, k, np;
   double tcad, tspan;
 
   /* read number of data sets. */
@@ -1288,7 +1288,7 @@ void scale_con_line()
  */
 void get_num_particles(char *fname)
 {
-  FILE *fp;
+  FILE *fp=NULL;
   char buf[MICA_MAX_STR_LENGTH], buf1[MICA_MAX_STR_LENGTH], buf2[MICA_MAX_STR_LENGTH];
   fp = fopen(fname, "r");
   if(fp == NULL)

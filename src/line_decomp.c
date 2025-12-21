@@ -368,7 +368,7 @@ void output_decompose_line()
   {
     printf("start line decompose...\n");
 
-    FILE *fp, *fp_sample;
+    FILE *fp=NULL, *fp_sample=NULL;
     char fname[200];
     int i, j, k, m, kgau;
     double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq;

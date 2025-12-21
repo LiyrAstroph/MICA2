@@ -62,7 +62,7 @@ void mc_con(double *logz)
   
   if(thistask == roottask)
   {
-    FILE *fp;
+    FILE *fp=NULL;
     char fname[200];
     int j, idx;
     double sigma, tau, alpha, syserr, tspan;
@@ -113,7 +113,7 @@ void mc_con(double *logz)
 
     if(thistask == roottask && flag_para_name != 1)
     {
-      FILE *fpz;
+      FILE *fpz=NULL;
       sprintf(fname, "%s/%s", parset.file_dir, "data/evidence_con.txt");
       fpz = fopen(fname, "w");
       fprintf(fpz, "# evidence log(z) of continuum modeling\n");
@@ -339,7 +339,7 @@ void postprocess_con()
   
   if(thistask == roottask)
   {
-    FILE *fp;
+    FILE *fp=NULL;
 
     /* get file name of posterior sample file */
     dnest_get_posterior_sample_file(posterior_sample_file);

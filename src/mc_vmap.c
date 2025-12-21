@@ -106,7 +106,7 @@ void mc_vmap(double *logz)
     printf("best number of components: %d.\n", parset.num_gaussian_low + jzmax);
     printf("*****************************************************\n");
 
-    FILE *fp;
+    FILE *fp=NULL;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
     fprintf(fp, "# number_of_components     evidence log(z)\n");
@@ -146,7 +146,7 @@ void postprocess_vmap()
   {
     void *best_model_line;   /*!< best model */
     void *best_model_std_line;  /*!< standard deviation of the best model */
-    FILE *fp;
+    FILE *fp=NULL;
 
     best_model_line = malloc(size_of_modeltype);
     best_model_std_line = malloc(size_of_modeltype);
@@ -611,7 +611,7 @@ void output_reconstruction_vmap_parallel()
   double tspan, tbeg, tend;
 
   char fname[200];
-  FILE *fp, *fp_sample, *fpq;
+  FILE *fp=NULL, *fp_sample=NULL, *fpq=NULL;
   
   size_of_modeltype = num_params * sizeof(double);
 
@@ -1022,7 +1022,7 @@ void output_reconstruction_vmap()
   {
     printf("start reconstruction...\n");
 
-    FILE *fp, *fp_sample, *fpq;
+    FILE *fp=NULL, *fp_sample=NULL, *fpq=NULL;
     char fname[200];
     int i, j, k, m;
     double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq, **yq_best, **yq_std;

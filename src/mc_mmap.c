@@ -95,10 +95,10 @@ void mc_mmap(double *logz)
     char fname[200];
 
     printf("*****************************************************\n");
-    printf("number of components: %d, evidence: %f\n", num_gaussian, logz);
+    printf("number of components: %d, evidence: %f\n", num_gaussian, logz[0]);
     printf("*****************************************************\n");
 
-    FILE *fp;
+    FILE *fp=NULL;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
     fprintf(fp, "# number_of_components     evidence log(z)\n");
@@ -133,7 +133,7 @@ void postprocess_mmap()
   {
     void *best_model_line;   /*!< best model */
     void *best_model_std_line;  /*!< standard deviation of the best model */
-    FILE *fp;
+    FILE *fp=NULL;
 
     best_model_line = malloc(size_of_modeltype);
     best_model_std_line = malloc(size_of_modeltype);
@@ -237,7 +237,7 @@ void output_reconstruction_parallel_mmap()
   double tspan, tbeg, tend;
 
   char fname[200];
-  FILE *fp, *fp_sample, *fpq;
+  FILE *fp=NULL, *fp_sample=NULL, *fpq=NULL;
   
   size_of_modeltype = num_params * sizeof(double);
 
@@ -5292,7 +5292,7 @@ void Sll2_array_gam_tophat(double *tline1, int nline1, double *tline2, int nline
 
 void test_mix()
 {
-  FILE *fp;
+  FILE *fp=NULL;
   void *model = (void *)malloc(10*sizeof(double));
   void *model2 = (void *)malloc(10*sizeof(double));
   double *pm = (double *)model, *pm2 = (double *)model2;

@@ -399,10 +399,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   
   # set x-axis coordinates of sub figures
   if flagnegresp == False:
-    figlc_center = 0.05
-    figlc_centroid = 0.22
+    figlc_center = 0.01
+    figlc_centroid = 0.17
   else:
-    figlc_center = 0.17
+    figlc_center = 0.13
     # figlc_centroid = 0.22
   
   idx_q = 0 # index for long-term trend parameters
@@ -417,13 +417,33 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     sall_con0 = sall[indx_con_rec[m]:(indx_con_rec[m]+ns_rec[0]), :] 
     
     axheight = 0.8/(len(ns))
-    ax = fig.add_axes((0.56, 0.95-axheight, 0.35, axheight))
+    ax = fig.add_axes((0.49, 0.95-axheight, 0.35, axheight))
     
     ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10, marker='o', markersize=1.5, elinewidth=0.5)
     
     ax.plot(sall_con0[:, 0]-shift, sall_con0[:, 1], color='k')
     ax.fill_between(sall_con0[:, 0]-shift, y1=sall_con0[:, 1]-sall_con0[:, 2], y2=sall_con0[:, 1]+sall_con0[:, 2], color='darkgrey')
     
+    #===============================================
+    # residuals
+    ax_res = fig.add_axes((0.89, 0.95-axheight, 0.05, axheight))
+    con0_intp = np.interp(con0[:, 0], sall_con0[:, 0], sall_con0[:, 1])
+    ax_res.hist((con0[:, 1]-con0_intp)/con0[:, 2], bins=20, orientation='horizontal', density=True, color='C0')
+    ax_res.yaxis.set_tick_params(labelleft=False, labelright=True)
+    ax_res.yaxis.set_label_position("right")
+    ax_res.set_ylabel("Res./Err.", labelpad=-5)
+    ax_res.set_ylim(-4, 4)
+    ylim_res = ax_res.get_ylim()
+    ylim_res_max = max(abs(ylim_res[0]), abs(ylim_res[1]))
+    ax_res.set_ylim(-ylim_res_max, ylim_res_max)
+    y = np.linspace(-ylim_res_max, ylim_res_max, 100)
+    x = 1.0/np.sqrt(2.0*np.pi) * np.exp(-0.5*y**2)
+    ax_res.plot(x, y, color='red')
+    ax_res.minorticks_on()
+    ax_res.xaxis.set_tick_params(labelbottom=False)
+    ax_res.set_xlim(0.0, 0.6)
+    #===============================================
+
     # plot long-term trend
     if flagtrend > 0:
       xlim = ax.get_xlim()
@@ -439,7 +459,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     ax.yaxis.set_tick_params(labelleft=False)
     ax.yaxis.set_tick_params(labelright=True)
     ax.yaxis.set_label_position("right")
-    ax.set_ylabel('Flux')
+    # ax.set_ylabel('Flux')
     ax.minorticks_on()
     #ax.xaxis.set_label_position("top")
     #ax.set_xlabel('HJD - 2450000')
@@ -489,13 +509,36 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ##############################
       # first line light curve
       ##############################
-      ax = fig.add_axes((0.56, 0.95-(j+1)*axheight, 0.35, axheight))
+      ax = fig.add_axes((0.49, 0.95-(j+1)*axheight, 0.35, axheight))
       
       ax.errorbar(hb[:, 0]-shift, hb[:, 1], yerr=hb[:, 2], ls='none', zorder=10, color='b', marker='o', markersize=1.5, elinewidth=0.5)
       
       ax.plot(sall_hb[:, 0]-shift, sall_hb[:, 1], color='k')
       ax.fill_between(sall_hb[:, 0]-shift, y1=sall_hb[:, 1]-sall_hb[:, 2], y2=sall_hb[:, 1]+sall_hb[:, 2], color='darkgrey')
       
+      #===============================================
+      # residuals
+      ax_res = fig.add_axes((0.89, 0.95-(j+1)*axheight, 0.05, axheight))
+      hb_intp = np.interp(hb[:, 0], sall_hb[:, 0], sall_hb[:, 1])
+      ax_res.hist((hb[:, 1]-hb_intp)/hb[:, 2], bins=20, orientation='horizontal', density=True, color='C0')
+      ax_res.yaxis.set_tick_params(labelleft=False, labelright=True)
+      ax_res.yaxis.set_label_position("right")
+      ax_res.set_ylabel("Res./Err.", labelpad=-5)
+      ax_res.set_ylim(-4, 4)
+      ylim_res = ax_res.get_ylim()
+      ylim_res_max = max(abs(ylim_res[0]), abs(ylim_res[1]))
+      ax_res.set_ylim(-ylim_res_max, ylim_res_max)
+      y = np.linspace(-ylim_res_max, ylim_res_max, 100)
+      x = 1.0/np.sqrt(2.0*np.pi) * np.exp(-0.5*y**2)
+      ax_res.plot(x, y, color='red')
+      ax_res.minorticks_on()
+      ax_res.set_xlim(0.0, 0.6)
+      if j != len(ns)-1:
+        ax_res.xaxis.set_tick_params(labelbottom=False)
+      else:
+        ax_res.set_xlabel("Hist.")
+      #===============================================
+
       # plot long-term trend 
       if flagtrend > 0:
         xlim = ax.get_xlim()
@@ -513,7 +556,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ax.yaxis.set_tick_params(labelleft=False)
       ax.yaxis.set_tick_params(labelright=True)
       ax.yaxis.set_label_position("right")
-      ax.set_ylabel("Flux")
+      # ax.set_ylabel("Flux")
       ax.set_xlim(xlim0[0], xlim0[1])
       
       # set ylim
@@ -532,7 +575,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       # then posteriror distribution of time lags
       ############################################
       
-      ax = fig.add_axes((figlc_center, 0.95-(j+1)*axheight, 0.16, axheight))
+      ax = fig.add_axes((figlc_center, 0.95-(j+1)*axheight, 0.15, axheight))
 
       for k in range(ngau):
         tt = int(typetf[k])
@@ -588,7 +631,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       #====================================================================
       # only plot centroid lag when no negative response
       if flagnegresp == False:
-        ax = fig.add_axes((figlc_centroid, 0.95-(j+1)*axheight, 0.16, axheight))
+        ax = fig.add_axes((figlc_centroid, 0.95-(j+1)*axheight, 0.15, axheight))
         
         if typemodel in [0, 2, 3]: # centroid time lag
           cent = np.zeros(sample.shape[0])
@@ -680,7 +723,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       ############################################
       #===========================================================================================================
       # transfer function
-      ax = fig.add_axes((0.39, 0.95-(j+1)*axheight, 0.16, axheight))
+      ax = fig.add_axes((0.33, 0.95-(j+1)*axheight, 0.15, axheight))
       
       tau = np.linspace(tau1_tf, tau2_tf, ntau)
       tran[:, :] = 0.0

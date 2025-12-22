@@ -1101,7 +1101,14 @@ void scale_con_line()
         mean /= dataset[i].con.n;
         Rmax = (fdmax-fdmin)/2.0;
 
-        /* check if the mean is positive*/
+        /* check if the mean is positive */
+        if(mean <= 0.0)
+        {
+          printf("Error: the continuum of %d-th set has a negative mean (=%f).\n", i, mean);
+          exit(0);
+        }
+
+        /* determine the normalization factor */
         if(Rmax == 0.0)
         {
           printf("Error: the continuum of %d-th set is constant, without variability. \n", i);
@@ -1111,7 +1118,7 @@ void scale_con_line()
         {
           flag_norm = 1;
         }
-        else
+        else if(flag_norm != 1)
         {
           flag_norm = 0;
         }
@@ -1135,8 +1142,15 @@ void scale_con_line()
         }
         mean /= dataset[i].line[j].n;
         Rmax = (fdmax-fdmin)/2.0;
-
+        
         /* check if the mean is positive*/
+        if(mean <= 0.0)
+        {
+          printf("Error: the %d-th line of %d-th set has a negative mean (=%f).\n", j, i, mean);
+          exit(0);
+        }
+
+        /* determine the normalization factor */
         if(Rmax == 0.0)
         {
           printf("Error: the %d-th line of %d-th set is constant, without variability. \n", j, i);

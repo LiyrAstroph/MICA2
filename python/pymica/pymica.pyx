@@ -257,8 +257,11 @@ cdef class basis:
   
   def post_process(self, temperature=1.0):
 
-    for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
-      ut.postprocess(self.parset.file_dir.decode("UTF-8"), i, temperature)
+    if self.parset.model == 4: # nmap
+      ut.postprocess(self.parset.file_dir.decode("UTF-8"), 0, temperature)
+    else:
+      for i in range(self.parset.num_gaussian_low, self.parset.num_gaussian_upper+1, 1):
+        ut.postprocess(self.parset.file_dir.decode("UTF-8"), i, temperature)
 
     return
   

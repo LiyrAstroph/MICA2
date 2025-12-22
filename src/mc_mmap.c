@@ -101,7 +101,7 @@ void mc_mmap(double *logz)
     FILE *fp=NULL;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
-    fprintf(fp, "# number_of_components     evidence log(z)\n");
+    fprintf(fp, "# number_of_components     evidence ln(z)\n");
     fprintf(fp, "%d       %f\n", num_gaussian, logz[0]);
     fclose(fp);
   }  

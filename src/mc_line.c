@@ -137,7 +137,7 @@ void mc_line(double *logz)
     FILE *fp=NULL;
     sprintf(fname, "%s/%s", parset.file_dir, "data/evidence.txt");
     fp = fopen(fname, "w");
-    fprintf(fp, "# number_of_components     evidence log(z)\n");
+    fprintf(fp, "# number_of_components     evidence ln(z)\n");
     for(j=0; j<parset.num_gaussian_diff; j++)
     {
       fprintf(fp, "%d       %f\n", parset.num_gaussian_low + j, logz[j]);

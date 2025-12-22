@@ -116,7 +116,7 @@ void mc_con(double *logz)
       FILE *fpz=NULL;
       sprintf(fname, "%s/%s", parset.file_dir, "data/evidence_con.txt");
       fpz = fopen(fname, "w");
-      fprintf(fpz, "# evidence log(z) of continuum modeling\n");
+      fprintf(fpz, "# evidence ln(z) of continuum modeling\n");
       fprintf(fpz, "%f\n", *logz);
       fclose(fpz);
     }

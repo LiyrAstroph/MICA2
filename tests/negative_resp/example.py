@@ -43,7 +43,7 @@ data_input = comm.bcast(data_input, root=0)
 
 model = pymica.gmodel()
 # use Gaussians
-model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 80], number_component=[2, 2], max_num_saves=2000, 
+model.setup(data=data_input, type_tf='gaussian', lag_limit=[0, 80], number_component=[2, 2], max_num_saves=5000, 
             flag_negative_resp=True)
 
 # or use tophats
@@ -74,7 +74,7 @@ model.run()
 # model.post_run()
 
 #do decomposition for the cases of multiple components 
-model.decompose()
+#model.decompose()
 
 # plot results
 if rank == 0:

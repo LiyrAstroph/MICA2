@@ -396,7 +396,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
     line = fp.readline()
     ls = line[1:].split(":")
     ns = np.array([int(i) for i in ls])
-    for j in ns:
+    for j in ns[1:]: # negelect the first one, which is number of continuum points
       if j == 0:
         typemodel = Model.nmap.value
     nl.append(ns)

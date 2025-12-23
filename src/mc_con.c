@@ -115,9 +115,9 @@ void mc_con(double *logz)
 
       ncon = ncon_data * nscale; 
 
-      tspan = tcon_data[ncon_data-1] - tcon_data[0];
+      tspan = tcon_data[ncon_data-1] - tcon_data[0] + (parset.trec_upp_ext - parset.trec_low_ext);
       for(j=0; j<ncon; j++)
-        tcon[j] = (tspan + 0.1*tspan)/(ncon-1.0) * j + tcon_data[0]-0.05*tspan;
+        tcon[j] = (tspan + 0.1*tspan)/(ncon-1.0) * j + (tcon_data[0]-0.05*tspan + parset.trec_low_ext);
 
       recostruct_con_from_varmodel_semiseparable(sigma, tau, alpha, syserr, ncon_data, tcon_data, fcon_data, fecon_data, 
         ncon, tcon, fcon, fecon, yq);

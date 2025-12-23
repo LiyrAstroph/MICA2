@@ -11,6 +11,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import sys, os
 import configparser as cp 
 import argparse
+from enum import Enum 
 
 __all__ = ["plot_results"]
 
@@ -25,6 +26,13 @@ plt.rcParams["xtick.minor.visible"] = True
 plt.rcParams["ytick.minor.visible"] = True
 plt.rcParams["xtick.direction"] = "in"
 plt.rcParams["ytick.direction"] = "in"
+
+class Model(Enum):
+  gmodel=0
+  pmap = 1
+  vmap = 2
+  mmap = 3
+  nmap = 4
 
 def _get_hist_timelag_range(sample, indx_line, typetf, ngau, ns, m):
   """
@@ -253,40 +261,168 @@ def _get_time_lag(sample, idx, tt):
   elif tt == 3:
     return sample[:, idx+1] + 1*np.exp(sample[:, idx+2])
 
+def plot_results_con(fdir, fname, flagtrend, doshow=True):
+  """
+  plot results for continuum modeling for nmap 
+  """
+  fp = open(fdir+fname)
+  # read numbe of datasets
+  line = fp.readline()
+  nd = int(line[1:])
+
+  # read number of data points in each dataset
+  ncon = []
+  for i in range(nd):
+    line = fp.readline()
+    ls = line[1:].split(":")
+    ns = [int(i) for i in ls]
+    ncon += ns
+  fp.close()
+  
+  # reconstruction points 
+  fp = open(fdir+"/data/pcon.txt")
+  # read numbe of datasets
+  line = fp.readline()
+  nd = int(line[1:])
+
+  # read number of data points in each dataset
+  ncon_rec = []
+  for i in range(nd):
+    line = fp.readline()
+    ls = line[1:].split(":")
+    ns = [int(i) for i in ls]
+    ncon_rec += ns
+  fp.close()
+
+  # assign index of cont data
+  indx_con_data = []
+  indx_con_rec = []
+  indx_con_data.append(0)
+  indx_con_rec.append(0)
+  for i in range(1, nd):
+    ns = ncon[i-1]
+    ns_rec = ncon_rec[i-1]
+    indx_con_data.append(ns + indx_con_data[i-1])
+    indx_con_rec.append(ns_rec + indx_con_rec[i-1])
+
+  data = np.loadtxt(fdir+fname)
+  sall = np.loadtxt(fdir+"/data/pcon.txt")
+
+  if flagtrend > 0:
+    trend = np.loadtxt(fdir+"/data/trend_con.txt")
+  
+  # number of parameters for long-term trend
+  nq = flagtrend + 1
+
+  # open pdf file
+  pdf = PdfPages(fdir+"/data/fig_con.pdf")
+  print("Plotting to %s."%(fdir+"/data/fig_con.pdf"))
+
+  shift = 0.0
+  idx_q = 0
+  for m in range(nd):
+    ns = ncon[m]
+    ns_rec = ncon_rec[m]
+
+    fig = plt.figure(figsize=(12, 4))
+    
+    con0 = data[indx_con_data[m]:indx_con_data[m]+ns, :]
+    sall_con0 = sall[indx_con_rec[m]:(indx_con_rec[m]+ns_rec), :] 
+    
+    axheight = 0.8
+    ax = fig.add_axes((0.05, 0.95-axheight, 0.75, axheight))
+    
+    ax.errorbar(con0[:, 0]-shift, con0[:, 1], yerr=con0[:, 2], ls='none', color='b', zorder=10, marker='o', 
+                markersize=3.5, elinewidth=0.5, capsize=1.0, capthick=0.5)
+    
+    ax.plot(sall_con0[:, 0]-shift, sall_con0[:, 1], color='k')
+    ax.fill_between(sall_con0[:, 0]-shift, y1=sall_con0[:, 1]-sall_con0[:, 2], y2=sall_con0[:, 1]+sall_con0[:, 2], color='darkgrey')
+    
+    ax.set_ylabel('Flux')
+    ax.minorticks_on()
+    ax.set_xlabel('Time')
+
+    # plot long-term trend
+    if flagtrend > 0:
+      xlim = ax.get_xlim()
+      x = np.linspace(sall_con0[0, 0], sall_con0[-1, 0], 100)
+      y = np.zeros(100)
+      for j in range(nq):
+        y += trend[idx_q + j] * x**(j)
+  
+      ax.plot(x, y, ls='--', color='grey')
+    
+    idx_q += nq
+
+    #===============================================
+    # residuals
+    ax_res = fig.add_axes((0.82, 0.95-axheight, 0.10, axheight))
+    con0_intp = np.interp(con0[:, 0], sall_con0[:, 0], sall_con0[:, 1])
+    ax_res.hist((con0[:, 1]-con0_intp)/con0[:, 2], bins=20, orientation='horizontal', density=True, color='C0')
+    ax_res.yaxis.set_tick_params(labelleft=False, labelright=True)
+    ax_res.yaxis.set_label_position("right")
+    ax_res.set_ylabel("Res./Err.")
+    ax_res.set_xlabel("Hist.")
+    ax_res.set_ylim(-4, 4)
+    ylim_res = ax_res.get_ylim()
+    ylim_res_max = max(abs(ylim_res[0]), abs(ylim_res[1]))
+    ax_res.set_ylim(-ylim_res_max, ylim_res_max)
+    y = np.linspace(-ylim_res_max, ylim_res_max, 100)
+    x = 1.0/np.sqrt(2.0*np.pi) * np.exp(-0.5*y**2)
+    ax_res.plot(x, y, color='red')
+    ax_res.minorticks_on()
+    ax_res.xaxis.set_tick_params(labelbottom=False)
+    ax_res.set_xlim(0.0, 0.6)
+    #===============================================
+
+    pdf.savefig(fig)
+
+  pdf.close()
+
+  return
 
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, 
                  typetf, typemodel, resp_input, doshow=True, tf_lag_range=None, hist_lag_range=None, 
                  hist_bins=None, show_pmax=False, show_gap=False, labels=None):
-  
-  sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
-  sample_info = np.loadtxt(fdir+"/data/posterior_sample_info1d.txt_%d"%ngau)
-  idx_pmax = np.argmax(sample_info)
-  data = np.loadtxt(fdir+fname)
-  sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
-
-  if flagtrend > 0:
-    trend = np.loadtxt(fdir+"/data/trend.txt_%d"%ngau)
 
   fp = open(fdir+fname)
   # read numbe of datasets
   line = fp.readline()
   nd = int(line[1:])
-  if flagvar == 1:
-    num_params_var = 3
-  else:
-    num_params_var = 3*nd
 
-  # number of parameters for long-term trend
-  nq = flagtrend + 1
-  
   # read number of data points in each dataset
   nl = []
   for i in range(nd):
     line = fp.readline()
     ls = line[1:].split(":")
     ns = np.array([int(i) for i in ls])
+    for j in ns:
+      if j == 0:
+        typemodel = Model.nmap.value
     nl.append(ns)
+
   fp.close()
+
+  if typemodel == Model.nmap.value: # nmap, only plot continuum
+    plot_results_con(fdir, fname, flagtrend, doshow)
+    return
+
+  sample = np.atleast_2d(np.loadtxt(fdir+"/data/posterior_sample1d.txt_%d"%ngau))
+  sample_info = np.loadtxt(fdir+"/data/posterior_sample_info1d.txt_%d"%ngau)
+  idx_pmax = np.argmax(sample_info)
+  data = np.loadtxt(fdir+fname)
+  sall = np.loadtxt(fdir+"/data/pall.txt_%d"%ngau)
+
+  if flagvar == 1:
+    num_params_var = 3
+  else:
+    num_params_var = 3*nd
+  
+  if flagtrend > 0:
+    trend = np.loadtxt(fdir+"/data/trend.txt_%d"%ngau)
+  
+  # number of parameters for long-term trend
+  nq = flagtrend + 1
 
   # read number of points of reconstructions
   fp = open(fdir+"/data/pall.txt_%d"%ngau, "r")

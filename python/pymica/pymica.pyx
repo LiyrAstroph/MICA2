@@ -1426,6 +1426,7 @@ cdef class nmap(basis):
   
 
   def setup(self, data_file=None, data=None,
+                  flag_trend=0,
                   max_num_saves=2000, 
                   flag_con_sys_err=False, 
                   nd_rec=200, trec_ext=[0, 0],
@@ -1439,9 +1440,10 @@ cdef class nmap(basis):
     setup parameters
     """
 
-    basis.setup(self, data_file=data_file, data=data, \
-                      max_num_saves=max_num_saves, \
-                      flag_con_sys_err=flag_con_sys_err, \
+    basis.setup(self, data_file=data_file, data=data,   \
+                      max_num_saves=max_num_saves,      \
+                      flag_trend = 0,                   \
+                      flag_con_sys_err=flag_con_sys_err,\
                       nd_rec=nd_rec, trec_ext=trec_ext,
                       # follows cdnest parameters
                       num_particles = num_particles,

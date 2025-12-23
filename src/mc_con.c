@@ -62,13 +62,14 @@ void mc_con(double *logz)
   
   if(thistask == roottask)
   {
-    FILE *fp=NULL;
+    FILE *fp=NULL, *fpq=NULL;
     char fname[200];
     int j, idx;
     double sigma, tau, alpha, syserr, tspan;
     double *pm = best_model_con;
     double *tcon_data, *fcon_data, *fecon_data, *tcon, *fcon, *fecon;
     int ncon, ncon_data;
+    double *yq;
 
     sprintf(fname, "%s/%s", parset.file_dir, "data/pcon.txt");
     fp = fopen(fname, "w");
@@ -77,10 +78,26 @@ void mc_con(double *logz)
       fprintf(stderr, "# Error: Cannot open file %s\n", fname);
       exit(-1);
     }
+
+    sprintf(fname, "%s/%s", parset.file_dir, "data/trend_con.txt");
+    fpq = fopen(fname, "w");
+    if(fpq == NULL)
+    {
+      fprintf(stderr, "# Error: Cannot open file %s\n", fname);
+      exit(-1);
+    }
+
+    fprintf(fp, "# %d\n", nset);
+    for(i=0; i<nset; i++)
+    {
+      fprintf(fp, "# %d\n", dataset[i].con.n * nscale);
+    }
  
     tcon = malloc(ncon_max*nscale * sizeof(double));
     fcon = malloc(ncon_max*nscale * sizeof(double));
     fecon = malloc(ncon_max*nscale * sizeof(double));
+    
+    yq = malloc(nq*sizeof(double));
 
     for(i=0; i<nset; i++)
     {
@@ -102,13 +119,20 @@ void mc_con(double *logz)
       for(j=0; j<ncon; j++)
         tcon[j] = (tspan + 0.1*tspan)/(ncon-1.0) * j + tcon_data[0]-0.05*tspan;
 
-      recostruct_con_from_varmodel_semiseparable(sigma, tau, alpha, syserr, ncon_data, tcon_data, fcon_data, fecon_data, ncon, tcon, fcon, fecon);
+      recostruct_con_from_varmodel_semiseparable(sigma, tau, alpha, syserr, ncon_data, tcon_data, fcon_data, fecon_data, 
+        ncon, tcon, fcon, fecon, yq);
 
       for(j=0; j<ncon; j++)
       {
         fprintf(fp, "%e %e %e\n", tcon[j], fcon[j] * dataset[i].con.scale, fecon[j] * dataset[i].con.scale);
       }
       fprintf(fp, "\n");
+
+      for(j=0; j<nq; j++)
+      {
+        fprintf(fpq, "%e\n", yq[j] * dataset[i].con.scale);
+      }
+      fprintf(fpq, "\n");
     }
 
     if(thistask == roottask && flag_para_name != 1)
@@ -122,10 +146,12 @@ void mc_con(double *logz)
     }
     
     fclose(fp);
+    fclose(fpq);
 
     free(tcon);
     free(fcon);
     free(fecon);
+    free(yq);
   }
   
   mc_con_end();
@@ -141,7 +167,8 @@ void mc_con(double *logz)
 }
 
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
-  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon)
+  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, 
+  double *tcon, double *fcon, double *fecon, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
   int i, j, info, *ipiv;
@@ -186,6 +213,7 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
   /* (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
   inverse_mat(Cq, nq, &info, ipiv);
   multiply_mat_MN(Cq, yuq, yq, nq, 1, nq);  //yq: Nqx1
+  memcpy(yqall, yq, nq*sizeof(double));
 
   /*  L x q */
   multiply_matvec_MN(Larr, ncon_data, nq, yq, ybuf); // ybuf: Ndx1
@@ -235,7 +263,8 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
 }
 
 void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double alpha, double syserr, 
-  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon)
+  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, 
+  int ncon, double *tcon, double *fcon, double *fecon, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
   int i, j, info, *ipiv;
@@ -282,6 +311,7 @@ void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double
   /* yq = (L^T x C^-1 x L)^-1 x  L^T x C^-1 x y */
   inverse_mat(Cq, nq, &info, ipiv);
   multiply_mat_MN(Cq, yuq, yq, nq, 1, nq);  //yq: Nqx1
+  memcpy(yqall, yq, nq*sizeof(double));
 
   /* y = -1.0 * L x q + 1.0 * y */
   memcpy(y, fcon_data, ncon_data*sizeof(double));

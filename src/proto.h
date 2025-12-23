@@ -58,9 +58,9 @@ void output_reconstruction();
 void output_reconstruction2();
 void output_reconstruction_parallel();
 void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double syserr, 
-  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
+  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon, double *yqall);
 void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double alpha, double syserr, 
-  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon);
+  int ncon_data, double *tcon_data, double *fcon_data, double *fecon_data, int ncon, double *tcon, double *fcon, double *fecon, double *yqall);
 int write_options_con(char *fname);
 
 

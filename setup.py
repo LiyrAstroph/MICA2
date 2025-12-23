@@ -121,7 +121,7 @@ extensions = cythonize([
 
 setup(
       name="pymica",
-      version="2.1.1",
+      version="2.1.3",
       author="Yan-Rong Li",
       author_email="liyanrong@mail.ihep.ac.cn",
       packages=["pymica", "pymica.utility"],

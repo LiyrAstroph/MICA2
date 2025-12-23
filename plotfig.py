@@ -371,7 +371,7 @@ def plot_results_con(fdir, fname, flagtrend, doshow=True):
     x = 1.0/np.sqrt(2.0*np.pi) * np.exp(-0.5*y**2)
     ax_res.plot(x, y, color='red')
     ax_res.minorticks_on()
-    ax_res.xaxis.set_tick_params(labelbottom=False)
+    ax_res.xaxis.set_tick_params(labelbottom=True, labeltop=False)
     ax_res.set_xlim(0.0, 0.6)
     #===============================================
 

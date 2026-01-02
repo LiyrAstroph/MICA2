@@ -333,6 +333,12 @@ void allocate_memory()
     gap_center = (double *)malloc(nset*sizeof(double));
     gap_width = (double *)malloc(nset*sizeof(double));
   }
+
+  if(thistask == roottask)
+  {
+    pb_mica = pb_alloc();
+  }
+
   return;
 }
 
@@ -393,6 +399,11 @@ void free_memory()
   {
     free(gap_center);
     free(gap_width);
+  }
+
+  if(thistask == roottask)
+  {
+    pb_free(pb_mica);
   }
   return;
 }

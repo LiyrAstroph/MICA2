@@ -121,6 +121,6 @@ void (*accept_action)();
 void (*kill_action)(int i, int i_copy);
 /*=====================================================*/
 
-ProgressBar pb;
+ProgressBar *pb;
 // file for printing status
 FILE *fp_status;

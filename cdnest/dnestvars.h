@@ -157,7 +157,7 @@ extern void (*accept_action)();
 extern void (*kill_action)(int i, int i_copy);
 /*=====================================================*/
 
-extern ProgressBar pb;
+extern ProgressBar *pb;
 // file for printing status
 extern FILE *fp_status;
 

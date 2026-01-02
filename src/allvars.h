@@ -13,6 +13,8 @@
 #include <mpi.h>
 #include <math.h>
 
+#include "progress-bar.h"
+
 #define PI            (3.14159265358979323846)
 #define MICA_MAX_STR_LENGTH  (256)
 #define YEAR_DAY      (365.25)
@@ -160,4 +162,6 @@ extern int nscale, nrec_max; /* determine number of points of reconstruction */
 
 // whether print warning
 extern int flag_warning;
+
+extern ProgressBar *pb_mica;
 #endif

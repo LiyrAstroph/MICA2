@@ -216,7 +216,7 @@ void dnest_run()
     printf("#=======================================================\n");
     printf("# Starting diffusive nested sampling.\n");
 
-    pb_update(&pb, 0);
+    pb_update(pb, 0);
     pb_print(pb);
   }
   MPI_Barrier(MPI_COMM_WORLD);
@@ -612,7 +612,7 @@ void save_particle()
   
   if(dnest_thistask == dnest_root)
   {
-    pb_update(&pb, count_saves);
+    pb_update(pb, count_saves);
     pb_print(pb);
 
     if(count_saves%1 == 0)
@@ -1149,9 +1149,10 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
   
   if(dnest_thistask == dnest_root)
   {
-    pb = pb_init('#', 50, options.max_num_saves);
-    showPercent(&pb, true);
-    showCount(&pb, true);
+    pb = pb_alloc();
+    pb_init(pb, '#', 50, options.max_num_saves);
+    showPercent(pb, true);
+    showCount(pb, true);
     
     sprintf(fname, "%s/%s%s.txt", dnest_sample_dir, "status", dnest_sample_tag);
     fp_status = fopen(fname, "w");
@@ -1199,6 +1200,7 @@ void finalise()
 
   if(dnest_thistask == dnest_root)
   {
+    pb_free(pb);
     fclose(fp_status);
 
     printf("# Finalizing CDNest.\n");

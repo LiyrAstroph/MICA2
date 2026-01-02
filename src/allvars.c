@@ -85,3 +85,5 @@ int flag_warning = 0;
 int nscale, nrec_max;
 
 double width_factor, lag_factor;
+
+ProgressBar *pb_mica;

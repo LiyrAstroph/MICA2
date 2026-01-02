@@ -24,6 +24,11 @@ void mc_mmap(double *logz)
 {
   int i, j, argc=0;
   char **argv;
+  
+  if(thistask == roottask)
+  {
+    printf("start RM modeling\n");
+  }
 
   argv = malloc(11*sizeof(char *));
   for(i=0; i<11; i++)
@@ -114,7 +119,12 @@ void mc_mmap(double *logz)
     free(argv[i]);
   }
   free(argv);
-
+  
+  if(thistask == roottask)
+  {
+    printf("end RM modeling\n");
+    printf("#=======================================================\n");
+  }
   return;
 }
 

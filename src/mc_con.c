@@ -26,6 +26,12 @@ void mc_con(double *logz)
 {
   int i, argc=0;
   char **argv;
+  
+  if(thistask == roottask)
+  {
+    printf("#=======================================================\n");
+    printf("start continuum modeling\n");
+  }
 
   argv = malloc(9*sizeof(char *));
   for(i=0; i<9; i++)
@@ -163,6 +169,11 @@ void mc_con(double *logz)
   }
   free(argv);
 
+  if(thistask == roottask)
+  {
+    printf("end continuum modeling\n");
+    printf("#=======================================================\n");
+  }
   return;
 }
 

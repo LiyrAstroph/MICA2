@@ -269,7 +269,7 @@ void output_reconstruction_parallel()
     
     pb_init(pb_mica, '#', 50, num_ps_task);
     showPercent(pb_mica, true);
-    showCount(pb_mica, true);
+    showCount(pb_mica, false);
     pb_update(pb_mica, 0);
     pb_print(pb_mica);
   }

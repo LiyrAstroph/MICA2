@@ -198,6 +198,13 @@ void output_decompose_line_parallel_mmap()
   {
     if(thistask == roottask )
     {
+      printf("%d-th component\n", kgau);
+      pb_init(pb_mica, '#', 50, num_ps_task);
+      showPercent(pb_mica, true);
+      showCount(pb_mica, false);
+      pb_update(pb_mica, 0);
+      pb_print(pb_mica);
+
       sprintf(fname, "%s/%s%s_comp%d", parset.file_dir, "data/pline.txt", postfix, kgau);
       fp = fopen(fname, "w");
       if(fp == NULL)
@@ -233,7 +240,13 @@ void output_decompose_line_parallel_mmap()
     ps = (double *)posterior_sample_task;
     for(m=0; m<num_ps_task; m++)
     {
-      printf("# %d-th component of sample %d on task %d\n", kgau+1, m, thistask);      
+      if(thistask == roottask)
+      {
+        pb_update(pb_mica, m+1);
+        pb_print(pb_mica);
+      }
+      
+      // printf("# %d-th component of sample %d on task %d\n", kgau+1, m, thistask);      
       for(i=0; i<nset; i++)
       {
         /* reconstuct all the light curves */

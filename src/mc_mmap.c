@@ -329,6 +329,12 @@ void output_reconstruction_parallel_mmap()
     ps += num_ps_task_average * num_params;
     post_model = (double *)posterior_sample_all;
     memcpy((void *)ps, (void *)post_model, (num_ps_task - num_ps_task_average) * size_of_modeltype);
+    
+    pb_init(pb_mica, '#', 50, num_ps_task);
+    showPercent(pb_mica, true);
+    showCount(pb_mica, false);
+    pb_update(pb_mica, 0);
+    pb_print(pb_mica);
   }
   
   /* now start to reconstruction */
@@ -456,7 +462,13 @@ void output_reconstruction_parallel_mmap()
   post_model = (double *)posterior_sample_task;
   for(m=0; m<num_ps_task; m++)
   {
-    printf("# sample %d on task %d\n", m, thistask);
+    if(thistask == roottask)
+    {
+      pb_update(pb_mica, m+1);
+      pb_print(pb_mica);
+    }
+
+    // printf("# sample %d on task %d\n", m, thistask);
     if(parset.model == pmap)
     {
       transform_response_ratio_inplace((void *)post_model);

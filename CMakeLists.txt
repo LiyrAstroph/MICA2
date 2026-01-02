@@ -54,6 +54,7 @@ add_executable(${CMAKE_PROJECT_NAME}
   ${CDNEST}/dnest.c
   ${CDNEST}/dnestvars.c
   ${CDNEST}/dnestpostprocess.c
+  ${CDNEST}/progress-bar.c
   )
 
 # Math library

@@ -22,6 +22,8 @@
 #include "dnestvars.h"
 #include "mygetopt.h"
 
+#include "progress-bar.h"
+
 /*
  * dnest
  * call this function to do sampling
@@ -213,6 +215,9 @@ void dnest_run()
   {
     printf("#=======================================================\n");
     printf("# Starting diffusive nested sampling.\n");
+
+    pb_update(&pb, 0);
+    pb_print(pb);
   }
   MPI_Barrier(MPI_COMM_WORLD);
 
@@ -363,7 +368,7 @@ void dnest_run()
           fsync(fileno(fsample_info));
           fflush(fsample);
           fsync(fileno(fsample));
-          printf("# Save levels, limits, and sync samples at N= %d.\n", count_saves);
+          fprintf(fp_status, "# Save levels, limits, and sync samples at N= %d.\n", count_saves);
         }
       }
 
@@ -419,7 +424,7 @@ void do_bookkeeping()
     levels_combine[size_levels_combine] = level_tmp;
     size_levels_combine++;
     
-    printf("# Creating level %d with log likelihood = %e.\n", 
+    fprintf(fp_status, "# Creating level %d with log likelihood = %e.\n", 
                size_levels_combine-1, levels_combine[size_levels_combine-1].log_likelihood.value);
 
     // clear out the last index records
@@ -434,7 +439,7 @@ void do_bookkeeping()
     {
       renormalise_visits();
       options.max_num_levels = size_levels_combine;
-      printf("# Done creating levles.\n");
+      fprintf(fp_status, "# Done creating levles.\n");
     }
     else
     {
@@ -607,8 +612,12 @@ void save_particle()
   
   if(dnest_thistask == dnest_root)
   {
+    pb_update(&pb, count_saves);
+    pb_print(pb);
+
     if(count_saves%1 == 0)
-      printf("#[%.1f%%] Saving particle to disk. N= %d.\n", 100.0*count_saves/options.max_num_saves, count_saves);
+      fprintf(fp_status, "#[%.1f%%] Saving particle to disk. N= %d.\n", 
+        100.0*count_saves/options.max_num_saves, count_saves);
 
     whichtask = gsl_rng_uniform_int(dnest_gsl_r,dnest_totaltask);
   }
@@ -917,6 +926,7 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
            char *sample_dir, char *optfile, DNestOptions *opts, void *args)
 {
   int i, j;
+  char fname[STR_MAX_LENGTH];
 
   // root task.
   dnest_root = 0;
@@ -1136,6 +1146,16 @@ void setup(int argc, char** argv, DNestFptrSet *fptrset, int num_params,
   printf("%f %f %f \n", particles[0].param[0], particles[0].param[1], particles[0].param[2] );
   proposal = particles[0];
   printf("%f %f %f \n", proposal.param[0], proposal.param[1], proposal.param[2] );*/
+  
+  if(dnest_thistask == dnest_root)
+  {
+    pb = pb_init('#', 50, options.max_num_saves);
+    showPercent(&pb, true);
+    showCount(&pb, true);
+    
+    sprintf(fname, "%s/%s%s.txt", dnest_sample_dir, "status", dnest_sample_tag);
+    fp_status = fopen(fname, "w");
+  }
 }
 
 void finalise()
@@ -1179,6 +1199,8 @@ void finalise()
 
   if(dnest_thistask == dnest_root)
   {
+    fclose(fp_status);
+
     printf("# Finalizing CDNest.\n");
     printf("#=======================================================\n");
   }
@@ -1799,7 +1821,7 @@ void dnest_save_restart()
 
   if(dnest_thistask == dnest_root )
   {
-    printf("# Save restart data to file %s.\n", str);
+    fprintf(fp_status, "# Save restart data to file %s.\n", str);
 
     //fprintf(fp, "%d %d\n", count_saves, count_mcmc_steps);
     //fprintf(fp, "%d\n", size_levels_combine);

@@ -21,6 +21,8 @@ extern "C" {
 
 #include "dnest.h"
 
+#include "progress-bar.h"
+
 enum PRIOR_TYPE {UNIFORM=0, GAUSSIAN=1, LOG=2};
 
 /* output files */
@@ -154,6 +156,10 @@ extern void (*restart_action)(int iflag);
 extern void (*accept_action)();
 extern void (*kill_action)(int i, int i_copy);
 /*=====================================================*/
+
+extern ProgressBar pb;
+// file for printing status
+extern FILE *fp_status;
 
 #ifdef __cplusplus
 }

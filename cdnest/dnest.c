@@ -546,13 +546,13 @@ void kill_lagging_particles()
 
         deletions++;
 
-        printf("# Replacing lagging particle.\n");
-        printf("# This has happened %d times.\n", deletions);
+        fprintf(fp_status, "# Replacing lagging particle.\n");
+        fprintf(fp_status, "# This has happened %d times.\n", deletions);
       }
     }
   }
   else
-    printf("# Warning: all particles lagging!.\n");
+    fprintf(fp_status, "# Warning: all particles lagging!.\n");
 
   free(good);
 }

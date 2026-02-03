@@ -525,6 +525,36 @@ to print help information about this script.
 
   python plotfig.py --help
 
+The output looks like,
+
+.. code:: bash 
+
+  usage: python plotfig.py [options]
+
+  options:
+    -h, --help            show this help message and exit
+    --param PARAM         parameter file
+    --resp_input RESP_INPUT
+                          str, a file storing input response function
+    --tf_lag_range TF_LAG_RANGE [TF_LAG_RANGE ...]
+                          time lag range for the transfer function, e.g., --tf_lag_range 0 100
+    --hist_lag_range HIST_LAG_RANGE [HIST_LAG_RANGE ...]
+                          time lag range for the histograms, e.g., --hist_lag_range 0 100
+    --hist_bins HIST_BINS [HIST_BINS ...]
+                          number of bins for the histograms, e.g., --hist_bins 20
+    --show_gap            whether show seasonal gaps, e.g., --show_gap
+    --show_pmax           whether show the results of the maximum posterior ppint, e.g., --show_pmax
+    --time_shift TIME_SHIFT
+                          time shift applied to all light curves, e.g., --time_shift 5000.0
+
+
+For example, if one wants to adjust the starting time of the light curves, use the option as 
+
+.. code:: bash
+
+  python plotfig.py --param param/param --time_shift -50000  # this will subtract 50000 from the time  
+                                                             # of all light curves for plotting
+
 Testing
 ========================
 To test ``mica2``, change to the subdirectory ``tests/`` and there are several suites of tests to guide the useage of ``mica2``. 

@@ -383,7 +383,8 @@ def plot_results_con(fdir, fname, flagtrend, doshow=True):
 
 def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtrend, flagnegresp, 
                  typetf, typemodel, resp_input, doshow=True, tf_lag_range=None, hist_lag_range=None, 
-                 hist_bins=None, show_pmax=False, show_gap=False, labels=None):
+                 hist_bins=None, show_pmax=False, show_gap=False, labels=None,
+                 time_shift=0.0):
 
   fp = open(fdir+fname)
   # read numbe of datasets
@@ -527,7 +528,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
   ntau = 1000
   tran = np.zeros((sample.shape[0], ntau))
   
-  shift = 0.0
+  shift = -time_shift
 
   # open pdf file
   pdf = PdfPages(fdir+"/data/fig_%d.pdf"%ngau)
@@ -1057,7 +1058,8 @@ def plot_results_all(args, param, doshow=True, tf_lag_range=None, hist_lag_range
                  flagnegresp, typetf, typemodel, args.resp_input, 
                  doshow=doshow, tf_lag_range=args.tf_lag_range, 
                  hist_lag_range=args.hist_lag_range, hist_bins=args.hist_bins, 
-                 show_pmax=args.show_pmax, show_gap=show_gap)
+                 show_pmax=args.show_pmax, show_gap=show_gap,
+                 time_shift=args.time_shift)
 
 def _param_parser(fname):
   """
@@ -1083,6 +1085,7 @@ if __name__ == "__main__":
   parser.add_argument('--hist_bins', type=int, nargs='+', help="number of bins for the histograms, e.g., --hist_bins 20")
   parser.add_argument('--show_gap', action='store_true', default=False, help="whether show seasonal gaps, e.g., --show_gap")
   parser.add_argument('--show_pmax', action='store_true', default=False, help="whether show the results of the maximum posterior ppint, e.g., --show_pmax")
+  parser.add_argument('--time_shift', type=float, default=0.0, help="time shift applied to all light curves, e.g., --time_shift 5000.0")
   args = parser.parse_args()
 
   if args.param == None:

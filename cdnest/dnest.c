@@ -368,6 +368,8 @@ void dnest_run()
           fsync(fileno(fsample_info));
           fflush(fsample);
           fsync(fileno(fsample));
+          fflush(fp_status);
+          fsync(fileno(fp_status));
           fprintf(fp_status, "# Save levels, limits, and sync samples at N= %d.\n", count_saves);
         }
       }

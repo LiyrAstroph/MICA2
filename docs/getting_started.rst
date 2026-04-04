@@ -511,7 +511,7 @@ a function to load the posterior sample
 
 Plotting
 ========================
-There is a Python script **plotfig.py** provided in the package that can be used to plot the results. 
+There is a Python script **plotfig.py** provided in the package that can be used to plot the results.  
 Run it with 
 
 .. code:: bash
@@ -554,6 +554,11 @@ For example, if one wants to adjust the starting time of the light curves, use t
 
   python plotfig.py --param param/param --time_shift -50000  # this will subtract 50000 from the time  
                                                              # of all light curves for plotting
+
+.. note::
+  Note that this plotting script has been incorporated into the Python version ``pymica``. 
+  The function ``plot_results()`` in ``pymica`` has exactly the same functionality as the above script.
+  see :ref:`python_label` for more details. 
 
 Testing
 ========================

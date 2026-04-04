@@ -34,6 +34,7 @@ Documentation
    python.rst
    para_prior.rst
    negresp.rst
+   format.rst
    tests.rst
    list.rst
    faq.rst

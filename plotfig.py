@@ -873,7 +873,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       tran2 = np.percentile(tran, 100.0-(100.0-68.3)/2.0, axis=0)
 
       out = np.column_stack((tau, tran_best, tran_best-tran1, tran2-tran_best))
-      np.savetxt(fdir+f"/data/tranfunc_{m}_{j}.txt_{ngau}", out, fmt="%f")
+      np.savetxt(fdir+f"/data/tranfunc_{m}_{j}.txt_{ngau}", out, fmt="%e")
       
       ax.plot(tau, tran_best, color='k')
       ax.fill_between(tau, y1=tran1, y2=tran2, color='darkgrey')
@@ -881,6 +881,7 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
       if show_pmax == True:
         tran_pmax = _calculate_tran(tau, sample[idx_pmax, :], typemodel, typetf, ngau, flagnegresp, indx_line, m, j)
         ax.plot(tau, tran_pmax, label=r'$L_{\rm max}$', color='r', ls='--')
+        np.savetxt(fdir+f"tranfunc_{m}_{j}_pmax.txt_{ngau}", np.column_stack((tau, tran_pmax)), fmt="%e")
         
 
       #plot input response function
@@ -1084,7 +1085,7 @@ if __name__ == "__main__":
   parser.add_argument('--hist_lag_range', type=float, nargs='+', help="time lag range for the histograms, e.g., --hist_lag_range 0 100")
   parser.add_argument('--hist_bins', type=int, nargs='+', help="number of bins for the histograms, e.g., --hist_bins 20")
   parser.add_argument('--show_gap', action='store_true', default=False, help="whether show seasonal gaps, e.g., --show_gap")
-  parser.add_argument('--show_pmax', action='store_true', default=False, help="whether show the results of the maximum posterior ppint, e.g., --show_pmax")
+  parser.add_argument('--show_pmax', action='store_true', default=False, help="whether show the results of the maximum posterior point, e.g., --show_pmax")
   parser.add_argument('--time_shift', type=float, default=0.0, help="time shift applied to all light curves, e.g., --time_shift 5000.0")
   args = parser.parse_args()
 

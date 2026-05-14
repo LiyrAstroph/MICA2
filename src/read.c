@@ -536,7 +536,7 @@ int read_data()
   FILE *fp=NULL;
   char buf[256], *pstr;
   int i, j, k, np;
-  double tcad, tspan;
+  double tcad, tspan, tmax;
 
   /* read number of data sets. */
   if(parset.model != nmap)
@@ -954,6 +954,7 @@ int read_data()
   }
 
   tspan_max = 0.0;
+  tmax = -DBL_MAX;
   for(i=0; i<nset; i++)
   {
     /* note that continuum might be empty */
@@ -962,6 +963,8 @@ int read_data()
       tspan = dataset[i].con.t[dataset[i].con.n-1] - dataset[i].con.t[0];
       if(tspan_max < tspan)
         tspan_max = tspan;
+      
+      tmax = fmax(tmax, dataset[i].con.t[dataset[i].con.n-1]);
     }
     
     for(j=0; j<dataset[i].nlset; j++)
@@ -972,6 +975,8 @@ int read_data()
       tspan = dataset[i].line[j].t[dataset[i].line[j].n-1] - dataset[i].line[j].t[0];
       if(tspan_max < tspan)
         tspan_max = tspan;
+      
+      tmax = fmax(tmax, dataset[i].line[j].t[dataset[i].line[j].n-1]);
     }
   }
   if(parset.lag_limit_upper < 0.0)
@@ -1002,6 +1007,10 @@ int read_data()
     }
   }
   tcadence_min = fmin(tcadence_con_min, tcadence_line_min);
+
+  n_precision_time = (int)(floor(log10(fabs(tmax)))) + 1
+                    -(int)(floor(log10(tspan_max/parset.nd_rec)));
+  n_precision_time = fmax(n_precision_time, 6);
 
   /* test */
   if(thistask == roottask)

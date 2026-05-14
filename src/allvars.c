@@ -69,6 +69,9 @@ double *gap_width, *gap_center;
 /* for max and min flux of each dataset */
 double **flux_minmax;
 
+/* output precision of time */
+int n_precision_time = 6;
+
 // mathematic functions
 int *workspace_ipiv;
 double *workspace_inv;

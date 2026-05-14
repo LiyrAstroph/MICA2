@@ -620,9 +620,12 @@ void output_reconstruction_vmap_parallel()
   int **nall, *ntall, np;
   double tspan, tbeg, tend;
 
-  char fname[200];
+  char fname[200], fmt[64];
   FILE *fp=NULL, *fp_sample=NULL, *fpq=NULL;
   
+  /* print format, adjust number of significant digits */
+  snprintf(fmt, sizeof(fmt), "%%.%de %%e %%e\n", n_precision_time);
+
   size_of_modeltype = num_params * sizeof(double);
 
   if(thistask == roottask)
@@ -941,7 +944,7 @@ void output_reconstruction_vmap_parallel()
 
       /* output reconstructed continuum */
       for(k=0; k<nall[i][0]; k++)
-        fprintf(fp, "%e %e %e\n", tall[i][k], fall_best_buf[i][k] * dataset[i].con.scale, fall_std_buf[i][k] * dataset[i].con.scale);
+        fprintf(fp, fmt, tall[i][k], fall_best_buf[i][k] * dataset[i].con.scale, fall_std_buf[i][k] * dataset[i].con.scale);
       fprintf(fp, "\n");
 
       /* output reconstructed lines */
@@ -949,7 +952,7 @@ void output_reconstruction_vmap_parallel()
       for(j=0; j<dataset[i].nlset; j++)
       {
         for(k=0; k<nall[i][1+j]; k++)
-          fprintf(fp, "%e %e %e\n", tall[i][np+k], fall_best_buf[i][np+k] * dataset[i].line[j].scale, fall_std_buf[i][np+k] * dataset[i].line[j].scale);
+          fprintf(fp, fmt, tall[i][np+k], fall_best_buf[i][np+k] * dataset[i].line[j].scale, fall_std_buf[i][np+k] * dataset[i].line[j].scale);
         fprintf(fp, "\n");
         np += nall[i][1+j];
       }  
@@ -1045,7 +1048,7 @@ void output_reconstruction_vmap()
     printf("start reconstruction...\n");
 
     FILE *fp=NULL, *fp_sample=NULL, *fpq=NULL;
-    char fname[200];
+    char fname[200], fmt[64];
     int i, j, k, m;
     double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq, **yq_best, **yq_std;
     int **nall, *ntall, np;
@@ -1057,6 +1060,9 @@ void output_reconstruction_vmap()
 
     /* time span of reconstruction */
     double tbeg, tend;
+    
+    /* print format, adjust number of significant digits */
+    snprintf(fmt, sizeof(fmt), "%%.%de %%e %%e\n", n_precision_time);
 
     size_of_modeltype = num_params * sizeof(double);
 
@@ -1289,7 +1295,7 @@ void output_reconstruction_vmap()
       
       /* output reconstructed continuum */
       for(k=0; k<nall[i][0]; k++)
-        fprintf(fp, "%e %e %e\n", tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
+        fprintf(fp, fmt, tall[i][k], fall_best[i][k] * dataset[i].con.scale, fall_std[i][k] * dataset[i].con.scale);
       fprintf(fp, "\n");
 
       /* output reconstructed lines */
@@ -1297,7 +1303,7 @@ void output_reconstruction_vmap()
       for(j=0; j<dataset[i].nlset; j++)
       {
         for(k=0; k<nall[i][1+j]; k++)
-          fprintf(fp, "%e %e %e\n", tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
+          fprintf(fp, fmt, tall[i][np+k], fall_best[i][np+k] * dataset[i].line[j].scale, fall_std[i][np+k] * dataset[i].line[j].scale);
         fprintf(fp, "\n");
         np += nall[i][1+j];
       }  

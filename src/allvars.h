@@ -72,6 +72,9 @@ extern double *gap_width, *gap_center;
 /* for max and min flux of each dataset */
 extern double **flux_minmax;
 
+/* output precision of time */
+extern int n_precision_time;
+
 // error exit
 extern char str_error_exit[200];
 // mathematic functions

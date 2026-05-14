@@ -23,7 +23,7 @@
 void output_decompose_line_parallel_mmap()
 {
   FILE *fp=NULL, *fp_sample=NULL;
-  char fname[200];
+  char fname[200], fmt[64];
   int i, j, k, m, kgau;
   double **tall, **fall, **feall, **feall_max, **fall_best, **fall_std, *yq;
   double **fall_best_buf, **fall_std_buf, **feall_max_buf;
@@ -37,7 +37,10 @@ void output_decompose_line_parallel_mmap()
   /* time span of reconstruction */
   double tspan;
   double tbeg, tend;
-
+  
+  /* print format, adjust number of significant digits */
+  snprintf(fmt, sizeof(fmt), "%%.%de %%e %%e\n", n_precision_time);
+  
   size_of_modeltype = num_params * sizeof(double);
   
   if(thistask == roottask)
@@ -314,7 +317,7 @@ void output_decompose_line_parallel_mmap()
         
         /* output reconstructed continuum */
         for(k=0; k<nall[i][0]; k++)
-          fprintf(fp, "%f %f %f\n", tall[i][k], fall_best_buf[i][k] * dataset[i].con.scale, fall_std_buf[i][k] * dataset[i].con.scale);
+          fprintf(fp, fmt, tall[i][k], fall_best_buf[i][k] * dataset[i].con.scale, fall_std_buf[i][k] * dataset[i].con.scale);
         fprintf(fp, "\n");
 
         /* output reconstructed lines */
@@ -322,7 +325,7 @@ void output_decompose_line_parallel_mmap()
         for(j=0; j<dataset[i].nlset; j++)
         {
           for(k=0; k<nall[i][1+j]; k++)
-            fprintf(fp, "%f %f %f\n", tall[i][np+k], fall_best_buf[i][np+k] * dataset[i].line[j].scale, fall_std_buf[i][np+k] * dataset[i].line[j].scale);
+            fprintf(fp, fmt, tall[i][np+k], fall_best_buf[i][np+k] * dataset[i].line[j].scale, fall_std_buf[i][np+k] * dataset[i].line[j].scale);
           fprintf(fp, "\n");
           np += nall[i][1+j];
         }  

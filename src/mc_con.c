@@ -69,7 +69,7 @@ void mc_con(double *logz)
   if(thistask == roottask)
   {
     FILE *fp=NULL, *fpq=NULL;
-    char fname[200];
+    char fname[200], fmt[64];
     int j, idx;
     double sigma, tau, alpha, syserr, tspan;
     double *pm = best_model_con;
@@ -98,7 +98,10 @@ void mc_con(double *logz)
     {
       fprintf(fp, "# %d\n", dataset[i].con.n * nscale);
     }
- 
+    
+    /* print format, adjust number of significant digits */
+    snprintf(fmt, sizeof(fmt), "%%.%de %%e %%e\n", n_precision_time);
+    
     tcon = malloc(ncon_max*nscale * sizeof(double));
     fcon = malloc(ncon_max*nscale * sizeof(double));
     fecon = malloc(ncon_max*nscale * sizeof(double));
@@ -130,7 +133,7 @@ void mc_con(double *logz)
 
       for(j=0; j<ncon; j++)
       {
-        fprintf(fp, "%e %e %e\n", tcon[j], fcon[j] * dataset[i].con.scale, fecon[j] * dataset[i].con.scale);
+        fprintf(fp, fmt, tcon[j], fcon[j] * dataset[i].con.scale, fecon[j] * dataset[i].con.scale);
       }
       fprintf(fp, "\n");
 

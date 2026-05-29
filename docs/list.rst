@@ -42,11 +42,23 @@ Here is a list of references that used MICA in time lag analysis, retrieved from
   *Spectroastrometry and Reverberation Mapping of Active Galactic Nuclei. I. The Hβ 
   Broad-line Region Structure and Black Hole Mass of Five Quasars*
 
+- `Yao, Z.-H. et al. 2024, ApJ, 975, 41 <https://ui.adsabs.harvard.edu/abs/2024ApJ...975...41Y/abstract>`_,
+  *Broad-line Region of the Quasar PG 2130+099. II. Doubling the Size Over Four Years?*
+
 - `Guo, W.-J., et al. 2025, A&A, 698, 134 <https://ui.adsabs.harvard.edu/abs/2025A%26A...698A.135G/abstract>`_,
   *Multiple flares and asymmetric broad emission lines in a recurring changing-look active galactic nucleus*
 
-- `Fu, Y.-X., Li, Y.-R., et al. 2025, MNRAS, in press <https://ui.adsabs.harvard.edu/abs/2025MNRAS.tmp.1419F/abstract>`_,
+- `Fu, Y.-X., Li, Y.-R., et al. 2025, MNRAS, 543, 2093 <https://ui.adsabs.harvard.edu/abs/2025MNRAS.tmp.1419F/abstracthttps://ui.adsabs.harvard.edu/abs/2025MNRAS.543.2093F/abstract>`_,
   *Continuum Reverberation Mapping of Accretion Disks Surrounding Supermassive Black Hole Binaries: Observational Signatures*
 
-- `Ayubinia, A., et al., 2025, ApJ, in press <https://arxiv.org/abs/2509.07878v1>`_,
+- `Ayubinia, A., et al., 2025, ApJ, 994, 188 <https://ui.adsabs.harvard.edu/abs/2025ApJ...994..188A/abstract>`_,
   *Scaling Relations of the Dusty Torus with Luminosity and the Broad-Line Region*
+
+- `Tomar, A., et al. 2025, ApJ, 993, 203 <https://ui.adsabs.harvard.edu/abs/2025ApJ...993..203T/abstract>`_,
+  *Probing the Dust Torus Radius─Luminosity Relation: A WISE View*
+
+- `Bai, H.-R., et al. 2026, ApJS, 282, 56 <https://ui.adsabs.harvard.edu/abs/2026ApJS..282...56B/abstract>`_,
+  *Supermassive Black Holes with High Accretion Rates in Active Galactic Nuclei. XV. Reverberation Mapping of Mg II Emission Lines*
+
+- `Landt, H., et al. 2026, ApJ, 997, 22 <https://ui.adsabs.harvard.edu/abs/2026ApJ...997...22L/abstract>`_,
+  *AGN STORM 2. XI. Spectroscopic Reverberation Mapping of the Hot Dust in Mrk 817*

@@ -12,6 +12,9 @@ Third-party package dependence
 
   * **MPICH** --- an MPI implementation library, available at http://www-unix.mcs.anl.gov/mpi/mpich. 
     
+    The Intel® MPI Library provides a multifabric message-passing library that implements the 
+    open source MPICH specification. Use this library if you have installed Intel oneAPI (see :ref:`oneapi-installation`).
+    
     Note that in some cases, the package **hwloc** is not automatically installed when installing mpich. One needs to install it 
     and its development package **hwloc-devel** to use mpi.
 

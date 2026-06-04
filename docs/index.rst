@@ -38,6 +38,7 @@ Documentation
    tests.rst
    list.rst
    faq.rst
+   oneapi.rst
 
 
 Attribution

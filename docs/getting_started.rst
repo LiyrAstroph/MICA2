@@ -65,8 +65,10 @@ Note that one does not need to compile the above packages from the source code. 
 For Intel CPUs, the Intel OneAPI MKL library provides optimized interfaces to LAPACKE and BLAS libraries. Using MKL libraray can improve
 the running speed and it is therefore highly recommended. MICA automatically checks the system environment variable ``MKLROOT`` to 
 determine whether MKL libraray has been installed. If yes, MICA will by default use the interfaces of the MKL library; if not, the original 
-LAPACKE and BLAS libraraies will be used. See `Intel OneAPI MKL <https://www.intel.com/content/www/us/en/docs/onemkl/get-started-guide/2025-0/overview.html>`_
-for the installation. Please keep in mind that one needs to source the MKL's variable in `bashrc`, so as to let it callable from MICA.
+LAPACKE and BLAS libraraies will be used. See :ref:`oneapi-installation` or the official documentation 
+`Intel OneAPI MKL <https://www.intel.com/content/www/us/en/docs/onemkl/get-started-guide/2025-0/overview.html>`_
+for the installation. Please keep in mind that one needs to source the MKL's variable in `bashrc`, 
+so as to let it be callable from MICA.
 
 Compiling
 =============================

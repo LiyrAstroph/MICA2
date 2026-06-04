@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(mica2 LANGUAGES C)
 
 if(NOT CMAKE_BUILD_TYPE)

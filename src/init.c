@@ -299,9 +299,9 @@ void allocate_memory()
   
   ns = ((1+nlset_max)*nq);
   n = 5*nall_max + (2*nall_max + 2*nrec_max + 1 + ns) * ns;
-  workspace = malloc((n)*sizeof(double));
-  workspace_ipiv = malloc(n_max*sizeof(int));
-  workspace_inv = malloc(3*nall_max*nall_max*sizeof(double));
+  workspace = (double *)malloc((n)*sizeof(double));
+  workspace_ipiv = (lapack_int *)malloc(n_max*sizeof(lapack_int));
+  workspace_inv = (double *)malloc(3*nall_max*nall_max*sizeof(double));
 
   var_param = malloc(num_params_var * sizeof(double));
   var_param_std = malloc(num_params_var * sizeof(double));

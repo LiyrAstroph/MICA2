@@ -73,7 +73,7 @@ double **flux_minmax;
 int n_precision_time = 6;
 
 // mathematic functions
-int *workspace_ipiv;
+lapack_int *workspace_ipiv;
 double *workspace_inv;
 
 // error exit

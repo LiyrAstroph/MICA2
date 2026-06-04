@@ -369,15 +369,15 @@ void test_tophat();
 void test_mix();
 
 // mathfunc.c
-void inverse_mat(double *a, int n, int *info, int *ipiv);
-void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, int *ipiv);
-void inverse_symat(double *a, int n, int *info, int *ipiv);
-void inverse_symat_lndet(double *a, int n, double *lndet, int *info, int *ipiv);
-void inverse_symat_lndet_sign(double *a, int n, double *lndet, int *info, int *sign, int *ipiv);
-double det_mat(double *a, int n, int *info, int *ipiv);
-double lndet_mat(double *a, int n, int *info, int *ipiv);
-double lndet_mat2(double *a, int n, int *info, int *sign, int *ipiv);
-double lndet_mat3(double *a, int n, int *info, int *sign, int *ipiv);
+void inverse_mat(double *a, int n, int *info, lapack_int *ipiv);
+void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, lapack_int *ipiv);
+void inverse_symat(double *a, int n, int *info, lapack_int *ipiv);
+void inverse_symat_lndet(double *a, int n, double *lndet, int *info, lapack_int *ipiv);
+void inverse_symat_lndet_sign(double *a, int n, double *lndet, int *info, int *sign, lapack_int *ipiv);
+double det_mat(double *a, int n, int *info, lapack_int *ipiv);
+double lndet_mat(double *a, int n, int *info, lapack_int *ipiv);
+double lndet_mat2(double *a, int n, int *info, int *sign, lapack_int *ipiv);
+double lndet_mat3(double *a, int n, int *info, int *sign, lapack_int *ipiv);
 void display_mat(double *a, int m, int n);
 void multiply_mat(double * a, double *b, double *c, int n);
 void multiply_mat_transposeA(double * a, double *b, double *c, int n);
@@ -388,7 +388,7 @@ void multiply_mat_MN_transposeA(double * a, double *b, double *c, int m, int n, 
 void multiply_mat_MN_transposeA_alpha_beta(double * a, double *b, double *c, int m, int n, int k, double alpha, double beta);
 void multiply_mat_MN_transposeB(double * a, double *b, double *c, int m, int n, int k);
 void multiply_mat_MN_transposeB_alpha_beta(double * a, double *b, double *c, int m, int n, int k, double alpha, double beta);
-int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, int *ipiv);
+int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, lapack_int *ipiv);
 void multiply_matvec(double *a, double *x, int n, double *y);
 void multiply_matvec_transposeA(double *a, double *x, int n, double *y);
 void multiply_matvec_MN(double * a, int m, int n, double *x, double *y);
@@ -405,28 +405,28 @@ void multiply_matvec_semiseparable_drw(double *y, double  *W, double *D, double 
 void multiply_mat_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z);
 void multiply_mat_transposeB_semiseparable_drw(double *Y, double  *W, double *D, double *phi, int n, int m, double a1, double *Z);
 void inverse_symat_partition(double *P, double *S, double *Q, int n1, int n2, 
-                             double *PN, double *SN, double *QN, double *work, int *ipiv);
+                             double *PN, double *SN, double *QN, double *work, lapack_int *ipiv);
 
 void inverse_symat_partition_inv(double *Pinv, double *S, double *Q, int n1, int n2, 
-                             double *PN, double *SN, double *QN, double *work, int *ipiv);
+                             double *PN, double *SN, double *QN, double *work, lapack_int *ipiv);
 
 
 void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
-                                 double *lndet, double *work, int *ipiv);
+                                 double *lndet, double *work, lapack_int *ipiv);
 
 void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
-                                 double *lndet, double *work, int *ipiv);
+                                 double *lndet, double *work, lapack_int *ipiv);
 
 void inverse_symat_lndet_partition_inv_semiseparable(double *Pinv, double *W, double *D, 
                                  double *phi, double a1,  
                                  double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
-                                 double *lndet, double *work, int *ipiv);
+                                 double *lndet, double *work, lapack_int *ipiv);
 
 void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *lndet,
-                             double *work_inv, int *ipiv);
+                             double *work_inv, lapack_int *ipiv);
 
 void inverse_semiseparable(double *t, int n, double a1, double c1, double *sigma, 
                            double syserr, double *W, double *D, double *phi,
@@ -436,6 +436,6 @@ void inverse_semiseparable(double *t, int n, double a1, double c1, double *sigma
 void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *sigma, 
                            double syserr, double *W, double *D, double *phi,
                            double *A, int nt, int *narr, int np, double *lndet,
-                           double *work_inv, int *ipiv);
+                           double *work_inv, lapack_int *ipiv);
 
 #endif

@@ -11,7 +11,6 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <gsl/gsl_cblas.h>
 #include <gsl/gsl_sf_erf.h>
 
 #include "dnest_vmap.h"
@@ -330,7 +329,8 @@ int mc_vmap_end()
 double prob_line_variability3_vmap(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau;
-  int i, j, k, m, np, info, sign, *ipiv;
+  int i, j, k, m, np, info, sign;
+  lapack_int *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq;
   double *fall;
@@ -430,7 +430,8 @@ double prob_line_variability3_vmap(const void *model)
 double prob_line_variability4_vmap(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau;
-  int i, j, k, m, np, info, sign, *ipiv;
+  int i, j, k, m, np, info, sign;
+  lapack_int *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq;
   double *fall;
@@ -1381,7 +1382,8 @@ void output_reconstruction_vmap()
 void reconstruct_line_from_varmodel_vmap(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
-  int i, j, k, m, info, idx, *ipiv;
+  int i, j, k, m, info, idx;
+  lapack_int *ipiv;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
   int nall_data, nqall, ntall, np, ntall_max;
   double *fall_data;

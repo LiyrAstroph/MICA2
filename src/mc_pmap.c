@@ -11,7 +11,6 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <gsl/gsl_cblas.h>
 #include <gsl/gsl_sf_erf.h>
 
 #include "dnest_pmap.h"
@@ -281,7 +280,8 @@ void transform_response_ratio_inplace(const void *model_in)
 double prob_line_variability4_pmap(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau, syserr;
-  int i, j, k, m, np, info, sign, *ipiv;
+  int i, j, k, m, np, info, sign;
+  lapack_int *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *W, *D, *phi, *fe;
   double *fall;

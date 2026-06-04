@@ -10,16 +10,6 @@
 #include <math.h>
 #include <string.h>
 
-/* whether using Intel OneAPI MKL */
-#ifdef IntelMKL
-  #include <mkl_cblas.h>
-  #include <mkl_lapacke.h>
-#else 
-  #include <gsl/gsl_cblas.h>
-  #include <lapacke.h>
-#endif
-
-
 #include "allvars.h"
 #include "proto.h"
 /*
@@ -114,7 +104,7 @@ void multiply_matvec_MN_transposeA_alpha_beta(double * a, int m, int n, double *
 }
 /* A(mxm)^-1 * B(mxn), store the output in B
  * note that A will be changed on exit. */
-int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, int *ipiv)
+int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, lapack_int *ipiv)
 {
   int info;
 
@@ -139,7 +129,7 @@ int multiply_mat_MN_inverseA(double * a, double *b, int m, int n, int *ipiv)
  *  Contains the pivot indices; for 1 ≤i≤ min(m, n), 
  *  row i was interchanged with row ipiv(i).
  */
-void inverse_mat(double * a, int n, int *info, int *ipiv)
+void inverse_mat(double * a, int n, int *info, lapack_int *ipiv)
 {
 //  dgetrf_(&n, &n, a, &n, ipiv, info);
 //  dgetri_(&n, a, &n, ipiv, work, &lwork, info);
@@ -159,7 +149,7 @@ void inverse_mat(double * a, int n, int *info, int *ipiv)
   return;
 }
 
-void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, int *ipiv)
+void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, lapack_int *ipiv)
 {
   int i;
 
@@ -212,7 +202,7 @@ void inverse_mat_lndet(double * a, int n, double *lndet, int *info, int *sign, i
  * block in rows/columns i and i+1, and (i+1)-th row and column of 
  * A was interchanged with the m-th row and column.
  */
-void inverse_symat(double * a, int n, int *info, int *ipiv)
+void inverse_symat(double * a, int n, int *info, lapack_int *ipiv)
 {
   int i, j;
 
@@ -237,7 +227,7 @@ void inverse_symat(double * a, int n, int *info, int *ipiv)
 
   return;
 }
-void inverse_symat_lndet(double * a, int n, double *lndet, int *info, int *ipiv)
+void inverse_symat_lndet(double * a, int n, double *lndet, int *info, lapack_int *ipiv)
 {
   int i, j;
 
@@ -258,7 +248,7 @@ void inverse_symat_lndet(double * a, int n, double *lndet, int *info, int *ipiv)
   return;
 }
 /* A^-1 */
-void inverse_symat_lndet_sign(double * a, int n, double *lndet, int *info, int *sign, int *ipiv)
+void inverse_symat_lndet_sign(double * a, int n, double *lndet, int *info, int *sign, lapack_int *ipiv)
 {
   int i, j;
 
@@ -321,7 +311,7 @@ void multiply_vec2mat(double * x, double * a, int n)
 }
 /* determinant of matrix A 
  * note that A is changed on exit. */
-double det_mat(double *a, int n, int *info, int *ipiv)
+double det_mat(double *a, int n, int *info, lapack_int *ipiv)
 {
   int i;
   double det;
@@ -348,7 +338,7 @@ double det_mat(double *a, int n, int *info, int *ipiv)
 }
 /* natural logarithm of determinant of A
  * note that A is changed on exit. */
-double lndet_mat(double *a, int n, int *info, int *ipiv)
+double lndet_mat(double *a, int n, int *info, lapack_int *ipiv)
 {
   int i;
   double lndet;
@@ -372,7 +362,7 @@ double lndet_mat(double *a, int n, int *info, int *ipiv)
  * if any sign of the eigen values is negtive, return sign=-1 
  * note that A is changed on exit 
  */
-double lndet_mat2(double *a, int n, int *info, int *sign, int *ipiv)
+double lndet_mat2(double *a, int n, int *info, int *sign, lapack_int *ipiv)
 {
   int i;
   double lndet;
@@ -407,7 +397,7 @@ double lndet_mat2(double *a, int n, int *info, int *sign, int *ipiv)
  * sign of all the eigen values
  * note that A is changed on exit 
  */
-double lndet_mat3(double *a, int n, int *info, int *sign, int *ipiv)
+double lndet_mat3(double *a, int n, int *info, int *sign, lapack_int *ipiv)
 {
   int i;
   double lndet;
@@ -649,7 +639,7 @@ void multiply_mat_transposeB_semiseparable_drw(double *Y, double  *W, double *D,
  */
 void inverse_symat_partition(double *P, double *S, double *Q, int n1, int n2, 
                              double *PN, double *SN, double *QN, double *work, 
-                             int *ipiv)
+                             lapack_int *ipiv)
 {
   int i, j, info;
   double *pwork;
@@ -709,7 +699,7 @@ void inverse_symat_partition(double *P, double *S, double *Q, int n1, int n2,
  */
 void inverse_symat_partition_inv(double *Pinv, double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
-                                 double *work, int *ipiv)
+                                 double *work, lapack_int *ipiv)
 {
   int i, j, info;
   double *pwork;
@@ -756,7 +746,7 @@ void inverse_symat_partition_inv(double *Pinv, double *S, double *Q, int n1,
  */
 void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
-                                 double *lndet, double *work, int *ipiv)
+                                 double *lndet, double *work, lapack_int *ipiv)
 {
   int i, j, info;
   double *pwork;
@@ -804,7 +794,7 @@ void inverse_symat_lndet_partition_inv(double *Pinv, double *S, double *Q, int n
  */
 void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
-                                 double *lndet, double *work, int *ipiv)
+                                 double *lndet, double *work, lapack_int *ipiv)
 {
   int info;
 
@@ -852,7 +842,7 @@ void inverse_symat_lndet_partition_inv_fast(double *Pinv, double *S, double *Q, 
  * On exit, calculate lndet(A).
  */
 void inverse_symat_partition_iter(double *A, int nt, int *narr, int np, double *lndet, 
-                                  double *work_inv, int *ipiv)
+                                  double *work_inv, lapack_int *ipiv)
 {
   int i, j, k, ni, nq, info;
   double *Ai, *ANi, *QNi, *SNi, *pwork, lndet_SN;
@@ -936,7 +926,7 @@ void inverse_symat_lndet_partition_inv_semiseparable(double *Pinv, double *W, do
                                  double *phi, double a1,  
                                  double *S, double *Q, int n1, 
                                  int n2, double *PN, double *SN, double *QN, 
-                                 double *lndet, double *work, int *ipiv)
+                                 double *lndet, double *work, lapack_int *ipiv)
 {
   int i, j, info;
 
@@ -1010,7 +1000,7 @@ void inverse_semiseparable(double *t, int n, double a1, double c1, double *sigma
 void inverse_semiseparable_iter(double *t, int n, double a1, double c1, double *sigma, 
                            double syserr, double *W, double *D, double *phi,
                            double *A, int nt, int *narr, int np, double *lndet,
-                           double *work_inv, int *ipiv)
+                           double *work_inv, lapack_int *ipiv)
 {
   int i, j, k, ni, nq;
   double *Ai, *ANi, *QNi, *SNi, *pwork, lndet_SN;

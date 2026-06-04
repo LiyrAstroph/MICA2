@@ -11,7 +11,6 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <gsl/gsl_cblas.h>
 #include <gsl/gsl_sf_erf.h>
 
 #include "dnest_mmap.h"
@@ -653,7 +652,8 @@ void reconstruct_line_from_varmodel_mmap(const void *model, int nds,
   double *feall, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *W, *D, *phi, *fe;
-  int i, j, k, m, info, idx, *ipiv;
+  int i, j, k, m, info, idx;
+  lapack_int *ipiv;
   double *PEmat1, *PEmat2;
   int nall_data, nqall, ntall, np;
   double *fall_data;
@@ -977,7 +977,8 @@ int mc_mmap_end()
 double prob_line_variability_mmap(const void *model)
 {
   double prob = 0.0, prob1, sigma, tau, syserr;
-  int i, j, k, m, np, info, sign, *ipiv;
+  int i, j, k, m, np, info, sign;
+  lapack_int *ipiv;
   double lndet, lndet_ICq;
   double *Larr, *ybuf, *y, *yq, *Cq, *W, *D, *phi, *fe;
   double *fall;

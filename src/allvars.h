@@ -13,6 +13,15 @@
 #include <mpi.h>
 #include <math.h>
 
+/* whether using Intel OneAPI MKL */
+#ifdef IntelMKL
+  #include <mkl_cblas.h>
+  #include <mkl_lapacke.h>
+#else 
+  #include <gsl/gsl_cblas.h>
+  #include <lapacke.h>
+#endif
+
 #include "progress-bar.h"
 
 #define PI            (3.14159265358979323846)
@@ -78,7 +87,7 @@ extern int n_precision_time;
 // error exit
 extern char str_error_exit[200];
 // mathematic functions
-extern int *workspace_ipiv;
+extern lapack_int *workspace_ipiv;
 extern double *workspace_inv;
 
 

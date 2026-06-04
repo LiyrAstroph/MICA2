@@ -11,7 +11,6 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <gsl/gsl_cblas.h>
 #include <gsl/gsl_sf_erf.h>
 
 #include "dnest.h"
@@ -381,7 +380,8 @@ void output_decompose_line_parallel_mmap()
 void decompose_single_component_mmap(const void *model, int nds, int *nall, double *tall, double *fall, double *feall, double *yqall, int kgau)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq, *yave;
-  int i, j, k, m, info, idx, *ipiv;
+  int i, j, k, m, info, idx;
+  lapack_int *ipiv;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
   int nall_data, nqall, ntall, np, ntall_max;
   double *fall_data;

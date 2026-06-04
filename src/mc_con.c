@@ -11,7 +11,6 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <gsl/gsl_cblas.h>
 
 #include "dnest_con.h"
 #include "allvars.h"
@@ -185,7 +184,8 @@ void recostruct_con_from_varmodel(double sigma, double tau, double alpha, double
   double *tcon, double *fcon, double *fecon, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
-  int i, j, info, *ipiv;
+  int i, j, info;
+  lapack_int *ipiv;
   double *PEmat1, *PEmat2, *PEmat3, *PEmat4;
 
   Larr = workspace;
@@ -281,7 +281,8 @@ void recostruct_con_from_varmodel_semiseparable(double sigma, double tau, double
   int ncon, double *tcon, double *fcon, double *fecon, double *yqall)
 {
   double *Larr, *ybuf, *y, *Larr_rec, *yq, *yuq, *Cq;
-  int i, j, info, *ipiv;
+  int i, j, info;
+  lapack_int *ipiv;
   double *PEmat1, *PEmat2;
   double sigma2, *W, *D, *phi;
 
@@ -475,7 +476,8 @@ void postprocess_con()
 double prob_con_variability(const void *model)
 {
   double prob = 0.0;
-  int i, j, k, info, sign, *ipiv;
+  int i, j, k, info, sign;
+  lapack_int *ipiv;
   double *pm = (double *)model;
   double tau, sigma, alpha, lndet, lndet_ICq, syserr;
   double *Larr, *ybuf, *y, *yq, *Cq, *ICq;
@@ -567,7 +569,8 @@ double prob_con_variability(const void *model)
 double prob_con_variability_semiseparable(const void *model)
 {
   double prob = 0.0;
-  int i, j, k, info, sign, *ipiv;
+  int i, j, k, info, sign;
+  lapack_int *ipiv;
   double *pm = (double *)model;
   double tau, sigma, sigma2, alpha, lndet, lndet_ICq, syserr;
   double *Larr, *ybuf, *y, *yq, *Cq;

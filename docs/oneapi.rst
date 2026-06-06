@@ -28,12 +28,6 @@ Intel MKL Math Kernel Library:
 
     sudo dnf install intel-oneapi-mkl intel-oneapi-mkl-devel
 
-Intel MPI Library:
-
-.. code-block:: bash
-
-    sudo dnf install intel-oneapi-mpi intel-oneapi-mpi-devel
-
 Set Environment Variables
 =========================
 

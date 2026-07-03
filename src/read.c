@@ -1089,10 +1089,24 @@ void scale_con_line()
   int i, j, k;
   double mean, Rmax, fdmax, fdmin, scale;  /* mean flux, difference between max and min fluxes*/
   int flag_norm = 0; /* by default use mean to do normalization  */
+  FILE *fp;
+  char fname[256];
 
   /* first determine whether using mean or Rmax to do normalizations */
   if(thistask == roottask)
   {
+    /* open file for writing scale factors */
+    sprintf(fname, "%s/%s", parset.file_dir, "data/normalization.txt");
+    fp = fopen(fname, "w");
+    if(fp==NULL)
+    {
+      printf("Cannot open file %s.\n", fname);
+      exit(0);
+    }
+    fprintf(fp, "# normalization factors for data\n# i.e., flux/norm, error/norm\n"
+                "# in the order of driving light curve and then response light curves\n"
+                "# three columns: set   id   factor\n");
+
     for(i=0; i<nset; i++)
     {
       if(parset.model != vmap )
@@ -1241,6 +1255,11 @@ void scale_con_line()
       dataset[i].con.scale = 1.0;
     }
 
+    if(thistask == 0)
+    {
+      fprintf(fp, "%d %d %e\n", i, 0, scale);
+    }
+
     /* line */
     for(j=0; j<dataset[i].nlset; j++)
     {
@@ -1287,6 +1306,7 @@ void scale_con_line()
       if(thistask == 0)
       {
         printf("Use %f to normalize the %d-th line of %d-th set !\n", scale, j, i);
+        fprintf(fp, "%d %d %e\n", i, j+1, scale);
       }
 
       dataset[i].line[j].scale=scale;
@@ -1301,6 +1321,11 @@ void scale_con_line()
       flux_minmax[i][(1+j)*2 + 0] = (fdmin+fdmax)/2/scale;
       flux_minmax[i][(1+j)*2 + 1] = (fdmax-fdmin)/2/scale;
     }
+  }
+
+  if(thistask == roottask)
+  {
+    fclose(fp);
   }
 
   return;

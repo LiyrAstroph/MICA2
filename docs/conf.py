@@ -92,6 +92,21 @@ html_theme = "sphinx_book_theme"
 #
 # html_theme_options = {}
 
+html_theme_options = {
+    "path_to_docs": "docs",
+    "repository_url": "https://github.com/LiyrAstroph/MICA2",
+    "repository_branch": "master",
+    "launch_buttons": {
+        "binderhub_url": "https://mybinder.org",
+        "colab_url": "https://colab.research.google.com/",
+        "notebook_interface": "jupyterlab",
+    },
+    "use_edit_page_button": True,
+    "use_issues_button": True,
+    "use_repository_button": True,
+    "use_download_button": True,
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

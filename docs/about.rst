@@ -70,6 +70,15 @@ and their mixtures.
 
   Different shapes of transfer funcitons in MICA.
 
+.. note::
+
+  To facilitate assigning time-lag priors, the exponential and gamma transfer functions are parameterized
+  using the cetroid as a free parameter, i.e., 
+  :math:`\tau_{k}+\omega_k` instead of :math:`\tau_k` for exponential function and 
+  :math:`\tau_{k}+2\omega_k` instead of :math:`\tau_k` for gamma function.
+
+
+
 Here is an example for reverberation mapping analysis of the light curves from Hu et al. (2020) using **MICA**,
 
 .. figure:: _static/fig_pg2130.jpg

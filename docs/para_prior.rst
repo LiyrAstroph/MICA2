@@ -22,7 +22,7 @@ This will output the prior ranges to a file named `data/para_names_xx.txt`. The 
     2 taud                      LOG      1.000000   7.359338    0  -1.797693e+308
     3 sys_err_line              LOGUNI   0.000000   2.397895    1    0.000000e+00
     4 0-th_component_amplitude  LOG    -11.512925   2.302585    0  -1.797693e+308
-    5 0-th_component_center     UNI      0.000000 100.000000    0  -1.797693e+308
+    5 0-th_component_centeroid  UNI      0.000000 100.000000    0  -1.797693e+308
     6 0-th_component_sigma      LOG     -1.609438   4.422849    0  -1.797693e+308
 
 

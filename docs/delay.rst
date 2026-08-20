@@ -45,8 +45,16 @@ The centroid time lag can be calculated as follows.
 
 
 .. note:: 
-  When switching on **FlagNegativeResp**, the centroid lag might be meaningless as the
-  integral of the transfer function might be negative or zero.
+
+  - When switching on **FlagNegativeResp**, the centroid lag might be meaningless as the
+    integral of the transfer function might be negative or zero.
+  
+  - The exponential and gamma transfer functions are parameterized using **centroids**, namely, 
+    :math:`\tau_{k}+\omega_k` for exponential function and 
+    :math:`\tau_{k}+2\omega_k` for gamma function. That is to say, 
+    in the posterior samples, the corresponding  columns represent :math:`\tau_{k}+\omega_k` 
+    and :math:`\tau_{k}+2\omega_k`, respectively.
+    
 
 An example Python script to read in the posterior sample and calculate the time lag 
 is provided below.
@@ -65,12 +73,12 @@ is provided below.
     # assume that the input data has one dataset.
     k = 0  # 0th component
     f0   = sample[:,3+1 + k*3 + 0]  # amplitude of the first component
-    tau0 = sample[:,3+1 + k*3 + 1]  # center of the first component
+    tau0 = sample[:,3+1 + k*3 + 1]  # centeroid of the first component
     wid0 = sample[:,3+1 + k*3 + 2]  # width of the first component
 
     k = 1  # 1st component
     f1   = sample[:,3+1 + k*3 + 0]  # amplitude of the second component
-    tau1 = sample[:,3+1 + k*3 + 1]  # center of the second component
+    tau1 = sample[:,3+1 + k*3 + 1]  # centeroid of the second component
     wid1 = sample[:,3+1 + k*3 + 2]  # width of the second component
 
     # calculate the centroid lag

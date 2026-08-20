@@ -281,7 +281,7 @@ void print_para_names_vmap()
               par_fix[i], par_fix_val[i]);
 
       i++;
-      sprintf(fstr, "%d-th_component_%s", k, "center");
+      sprintf(fstr, "%d-th_component_%s", k, "centeroid");
       fprintf(fp, "%2d %-25s UNI    %10.6f %10.6f %4d %15.6e\n", i, fstr, par_range_model[i][0], par_range_model[i][1], 
               par_fix[i], par_fix_val[i]);
 

@@ -5374,8 +5374,8 @@ double Slc_exp(double tcon, double tline, const void *model, int nds, int nls)
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
-    tau0 =   pm[idxk + 1] ;
     tau1 = exp(pm[idxk + 2]);
+    tau0 =   pm[idxk + 1] - tau1;
 
     p1 = (taud + tau1)/taud;
     p2 = (taud - tau1)/taud;
@@ -5422,8 +5422,8 @@ double Slc_exp_linear(double tcon, double tline, const void *model, int nds, int
   {
     idxk = idx + 1 + 3*k;
     fg =     pm[idxk + 0];
-    tau0 =   pm[idxk + 1] ;
     tau1 = exp(pm[idxk + 2]);
+    tau0 =   pm[idxk + 1] - tau1;
 
     p1 = (taud + tau1)/taud;
     p2 = (taud - tau1)/taud;
@@ -5477,8 +5477,8 @@ void Slc_array_exp(double *tcon, int ncon, double *tline, int nline, const void 
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
-    tau0 =   pm[idxk + 1] ;
     tau1 = exp(pm[idxk + 2]);
+    tau0 =   pm[idxk + 1] - tau1;
     
     p1 = (taud + tau1)/taud;
     p2 = (taud - tau1)/taud;
@@ -5540,8 +5540,8 @@ void Slc_array_exp_linear(double *tcon, int ncon, double *tline, int nline, cons
   {
     idxk = idx + 1 + 3*k;
     fg =     pm[idxk + 0];
-    tau0 =   pm[idxk + 1] ;
     tau1 = exp(pm[idxk + 2]);
+    tau0 =   pm[idxk + 1] - tau1;
     
     p1 = (taud + tau1)/taud;
     p2 = (taud - tau1)/taud;
@@ -5599,8 +5599,8 @@ double Sll_exp(double t1, double t2, const void *model, int nds, int nls)
   {
     idxk1 = idx + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
     
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -5609,8 +5609,8 @@ double Sll_exp(double t1, double t2, const void *model, int nds, int nls)
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
       
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;
@@ -5669,8 +5669,8 @@ double Sll_exp_linear(double t1, double t2, const void *model, int nds, int nls)
   {
     idxk1 = idx + 1 + k1*3;
     fg1 =      pm[idxk1 + 0];
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
     
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -5679,8 +5679,8 @@ double Sll_exp_linear(double t1, double t2, const void *model, int nds, int nls)
     {
       idxk2 = idx + 1 + k2*3;
       fg2 =      pm[idxk2 + 0];
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
       
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;
@@ -5745,8 +5745,8 @@ void Sll_array_exp(double *tline, int nline, const void *model, int nds, int nls
   {
     idxk1 = idx + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
     
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -5755,8 +5755,8 @@ void Sll_array_exp(double *tline, int nline, const void *model, int nds, int nls
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
 
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;
@@ -5828,8 +5828,8 @@ void Sll_array_exp_linear(double *tline, int nline, const void *model, int nds, 
   {
     idxk1 = idx + 1 + k1*3;
     fg1 =      pm[idxk1 + 0];
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
     
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -5838,8 +5838,8 @@ void Sll_array_exp_linear(double *tline, int nline, const void *model, int nds, 
     {
       idxk2 = idx + 1 + k2*3;
       fg2 =      pm[idxk2 + 0];
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
 
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;
@@ -5906,8 +5906,8 @@ double Sll2_exp(double t1, double t2, const void *model, int nds, int nls1, int 
   {
     idxk1 = idx1 + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
 
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -5916,8 +5916,8 @@ double Sll2_exp(double t1, double t2, const void *model, int nds, int nls1, int 
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
 
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;
@@ -5977,8 +5977,8 @@ double Sll2_exp_linear(double t1, double t2, const void *model, int nds, int nls
   {
     idxk1 = idx1 + 1 + k1*3;
     fg1 =     pm[idxk1 + 0];
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
 
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -5987,8 +5987,8 @@ double Sll2_exp_linear(double t1, double t2, const void *model, int nds, int nls
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 =     pm[idxk2 + 0];
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
 
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;
@@ -6054,8 +6054,8 @@ void Sll2_array_exp(double *tline1, int nline1, double *tline2, int nline2, cons
   {
     idxk1 = idx1 + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
 
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -6064,8 +6064,8 @@ void Sll2_array_exp(double *tline1, int nline1, double *tline2, int nline2, cons
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
 
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;
@@ -6138,8 +6138,8 @@ void Sll2_array_exp_linear(double *tline1, int nline1, double *tline2, int nline
   {
     idxk1 = idx1 + 1 + k1*3;
     fg1 =      pm[idxk1 + 0] ;
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - tau1;
 
     p1 = (taud-tau1)/taud;
     p2 = (taud+tau1)/taud;
@@ -6148,8 +6148,8 @@ void Sll2_array_exp_linear(double *tline1, int nline1, double *tline2, int nline
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 =      pm[idxk2 + 0] ;
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - tau2;
 
       fg12 = fg1 * fg2;
       p3 = (taud+tau2)/taud;

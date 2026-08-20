@@ -50,9 +50,9 @@ def _get_tf_timelag_range(sample, indx_line, typetf, ngau, ns, m):
                                           +4*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
       else:  # exp
         tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                          -0.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
+                                          -1.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
         tau2_tf = np.max((tau2_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                          +6*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
+                                          +5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
 
   return tau1_tf, tau2_tf
 
@@ -138,16 +138,16 @@ def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line
       elif typemodel == 1: #pmap model 
         if k == 0:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - 2*sig
           idx_tau = np.where(tau >= cen)[0]
           tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
         else:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
                         pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
           
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - 2*sig
           tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
 
     else:  # exp
@@ -158,8 +158,8 @@ def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line
         else:
           amp =      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
 
-        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
         sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - sig
         
         idx_tau = np.where(tau >= cen)[0]
         tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
@@ -167,16 +167,16 @@ def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line
       elif typemodel == 1: #pmap model 
         if k == 0:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - sig
           idx_tau = np.where(tau >= cen)[0]
           tran[idx_tau] += amp/sig * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
         else:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
                         pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
           
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - sig
           tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
 
   return tran 

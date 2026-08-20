@@ -65,13 +65,15 @@ def _get_hist_timelag_range(sample, indx_line, typetf, ngau, ns, m):
           + 0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
         
       elif tt == 3:# exp use peak
-        tau1 = np.min((tau1, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1], q=0.0)))
-        tau2 = np.max((tau2, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1], q=1.0)))
+        tau1 = np.min((tau1, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                                          -np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
+        tau2 = np.max((tau2, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+                                          -np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
 
         tau1_cent = np.min((tau1_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
-          + np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
+          + 0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.0)))
         tau2_cent = np.max((tau2_cent, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
-          + np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
+          + 0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=1.0)))
   
   dtau = tau2 - tau1
   tau1 -= 0.1*dtau
@@ -124,9 +126,9 @@ def _get_tf_timelag_range(sample, indx_line, typetf, ngau, ns, m):
 
       else:  # exp
         tau1_tf = np.min((tau1_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                          -0.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
+                                          -1.2*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.05)))
         tau2_tf = np.max((tau2_tf, np.quantile(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-                                          +6*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
+                                          +5*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]), q=0.95)))
 
   return tau1_tf, tau2_tf
 
@@ -212,16 +214,16 @@ def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line
       elif typemodel == 1: #pmap model 
         if k == 0:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - 2*sig
           idx_tau = np.where(tau >= cen)[0]
           tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
         else:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
                         pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
-          
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - 2*sig
           tran[idx_tau] += amp/sig**2 * (tau[idx_tau]-cen) * np.exp(-(tau[idx_tau]-cen)/sig)
 
     else:  # exp
@@ -232,8 +234,8 @@ def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line
         else:
           amp =      pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]
 
-        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
         sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+        cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - sig
         
         idx_tau = np.where(tau >= cen)[0]
         tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
@@ -241,16 +243,16 @@ def _calculate_tran(tau, pmodel, typemodel, typetf, ngau, flagnegresp, indx_line
       elif typemodel == 1: #pmap model 
         if k == 0:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - sig
           idx_tau = np.where(tau >= cen)[0]
           tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
         else:
           amp = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0] + \
                        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+0*3+0])
           
-          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
           sig = np.exp(pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen =        pmodel[indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] - sig
           tran[idx_tau] += amp/sig * np.exp(-(tau[idx_tau]-cen)/sig)
 
   return tran 
@@ -264,7 +266,7 @@ def _get_time_lag(sample, idx, tt):
   elif tt == 2:
     return sample[:, idx+1] 
   elif tt == 3:
-    return sample[:, idx+1] + 1*np.exp(sample[:, idx+2])
+    return sample[:, idx+1]
 
 def plot_results_con(fdir, fname, flagtrend, doshow=True):
   """
@@ -733,8 +735,10 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
                 -np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
           
         elif tt == 3:  # exp, use peaks
-          cen =  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
-          cen_pmax =  sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]
+          cen =  sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1]  \
+                -np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
+          cen_pmax =  sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
+                -np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2])
         
         if hist_bins is None:
           cen_min = np.min(cen)
@@ -809,12 +813,12 @@ def plot_results(fdir, fname, ngau, tau_low, tau_upp, flagvar, flagtran, flagtre
               norm += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cent += np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
                     * (sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
-                      +np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
+                      +0*np.exp(sample[:, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
               
               norm_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0])
               cent_pmax += np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+0]) \
                     * (sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+1] \
-                      +np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
+                      +0*np.exp(sample[idx_pmax, indx_line[m] + (j-1)*(ngau*3+1) + 1+k*3+2]))
                         
           if hist_bins is None:
             cent_min = np.min(cent/norm)

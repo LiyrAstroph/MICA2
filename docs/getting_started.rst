@@ -468,14 +468,15 @@ Output
   
   * **posterior_sample1d.txt_xx**
 
-    posterior sample for parameters. The postfix "_xx" means the number of Gaussians. 
+    posterior sample for parameters. The postfix "_xx" means the number of components. 
     The order of parameters in posterior sample file is arranged as: 
 
     (systematic error of continuum, sigmad, taud) * number of datasets
 
-    (systematic error of line, (gaussian amplitude, centeroid, sigma) * number of gaussians * number of line datasets) * number of datasets
+    (systematic error of line, (component amplitude, centroid, sigma) * number of components * number of line datasets) * number of datasets
 
-    sigmad, taud, gaussian amplitude and sigma are in logarithm scale; systematic errors (x) are dimensionless, defined as  x = log(1+err/err_data), where err is the real systematic error and err_data is the mean measurement error of the data.
+    sigmad, taud, component amplitude and sigma are in logarithm scale; systematic errors (x) are dimensionless, 
+    defined as  x = log(1+err/err_data), where err is the real systematic error and err_data is the mean measurement error of the data.
 
   * **pall.txt_xx**
 
@@ -483,7 +484,7 @@ Output
   
   * **pline.txt_xx_compyy** (applicable with ``-d`` option)
     
-    decomposed light curves for each Gaussian component, with the same format as the input data. **yy** (a number) indicates which Gaussian component.
+    decomposed light curves for each component, with the same format as the input data. **yy** (a number) indicates which component.
     Note that the continuum light curve is not decomposed and only line light curves are decomposed. 
 
   * **para_names_line.txt_xx**
@@ -492,9 +493,9 @@ Output
 
   * **evidence.txt**
     
-    Bayesian evidence for each number of Gaussians explored.
+    Bayesian evidence for each number of components explored.
 
-In the end of running, ``mica2`` prints the obtained Bayesian evidence for each number of Gausssians explored.
+In the end of running, ``mica2`` prints the obtained Bayesian evidence for each number of components explored.
 
 Posterior sample
 ========================

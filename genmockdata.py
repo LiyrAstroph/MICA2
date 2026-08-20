@@ -271,12 +271,14 @@ def tophat(t, f, tau, wid):
 
 def gamma(t, f, tau, wid):
   ret = np.zeros(t.shape)
-  ret[t>=tau] = f*(t[t>=tau]-tau)/wid**2 * np.exp(-(t[t>=tau]-tau)/wid)
+  t0 = tau - 2*wid
+  ret[t>=t0] = f*(t[t>=t0]-t0)/wid**2 * np.exp(-(t[t>=t0]-t0)/wid)
   return ret
 
 def exponential(t, f, tau, wid):
   ret = np.zeros(t.shape)
-  ret[t>=tau] = f/wid * np.exp(-(t[t>=tau]-tau)/wid)
+  t0 = tau - 1*wid
+  ret[t>=t0] = f/wid * np.exp(-(t[t>=t0]-t0)/wid)
   return ret
 ##################################################
 
@@ -370,7 +372,9 @@ def simlc(tfs={"comp1":("gauss", 1.0, 10.0, 5.0), "comp2":("gauss", 1.0, 30.0, 5
 
 
 if __name__ == "__main__":
-  
+
+  # note: for gamma function, tau is set to be the centroid of the transfer function (tau = t0 + 2*w)
+  #       for exp function,   tau is set to be the centroid of the transfer function (tau = t0 + 1*w)
   # tfs={"comp1":("gauss", 1.0, -10.0, 5.0), "comp2":("tophat", 1.0, 30.0, 5.0)}
   tfs={"comp1":("gamma", 1.0, 0.0, 6.0), "comp2":("gauss", 0.5, 50.0, 5.0)}
   simlc(tfs, lag_range=[-10, 100], doshow=True, tspan=300, dt=1.0)

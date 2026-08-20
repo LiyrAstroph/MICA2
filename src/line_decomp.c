@@ -2106,8 +2106,8 @@ double Slc_single_gamma(double tcon, double tline, const void *model, int nds, i
   {
     idxk = idx + 1 + 3*k;
     fg = exp(pm[idxk + 0]);
-    tau0 =   pm[idxk + 1] ;
     tau1 = exp(pm[idxk + 2]);
+    tau0 =   pm[idxk + 1] - 2*tau1;
     
     fg /= (tau1*tau1);
     p1 = (taud + tau1)/taud/tau1;
@@ -2151,8 +2151,8 @@ double Slc_single_gamma_linear(double tcon, double tline, const void *model, int
   {
     idxk = idx + 1 + 3*k;
     fg =     pm[idxk + 0];
-    tau0 =   pm[idxk + 1] ;
     tau1 = exp(pm[idxk + 2]);
+    tau0 =   pm[idxk + 1] - 2*tau1;
     
     fg /= (tau1*tau1);
     p1 = (taud + tau1)/taud/tau1;
@@ -2204,8 +2204,8 @@ double Sll2_single_gamma(double t1, double t2, const void *model, int nds, int n
   {
     idxk1 = idx1 + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1]  - 2*tau1;
 
     p1 = (taud-tau1)/taud/tau1;
     p2 = (taud+tau1)/taud/tau1;
@@ -2214,8 +2214,8 @@ double Sll2_single_gamma(double t1, double t2, const void *model, int nds, int n
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - 2*tau2;
 
       fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
       p3 = (taud+tau2)/taud/tau2;
@@ -2271,8 +2271,8 @@ double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds
   {
     idxk1 = idx1 + 1 + k1*3;
     fg1 =     pm[idxk1 + 0];
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - 2*tau1;
 
     p1 = (taud-tau1)/taud/tau1;
     p2 = (taud+tau1)/taud/tau1;
@@ -2281,8 +2281,8 @@ double Sll2_single_gamma_linear(double t1, double t2, const void *model, int nds
     {
       idxk2 = idx2 + 1 + k2*3;
       fg2 =     pm[idxk2 + 0];
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - 2*tau2;
 
       fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
       p3 = (taud+tau2)/taud/tau2;
@@ -2344,8 +2344,8 @@ double Sll_single_gamma(double t1, double t2, const void *model, int nds, int nl
   {
     idxk1 = idx + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - 2*tau1;
 
     p1 = (taud-tau1)/taud/tau1;
     p2 = (taud+tau1)/taud/tau1;
@@ -2354,8 +2354,8 @@ double Sll_single_gamma(double t1, double t2, const void *model, int nds, int nl
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - 2*tau2;
 
       fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
       p3 = (taud+tau2)/taud/tau2;
@@ -2410,8 +2410,8 @@ double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds,
   {
     idxk1 = idx + 1 + k1*3;
     fg1 =     pm[idxk1 + 0];
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - 2*tau1;
     
     p1 = (taud-tau1)/taud/tau1;
     p2 = (taud+tau1)/taud/tau1;
@@ -2420,8 +2420,8 @@ double Sll_single_gamma_linear(double t1, double t2, const void *model, int nds,
     {
       idxk2 = idx + 1 + k2*3;
       fg2 =     pm[idxk2 + 0];
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - 2*tau2;
 
       fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
       p3 = (taud+tau2)/taud/tau2;
@@ -2483,8 +2483,8 @@ double Sll_single2_gamma(double t1, double t2, const void *model, int nds, int n
   {
     idxk1 = idx + 1 + k1*3;
     fg1 = exp(pm[idxk1 + 0]);
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - 2*tau1;
     
     p1 = (taud-tau1)/taud/tau1;
     p2 = (taud+tau1)/taud/tau1;
@@ -2493,8 +2493,8 @@ double Sll_single2_gamma(double t1, double t2, const void *model, int nds, int n
     {
       idxk2 = idx + 1 + k2*3;
       fg2 = exp(pm[idxk2 + 0]);
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - 2*tau2;
 
       fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
       p3 = (taud+tau2)/taud/tau2;
@@ -2549,8 +2549,8 @@ double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds
   {
     idxk1 = idx + 1 + k1*3;
     fg1 =     pm[idxk1 + 0];
-    tau01 =    pm[idxk1 + 1] ;
     tau1 = exp(pm[idxk1 + 2]);
+    tau01 =    pm[idxk1 + 1] - 2*tau1;
 
     p1 = (taud-tau1)/taud/tau1;
     p2 = (taud+tau1)/taud/tau1;
@@ -2559,8 +2559,8 @@ double Sll_single2_gamma_linear(double t1, double t2, const void *model, int nds
     {
       idxk2 = idx + 1 + k2*3;
       fg2 =     pm[idxk2 + 0];
-      tau02 =    pm[idxk2 + 1] ;
       tau2 = exp(pm[idxk2 + 2]);
+      tau02 =    pm[idxk2 + 1] - 2*tau2;
 
       fg12 = fg1/tau1/tau1 * fg2/tau2/tau2;
       p3 = (taud+tau2)/taud/tau2;
